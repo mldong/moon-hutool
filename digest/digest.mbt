@@ -1,7 +1,7 @@
 ///|
 /// moon-hutool/digest —— 摘要（hutool `DigestUtil` 的 MoonBit 对位）
 ///
-/// 契约：`docs/spec/05-digest.md`；进度：`docs/ROADMAP.md`。
+/// 契约：`docs/spec/02-digest.md`；进度：`docs/ROADMAP.md`。
 ///
 /// **权威是规范文本，不是 hutool**：hutool-crypto 自己几乎不实现算法（它是 `javax.crypto`/JCE 门面，
 /// 全模块只有 RC4/XXTEA/Vigenere 是手写位运算），所以本包对着 RFC 1321 / FIPS 180-4 / RFC 2104 实现，

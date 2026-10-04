@@ -2,7 +2,7 @@
 
 hutool `DigestUtil` 的 MoonBit 对位：MD5、SHA-256、HMAC-SHA-256，外加一段常量时间比较。
 
-**这里的权威是规范文本，不是 hutool**：hutool-crypto 自己几乎不实现算法（它是 `javax.crypto` 门面，全模块只有 RC4/XXTEA/Vigenere 是手写位运算），所以本包对着 RFC 1321 / FIPS 180-4 / RFC 2104 实现，验收只认**官方向量**。完整边界矩阵见 [`docs/spec/05-digest.md`](https://github.com/mldong/moon-hutool/blob/master/docs/spec/05-digest.md)。
+**这里的权威是规范文本，不是 hutool**：hutool-crypto 自己几乎不实现算法（它是 `javax.crypto` 门面，全模块只有 RC4/XXTEA/Vigenere 是手写位运算），所以本包对着 RFC 1321 / FIPS 180-4 / RFC 2104 实现，验收只认**官方向量**。完整边界矩阵见 [`docs/spec/02-digest.md`](https://github.com/mldong/moon-hutool/blob/master/docs/spec/02-digest.md)。
 
 输入一律按 **UTF-8 字节**参与运算。core 没有任何摘要能力，故整包自研，纯位运算、无状态、无第三方依赖。
 

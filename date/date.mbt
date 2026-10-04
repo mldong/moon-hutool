@@ -1,7 +1,7 @@
 ///|
 /// moon-hutool/date —— 日期时间（hutool `DateUtil`/`CalendarUtil`/`DatePattern`/`DateUnit` 的 MoonBit 对位）
 ///
-/// 契约：`docs/spec/02-date.md`。本文件此刻是**签名骨架**，函数体一律 `abort("…未实现…")`：
+/// 契约：`docs/spec/03-date.md`。本文件此刻是**签名骨架**，函数体一律 `abort("…未实现…")`：
 /// `moon check` 全绿、`moon test` 本包预期红。期望值权威在 `date_test.mbt` 与 spec 表——
 /// 实现期只许把红变绿，改期望值须单独一笔并给外部读数来源（门禁 G5）。
 ///
@@ -107,7 +107,7 @@ pub let time_pattern : String = "HH:mm:ss"
 /// - 天文纪年下 0 与 -4 都是闰年、-100 不是（负年份按数学整除判，不用"公元前无闰年"的历史口径）
 pub fn is_leap_year(year : Int) -> Bool {
   let _ = year
-  abort("moon-hutool: date.is_leap_year 未实现（spec 02-date #2.1）")
+  abort("moon-hutool: date.is_leap_year 未实现（spec 03-date #2.1）")
 }
 
 ///|
@@ -118,7 +118,7 @@ pub fn is_leap_year(year : Int) -> Bool {
 /// - Raises: `DateError.MonthOutOfRange` —— `month` 不在 1..12 时**不夹紧也不取绝对值**
 pub fn days_in_month(year : Int, month : Int) -> Int raise DateError {
   let _ = (year, month)
-  abort("moon-hutool: date.days_in_month 未实现（spec 02-date #2.1）")
+  abort("moon-hutool: date.days_in_month 未实现（spec 03-date #2.1）")
 }
 
 ///|
@@ -130,14 +130,14 @@ pub fn days_in_month(year : Int, month : Int) -> Int raise DateError {
 ///   lenient 模式会滚，本库不滚，见 spec 2.1 差异声明）
 pub fn Date::of(year : Int, month : Int, day : Int) -> Date raise DateError {
   let _ = (year, month, day)
-  abort("moon-hutool: date.Date::of 未实现（spec 02-date #2.1）")
+  abort("moon-hutool: date.Date::of 未实现（spec 03-date #2.1）")
 }
 
 ///|
 /// 距 1970-01-01 的天数（1970-01-01 = 0，之前为负）
 pub fn Date::epoch_days(self : Self) -> Int64 {
   let _ = self
-  abort("moon-hutool: date.Date::epoch_days 未实现（spec 02-date #2.1）")
+  abort("moon-hutool: date.Date::epoch_days 未实现（spec 03-date #2.1）")
 }
 
 ///|
@@ -145,7 +145,7 @@ pub fn Date::epoch_days(self : Self) -> Int64 {
 pub fn Date::from_epoch_days(days : Int64) -> Date {
   let _ = days
   abort(
-    "moon-hutool: date.Date::from_epoch_days 未实现（spec 02-date #2.1）",
+    "moon-hutool: date.Date::from_epoch_days 未实现（spec 03-date #2.1）",
   )
 }
 
@@ -153,7 +153,7 @@ pub fn Date::from_epoch_days(days : Int64) -> Date {
 /// 加减天数（跨月/跨年/跨世纪自动进位，`0` 原样返回）
 pub fn Date::add_days(self : Self, days : Int) -> Date {
   let _ = (self, days)
-  abort("moon-hutool: date.Date::add_days 未实现（spec 02-date #2.4）")
+  abort("moon-hutool: date.Date::add_days 未实现（spec 03-date #2.4）")
 }
 
 ///|
@@ -164,14 +164,14 @@ pub fn Date::add_days(self : Self, days : Int) -> Date {
 ///   `Calendar.add(MONTH)`）的行为，也是业务最不容易出错的一档
 pub fn Date::add_months(self : Self, months : Int) -> Date {
   let _ = (self, months)
-  abort("moon-hutool: date.Date::add_months 未实现（spec 02-date #2.4）")
+  abort("moon-hutool: date.Date::add_months 未实现（spec 03-date #2.4）")
 }
 
 ///|
 /// 加减年数，2 月 29 日在平年夹紧到 2 月 28 日
 pub fn Date::add_years(self : Self, years : Int) -> Date {
   let _ = (self, years)
-  abort("moon-hutool: date.Date::add_years 未实现（spec 02-date #2.4）")
+  abort("moon-hutool: date.Date::add_years 未实现（spec 03-date #2.4）")
 }
 
 ///|
@@ -180,7 +180,7 @@ pub fn Date::add_years(self : Self, years : Int) -> Date {
 /// - Note: **不是** JDK `Calendar.DAY_OF_WEEK`（那套周日 = 1）。选 ISO 的理由与差异见 spec 2.2
 pub fn Date::weekday(self : Self) -> Int {
   let _ = self
-  abort("moon-hutool: date.Date::weekday 未实现（spec 02-date #2.2）")
+  abort("moon-hutool: date.Date::weekday 未实现（spec 03-date #2.2）")
 }
 
 ///|
@@ -189,21 +189,21 @@ pub fn Date::weekday(self : Self) -> Int {
 /// - Note: 不做调休/法定节假日（那是逐年数据表，见 `docs/ROADMAP.md` 的「暂不做」）
 pub fn Date::is_weekend(self : Self) -> Bool {
   let _ = self
-  abort("moon-hutool: date.Date::is_weekend 未实现（spec 02-date #2.2）")
+  abort("moon-hutool: date.Date::is_weekend 未实现（spec 03-date #2.2）")
 }
 
 ///|
 /// 该年内的第几天（1 起算：平年 1..365，闰年 1..366）
 pub fn Date::day_of_year(self : Self) -> Int {
   let _ = self
-  abort("moon-hutool: date.Date::day_of_year 未实现（spec 02-date #2.2）")
+  abort("moon-hutool: date.Date::day_of_year 未实现（spec 03-date #2.2）")
 }
 
 ///|
 /// 季度 1..4
 pub fn Date::quarter(self : Self) -> Int {
   let _ = self
-  abort("moon-hutool: date.Date::quarter 未实现（spec 02-date #2.2）")
+  abort("moon-hutool: date.Date::quarter 未实现（spec 03-date #2.2）")
 }
 
 ///|
@@ -214,7 +214,7 @@ pub fn Date::quarter(self : Self) -> Int {
 ///   `Calendar.WEEK_OF_YEAR`，随 `Locale`/`firstDayOfWeek` 变——那是不可复现的读数，不跟
 pub fn Date::week_of_year(self : Self) -> Int {
   let _ = self
-  abort("moon-hutool: date.Date::week_of_year 未实现（spec 02-date #2.2）")
+  abort("moon-hutool: date.Date::week_of_year 未实现（spec 03-date #2.2）")
 }
 
 ///|
@@ -224,7 +224,7 @@ pub fn Date::week_of_year(self : Self) -> Int {
 pub fn Date::week_based_year(self : Self) -> Int {
   let _ = self
   abort(
-    "moon-hutool: date.Date::week_based_year 未实现（spec 02-date #2.2）",
+    "moon-hutool: date.Date::week_based_year 未实现（spec 03-date #2.2）",
   )
 }
 
@@ -233,7 +233,7 @@ pub fn Date::week_based_year(self : Self) -> Int {
 pub fn Date::begin_of_week(self : Self) -> Date {
   let _ = self
   abort(
-    "moon-hutool: date.Date::begin_of_week 未实现（spec 02-date #2.3）",
+    "moon-hutool: date.Date::begin_of_week 未实现（spec 03-date #2.3）",
   )
 }
 
@@ -242,7 +242,7 @@ pub fn Date::begin_of_week(self : Self) -> Date {
 pub fn Date::begin_of_month(self : Self) -> Date {
   let _ = self
   abort(
-    "moon-hutool: date.Date::begin_of_month 未实现（spec 02-date #2.3）",
+    "moon-hutool: date.Date::begin_of_month 未实现（spec 03-date #2.3）",
   )
 }
 
@@ -250,7 +250,7 @@ pub fn Date::begin_of_month(self : Self) -> Date {
 /// 当月最后一日（2 月按闰年判：2024 → 29 日，2023 → 28 日）
 pub fn Date::end_of_month(self : Self) -> Date {
   let _ = self
-  abort("moon-hutool: date.Date::end_of_month 未实现（spec 02-date #2.3）")
+  abort("moon-hutool: date.Date::end_of_month 未实现（spec 03-date #2.3）")
 }
 
 ///|
@@ -258,7 +258,7 @@ pub fn Date::end_of_month(self : Self) -> Date {
 pub fn Date::begin_of_quarter(self : Self) -> Date {
   let _ = self
   abort(
-    "moon-hutool: date.Date::begin_of_quarter 未实现（spec 02-date #2.3）",
+    "moon-hutool: date.Date::begin_of_quarter 未实现（spec 03-date #2.3）",
   )
 }
 
@@ -267,7 +267,7 @@ pub fn Date::begin_of_quarter(self : Self) -> Date {
 pub fn Date::end_of_quarter(self : Self) -> Date {
   let _ = self
   abort(
-    "moon-hutool: date.Date::end_of_quarter 未实现（spec 02-date #2.3）",
+    "moon-hutool: date.Date::end_of_quarter 未实现（spec 03-date #2.3）",
   )
 }
 
@@ -276,7 +276,7 @@ pub fn Date::end_of_quarter(self : Self) -> Date {
 pub fn Date::begin_of_year(self : Self) -> Date {
   let _ = self
   abort(
-    "moon-hutool: date.Date::begin_of_year 未实现（spec 02-date #2.3）",
+    "moon-hutool: date.Date::begin_of_year 未实现（spec 03-date #2.3）",
   )
 }
 
@@ -284,7 +284,7 @@ pub fn Date::begin_of_year(self : Self) -> Date {
 /// 当年 12 月 31 日
 pub fn Date::end_of_year(self : Self) -> Date {
   let _ = self
-  abort("moon-hutool: date.Date::end_of_year 未实现（spec 02-date #2.3）")
+  abort("moon-hutool: date.Date::end_of_year 未实现（spec 03-date #2.3）")
 }
 
 ///|
@@ -294,7 +294,7 @@ pub fn Date::end_of_year(self : Self) -> Date {
 pub fn Date::to_iso_string(self : Self) -> String {
   let _ = self
   abort(
-    "moon-hutool: date.Date::to_iso_string 未实现（spec 02-date #2.5）",
+    "moon-hutool: date.Date::to_iso_string 未实现（spec 03-date #2.5）",
   )
 }
 
@@ -307,7 +307,7 @@ pub fn Date::to_iso_string(self : Self) -> String {
 /// - Raises: `UnknownPatternToken`
 pub fn Date::format(self : Self, pattern : String) -> String raise DateError {
   let _ = (self, pattern)
-  abort("moon-hutool: date.Date::format 未实现（spec 02-date #2.6）")
+  abort("moon-hutool: date.Date::format 未实现（spec 03-date #2.6）")
 }
 
 ///|
@@ -318,21 +318,21 @@ pub fn Date::format(self : Self, pattern : String) -> String raise DateError {
 /// - Raises: `UnknownPatternToken` / `ParseFailed` / `MonthOutOfRange` / `DayOutOfRange`
 pub fn Date::parse(input : String, pattern : String) -> Date raise DateError {
   let _ = (input, pattern)
-  abort("moon-hutool: date.Date::parse 未实现（spec 02-date #2.7）")
+  abort("moon-hutool: date.Date::parse 未实现（spec 03-date #2.7）")
 }
 
 ///|
 /// 转成当天 00:00:00.000 的墙上时刻
 pub fn Date::to_datetime(self : Self) -> DateTime {
   let _ = self
-  abort("moon-hutool: date.Date::to_datetime 未实现（spec 02-date #2.5）")
+  abort("moon-hutool: date.Date::to_datetime 未实现（spec 03-date #2.5）")
 }
 
 ///|
 /// `other - self` 的天数（有符号；`self == other` 为 0）
 pub fn Date::days_between(self : Self, other : Date) -> Int {
   let _ = (self, other)
-  abort("moon-hutool: date.Date::days_between 未实现（spec 02-date #2.4）")
+  abort("moon-hutool: date.Date::days_between 未实现（spec 03-date #2.4）")
 }
 
 ///|
@@ -348,7 +348,7 @@ pub fn DateTime::of(
   milli : Int,
 ) -> DateTime raise DateError {
   let _ = (date, hour, minute, second, milli)
-  abort("moon-hutool: date.DateTime::of 未实现（spec 02-date #2.5）")
+  abort("moon-hutool: date.DateTime::of 未实现（spec 03-date #2.5）")
 }
 
 ///|
@@ -363,7 +363,7 @@ pub fn DateTime::from_epoch_millis(
 ) -> DateTime {
   let _ = (millis, offset_minutes)
   abort(
-    "moon-hutool: date.DateTime::from_epoch_millis 未实现（spec 02-date #2.5）",
+    "moon-hutool: date.DateTime::from_epoch_millis 未实现（spec 03-date #2.5）",
   )
 }
 
@@ -374,7 +374,7 @@ pub fn DateTime::from_epoch_millis(
 pub fn DateTime::to_epoch_millis(self : Self, offset_minutes : Int) -> Int64 {
   let _ = (self, offset_minutes)
   abort(
-    "moon-hutool: date.DateTime::to_epoch_millis 未实现（spec 02-date #2.5）",
+    "moon-hutool: date.DateTime::to_epoch_millis 未实现（spec 03-date #2.5）",
   )
 }
 
@@ -385,7 +385,7 @@ pub fn DateTime::to_epoch_millis(self : Self, offset_minutes : Int) -> Int64 {
 ///   恒等于"墙上时钟 +24 小时"
 pub fn DateTime::add(self : Self, unit : TimeUnit, n : Int64) -> DateTime {
   let _ = (self, unit, n)
-  abort("moon-hutool: date.DateTime::add 未实现（spec 02-date #2.5）")
+  abort("moon-hutool: date.DateTime::add 未实现（spec 03-date #2.5）")
 }
 
 ///|
@@ -393,7 +393,7 @@ pub fn DateTime::add(self : Self, unit : TimeUnit, n : Int64) -> DateTime {
 pub fn DateTime::add_months(self : Self, months : Int) -> DateTime {
   let _ = (self, months)
   abort(
-    "moon-hutool: date.DateTime::add_months 未实现（spec 02-date #2.5）",
+    "moon-hutool: date.DateTime::add_months 未实现（spec 03-date #2.5）",
   )
 }
 
@@ -402,7 +402,7 @@ pub fn DateTime::add_months(self : Self, months : Int) -> DateTime {
 pub fn DateTime::begin_of_day(self : Self) -> DateTime {
   let _ = self
   abort(
-    "moon-hutool: date.DateTime::begin_of_day 未实现（spec 02-date #2.3）",
+    "moon-hutool: date.DateTime::begin_of_day 未实现（spec 03-date #2.3）",
   )
 }
 
@@ -411,7 +411,7 @@ pub fn DateTime::begin_of_day(self : Self) -> DateTime {
 pub fn DateTime::end_of_day(self : Self) -> DateTime {
   let _ = self
   abort(
-    "moon-hutool: date.DateTime::end_of_day 未实现（spec 02-date #2.3）",
+    "moon-hutool: date.DateTime::end_of_day 未实现（spec 03-date #2.3）",
   )
 }
 
@@ -420,7 +420,7 @@ pub fn DateTime::end_of_day(self : Self) -> DateTime {
 pub fn DateTime::begin_of_week(self : Self) -> DateTime {
   let _ = self
   abort(
-    "moon-hutool: date.DateTime::begin_of_week 未实现（spec 02-date #2.3）",
+    "moon-hutool: date.DateTime::begin_of_week 未实现（spec 03-date #2.3）",
   )
 }
 
@@ -429,7 +429,7 @@ pub fn DateTime::begin_of_week(self : Self) -> DateTime {
 pub fn DateTime::begin_of_month(self : Self) -> DateTime {
   let _ = self
   abort(
-    "moon-hutool: date.DateTime::begin_of_month 未实现（spec 02-date #2.3）",
+    "moon-hutool: date.DateTime::begin_of_month 未实现（spec 03-date #2.3）",
   )
 }
 
@@ -438,7 +438,7 @@ pub fn DateTime::begin_of_month(self : Self) -> DateTime {
 pub fn DateTime::end_of_month(self : Self) -> DateTime {
   let _ = self
   abort(
-    "moon-hutool: date.DateTime::end_of_month 未实现（spec 02-date #2.3）",
+    "moon-hutool: date.DateTime::end_of_month 未实现（spec 03-date #2.3）",
   )
 }
 
@@ -447,7 +447,7 @@ pub fn DateTime::end_of_month(self : Self) -> DateTime {
 pub fn DateTime::begin_of_quarter(self : Self) -> DateTime {
   let _ = self
   abort(
-    "moon-hutool: date.DateTime::begin_of_quarter 未实现（spec 02-date #2.3）",
+    "moon-hutool: date.DateTime::begin_of_quarter 未实现（spec 03-date #2.3）",
   )
 }
 
@@ -456,7 +456,7 @@ pub fn DateTime::begin_of_quarter(self : Self) -> DateTime {
 pub fn DateTime::end_of_quarter(self : Self) -> DateTime {
   let _ = self
   abort(
-    "moon-hutool: date.DateTime::end_of_quarter 未实现（spec 02-date #2.3）",
+    "moon-hutool: date.DateTime::end_of_quarter 未实现（spec 03-date #2.3）",
   )
 }
 
@@ -465,7 +465,7 @@ pub fn DateTime::end_of_quarter(self : Self) -> DateTime {
 pub fn DateTime::begin_of_year(self : Self) -> DateTime {
   let _ = self
   abort(
-    "moon-hutool: date.DateTime::begin_of_year 未实现（spec 02-date #2.3）",
+    "moon-hutool: date.DateTime::begin_of_year 未实现（spec 03-date #2.3）",
   )
 }
 
@@ -474,7 +474,7 @@ pub fn DateTime::begin_of_year(self : Self) -> DateTime {
 pub fn DateTime::end_of_year(self : Self) -> DateTime {
   let _ = self
   abort(
-    "moon-hutool: date.DateTime::end_of_year 未实现（spec 02-date #2.3）",
+    "moon-hutool: date.DateTime::end_of_year 未实现（spec 03-date #2.3）",
   )
 }
 
@@ -483,7 +483,7 @@ pub fn DateTime::end_of_year(self : Self) -> DateTime {
 pub fn DateTime::to_iso_string(self : Self) -> String {
   let _ = self
   abort(
-    "moon-hutool: date.DateTime::to_iso_string 未实现（spec 02-date #2.5）",
+    "moon-hutool: date.DateTime::to_iso_string 未实现（spec 03-date #2.5）",
   )
 }
 
@@ -496,7 +496,7 @@ pub fn DateTime::format(
   pattern : String,
 ) -> String raise DateError {
   let _ = (self, pattern)
-  abort("moon-hutool: date.DateTime::format 未实现（spec 02-date #2.6）")
+  abort("moon-hutool: date.DateTime::format 未实现（spec 03-date #2.6）")
 }
 
 ///|
@@ -511,7 +511,7 @@ pub fn DateTime::parse(
   pattern : String,
 ) -> DateTime raise DateError {
   let _ = (input, pattern)
-  abort("moon-hutool: date.DateTime::parse 未实现（spec 02-date #2.7）")
+  abort("moon-hutool: date.DateTime::parse 未实现（spec 03-date #2.7）")
 }
 
 ///|
@@ -521,7 +521,7 @@ pub fn DateTime::parse(
 pub fn TimeUnit::to_millis(self : Self) -> Int64 {
   let _ = self
   abort(
-    "moon-hutool: date.TimeUnit::to_millis 未实现（spec 02-date #2.9）",
+    "moon-hutool: date.TimeUnit::to_millis 未实现（spec 03-date #2.9）",
   )
 }
 
@@ -529,14 +529,14 @@ pub fn TimeUnit::to_millis(self : Self) -> Int64 {
 /// `b - a` 的毫秒数向下取整到 `unit`，**取绝对值**（hutool `DateUtil.between(begin,end,unit)` 默认档）
 pub fn between(a : DateTime, b : DateTime, unit : TimeUnit) -> Int64 {
   let _ = (a, b, unit)
-  abort("moon-hutool: date.between 未实现（spec 02-date #2.9）")
+  abort("moon-hutool: date.between 未实现（spec 03-date #2.9）")
 }
 
 ///|
 /// `b - a` 的毫秒数向下取整到 `unit`，**带符号**（hutool `between(..., isAbs=false)` 对位）
 pub fn difference(a : DateTime, b : DateTime, unit : TimeUnit) -> Int64 {
   let _ = (a, b, unit)
-  abort("moon-hutool: date.difference 未实现（spec 02-date #2.9）")
+  abort("moon-hutool: date.difference 未实现（spec 03-date #2.9）")
 }
 
 ///|
@@ -546,7 +546,7 @@ pub fn difference(a : DateTime, b : DateTime, unit : TimeUnit) -> Int64 {
 ///   要判"同一瞬间"请直接比 `to_epoch_millis`
 pub fn is_same_day(a : DateTime, b : DateTime) -> Bool {
   let _ = (a, b)
-  abort("moon-hutool: date.is_same_day 未实现（spec 02-date #2.9）")
+  abort("moon-hutool: date.is_same_day 未实现（spec 03-date #2.9）")
 }
 
 ///|
@@ -555,7 +555,7 @@ pub fn is_same_day(a : DateTime, b : DateTime) -> Bool {
 /// - Raises: `FutureBirth` —— `on` 早于 `birth` 时不返回负数
 pub fn age(birth : Date, on : Date) -> Int raise DateError {
   let _ = (birth, on)
-  abort("moon-hutool: date.age 未实现（spec 02-date #2.9）")
+  abort("moon-hutool: date.age 未实现（spec 03-date #2.9）")
 }
 
 ///|
@@ -565,7 +565,7 @@ pub fn age(birth : Date, on : Date) -> Int raise DateError {
 /// 本包其余函数都吃显式传入的值，所以用例不依赖墙上时钟；这一条的可测性靠"下界断言"，
 /// 不做区间断言（CI 机器慢窄了区间会假红）。
 pub fn now_millis() -> Int64 {
-  abort("moon-hutool: date.now_millis 未实现（spec 02-date #2.10）")
+  abort("moon-hutool: date.now_millis 未实现（spec 03-date #2.10）")
 }
 
 ///|
@@ -574,7 +574,7 @@ pub fn now_millis() -> Int64 {
 /// - Parameters: `offset_minutes` 调用方所在地的 UTC 偏移（框架层通常来自配置项，不是猜的）
 pub fn now(offset_minutes : Int) -> DateTime {
   let _ = offset_minutes
-  abort("moon-hutool: date.now 未实现（spec 02-date #2.10）")
+  abort("moon-hutool: date.now 未实现（spec 03-date #2.10）")
 }
 
 ///|
@@ -585,7 +585,7 @@ pub fn now(offset_minutes : Int) -> DateTime {
 ///   （定长输出要恒定宽度请改用 `DateTime::format` + `datetime_millis_pattern`）
 pub fn to_rfc3339(millis : Int64, offset_minutes : Int) -> String {
   let _ = (millis, offset_minutes)
-  abort("moon-hutool: date.to_rfc3339 未实现（spec 02-date #2.8）")
+  abort("moon-hutool: date.to_rfc3339 未实现（spec 03-date #2.8）")
 }
 
 ///|
@@ -596,5 +596,5 @@ pub fn to_rfc3339(millis : Int64, offset_minutes : Int) -> String {
 ///   闰秒 `:60` 判 `TimeFieldOutOfRange`（本库不实现闰秒）
 pub fn from_rfc3339(text : String) -> Int64 raise DateError {
   let _ = text
-  abort("moon-hutool: date.from_rfc3339 未实现（spec 02-date #2.8）")
+  abort("moon-hutool: date.from_rfc3339 未实现（spec 03-date #2.8）")
 }

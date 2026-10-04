@@ -1,4 +1,4 @@
-# 契约 02 · date（日期时间）
+# 契约 03 · date（日期时间）
 
 > 状态：**契约已冻结、实现未开工**（10-04）。签名在 `date/date.mbt`（函数体是 `abort`），公开接口在
 > `date/pkg.generated.mbti`，期望值在 `date/date_test.mbt` 与 `date/README.mbt.md`（本包 47 条用例此刻红是设计态）。

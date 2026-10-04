@@ -6,7 +6,9 @@
 - **本库补** —— 本库提供，且标明补的是哪类：① hutool 契约形状 / ② 环境显式化 / ③ 分散入口收成可测出口
 - **不做** —— JVM 特性、FFI、或明确不承诺（理由见文末与 `AGENTS.md`）
 
-包名 ↔ 相位见 `AGENTS.md` 的路线表；已定契约的包：`01-text.md`、`02-date.md`、`05-digest.md`（编号按交付顺序：01 text、02 date、03 id、04 rand、05 digest）。
+**spec 文件名的序号 = 该包在 [`docs/ROADMAP.md`](https://github.com/mldong/moon-hutool/blob/master/docs/ROADMAP.md) 逐包表里的行号**（`01-text`、`02-digest`、`03-date`、`04-id` … `23-typex`）。它是**稳定 ID 不是排名**：包挪进"暂不做"也不改号，号一旦发过就不再动。这条由门禁 G13 守着——某行的「契约」列与它的行号对不上就报红（防止"号"和"表"各漂各的，这个不一致曾经真的存在过）。
+
+已定契约的包：`01-text.md`、`02-digest.md`、`03-date.md`。
 
 ## 1. 字符串（hutool `StrUtil` / `CharSequenceUtil`，实测 1838 非注释行）
 

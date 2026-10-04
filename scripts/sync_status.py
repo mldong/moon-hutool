@@ -11,11 +11,13 @@
    a. 标记块内容与重新生成的一致（有人手改了数字 → 红）；
    b. `docs/ROADMAP.md` 的逐包表**必须覆盖每个真实存在的包**（新包没登记 → 红），
       且每行的状态词与当场读数一致（绿了写"未开工"、没绿写"已实现" → 红，双向）；
-   c. 包内文档（`README.mbt.md` / `*_test.mbt` / `docs/spec/NN-<pkg>.md`）的状态措辞与读数不冲突。
+   c. 包内文档（`README.mbt.md` / `*_test.mbt` / `docs/spec/NN-<pkg>.md`）的状态措辞与读数不冲突；
+  d. **`docs/spec/NN-<pkg>.md` 的 NN 必须等于该包在逐包表里的行号**（门禁 G13，号是稳定 ID 不是排名）。
 
 用法：
   python scripts/sync_status.py --write    # 生成/刷新读数块
-  python scripts/sync_status.py --check    # 只校验，不写
+  python scripts/sync_status.py --check    # 只校验，不写（要跑逐包用例，稍慢）
+  python scripts/sync_status.py --numbers  # 只查序号一致性（不跑 moon，秒级）
   python scripts/sync_status.py --selftest # 判据自检（坏样本必须被抓到）
 """
 
@@ -153,20 +155,96 @@ def roadmap_findings(rows):
     return bad
 
 
+def roadmap_rows():
+    """按出现顺序返回逐包表的 [(包名, 契约列)]——这个顺序就是包的**序号权威**。"""
+    path = os.path.join(os.getcwd(), "docs", "ROADMAP.md")
+    if not os.path.isfile(path):
+        return []
+    rows = []
+    for line in io.open(path, encoding="utf-8", errors="replace").read().splitlines():
+        m = ROW.match(line)
+        if m:
+            cells = [c.strip() for c in line.strip().strip("|").split("|")]
+            rows.append((m.group(1), cells[3] if len(cells) > 3 else ""))
+    return rows
+
+
+def spec_files():
+    d = os.path.join(os.getcwd(), "docs", "spec")
+    return sorted(f for f in os.listdir(d) if f.endswith(".md")) if os.path.isdir(d) else []
+
+
+def number_findings(rows, files):
+    """spec 文件名序号必须等于该包在逐包表里的行号（门禁 G13）。
+
+    为什么值得钉：号一旦与表序各漂各的，读者就只能猜哪个是真的（本轮就是这么被撞——01/02/05 对
+    text/digest/date）。定成**稳定 ID**：包挪进「暂不做」也不改号，号发过就不再动，只有新增包时
+    按行号往后编。
+    """
+    want = {}
+    for i, (pkg, _cell) in enumerate(rows, 1):
+        want[pkg] = "%02d-%s.md" % (i, pkg)
+    bad = []
+    for i, (pkg, cell) in enumerate(rows, 1):
+        for ref in re.findall(r"docs/spec/([0-9A-Za-z_.\-]+\.md)", cell):
+            if ref != want[pkg]:
+                bad.append("逐包表第 {} 行是 `{}`，契约列却指向 docs/spec/{}（应为 {}）".format(
+                    i, pkg, ref, want[pkg]))
+    for f in files:
+        if f == "00-hutool-map.md":
+            continue
+        m = re.match(r"^(\d{2})-([a-z0-9_\-]+)\.md$", f)
+        if not m:
+            bad.append("docs/spec/{} 不合 `NN-<pkg>.md` 命名（NN＝该包在逐包表里的行号）".format(f))
+            continue
+        pkg = m.group(2)
+        if pkg not in want:
+            bad.append("docs/spec/{} 的包 `{}` 在逐包表里没有行".format(f, pkg))
+        elif want[pkg] != f:
+            idx = [p for p, _c in rows].index(pkg) + 1
+            bad.append("包 `{}` 在逐包表里是第 {} 行，spec 文件却叫 {}（应为 {}）".format(
+                pkg, idx, f, want[pkg]))
+    return bad
+
+
 def selftest():
-    """判据自检：三类坏读数都必须被识别。"""
+    """判据自检：坏读数与坏序号都必须被识别。"""
     ok = (bool(NOT_DONE.search("> 当前状态：实现未开工，函数体是 `abort`"))
           and bool(CLAIM_DONE.search("| `text` | x | **已实现**（10-04） |"))
           and ROW.match("| `text` | `StrUtil` | 已实现 | a | b |") is not None
           and not NOT_DONE.search("这里只是解释 abort 这个函数怎么用：`abort(\"x\")`"))
-    print("  PASS 自检：措辞与表格行的识别规则都对得上" if ok else "  FAIL 自检失效")
+    # 序号判据的阳性对照：表说 digest 在第 2 行、文件却叫 05-digest.md ⇒ 必须报两条（列与文件各一条）
+    probe_rows = [("text", "`docs/spec/01-text.md`"), ("digest", "`docs/spec/05-digest.md`"),
+                  ("date", "—")]
+    probe_bad = number_findings(probe_rows, ["01-text.md", "05-digest.md", "03-date.md"])
+    # 以及一条全对的样本，确认判据不会乱报
+    probe_ok = number_findings([("text", "`docs/spec/01-text.md`"), ("digest", "—")],
+                               ["00-hutool-map.md", "01-text.md"])
+    ok = ok and len(probe_bad) == 2 and not probe_ok
+    print("  PASS 自检：措辞、表格行、序号三条识别规则都对得上" if ok else
+          "  FAIL 自检失效（坏样本抓到 {} 条，应 2 条；好样本误报 {} 条）".format(
+              len(probe_bad), len(probe_ok)))
     return 0 if ok else 1
+
+
+def numbers_only():
+    """G13：只查序号一致性（不跑 moon，秒级）。"""
+    bad = number_findings(roadmap_rows(), spec_files())
+    if bad:
+        print("  FAIL spec 序号与逐包表行号不一致（{} 处）：".format(len(bad)))
+        for b in bad:
+            print("    ", b)
+        return 1
+    print("  PASS docs/spec/NN-<pkg>.md 的 NN 与逐包表行号一一对应")
+    return selftest() if "--selftest" in sys.argv else 0
 
 
 def main():
     os.chdir(os_root())
     if "--selftest" in sys.argv:
         return selftest()
+    if "--numbers" in sys.argv:
+        return numbers_only()
     rows = collect()
     targets = ["README.md", os.path.join("docs", "ROADMAP.md")]
     if "--write" in sys.argv:
@@ -187,6 +265,7 @@ def main():
             bad.append("{} 的读数块与当场跑出来的不一致 → 跑 `python scripts/sync_status.py --write`".format(t))
     bad += roadmap_findings(rows)
     bad += wording_findings(rows)
+    bad += number_findings(roadmap_rows(), spec_files())
     for pkg, state, t, g, f in rows:
         print("  INFO {:8s} {:12s} 用例 {:>3} 绿 {:>3} 红 {:>3}".format(pkg, state, t, g, f))
     if bad:

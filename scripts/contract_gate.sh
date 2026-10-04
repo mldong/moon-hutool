@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# moon-hutool 契约门禁 G1~G12
+# moon-hutool 契约门禁 G1~G13
 #
 # 原则：每条判据都必须"真跑过且敢报红"。凡当前环境跑不了的项，显式打 SKIP + 理由，
 # 绝不伪装成 PASS（恒绿但没测的套件比红灯更危险）。
@@ -169,6 +169,13 @@ printf 'pub fn a() -> Int { 1 }\n' > "$fx/fakepkg/a.mbt"
 caught=$(skel_check "$fx")
 rm -rf "$fx"
 [ -n "$caught" ] && ok "阳性对照正常（假包的豁免被抓到：$caught）" || bad "G12 自身失效：坏样本没抓到，这条判据不可信"
+
+echo "== G13 spec 序号 == 逐包表行号（号是稳定 ID，不许与表各漂各的）=="
+if python scripts/sync_status.py --numbers >/tmp/mh_numbers.log 2>&1; then
+  grep -E "^  PASS" /tmp/mh_numbers.log
+else
+  bad "序号与表行号不一致（见下）："; sed -n '1,10p' /tmp/mh_numbers.log | sed 's/^/    /'
+fi
 
 echo
 if [ "$FAILS" = "0" ]; then
