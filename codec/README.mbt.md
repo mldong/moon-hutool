@@ -4,7 +4,9 @@ hutool `Codec` 家族的 MoonBit 对位：Base64 的 URL/MIME/宽松三档、Bas
 
 完整边界矩阵与逐条读数来源见 [`docs/spec/05-codec.md`](https://github.com/mldong/moon-hutool/blob/master/docs/spec/05-codec.md)。
 
-> 状态：**分两批**。第一批（Base64 三档 / Base32 / Base58 / Base62 / Radix）已经落地并在这三个块里保持断言；**第二批（§7 form 档、§8 URL 组件）此刻尚未落地**，相关块的红是设计态。期望串与 `codec_test.mbt` 同受"期望值冻结"约束：改任何期望须单独一笔并给外部读数来源（门禁 G5）。
+> 状态：**两批都已落地**（10-05）。第一批是 Base64 三档 / Base32 / Base58 / Base62 / Radix，第二批是
+> §7 form 档与 §8 URL 组件——下面每个块的期望值都是当场跑出来的读数，wasm / js / wasm-gc 三档一致。
+> 期望串受"期望值冻结"约束：改任何期望须单独一笔并给外部读数来源（门禁 G5）。
 
 ## 三条先决口径
 

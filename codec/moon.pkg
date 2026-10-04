@@ -1,5 +1,6 @@
 // Base58Check 的校验位是双 SHA-256，摘要走本库 digest（不重复实现）
 import {
+  "moonbitlang/core/encoding/utf8",
   "mldong/moon-hutool/digest",
 }
 
@@ -11,9 +12,5 @@ import {
   "mldong/moon-hutool/codec",
 } for "test"
 
-// 第二批（§7 form / §8 URL）的骨架期豁免：函数体还是 `abort`，于是
-// - 新增的 `BadUtf8` 变体没人构造（`unused_constructor`）
-// - 四条新签名写了 `raise CodecError` 而体里没 `raise`（`unused_error_type`）
-// 这两类全是"未实现"的机械后果。实现落地那一笔删掉——门禁 G12 拦着不让忘。
-
-warnings = "-unused_constructor-unused_error_type"
+// §7/§8 落地后骨架豁免整行已删除（G12）：体里没有 `abort` 了，
+// 那两类警告若再响就是真死码，不再豁免。

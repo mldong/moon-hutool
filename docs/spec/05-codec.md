@@ -1,8 +1,8 @@
 # 契约 05 · codec（编码解码）
 
-> 状态：**分两批**。§2~§6（第一批）的实现已随 10-05 那轮落地，三档（wasm / js / wasm-gc）读数一致、
-> `moon info` 后 `.mbti` 零漂移；**§7~§8 是本包第二批契约，此刻尚未落地**（新增函数体走 `abort`，
-> 第二批用例的红是设计态）。实现在 `codec/codec.mbt`，公开接口在 `codec/pkg.generated.mbti`，
+> 状态：**两批都已落地**（10-05）。§2~§6（第一批）与 §7~§8（第二批：form 档 + URL 组件）全部绿，
+> 三档（wasm / js / wasm-gc）读数一致、`moon info` 后 `.mbti` 零漂移；第二批实现那一笔**期望串一字未改**。
+> 实现在 `codec/codec.mbt`，公开接口在 `codec/pkg.generated.mbti`，
 > 期望值在 `codec/codec_test.mbt` 与 `codec/README.mbt.md`。
 > 改任何期望串须单独一笔并给外部读数来源（门禁 G5）：本轮实现前动过一条——`MZXWE1==` 的非法字符
 > 下标从 4 改成 5，判据就是逐位数（M0 Z1 X2 W3 E4 **1=5**）。

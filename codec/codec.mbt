@@ -302,8 +302,19 @@ pub fn radix_decode(text : String, radix : Int) -> Int64 raise CodecError {
 ///   于是 `~` 原样出、`*` 被转义、空格出 `%20`；表单这三条都不一样（spec §7）。
 ///   除这三处外两档**同结果**，这条重叠区间由用例里的对拍腿钉住（门禁 G8）
 pub fn form_encode(text : String) -> String {
-  let _ = text
-  abort("moon-hutool: codec.form_encode 未实现（spec 05-codec #7）")
+  let buf = StringBuilder()
+  let bytes = @utf8.encode(text)
+  for i in 0..<bytes.length() {
+    let v = bytes[i].to_int()
+    if v == 32 {
+      buf.write_char('+')
+    } else if is_form_safe(v) {
+      buf.write_char(code_char(v))
+    } else {
+      buf.write_string(pct_pair(v))
+    }
+  }
+  buf.to_string()
 }
 
 ///|
@@ -313,8 +324,38 @@ pub fn form_encode(text : String) -> String {
 ///   `CodecError.BadUtf8`（解出的字节不是合法 UTF-8）
 /// - Note: 坏序列**报错**而不是换 U+FFFD——表单值坏掉通常是上游忘了编码
 pub fn form_decode(text : String) -> String raise CodecError {
-  let _ = text
-  abort("moon-hutool: codec.form_decode 未实现（spec 05-codec #7）")
+  let chars = text.to_array()
+  let n = chars.length()
+  let out : Array[Byte] = []
+  let mut i = 0
+  while i < n {
+    let c = chars[i]
+    if c == '+' {
+      out.push((32).to_byte())
+      i = i + 1
+    } else if c == '%' {
+      if i + 2 >= n {
+        raise IllegalChar(text, i)
+      }
+      match (hex_value(chars[i + 1]), hex_value(chars[i + 2])) {
+        (Some(h), Some(l)) => {
+          out.push((h * 16 + l).to_byte())
+          i = i + 3
+        }
+        _ => raise IllegalChar(text, i)
+      }
+    } else {
+      let b = @utf8.encode(c.to_string())
+      for k in 0..<b.length() {
+        out.push(b[k])
+      }
+      i = i + 1
+    }
+  }
+  // 字节层的合法性交给 core 的 UTF-8 解码器判：再写一份校验器就是第二个口径
+  @utf8.decode(Bytes::from_array(out)) catch {
+    _ => raise BadUtf8(text)
+  }
 }
 
 ///|
@@ -322,8 +363,17 @@ pub fn form_decode(text : String) -> String raise CodecError {
 ///
 /// - Note: 保序、允许重复键；空数组出空串。不做 hutool 那个"charset 为 null 就不编码"的静默分档
 pub fn form_build(pairs : Array[(String, String)]) -> String {
-  let _ = pairs
-  abort("moon-hutool: codec.form_build 未实现（spec 05-codec #7）")
+  let buf = StringBuilder()
+  for i in 0..<pairs.length() {
+    if i > 0 {
+      buf.write_char('&')
+    }
+    let (k, v) = pairs[i]
+    buf.write_string(form_encode(k))
+    buf.write_char('=')
+    buf.write_string(form_encode(v))
+  }
+  buf.to_string()
 }
 
 ///|
@@ -333,8 +383,27 @@ pub fn form_build(pairs : Array[(String, String)]) -> String {
 /// - Note: 不给"同名键自动合成数组"那种视图——那是 Map 层语义且各栈不同，要分组自己 `match`
 /// - Raises: `CodecError.IllegalChar`、`CodecError.BadUtf8`（键或值走 `form_decode`）
 pub fn form_parse(query : String) -> Array[(String, String)] raise CodecError {
-  let _ = query
-  abort("moon-hutool: codec.form_parse 未实现（spec 05-codec #7）")
+  let out : Array[(String, String)] = []
+  for view in query.split("&") {
+    let item = view.to_owned()
+    if item != "" {
+      let cs = item.to_array()
+      let mut eq_at = -1
+      for j in 0..<cs.length() {
+        if cs[j] == '=' {
+          eq_at = j
+          break
+        }
+      }
+      let (k, v) = if eq_at >= 0 {
+        (chars_slice(cs, 0, eq_at), chars_slice(cs, eq_at + 1, cs.length()))
+      } else {
+        (item, "")
+      }
+      out.push((form_decode(k), form_decode(v)))
+    }
+  }
+  out
 }
 
 ///|
@@ -360,8 +429,95 @@ pub(all) struct Url {
 /// - Raises: `CodecError.IllegalChar`（结构不对：端口非数字、给了 `:` 而 host 为空等）、
 ///   `CodecError.RadixOutOfRange(port, 65535)`（端口越界）
 pub fn Url::parse(text : String) -> Url raise CodecError {
-  let _ = text
-  abort("moon-hutool: codec.Url::parse 未实现（spec 05-codec #8）")
+  let chars = text.to_array()
+  let n = chars.length()
+  let hash_at = find_char_from(chars, '#', 0, n)
+  let head_end = if hash_at >= 0 { hash_at } else { n }
+  let fragment = if hash_at >= 0 {
+    Some(chars_slice(chars, hash_at + 1, n))
+  } else {
+    None
+  }
+  let qmark_at = find_char_from(chars, '?', 0, head_end)
+  let body_end = if qmark_at >= 0 { qmark_at } else { head_end }
+  let query = if qmark_at >= 0 {
+    Some(chars_slice(chars, qmark_at + 1, head_end))
+  } else {
+    None
+  }
+  let mut scheme = ""
+  let mut pos = 0
+  if n > 0 && is_scheme_start(chars[0]) {
+    let mut j = 0
+    while j < body_end && is_scheme_char(chars[j]) {
+      j = j + 1
+    }
+    if j > 0 && j < body_end && chars[j] == ':' {
+      scheme = chars_slice(chars, 0, j)
+      pos = j + 1
+    }
+  }
+  let has_authority = pos + 1 < body_end &&
+    chars[pos] == '/' &&
+    chars[pos + 1] == '/'
+  let mut userinfo = ""
+  let mut host = ""
+  let mut port = -1
+  let mut path = ""
+  if has_authority {
+    let auth_start = pos + 2
+    let slash = find_char_from(chars, '/', auth_start, body_end)
+    // authority 一路吃到第一个 `/`；整段没有 `/` 就是"有 authority 而无 path"，
+    // 这时 auth_end 落在 body_end，后面的 path 自然是空串
+    let auth_end = if slash >= 0 { slash } else { body_end }
+    let at = find_last(chars, '@', auth_start, auth_end)
+    let mut host_start = auth_start
+    if at >= 0 {
+      userinfo = chars_slice(chars, auth_start, at)
+      host_start = at + 1
+    }
+    let colon = find_last(chars, ':', host_start, auth_end)
+    let host_end = if colon >= 0 { colon } else { auth_end }
+    host = chars_slice(chars, host_start, host_end)
+    for t in host_start..<host_end {
+      if !is_host_char(chars[t].to_int()) {
+        raise IllegalChar(text, t)
+      }
+    }
+    if at >= 0 && userinfo == "" && host == "" {
+      raise IllegalChar(text, at)
+    }
+    if colon >= 0 {
+      if colon + 1 >= auth_end {
+        raise IllegalChar(text, colon)
+      }
+      let mut acc = 0
+      let mut t = colon + 1
+      let mut bad = -1
+      while t < auth_end {
+        let v = chars[t].to_int()
+        if v >= 48 && v <= 57 {
+          acc = acc * 10 + (v - 48)
+          if acc > 65535 {
+            raise RadixOutOfRange(acc, 65535)
+          }
+        } else {
+          bad = t
+          break
+        }
+        t = t + 1
+      }
+      if bad >= 0 {
+        raise IllegalChar(text, bad)
+      }
+      port = acc
+    }
+    path = chars_slice(chars, auth_end, body_end)
+  } else {
+    path = chars_slice(chars, pos, body_end)
+  }
+  let url : Url = { scheme, userinfo, host, port, path, query, fragment, }
+  url
 }
 
 ///|
@@ -369,8 +525,39 @@ pub fn Url::parse(text : String) -> Url raise CodecError {
 ///
 /// - Note: hutool 那侧靠三个 `get*WithDefault` 往输出里塞默认值，最容易漂的一档在这里被剔除
 pub fn Url::to_string(self : Self) -> String {
-  let _ = self
-  abort("moon-hutool: codec.Url::to_string 未实现（spec 05-codec #8）")
+  let buf = StringBuilder()
+  if self.scheme != "" {
+    buf.write_string(self.scheme)
+    buf.write_string(":")
+  }
+  if self.userinfo != "" || self.host != "" || self.port >= 0 {
+    buf.write_string("//")
+    if self.userinfo != "" {
+      buf.write_string(self.userinfo)
+      buf.write_string("@")
+    }
+    buf.write_string(self.host)
+    if self.port >= 0 {
+      buf.write_string(":")
+      buf.write_string(self.port.to_string())
+    }
+  }
+  buf.write_string(self.path)
+  match self.query {
+    Some(q) => {
+      buf.write_string("?")
+      buf.write_string(q)
+    }
+    None => ()
+  }
+  match self.fragment {
+    Some(f) => {
+      buf.write_string("#")
+      buf.write_string(f)
+    }
+    None => ()
+  }
+  buf.to_string()
 }
 
 ///|
@@ -380,8 +567,25 @@ pub fn Url::to_string(self : Self) -> String {
 /// - Note: **幂等**，且**只改写法不改语义**——末尾斜杠、`index.html` 省略、协议升级这些一律不做；
 ///   非法转义（如 `%zz`）原样保留，不猜
 pub fn Url::normalize(self : Self) -> Url {
-  let _ = self
-  abort("moon-hutool: codec.Url::normalize 未实现（spec 05-codec #8）")
+  let scheme = ascii_lower(self.scheme)
+  let host = ascii_lower(self.host)
+  let mut port = self.port
+  if (scheme == "http" && port == 80) || (scheme == "https" && port == 443) {
+    port = -1
+  }
+  let has_auth = self.userinfo != "" || self.host != "" || self.port >= 0
+  let raw_path = if has_auth && self.path == "" { "/" } else { self.path }
+  let path = drop_dot_segments(normalize_percent(raw_path))
+  let out : Url = {
+    scheme,
+    userinfo: self.userinfo,
+    host,
+    port,
+    path,
+    query: self.query,
+    fragment: self.fragment,
+  }
+  out
 }
 
 ///|
@@ -390,8 +594,13 @@ pub fn Url::normalize(self : Self) -> Url {
 /// - Parameters: 判"有没有协议"看的是 `http://`/`https://` 前缀，**大小写不敏感**
 /// - Note: 单独一条而不是让 `Url::parse` 偷偷补——猜缺失的协议是改语义，必须点名
 pub fn url_of_http(text : String) -> Url raise CodecError {
-  let _ = text
-  abort("moon-hutool: codec.url_of_http 未实现（spec 05-codec #8）")
+  let lowered = ascii_lower(text)
+  let known = lowered.has_prefix("http://") || lowered.has_prefix("https://")
+  if known || text.has_prefix("//") {
+    Url::parse(text)
+  } else {
+    Url::parse("http://" + text)
+  }
 }
 
 ///|
@@ -772,5 +981,229 @@ fn radix_index(c : Char, radix : Int) -> Int? {
     Some(found)
   } else {
     None
+  }
+}
+
+// ==== §7/§8 的私有件：只在 form 档与 URL 档内部用，不进 `.mbti` ====
+
+///|
+let hex_digits : Array[Char] = [
+  '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F',
+]
+
+///|
+/// 码位 → `Char`。`Int::to_char()` 返回 `Char?`（非法码位给 None），
+/// 而这里只喂 `[0, 255]` 与 ASCII 归一位，那些码位全合法、None 分支不可达。
+/// 写 `unwrap` 而不是编一个替换字符：真被喂进坏值，炸出来比静默换字符好
+fn code_char(v : Int) -> Char {
+  v.to_char().unwrap()
+}
+
+///|
+/// 一个字节 → `%XX`（**大写**十六进制）
+fn pct_pair(v : Int) -> String {
+  let buf = StringBuilder()
+  buf.write_string("%")
+  buf.write_char(hex_digits[v >> 4])
+  buf.write_char(hex_digits[v & 15])
+  buf.to_string()
+}
+
+///|
+/// 十六进制位的值，大小写都收。`radix_index` 那批表只认大写，这里不能用它
+fn hex_value(c : Char) -> Int? {
+  let v = c.to_int()
+  if v >= 48 && v <= 57 {
+    Some(v - 48)
+  } else if v >= 65 && v <= 70 {
+    Some(v - 55)
+  } else if v >= 97 && v <= 102 {
+    Some(v - 87)
+  } else {
+    None
+  }
+}
+
+///|
+/// 表单档放行的字节：`A-Za-z0-9` 外加 `*` `-` `.` `_`。
+/// **`~` 不在这里**——RFC 3986 的 unreserved 有它、HTML 序列化器没有，这一位就是两档的分歧点
+fn is_form_safe(v : Int) -> Bool {
+  (v >= 48 && v <= 57) ||
+  (v >= 65 && v <= 90) ||
+  (v >= 97 && v <= 122) ||
+  v == 42 ||
+  v == 45 ||
+  v == 46 ||
+  v == 95
+}
+
+///|
+/// RFC 3986 §2.3 的 unreserved：`A-Za-z0-9` 加 `-` `.` `_` `~`（`~` 在、`*` 不在）
+fn is_unreserved_byte(v : Int) -> Bool {
+  (v >= 48 && v <= 57) ||
+  (v >= 65 && v <= 90) ||
+  (v >= 97 && v <= 122) ||
+  v == 45 ||
+  v == 46 ||
+  v == 95 ||
+  v == 126
+}
+
+///|
+/// host（RFC 3986 §3.2.2 的 reg-name）允许的字符：unreserved + sub-delims + `%`。
+/// 表外字符（空格是典型）由 `Url::parse` 报错并给**那个字符**的下标
+fn is_host_char(v : Int) -> Bool {
+  if is_unreserved_byte(v) || v == 37 {
+    true
+  } else {
+    match v {
+      33 | 36 | 38 | 39 | 40 | 41 | 42 | 43 | 44 | 59 | 61 => true
+      _ => false
+    }
+  }
+}
+
+///|
+/// scheme 的 ABNF 是 `ALPHA *( ALPHA / DIGIT / "+" / "-" / "." )`：首字符必须是字母
+fn is_scheme_start(c : Char) -> Bool {
+  let v = c.to_int()
+  (v >= 65 && v <= 90) || (v >= 97 && v <= 122)
+}
+
+///|
+fn is_scheme_char(c : Char) -> Bool {
+  if is_scheme_start(c) {
+    true
+  } else {
+    match c.to_int() {
+      43 | 45 | 46 | 48..=57 => true
+      _ => false
+    }
+  }
+}
+
+///|
+/// 字符数组切片——**下标一律按码元（Char）算**，错误读数与夹具都是这一口径
+fn chars_slice(chars : Array[Char], start : Int, end : Int) -> String {
+  let buf = StringBuilder()
+  for i in start..<end {
+    buf.write_char(chars[i])
+  }
+  buf.to_string()
+}
+
+///|
+/// 区间 `[from, to)` 内第一个目标字符的下标；没有给 `-1`
+fn find_char_from(chars : Array[Char], c : Char, from : Int, to : Int) -> Int {
+  let mut i = from
+  while i < to {
+    if chars[i] == c {
+      return i
+    }
+    i = i + 1
+  }
+  -1
+}
+
+///|
+/// 区间内**最后一个**目标字符的下标：userinfo 按最后一个 `@`、端口按最后一个 `:` 切
+///（RFC 3986 §3.2 就是这么定的，按第一个切会在 `user@name@host` 上给出另一个答案）
+fn find_last(chars : Array[Char], c : Char, from : Int, to : Int) -> Int {
+  let mut last = -1
+  let mut i = from
+  while i < to {
+    if chars[i] == c {
+      last = i
+    }
+    i = i + 1
+  }
+  last
+}
+
+///|
+/// ASCII 小写（非 ASCII 原样）：`Char` 没有 `to_lowercase`，只能按码位 +32
+fn ascii_lower(text : String) -> String {
+  let buf = StringBuilder()
+  for c in text.to_array() {
+    let v = c.to_int()
+    if v >= 65 && v <= 90 {
+      buf.write_char(code_char(v + 32))
+    } else {
+      buf.write_char(c)
+    }
+  }
+  buf.to_string()
+}
+
+///|
+/// `%XX` 写法归一：统一大写；落在 unreserved 的字节**还原成字符**；非法转义原样保留（不猜）
+fn normalize_percent(text : String) -> String {
+  let chars = text.to_array()
+  let n = chars.length()
+  let buf = StringBuilder()
+  let mut i = 0
+  while i < n {
+    let c = chars[i]
+    if c == '%' && i + 2 < n {
+      match (hex_value(chars[i + 1]), hex_value(chars[i + 2])) {
+        (Some(h), Some(l)) => {
+          let v = h * 16 + l
+          // `%2E`（点号）**不参与还原**：还原出来的 `.` 会被后面的点段删除当成 `.`/`..` 段吃掉，
+          // 而原串那一格本是字面段——RFC 3986 §6.2.2.2 特意点过这一档，还原它等于改语义
+          if is_unreserved_byte(v) && v != 46 {
+            buf.write_char(code_char(v))
+          } else {
+            buf.write_string(pct_pair(v))
+          }
+          i = i + 3
+        }
+        _ => {
+          buf.write_char(c)
+          i = i + 1
+        }
+      }
+    } else {
+      buf.write_char(c)
+      i = i + 1
+    }
+  }
+  buf.to_string()
+}
+
+///|
+/// RFC 3986 §5.2.4 的点段删除（绝对路径档）。末尾的 `.`/`..` 要留尾斜杠，中间的直接删
+fn drop_dot_segments(path : String) -> String {
+  if path == "" {
+    ""
+  } else {
+    let segs : Array[StringView] = path.split("/").to_array()
+    let absolute = path.has_prefix("/")
+    let out : Array[String] = []
+    let n = segs.length()
+    for i in 0..<n {
+      let seg = segs[i].to_owned()
+      if i == 0 && absolute {
+        // 开头 `/` 拆出来的那个空段丢掉
+      } else if seg == "." {
+        if i == n - 1 {
+          out.push("")
+        }
+      } else if seg == ".." {
+        if i == n - 1 {
+          let _ = out.pop()
+          out.push("")
+        } else if out.length() > 0 {
+          let _ = out.pop()
+        }
+      } else {
+        out.push(seg)
+      }
+    }
+    let joined = out.join("/")
+    if absolute {
+      "/" + joined
+    } else {
+      joined
+    }
   }
 }

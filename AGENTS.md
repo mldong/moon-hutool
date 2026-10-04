@@ -145,7 +145,17 @@ PR-A 的合入标准：`moon check` 必须全绿（签名与类型自洽、文�
   `update_or_default(x, 1, v => v + 1)`，给 0 会让**每个计数静默少 1**（本轮实现期唯一一处红就是这个）。
   配套的 `Map::get_or_init(key, () => v) -> v` 返回**存进去的那个值**，所以分组可以直接
   `m.get_or_init(k, () => []).push(x)`（Array 是引用语义，push 生效）。
-- **`Array::clamped_view(start, end)` 的两个参是带标签可选参**：按位置传 `xs.clamped_view(s, e)` 判
+- **`Int` 后面直接点方法会被切成字面量的一部分**：`out.push(32.to_byte())` 里的 `32.` 先按 Double 词法吃掉点号，
+  判 `has type : Double` ⇒ 写 `(32).to_byte()`。
+- **`Int::to_char()` 返回 `Char?`**（非法码位 None）：只在码位区间已被调用方保证时 `.unwrap()`，
+  并且把"为什么不可达"写在注释里；编一个替换字符是更坏的选择。
+- **`String::split(sep)` 返回 `Iter[StringView]`，不是 `Array[String]`**：要下标就先 `.to_array()`，
+  视图转拥有串用 `.to_owned()`（`StringView::to_string()` 已废弃，判词直接指到 `Show::to_string`）。
+- **`String::starts_with` 已废弃** ⇒ `has_prefix`（本轮两处调用点都是字符串前缀判断，判词直接点名 `has_prefix`）。
+- **布尔/算子表达式续行只能把运算符留在行尾**：行首再写 `||` 判 `Parse error, unexpected token ||`，
+  且上一条语句还会被当成"表达式值未显式忽略"（`Bool cannot be implicitly ignored`）——两条错一起报很迷惑。
+- `Array` **没有 `iteri`**（core 给的是 `eachi`/`iter`），带下标循环就直接 `for i in 0..<xs.length()`。
+- **`Array::clamped_view` 的 `start`/`end` 是带标签可选参**：按位置传判
   `requires 1 positional arguments, but is given 3` ⇒ 写 `xs.clamped_view(start = s, end = e)`。
   它把越界自然夹空，"越界给空数组"这类契约可以直接交给它，不必自己写边界分支。
 - 用例首选 `assert_eq`；`inspect` 对集合走 `Show` 会吃废弃警告（core 立场：结果确定的用例用断言）。
