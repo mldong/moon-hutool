@@ -13,6 +13,8 @@
       且每行的状态词与当场读数一致（绿了写"未开工"、没绿写"已实现" → 红，双向）；
    c. 包内文档（`README.mbt.md` / `*_test.mbt` / `docs/spec/NN-<pkg>.md`）的状态措辞与读数不冲突；
   d. **`docs/spec/NN-<pkg>.md` 的 NN 必须等于该包在逐包表里的行号**（门禁 G13，号是稳定 ID 不是排名）。
+  e. **根 `README.md` 的索引行不许逐包写状态**（括号里既点包名又点状态词的，必须等于当场读数；
+     不指名包的状态口径词表放行）——本轮 date/id 转绿时那行索引就漂了，光扫包内文档看不见。
 
 用法：
   python scripts/sync_status.py --write    # 生成/刷新读数块
@@ -37,6 +39,8 @@ STATE_TODO = "未开工"
 NOT_DONE = re.compile(r"实现未开工|预期全红|预期红|函数体是 `abort`|函数体 `abort`")
 CLAIM_DONE = re.compile(r"已实现|全绿")
 ROW = re.compile(r"^\|\s*`([a-z0-9_-]+)`\s*\|")
+STATE_WORDS = ("已实现", "契约已冻结", "实现中", "未开工")
+PAREN = re.compile(u"（([^）]*)）")
 
 
 def os_root():
@@ -155,6 +159,53 @@ def roadmap_findings(rows):
     return bad
 
 
+def pkg_token(name):
+    """包名要整词匹配——`valid` 里含 `id`，裸子串会误点。"""
+    return re.compile(r"(?<![a-z0-9_-])" + re.escape(name) + r"(?![a-z0-9_-])")
+
+
+def index_findings_text(text, states):
+    """根 README 的索引行不许逐包写状态。
+
+    为什么值得钉：`docs/spec/NN-<pkg>.md`（date，契约已冻结）这种括号里的状态，包转绿后没人回来改——
+    本轮 date/id 双双转绿时它就漂了。G11 原本只扫**包目录内**的文档与 spec 抬头，根 README 不在面上。
+    规则：括号内同时点了某个包与某个状态词的，状态词必须等于当场读数；不指名包的（状态口径词表）放行。
+    """
+    bad = []
+    inside = False
+    for i, line in enumerate(text.splitlines(), 1):
+        if BEGIN in line:
+            inside = True
+        if END in line:
+            inside = False
+            continue
+        if inside:
+            continue
+        for seg in PAREN.findall(line):
+            words = [w for w in STATE_WORDS if w in seg]
+            if not words:
+                continue
+            hits = [n for n in states if pkg_token(n).search(seg)]
+            if not hits:
+                continue
+            if len(hits) > 1 or len(words) > 1:
+                bad.append("README.md:%d 一个括号里点了 %d 个包 / %d 个状态词，读数没法核：%s"
+                           % (i, len(hits), len(words), seg[:40]))
+                continue
+            pkg, stated = hits[0], words[0]
+            if stated != states[pkg]:
+                bad.append("README.md:%d 给 `%s` 写了「%s」，当场读数是「%s」→ 索引行别写状态，"
+                           "状态只看生成的读数块与 ROADMAP" % (i, pkg, stated, states[pkg]))
+    return bad
+
+
+def index_findings(rows):
+    states = dict((p, st) for p, st, _t, _g, _f in rows)
+    if not os.path.isfile("README.md"):
+        return ["缺 README.md"]
+    return index_findings_text(io.open("README.md", encoding="utf-8").read(), states)
+
+
 def roadmap_rows():
     """按出现顺序返回逐包表的 [(包名, 契约列)]——这个顺序就是包的**序号权威**。"""
     path = os.path.join(os.getcwd(), "docs", "ROADMAP.md")
@@ -220,10 +271,22 @@ def selftest():
     # 以及一条全对的样本，确认判据不会乱报
     probe_ok = number_findings([("text", "`docs/spec/01-text.md`"), ("digest", "—")],
                                ["00-hutool-map.md", "01-text.md"])
-    ok = ok and len(probe_bad) == 2 and not probe_ok
-    print("  PASS 自检：措辞、表格行、序号三条识别规则都对得上" if ok else
-          "  FAIL 自检失效（坏样本抓到 {} 条，应 2 条；好样本误报 {} 条）".format(
-              len(probe_bad), len(probe_ok)))
+    # 索引行状态判据：漂了的状态词必须被抓到；不指名包的"状态口径词表"不许误报
+    st = {"date": "已实现", "id": "已实现", "text": "已实现", "valid": "未开工"}
+    idx_bad = index_findings_text(
+        "| 契约 | `docs/spec/03-date.md`（date，契约已冻结） |\n", st)
+    idx_multi = index_findings_text(
+        "| 契约 | `docs/spec/03-date.md`（date、id，未开工） |\n", st)
+    idx_ok = index_findings_text(
+        "| 契约 | `docs/spec/03-date.md`（date） |\n"
+        "| 进度 | 逐包状态（`已实现`/`实现中`/`契约已冻结`/`未开工`）+ 用例数 |\n"
+        "| 校验 | `valid` 包（valid 未开工）——见生成块 |\n"
+        + BEGIN + "\n| 包状态 | `已实现` 4 |\n" + END + "\n", st)
+    ok = (ok and len(probe_bad) == 2 and not probe_ok and len(idx_bad) == 1
+          and len(idx_multi) == 1 and not idx_ok)
+    print("  PASS 自检：措辞、表格行、序号、索引状态四条识别规则都对得上" if ok else
+          "  FAIL 自检失效（序号坏样本 %d 应 2、好样本误报 %d；索引坏 %d 应 1、多点 %d 应 1、误报 %d）"
+          % (len(probe_bad), len(probe_ok), len(idx_bad), len(idx_multi), len(idx_ok)))
     return 0 if ok else 1
 
 
@@ -265,6 +328,7 @@ def main():
             bad.append("{} 的读数块与当场跑出来的不一致 → 跑 `python scripts/sync_status.py --write`".format(t))
     bad += roadmap_findings(rows)
     bad += wording_findings(rows)
+    bad += index_findings(rows)
     bad += number_findings(roadmap_rows(), spec_files())
     for pkg, state, t, g, f in rows:
         print("  INFO {:8s} {:12s} 用例 {:>3} 绿 {:>3} 红 {:>3}".format(pkg, state, t, g, f))

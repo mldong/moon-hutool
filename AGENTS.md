@@ -162,6 +162,9 @@ PR-A 的合入标准：`moon check` 必须全绿（签名与类型自洽、文�
 - `README.md` 与 `docs/ROADMAP.md` 里的 `READINGS:BEGIN/END` 块**由脚本生成**：`python scripts/sync_status.py --write`。手改这些数字，`--check` 当场报红。
 - `docs/ROADMAP.md` 的逐包表是进度的唯一真相，两条硬约束：**每个真实存在的包必须有一行**（新包没登记 → 红）；**每行状态词必须等于当场 `moon test --package` 的读数**（绿了写"未开工"、没绿写"已实现" → 红）。
 - 包内三处措辞（`<pkg>/README.mbt.md`、`<pkg>_test.mbt` 头、`docs/spec/NN-<pkg>.md` 头）不许与读数矛盾；包转绿后仍写"预期红"就是红。
+- **根 `README.md` 的索引行不许逐包写状态**：括号里点了包名又点了状态词的，必须等于当场读数（不指名包的状态口径词表放行）。
+  这条是本轮补的——`date`/`id` 转绿时文档索引那行还写着"契约已冻结"，而原判据只扫**包内**文档，根 README 不在面上；
+  补完拿旧版 README 复跑过（报 2 条）与新版（0 条）正反对照。状态只有两处真相：生成的读数块 + ROADMAP 逐包表。
 - 挂点：CI 的门禁 G11 与本地 `.githooks/pre-push`（`pre-commit` 只跑 `moon check`，逐包跑用例太慢不放提交档）。
 - 新增包时的正确顺序：建目录 → **先在 ROADMAP 加一行**（状态"未开工"）→ 再写契约。反过来会被 G11 拦。
 
