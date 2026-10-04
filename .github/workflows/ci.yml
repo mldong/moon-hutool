@@ -33,10 +33,10 @@ jobs:
       - name: moon version
         run: moon version --all
 
-      - name: Run contract gate G1-G11
-        # 基线 37 = 20 条契约用例 + 17 条包文档 test 块；加用例时同步上调，别下调（下调＝用例被悄悄删掉）
+      - name: Run contract gate G1-G12
+        # 基线 84 = text 23 + digest 14 + date 47（用例只许增不许减：减到低于基线就是有用例被悄悄删掉）
         env:
-          BASELINE_TESTS: "37"
+          BASELINE_TESTS: "84"
           GATE_TARGETS: "wasm js"
         run: bash scripts/contract_gate.sh
 
@@ -83,5 +83,5 @@ jobs:
         env:
           GATE_FREEZE_BASE: ${{ github.event.pull_request.base.sha }}
           GATE_TARGETS: "wasm"
-          BASELINE_TESTS: "37"
+          BASELINE_TESTS: "84"
         run: bash scripts/contract_gate.sh

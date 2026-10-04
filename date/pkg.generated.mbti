@@ -2,10 +2,127 @@
 package "mldong/moon-hutool/date"
 
 // Values
+pub fn age(Date, Date) -> Int raise DateError
+
+pub fn between(DateTime, DateTime, TimeUnit) -> Int64
+
+pub let date_pattern : String
+
+pub let datetime_millis_pattern : String
+
+pub let datetime_pattern : String
+
+pub fn days_in_month(Int, Int) -> Int raise DateError
+
+pub fn difference(DateTime, DateTime, TimeUnit) -> Int64
+
+pub fn from_rfc3339(String) -> Int64 raise DateError
+
+pub fn is_leap_year(Int) -> Bool
+
+pub fn is_same_day(DateTime, DateTime) -> Bool
+
+pub fn now(Int) -> DateTime
+
+pub fn now_millis() -> Int64
+
+pub let pure_date_pattern : String
+
+pub let pure_datetime_pattern : String
+
+pub let time_pattern : String
+
+pub fn to_rfc3339(Int64, Int) -> String
 
 // Errors
+pub suberror DateError {
+  MonthOutOfRange(Int)
+  DayOutOfRange(Int, Int, Int)
+  TimeFieldOutOfRange(Int, Int, Int, Int)
+  UnknownPatternToken(String)
+  ParseFailed(String, Int)
+  FutureBirth
+}
 
 // Types and methods
+pub struct Date {
+  year : Int
+  month : Int
+  day : Int
+} derive(Compare, Eq)
+pub fn Date::add_days(Self, Int) -> Self
+pub fn Date::add_months(Self, Int) -> Self
+pub fn Date::add_years(Self, Int) -> Self
+pub fn Date::begin_of_month(Self) -> Self
+pub fn Date::begin_of_quarter(Self) -> Self
+pub fn Date::begin_of_week(Self) -> Self
+pub fn Date::begin_of_year(Self) -> Self
+pub fn Date::compare(Self, Self) -> Int
+pub fn Date::day_of_year(Self) -> Int
+pub fn Date::days_between(Self, Self) -> Int
+pub fn Date::end_of_month(Self) -> Self
+pub fn Date::end_of_quarter(Self) -> Self
+pub fn Date::end_of_year(Self) -> Self
+pub fn Date::epoch_days(Self) -> Int64
+pub fn Date::equal(Self, Self) -> Bool
+pub fn Date::format(Self, String) -> String raise DateError
+pub fn Date::from_epoch_days(Int64) -> Self
+pub fn Date::is_weekend(Self) -> Bool
+pub fn Date::not_equal(Self, Self) -> Bool
+pub fn Date::of(Int, Int, Int) -> Self raise DateError
+pub fn Date::op_ge(Self, Self) -> Bool
+pub fn Date::op_gt(Self, Self) -> Bool
+pub fn Date::op_le(Self, Self) -> Bool
+pub fn Date::op_lt(Self, Self) -> Bool
+pub fn Date::parse(String, String) -> Self raise DateError
+pub fn Date::quarter(Self) -> Int
+pub fn Date::to_datetime(Self) -> DateTime
+pub fn Date::to_iso_string(Self) -> String
+pub fn Date::week_based_year(Self) -> Int
+pub fn Date::week_of_year(Self) -> Int
+pub fn Date::weekday(Self) -> Int
+
+pub struct DateTime {
+  date : Date
+  hour : Int
+  minute : Int
+  second : Int
+  milli : Int
+} derive(Compare, Eq)
+pub fn DateTime::add(Self, TimeUnit, Int64) -> Self
+pub fn DateTime::add_months(Self, Int) -> Self
+pub fn DateTime::begin_of_day(Self) -> Self
+pub fn DateTime::begin_of_month(Self) -> Self
+pub fn DateTime::begin_of_quarter(Self) -> Self
+pub fn DateTime::begin_of_week(Self) -> Self
+pub fn DateTime::begin_of_year(Self) -> Self
+pub fn DateTime::compare(Self, Self) -> Int
+pub fn DateTime::end_of_day(Self) -> Self
+pub fn DateTime::end_of_month(Self) -> Self
+pub fn DateTime::end_of_quarter(Self) -> Self
+pub fn DateTime::end_of_year(Self) -> Self
+pub fn DateTime::equal(Self, Self) -> Bool
+pub fn DateTime::format(Self, String) -> String raise DateError
+pub fn DateTime::from_epoch_millis(Int64, Int) -> Self
+pub fn DateTime::not_equal(Self, Self) -> Bool
+pub fn DateTime::of(Date, Int, Int, Int, Int) -> Self raise DateError
+pub fn DateTime::op_ge(Self, Self) -> Bool
+pub fn DateTime::op_gt(Self, Self) -> Bool
+pub fn DateTime::op_le(Self, Self) -> Bool
+pub fn DateTime::op_lt(Self, Self) -> Bool
+pub fn DateTime::parse(String, String) -> Self raise DateError
+pub fn DateTime::to_epoch_millis(Self, Int) -> Int64
+pub fn DateTime::to_iso_string(Self) -> String
+
+pub(all) enum TimeUnit {
+  Millisecond
+  Second
+  Minute
+  Hour
+  Day
+  Week
+}
+pub fn TimeUnit::to_millis(Self) -> Int64
 
 // Type aliases
 

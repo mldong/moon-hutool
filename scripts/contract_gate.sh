@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# moon-hutool 契约门禁 G1~G8
+# moon-hutool 契约门禁 G1~G12
 #
 # 原则：每条判据都必须"真跑过且敢报红"。凡当前环境跑不了的项，显式打 SKIP + 理由，
 # 绝不伪装成 PASS（恒绿但没测的套件比红灯更危险）。
@@ -16,7 +16,7 @@ ok()  { echo "  PASS $*"; }
 bad() { echo "  FAIL $*"; FAILS=$((FAILS+1)); }
 skip(){ echo "  SKIP $*"; SKIPS=$((SKIPS+1)); }
 GATE_TARGETS="${GATE_TARGETS:-wasm js}"
-BASELINE_TESTS="${BASELINE_TESTS:-37}"
+BASELINE_TESTS="${BASELINE_TESTS:-84}"
 
 echo "== G1 零依赖（moon tree 无第三方节点 + moon.mod 无 deps）=="
 if tree_json=$(moon tree --json 2>/dev/null) && [ -n "$tree_json" ]; then
@@ -134,6 +134,41 @@ else
   bad "状态句与当场读数不一致（见下）："; sed -n '1,12p' /tmp/mh_status.log | sed 's/^/    /'
 fi
 
+
+echo "== G12 骨架豁免棘轮（只有还没实现的包才许压掉那三类警告）=="
+# 契约骨架期的包，函数体全是 abort ⇒ 类型没人构造、错误变体没人构造、签名写了 raise 而体里没 raise。
+# 这三类警告是"未实现"的机械后果，只能在骨架期用 moon.pkg 的 warnings 豁免。
+# 合法性判据取**函数体还是不是 abort**，不取"用例绿没绿"——后者要再跑一遍逐包测试，慢且与 G11 重复。
+skel_check() {  # $1 = 待查目录；打印违规的包（无输出即无违规）
+  python - "$1" <<'PYEOF'
+import glob, io, os, sys
+root = sys.argv[1]
+bad = []
+for pkg in sorted(glob.glob(os.path.join(root, "*", "moon.pkg"))):
+    d = os.path.dirname(pkg)
+    lines = io.open(pkg, encoding="utf-8", errors="replace").read().splitlines()
+    live = [l for l in lines if l.strip().startswith("warnings")]
+    if not live:
+        continue
+    bodies = [f for f in glob.glob(os.path.join(d, "*.mbt"))
+              if not f.endswith(("_test.mbt", "_wbtest.mbt"))]
+    still_abort = any('abort("moon-hutool' in io.open(f, encoding="utf-8", errors="replace").read()
+                      for f in bodies)
+    if not still_abort:
+        bad.append(os.path.relpath(pkg, root))
+print(" ".join(bad))
+PYEOF
+}
+viol=$(skel_check .)
+if [ -z "$viol" ]; then ok "在用的 warnings 豁免都对应还没实现的包"; else bad "实现已落地却还压着骨架豁免：$viol"; fi
+# 阳性对照：造一个"体里已无 abort 却仍带豁免"的假包，必须被抓到
+fx=$(mktemp -d ./_g12_fixture_XXXXXX 2>/dev/null || echo ./_g12_fixture)
+mkdir -p "$fx/fakepkg"
+printf 'warnings = "-unused_constructor"\n' > "$fx/fakepkg/moon.pkg"
+printf 'pub fn a() -> Int { 1 }\n' > "$fx/fakepkg/a.mbt"
+caught=$(skel_check "$fx")
+rm -rf "$fx"
+[ -n "$caught" ] && ok "阳性对照正常（假包的豁免被抓到：$caught）" || bad "G12 自身失效：坏样本没抓到，这条判据不可信"
 
 echo
 if [ "$FAILS" = "0" ]; then

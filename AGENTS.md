@@ -58,6 +58,8 @@ You can browse and install extra skills here:
 
 一个包的交付拆两笔：**PR-A 契约**（`docs/spec/NN-<pkg>.md` + 签名骨架 + `.mbti` + 期望值已冻结的用例，函数体 `abort`）→ **PR-B 实现**（只许把红变绿）。
 PR-A 的合入标准：`moon check` 必须全绿（签名与类型自洽、文档块能编），`moon test` **允许红**。
+"全绿"这一条在骨架期要靠 `moon.pkg` 里一行 `warnings` 豁免才做得到（体全 `abort` ⇒ 类型/变体没人构造那三类警告必响），
+豁免的合法边界由门禁 **G12** 守：体里已无 `abort` 却还压着豁免就报红——绝不为消警告去写假实现。
 
 ### 与 core 的边界：只包语义层，不写转发层
 
@@ -83,6 +85,24 @@ PR-A 的合入标准：`moon check` 必须全绿（签名与类型自洽、文�
 - `\u{...}` 只在 char 字面量合法，写进字符串会成插值 ⇒ `Lexing error: missing expression in string interpolation`。
 - `Array<StringView?>` 这种尖括号内的可选类型解析失败 ⇒ 用 `Array[Option[String]]`。
 - 骨架函数体里 `let _ = (a, b)` 是消 `unused_value` 警告的必要动作（零警告是门禁），实现落地后随函数体消失。
+  但**方法**的参数标注不能顺手写进 `let _ = (...)`：`(self : Self, days)` 是非法语法（`Parse error, unexpected token :`）。
+- **方法上的 `self` 必须显式标注** `self : Self`：骨架体里不用 self 时编译器推不出类型（`Missing type annotation for the parameter self`）。
+- **`pub struct` 跨包只读、不可构造**（判 `Cannot create values of the read-only type`），这正好当"构造闸门"；
+  但 **`pub enum` 的变体也因此构造不出来** ⇒ 要交给调用方当参数的枚举必须 `pub(all) enum`（本库 `TimeUnit` 就是这么改的）。
+- **`derive(Show)` 已废弃**（用 `derive(@debug.Debug)` 或手写 `impl Show`）；`derive(Eq, Compare)` 可用，
+  但本版会把实现的方法**隐式提升成同名方法**并报 `implicit_impl_as_method` 警告 ⇒ 必须补显式 `extend`
+  （形状抄 `moonbitlang/core/argparse/extends.mbt`，单独放 `extends.mbt`）。`suberror` 变体只收**位置参数**
+  （`DayOutOfRange(Int, Int, Int)` 合法，`DayOutOfRange(month : Int, …)` 判词法错）；`raise` 不要求额外 `impl Error`。
+- **带效果标注的函数参数类型要写成 `()` 而不是 `Unit`**：`f : () -> A raise E` 合法，
+  `f : Unit -> A raise E` 会被读成"参数是 Unit"（`has type: function type, wanted: Unit`）。
+  泛型写在 `fn` 上：`fn[A] shape(...)`，不是 `fn shape[A](...)`。文档块里的带标注闭包同形：
+  `let show : (String) -> String = (s) => { ... }`（`let show = (s : String) -> String { ... }` 判 `s is unbound`）。
+- **`moon.pkg` 的 `warnings` 键只能出现一次、值只能是字符串**，多个 flag 要**连写不加空格/逗号**：
+  `warnings = "-struct_never_constructed-unused_constructor-unused_error_type"`（写成空格或逗号分隔会被 moonc 打回Usage）。
+- **骨架期的三类警告只能就地豁免，且有棘轮**：契约骨架（体全 `abort`）必然触发
+  `struct_never_constructed` / `unused_constructor` / `unused_error_type`——它们是"未实现"的机械后果，
+  为消警告去写假实现才是本末倒置。豁免只允许出现在**体里还有 `abort`** 的包（门禁 **G12**，带阳性对照），
+  实现落地那一笔必须删掉 `warnings` 行。
 - 用例首选 `assert_eq`；`inspect` 对集合走 `Show` 会吃废弃警告（core 立场：结果确定的用例用断言）。
 - `moon.mod` 是 TOML：注释用 `#`，`//` 会解析失败；`moon fmt` 会把 `[]` 写成 `[ ]`，改字段前先跑 fmt。
 

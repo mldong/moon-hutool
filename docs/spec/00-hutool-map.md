@@ -6,7 +6,7 @@
 - **本库补** —— 本库提供，且标明补的是哪类：① hutool 契约形状 / ② 环境显式化 / ③ 分散入口收成可测出口
 - **不做** —— JVM 特性、FFI、或明确不承诺（理由见文末与 `AGENTS.md`）
 
-包名 ↔ 相位见 `AGENTS.md` 的路线表；已定契约的包：`01-text.md`、`05-digest.md`。
+包名 ↔ 相位见 `AGENTS.md` 的路线表；已定契约的包：`01-text.md`、`02-date.md`、`05-digest.md`（编号按交付顺序：01 text、02 date、03 id、04 rand、05 digest）。
 
 ## 1. 字符串（hutool `StrUtil` / `CharSequenceUtil`，实测 1838 非注释行）
 

@@ -1,1 +1,15 @@
-// 依赖在此声明；占位期不 import 任何 core 包（未使用的 import 会吃 unused_package 警告并卡零警告门禁）
+// 依赖在此声明（骨架期不 import 任何 core 包：未使用的 import 会吃 unused_package 警告并卡零警告门禁）。
+import {
+  "mldong/moon-hutool/date",
+} for "test"
+
+// 这三条警告豁免**只属于契约骨架期**：函数体全是 `abort`，所以
+// - `struct_never_constructed`（`Date`/`DateTime` 还没人构造）
+// - `unused_constructor`（`DateError`/`TimeUnit` 的各变体还没人构造）
+// - `unused_error_type`（签名写了 `raise DateError`，体里还没 `raise`）
+// 三类全是"未实现"的机械后果，不是代码缺陷。零警告是门禁，故在此豁免，而不是为了消警告去写假实现。
+//
+// ⚠ 实现落地（PR-B）时必须删掉这一行——那时这三类若还响就是真死码。
+// 门禁 G12 拦这件事：豁免只允许出现在**函数体还是 `abort`** 的包里——体里已经没有 `abort` 了却还压着豁免，当场报红（这条带阳性对照）。
+
+warnings = "-struct_never_constructed-unused_constructor-unused_error_type"
