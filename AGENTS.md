@@ -96,8 +96,13 @@ PR-A 的合入标准：`moon check` 必须全绿（签名与类型自洽、文�
 - **带效果标注的函数参数类型要写成 `()` 而不是 `Unit`**：`f : () -> A raise E` 合法，
   `f : Unit -> A raise E` 会被读成"参数是 Unit"（`has type: function type, wanted: Unit`）。
   泛型参数要紧跟 `fn` 关键字（写作 `fn[A] shape(...)`）；把 `[A]` 放在函数名后面判词法错
-  （`Parse error, unexpected `fn f[T]`, you may expect `fn[T] f``）。文档块里的带标注闭包同形：
+  （编译器原文：Parse error, unexpected fn f[T], you may expect fn[T] f）。文档块里的带标注闭包同形：
   `let show : (String) -> String = (s) => { ... }`（`let show = (s : String) -> String { ... }` 判 `s is unbound`）。
+- **native 档的测试驱动不兜 `panic`/`abort`**：一个红用例（骨架期函数体就是 `abort`）会把整个测试
+  可执行文件打到 `SIGABRT (core dumped)`，**拿不到 `Total tests:` 汇总**（CI 实测：wasm/js/wasm-gc 三档
+  都是 84 条正常报数，native 档 collected=0）。所以"某档一条红都没报出来"不等于"那档没套件"——
+  先分清是编不过、被 abort 打死、还是真丢了用例。CI 对该档的例外判据三条同时成立才生效，见
+  `.github/workflows/ci.yml`。
 - **`moon.pkg` 的 `warnings` 键只能出现一次、值只能是字符串**，多个 flag 要**连写不加空格/逗号**：
   `warnings = "-struct_never_constructed-unused_constructor-unused_error_type"`（写成空格或逗号分隔会被 moonc 打回Usage）。
 - **骨架期的三类警告只能就地豁免，且有棘轮**：契约骨架（体全 `abort`）必然触发
