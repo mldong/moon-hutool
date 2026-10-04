@@ -75,7 +75,7 @@ fn demo() {
 export MOON_HOME=<moon 工具链目录>   # Git Bash 下用 /g/ 之类 POSIX 盘符写法
 moon check --target wasm && moon test --target wasm
 moon info && moon fmt                # .mbti 是公开接口，diff 即 API 变更评审面
-scripts/contract_gate.sh             # G1~G9 十条判据
+scripts/contract_gate.sh             # G1~G10 十条判据
 ```
 
 约定见 [`AGENTS.md`](https://github.com/mldong/moon-hutool/blob/master/AGENTS.md)。
