@@ -46,7 +46,7 @@
 | `union/intersection/disjunction/subtract` | `HashSet::{union,intersection,difference,symmetric_difference}`（**只在集合类型上**，`Array`/`List`/`Iter` 一个都没有） | ③ `coll` 的数组形态三件：`union`/`intersection` 去重、`subtract` **保留左侧重复** | `disjunction` 不做（`Set::symmetric_difference` 已有，保序版需求没到） |
 | `LinkedHashMap`（插入序） | **`Map` 本身就是插入序**（Robin Hood + 链表，`builtin/LinkedHashMap.mbt.md`） | — | 不另造 LinkedHashMap |
 | `sortByProperty/sortByPinyin` | 无（依赖反射/`Collator`） | — | **不做**（无反射、无拼音表） |
-| `Table`（二维表）/`BiMap`/`CaseInsensitiveMap`/多值 Map | 无（`Map` 只有一层键） | ③ `mapx`（P2） | — |
+| `Table`（二维表）/`BiMap`/`CaseInsensitiveMap`/多值 Map | 无（`Map` 只有一层键，且 `contains_kv` 不能反查值） | ③ `mapx` 已交付：`BiMap`（双向唯一，撞值整次不生效 + 显式 `force_put`）、`CiMap`（ASCII 折叠、原样键取首次写入）、`Table`（行列双索引、列向顺序跟 `rows()`、删到空连行列键一起摘）、`filter_map`/`rename_key` | 多值 Map 不做（`Map[K, Array[V]]` 加两行就是，再包一层是第二个名字）；`ForestMap`/`TableMap` 扁平行视图/并发 Map 不做，理由见 `07-mapx.md` §9 |
 | `MapProxy`（Bean 视图） | 无（`java.lang.reflect.Proxy`） | — | **不做**，走 `derive(ToJson/FromJson)` 或手写映射 |
 
 ## 4. 日期时间（`DateUtil` 859 行 —— core 零 time，本库最大"从无到有"块）
