@@ -8,9 +8,5 @@ import {
 // `struct_never_constructed`）已随实现落地整行删除——门禁 G12 查的就是
 // "体里已无 `abort` 却还压着豁免"，那时这四类再响就是真死码。
 
-// 第二批（Table）回到骨架期，四条豁免重新挂上：`MapError` 那三个变体已有人在构造，
-// 但 Table 的方法体还是 `abort` ⇒ `unused_error_type` 不响了（Table 不 raise），
-// 而 `struct_never_constructed`（Table 没被构造）与 `unused_trait_bound`（界在体里没用上）会响。
-// Table 实现落地那一笔整行删——门禁 G12 拦着不让忘。
-
-warnings = "-unused_trait_bound-struct_never_constructed"
+// Table 落地后第二批的骨架豁免（`unused_trait_bound`/`struct_never_constructed`）也整行删除——
+// G12 查的就是「体里已无 `abort` 却还压着豁免」。

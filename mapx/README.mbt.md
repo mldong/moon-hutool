@@ -4,8 +4,8 @@ hutool `MapUtil` 家族与 `BiMap` / `CaseInsensitiveMap` 的 MoonBit 对位：�
 
 完整边界矩阵与逐条读数来源见 [`docs/spec/07-mapx.md`](https://github.com/mldong/moon-hutool/blob/master/docs/spec/07-mapx.md)。
 
-> 状态：**分两批**。第一批（`BiMap`/`CiMap`/`Map` 两个组合件，28 个公开项）已落地，下面相关块的读数都是当场跑的；
-> **第二批 `Table` 此刻是契约骨架**，它那几个块的读数红是设计态。三档（wasm / js / wasm-gc）口径一致。
+> 状态：**两批都已落地**（10-05）——第一批 28 个公开项（`BiMap`/`CiMap`/两个组合件）与第二批 `Table` 都实现完，
+> 下面每个块的读数都是当场跑出来的，三档（wasm / js / wasm-gc）一致。
 > 期望串受"期望值冻结"约束：改任何期望须单独一笔并给外部读数来源（门禁 G5）。
 > `Table`（二维表）自成一块，另起第二批。
 

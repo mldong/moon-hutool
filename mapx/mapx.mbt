@@ -432,7 +432,7 @@ pub struct Table[R, C, V] {
 ///
 /// - Note: 两张索引的键都要 `Hash + Eq`——`Map([])` 字面量与 `Set([])` 就要键有界（界是契约的一部分）
 pub fn[R : Hash + Eq, C : Hash + Eq, V] Table::new() -> Table[R, C, V] {
-  abort("moon-hutool: mapx.Table::new 未实现（spec 07-mapx #7.12）")
+  { rows: Map([]), cols: Map([]), }
 }
 
 ///|
@@ -442,8 +442,12 @@ pub fn[R : Hash + Eq, C : Hash + Eq, V] Table::new() -> Table[R, C, V] {
 pub fn[R : Hash + Eq, C : Hash + Eq, V] Table::of(
   cells : Array[(R, C, V)],
 ) -> Table[R, C, V] {
-  let _ = cells
-  abort("moon-hutool: mapx.Table::of 未实现（spec 07-mapx #7.18）")
+  let t : Table[R, C, V] = Table::new()
+  for (r, c, v) in cells {
+    // 逐条走 put：合并语义只有一套，不给第二份「同格谁胜」的答案
+    let _ = t.put(r, c, v)
+  }
+  t
 }
 
 ///|
@@ -458,10 +462,14 @@ pub fn[R : Hash + Eq, C : Hash + Eq, V] Table::put(
   column : C,
   value : V,
 ) -> V? {
-  let _ = self.rows
-  let _ = self.cols
-  let _ = (row, column, value)
-  abort("moon-hutool: mapx.Table::put 未实现（spec 07-mapx #7.13）")
+  let row_map = self.rows.get_or_init(row, () => Map([]))
+  let old = row_map.get(column)
+  if old is None {
+    // 只有新格才追加列索引：覆盖已有格什么都不挪（行序、列序、size 都不动）
+    self.cols.get_or_init(column, () => Set([])).add(row)
+  }
+  row_map.set(column, value)
+  old
 }
 
 ///|
@@ -471,10 +479,10 @@ pub fn[R : Hash + Eq, C : Hash + Eq, V] Table::get(
   row : R,
   column : C,
 ) -> V? {
-  let _ = self.rows
-  let _ = self.cols
-  let _ = (row, column)
-  abort("moon-hutool: mapx.Table::get 未实现（spec 07-mapx #7.12）")
+  match self.rows.get(row) {
+    Some(row_map) => row_map.get(column)
+    None => None
+  }
 }
 
 ///|
@@ -488,10 +496,29 @@ pub fn[R : Hash + Eq, C : Hash + Eq, V] Table::remove(
   row : R,
   column : C,
 ) -> V? {
-  let _ = self.rows
-  let _ = self.cols
-  let _ = (row, column)
-  abort("moon-hutool: mapx.Table::remove 未实现（spec 07-mapx #7.16）")
+  let row_map = match self.rows.get(row) {
+    Some(m) => m
+    None => return None
+  }
+  let gone = match row_map.get(column) {
+    Some(v) => v
+    None => return None
+  }
+  let _ = row_map.remove(column)
+  if row_map.length() == 0 {
+    // 空行不留：`rows()`、`size()`、`row()` 三处读数才不会各说各话
+    let _ = self.rows.remove(row)
+  }
+  match self.cols.get(column) {
+    Some(rows_of_col) => {
+      rows_of_col.remove(row)
+      if rows_of_col.length() == 0 {
+        let _ = self.cols.remove(column)
+      }
+    }
+    None => ()
+  }
+  Some(gone)
 }
 
 ///|
@@ -501,10 +528,10 @@ pub fn[R : Hash + Eq, C : Hash + Eq, V] Table::contains(
   row : R,
   column : C,
 ) -> Bool {
-  let _ = self.rows
-  let _ = self.cols
-  let _ = (row, column)
-  abort("moon-hutool: mapx.Table::contains 未实现（spec 07-mapx #7.12）")
+  match self.rows.get(row) {
+    Some(row_map) => row_map.contains(column)
+    None => false
+  }
 }
 
 ///|
@@ -516,9 +543,7 @@ pub fn[R : Hash + Eq, C, V] Table::contains_row(
   let _ = self.rows
   let _ = self.cols
   let _ = row
-  abort(
-    "moon-hutool: mapx.Table::contains_row 未实现（spec 07-mapx #7.17）",
-  )
+  self.rows.contains(row)
 }
 
 ///|
@@ -530,9 +555,7 @@ pub fn[R, C : Hash + Eq, V] Table::contains_column(
   let _ = self.rows
   let _ = self.cols
   let _ = column
-  abort(
-    "moon-hutool: mapx.Table::contains_column 未实现（spec 07-mapx #7.17）",
-  )
+  self.cols.contains(column)
 }
 
 ///|
@@ -544,9 +567,14 @@ pub fn[R, C, V : Eq] Table::contains_value(
   let _ = self.rows
   let _ = self.cols
   let _ = value
-  abort(
-    "moon-hutool: mapx.Table::contains_value 未实现（spec 07-mapx #7.17）",
-  )
+  // 值不建第三张索引（spec §10 的明码取舍）：这一档就是 O(格数) 遍历
+  let mut found = false
+  self.rows.each((_, row_map) => {
+    if !found {
+      row_map.each((_, v) => if v == value { found = true })
+    }
+  })
+  found
 }
 
 ///|
@@ -557,10 +585,10 @@ pub fn[R : Hash + Eq, C : Hash + Eq, V] Table::row(
   self : Table[R, C, V],
   row : R,
 ) -> Map[C, V] {
-  let _ = self.rows
-  let _ = self.cols
-  let _ = row
-  abort("moon-hutool: mapx.Table::row 未实现（spec 07-mapx #7.15）")
+  match self.rows.get(row) {
+    Some(row_map) => row_map.copy()
+    None => Map([])
+  }
 }
 
 ///|
@@ -569,34 +597,37 @@ pub fn[R : Hash + Eq, C : Hash + Eq, V] Table::column(
   self : Table[R, C, V],
   column : C,
 ) -> Map[R, V] {
-  let _ = self.rows
-  let _ = self.cols
-  let _ = column
-  abort("moon-hutool: mapx.Table::column 未实现（spec 07-mapx #7.15）")
+  // 沿 `rows()` 的序扫：列向读出来的键序就是行序，与「行序 = 首次写入该行」同一条口径
+  let out : Map[R, V] = Map([])
+  self.rows.each((r, row_map) => {
+    match row_map.get(column) {
+      Some(v) => {
+        let _ = out.set(r, v)
+      }
+      None => ()
+    }
+  })
+  out
 }
 
 ///|
 /// 行键序列：**按首次写入该行的顺序**（core `Map` 保插入序，Java 那侧无从承诺）
 pub fn[R, C, V] Table::rows(self : Table[R, C, V]) -> Array[R] {
-  let _ = self.rows
-  let _ = self.cols
-  abort("moon-hutool: mapx.Table::rows 未实现（spec 07-mapx #7.14）")
+  self.rows.keys().to_array()
 }
 
 ///|
 /// 列键序列：**按首次写入该列的顺序**（与行序无关——`put` 一个新列时追加到末尾）
 pub fn[R, C, V] Table::columns(self : Table[R, C, V]) -> Array[C] {
-  let _ = self.rows
-  let _ = self.cols
-  abort("moon-hutool: mapx.Table::columns 未实现（spec 07-mapx #7.14）")
+  self.cols.keys().to_array()
 }
 
 ///|
 /// 格数，**不是行×列**：稀疏表里有几格就是几
 pub fn[R, C, V] Table::size(self : Table[R, C, V]) -> Int {
-  let _ = self.rows
-  let _ = self.cols
-  abort("moon-hutool: mapx.Table::size 未实现（spec 07-mapx #7.12）")
+  let mut n = 0
+  self.rows.each((_, row_map) => n = n + row_map.length())
+  n
 }
 
 ///|
@@ -605,15 +636,15 @@ pub fn[R, C, V] Table::size(self : Table[R, C, V]) -> Int {
 /// - Note: 这一件取代 hutool 的 `cellSet()` 与 `forEach(Consumer3)`——给一个可断言的数组，
 ///   而不是两种遍历姿势
 pub fn[R, C, V] Table::to_cells(self : Table[R, C, V]) -> Array[(R, C, V)] {
-  let _ = self.rows
-  let _ = self.cols
-  abort("moon-hutool: mapx.Table::to_cells 未实现（spec 07-mapx #7.19）")
+  // 行优先展开：外层按 `rows()`，行内按该行首次写入的列序
+  let out : Array[(R, C, V)] = []
+  self.rows.each((r, row_map) => row_map.each((c, v) => out.push((r, c, v))))
+  out
 }
 
 ///|
 /// 清空成一张空表（两张索引一起清，键序也随之作废）
 pub fn[R, C, V] Table::clear(self : Table[R, C, V]) -> Unit {
-  let _ = self.rows
-  let _ = self.cols
-  abort("moon-hutool: mapx.Table::clear 未实现（spec 07-mapx #7.18）")
+  self.rows.clear()
+  self.cols.clear()
 }

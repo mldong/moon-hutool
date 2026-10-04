@@ -1,8 +1,7 @@
 # 契约 07 · mapx（Map 的组合件）
 
-> 状态：**分两批**。第一批（§3~§5 的 `BiMap`/`CiMap`/`Map` 组合件）已随 `01257bc` 落地，16 条期望值
-> 一字未改地从红变绿（唯一一处期望改动是契约期我写反的 `中文-a`，单独走 `d61524e`）；
-> **§10 是第二批 `Table` 的契约，此刻尚未落地**（方法体走 `abort`，新增 11 条用例的红是设计态）。
+> 状态：**契约与实现两笔都交完**（10-05，两批都落地）。第一批 16 条与第二批 `Table` 11 条期望值
+> 都是一字未改地从红变绿（唯一一处期望改动是契约期我写反的 `中文-a`，单独走 `d61524e`）。
 > 公开接口在 `mapx/pkg.generated.mbti`，期望值在 `mapx/mapx_test.mbt`、`mapx/table_test.mbt` 与 `mapx/README.mbt.md`。
 > 改任何期望串须单独一笔并给外部读数来源（门禁 G5）。
 >
@@ -118,7 +117,7 @@ new of remove retain set to_array to_json update update_or_default values`
 
 | 格子 | 结论 | 依据 |
 |---|---|---|
-| `Table`（二维表）、`TableMap` | **第二批已定契约，见 §10**（实现待下一笔） | 行列双索引 + 一张网格是第三种形状，混进第一批会让两边各自承诺的东西看不清 |
+| `Table`（二维表） | **第二批已交付，见 §10**；`TableMap`（Java 那侧的 `Map<Cell,V>` 扁平行视图）不做 | 行列双索引 + 一张网格是第三种形状，混进第一批会让两边各自承诺的东西看不清 |
 | `ForestMap`/`LinkedForestMap`（树形键空间）、`MultiValueMap`、`MergeMap`、`FixedLinkedHashMap`、`ReferenceConcurrentMap`/`SafeConcurrentHashMap` | **不做 / 排后** | 树形与多值各自是一整块语义；并发档需要运行时并发能力，与零依赖契约（全同步）结构冲突 |
 | `MapProxy`/`MapBuilder`/`CamelCaseMap` | **不做** | 反射动态代理做不到（AGENTS 的 core 边界条）；builder 在同步无 null 的写法里就是 `Map([...])`；驼峰/下划线键转换属 `text` 的 `NamingCase`，已在 text 交付 |
 | Unicode 大小写折叠（`İ`/`ı` 这类非 ASCII 一对一特例） | **不做** | 要码表；本库折叠只覆盖 ASCII，非 ASCII 原样（§4） |
