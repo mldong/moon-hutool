@@ -22,7 +22,7 @@
 | `id` | `IdUtil`（雪花 / UUID v3·v4 / ObjectId / NanoId） | **已实现**（10-05，32 条全绿，wasm / js / wasm-gc 三档读数一致，native 档由 CI 出证） | `docs/spec/04-id.md` | 32 条（22 断言块 + 10 文档块），全绿；时钟与熵全显式注入，**v5 待 `digest` 的 SHA-1**（hutool 本身无 v5） |
 | `codec` | `Base64`(url-safe·MIME·宽松解码) / `Base32` / `Base58`(含 Check) / `Base62` / `RadixUtil` / `x-www-form-urlencoded` / `UrlBuilder` | **已实现**（10-05 两批全落地，37 条全绿，wasm / js / wasm-gc 三档读数一致，`.mbti` 零漂移） | `docs/spec/05-codec.md` | 38 条（25 断言块 + 13 文档块）全绿；读数走 RFC 4648 §10 向量 + 两套独立实现互算（Base58/62 无 RFC），form 档以 HTML 序列化器 ↔ Node `URLSearchParams` 双路互算、URL 档以 RFC 3986 §3/§5.2.4/§6.2.2 加 Python `urlsplit` 对跑；`BCD` 判**不做**（上游已 `@Deprecated`、语义即 core hex），§5.2.2 引用解析与 IDN 另批 |
 | `coll` | `CollUtil` / `ListUtil` / `IterUtil` 的高频子集 | **已实现**（10-05，16 条全绿，wasm / js / wasm-gc 三档读数一致，`.mbti` 零漂移） | `docs/spec/06-coll.md` | 16 条（11 断言块 + 5 文档块）全绿；core `Array` 对外可写的方法几十条量级、扫描口径写在 spec §1（`chunks`/`dedup`/`flatten`/`zip`/`join`/`sort_by_key`/`shuffle`/`search_by` 全都有），本包只补**读源码数出来的缺口**：分组、两桶划分、保序去重与按键去重、频次表、分页、数组版并/交/差、`Array` 上的极值与按键极值；对拍腿三条（`distinct`↔`dedup`、`page`↔`chunks`、`maximum`↔`Iter::maximum`）；`index_where` 那种"找不到返 `-1`"的哨兵**不做**（core `search_by` 给 `Int?`） |
-| `mapx` | `MapUtil` / `Table`(二维表) / `BiMap` / `CaseInsensitiveMap` | 未开工 | — | `Map` 本身已保插入序，不再造 LinkedHashMap |
+| `mapx` | `MapUtil` / `Table`(二维表) / `BiMap` / `CaseInsensitiveMap` | **契约已冻结**（10-05 第一批，16 条红是设计态） | `docs/spec/07-mapx.md` | 16 条（11 断言块 + 5 文档块）；边界现读 core 得出：`Map` **本身就是插入序**（32 条公开面里有 `of/new/merge/retain/update_or_default/get_or_init/keys/values/to_array`）⇒ 不再造 LinkedHashMap、一个都不重新包装；补的只有 `BiMap`（双向唯一，`put` 撞值**整次不生效** + 显式 `force_put`）、`CiMap`（折叠只覆盖 ASCII，原样键取首次写入）、`filter_map`、`rename_key`（新键落末尾、不改输入、`old == new` 不自删）。三条"不跟随 hutool"都有源码级依据（`BiMap.put` 会让双向索引不一致；`renameKey` 原地改且 `old == new` 时把条目自己删掉）。`Table` 另起第二批 |
 | `num` | `NumberUtil` / `NumberChineseFormatter` / `MathUtil` / `Calculator` / `Money`(薄) | 未开工 | — | 含 core 缺的 `gcd/lcm/ext_gcd/mod_inverse` |
 | `conv` | `Convert`（无反射版） | 未开工 | — | `Json`→类型显式 `match` + 注册闭包 |
 | `re` | `ReUtil` / `PatternPool` / `RegexPool` | 未开工 | — | **core 有公开 `Regex`**（prelude 导出），本包只做语法糖与常量表 |
@@ -47,8 +47,9 @@
 <!-- READINGS:BEGIN 由 scripts/sync_status.py 生成，勿手改 -->
 | 读数（`moon test --target wasm`，当场跑） | 值 |
 |---|---|
-| 用例总数 | **172** —— 绿 172 / 红 0 |
-| 包状态 | 共 23 个：`已实现` 6 · `契约已冻结` 0 · `未开工` 17 |
+| 用例总数 | **188** —— 绿 172 / 红 16 |
+| 包状态 | 共 23 个：`已实现` 6 · `契约已冻结` 1 · `未开工` 16 |
+| 红的是谁 | `mapx`（16 红） —— 未实现的包红是设计态 |
 <!-- READINGS:END -->
 
 | 项 | 值 |

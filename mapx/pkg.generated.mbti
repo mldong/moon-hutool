@@ -2,10 +2,48 @@
 package "mldong/moon-hutool/mapx"
 
 // Values
+pub fn[K : Hash + Eq, A, B] filter_map(Map[K, A], (K, A) -> B?) -> Map[K, B]
+
+pub fn[K : Hash + Eq, V] rename_key(Map[K, V], K, K) -> Map[K, V] raise MapError
 
 // Errors
+pub suberror MapError {
+  ValueConflict
+  KeyAlreadyExists
+}
 
 // Types and methods
+pub struct BiMap[K, V] {
+  forward : Map[K, V]
+  backward : Map[V, K]
+}
+pub fn[K : Hash + Eq, V] BiMap::contains_key(Self[K, V], K) -> Bool
+pub fn[K, V : Hash + Eq] BiMap::contains_value(Self[K, V], V) -> Bool
+pub fn[K : Hash + Eq, V : Hash + Eq] BiMap::force_put(Self[K, V], K, V) -> K?
+pub fn[K : Hash + Eq, V] BiMap::get(Self[K, V], K) -> V?
+pub fn[K, V : Hash + Eq] BiMap::get_key(Self[K, V], V) -> K?
+pub fn[K : Hash + Eq, V : Hash + Eq] BiMap::inverse(Self[K, V]) -> Self[V, K]
+pub fn[K, V] BiMap::keys(Self[K, V]) -> Array[K]
+pub fn[K, V] BiMap::length(Self[K, V]) -> Int
+pub fn[K, V] BiMap::new() -> Self[K, V]
+pub fn[K : Hash + Eq, V : Hash + Eq] BiMap::of(Array[(K, V)]) -> Self[K, V] raise MapError
+pub fn[K : Hash + Eq, V : Hash + Eq] BiMap::put(Self[K, V], K, V) -> V? raise MapError
+pub fn[K : Hash + Eq, V] BiMap::remove(Self[K, V], K) -> V?
+pub fn[K, V] BiMap::to_pairs(Self[K, V]) -> Array[(K, V)]
+pub fn[K, V] BiMap::values(Self[K, V]) -> Array[V]
+
+pub struct CiMap[V] {
+  slots : Map[String, (String, V)]
+}
+pub fn[V] CiMap::contains(Self[V], String) -> Bool
+pub fn[V] CiMap::get(Self[V], String) -> V?
+pub fn[V] CiMap::get_key_of(Self[V], String) -> String?
+pub fn[V] CiMap::keys(Self[V]) -> Array[String]
+pub fn[V] CiMap::length(Self[V]) -> Int
+pub fn[V] CiMap::new() -> Self[V]
+pub fn[V] CiMap::put(Self[V], String, V) -> V?
+pub fn[V] CiMap::remove(Self[V], String) -> V?
+pub fn[V] CiMap::to_map(Self[V]) -> Map[String, V]
 
 // Type aliases
 

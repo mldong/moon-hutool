@@ -158,6 +158,17 @@ PR-A 的合入标准：`moon check` 必须全绿（签名与类型自洽、文�
 - **`Array::clamped_view` 的 `start`/`end` 是带标签可选参**：按位置传判
   `requires 1 positional arguments, but is given 3` ⇒ 写 `xs.clamped_view(start = s, end = e)`。
   它把越界自然夹空，"越界给空数组"这类契约可以直接交给它，不必自己写边界分支。
+- **泛型 `suberror` 在 moonc v0.10.14 不支持**：最小样本 `pub suberror E[K] { Conflict(K) }` 判
+  `Parse error, unexpected token '['`（落在声明收尾处）。⇒ 错误面要么不带载荷，要么带固定类型；
+  别为"错误里夹一个泛型读数"设计整套 `MapError[K]`。
+- **泛型结构体的方法必须写全 `Self` 的参数**：`pub fn[K, V] BiMap::get(self : Self, ...)` 判
+  `The type constructor Self expects 2 argument(s), but is here given 0` ⇒ 写 `self : BiMap[K, V]`。
+- **未使用的类型参数是 4027 错误，不是警告**——`warnings` 豁免串压不住它。⇒ 骨架期（体全是 `abort`）的
+  泛型方法必须**碰一下字段**把参数用起来：`let _ = self.forward`。而 `struct_never_constructed`
+  只是警告，可以进豁免串。两类错误的分界要写进 `moon.pkg` 注释。
+- `Map` 的字面量构造写 **`Map([("a", 1), ("b", 2)])`**。别去点 `Map.of([...])`：一来 `src.of` 判
+  `has no method of`，二来按函数形式调判 `Function with labelled arguments can only be applied directly`
+  （`of` 那一档是有标签参的构造函数，不能按位置传）。同一份代码里 `Map::new()` 也可用（`new` 无标签参）。
 - 用例首选 `assert_eq`；`inspect` 对集合走 `Show` 会吃废弃警告（core 立场：结果确定的用例用断言）。
 - `moon.mod` 是 TOML：注释用 `#`，`//` 会解析失败；`moon fmt` 会把 `[]` 写成 `[ ]`，改字段前先跑 fmt。
 
