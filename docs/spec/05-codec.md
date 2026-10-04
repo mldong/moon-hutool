@@ -1,8 +1,9 @@
 # 契约 05 · codec（编码解码）
 
-> 状态：**已实现**（10-05）——24 条用例全绿，wasm / js / wasm-gc 三档读数一致，native 档由 CI 出证，
-> 且 `moon info` 后 **`.mbti` 零漂移**（实现没动任何公开签名）。实现在 `codec/codec.mbt`，
-> 公开接口在 `codec/pkg.generated.mbti`，期望值在 `codec/codec_test.mbt` 与 `codec/README.mbt.md`。
+> 状态：**分两批**。§2~§6（第一批）的实现已随 10-05 那轮落地，三档（wasm / js / wasm-gc）读数一致、
+> `moon info` 后 `.mbti` 零漂移；**§7~§8 是本包第二批契约，此刻尚未落地**（新增函数体走 `abort`，
+> 第二批用例的红是设计态）。实现在 `codec/codec.mbt`，公开接口在 `codec/pkg.generated.mbti`，
+> 期望值在 `codec/codec_test.mbt` 与 `codec/README.mbt.md`。
 > 改任何期望串须单独一笔并给外部读数来源（门禁 G5）：本轮实现前动过一条——`MZXWE1==` 的非法字符
 > 下标从 4 改成 5，判据就是逐位数（M0 Z1 X2 W3 E4 **1=5**）。
 >
@@ -22,7 +23,7 @@
 
 | 签名 | 语义 | 边界/错误 | hutool 对位 | 差异声明 | 读数来源 | 血统 |
 |---|---|---|---|---|---|---|
-| `pub suberror CodecError { IllegalChar(String, Int) BadPadding(String, Int) RadixOutOfRange(Int, Int) ValueOverflow(String) ChecksumMismatch }` | 本包唯一错误面，只携带读数不携带文案 | — | hutool 抛 `DecodeException`/`IllegalArgumentException`（一个包打天下） | `IllegalChar` 携带**输入原文与第一个表外字符的下标**；`ChecksumMismatch` 不带读数——两个 4 字节摘要对人没有信息量，位置也不指向"哪一位被改过" | — | — |
+| `pub suberror CodecError { IllegalChar(String, Int) BadPadding(String, Int) RadixOutOfRange(Int, Int) ValueOverflow(String) ChecksumMismatch BadUtf8(String) }` | 本包唯一错误面，只携带读数不携带文案 | — | hutool 抛 `DecodeException`/`IllegalArgumentException`（一个包打天下） | `IllegalChar` 携带**输入原文与第一个表外字符的下标**；`ChecksumMismatch` 不带读数——两个 4 字节摘要对人没有信息量，位置也不指向"哪一位被改过"；`BadUtf8` 只带输入不带下标——`%XX` 流解到一半发现不是合法 UTF-8，出错位置在字节层而不在文本下标上，硬给一个位置反而会指错（PR-A2 补的第六个变体，用于 `form_decode`） | — | — |
 
 **`BadPadding(input, at)` 的 `at` 只有一个口径**（不写死的话，实现期会各自发明下标）：
 
@@ -81,16 +82,54 @@ Base64 是 1→非法、2/3→合法、0→合法。这两套余数就是"不可
 | `radix_encode(value : Int64, radix : Int) -> String raise CodecError` | 位权展开，负数出 `-` 前缀：`4096` 在 base36 → `35S`、base58 → `1Ca`、base62 → `144`；`62` base62 → `10`；`61` base62 → `z`；`0` 任何 radix → `0`；`-4096` base62 → `-144`；`Int64::max()` base62 → `AzL8n0Y58m7`；`Int64::min()` base2 → `-1` + 63 个 `0` | `radix` 不在 2..62 ⇒ `RadixOutOfRange(radix, 62)` | `RadixUtil.toRadix(int, radix)` | hutool 收 `int`，本库收 `Int64` 且**明确支持负数**（hutool 那侧对 `Integer.MIN_VALUE` 会翻成正的算）；`min` 取绝对值这一步在 `Int64` 上仍然溢出 ⇒ 走无符号位权展开，读数按上面这条定死 | Python `divmod` 逐条现算 + 与 `radix_decode` 互逆 |
 | `radix_decode(text : String, radix : Int) -> Int64 raise CodecError` | 上条的逆（允许一个前导 `-`） | `radix` 越界 ⇒ `RadixOutOfRange`；字符不属于该 radix 的前 `radix` 个表字符 ⇒ `IllegalChar(输入, 下标)`（`"Z"` 在 base36 合法、`"z"` 报 `@0`）；空串或只有 `-` ⇒ `IllegalChar(输入, 0 或 1)`；超出 `Int64` 范围 ⇒ `ValueOverflow(输入)` | `RadixUtil.parseRadix` | 本库**不做** hutool 的 `parseRadix(String, boolean autoFillToRadix)` 那档（溢出自动补位会静默改变值） | 同上 |
 
-## 7. 这一批不含（写清楚，别让读者以为没做就是漏了）
+## 7. x-www-form-urlencoded（HTML 序列化器；这是 percent 档之外的真缺口）
+
+core 的 `encoding/percent.encode` 走 **RFC 3986 unreserved**（`A-Za-z0-9-._~`），且空格出 `%20` 而非 `+`——
+那是 URI 组件的规矩，不是表单的规矩。表单这一档（`application/x-www-form-urlencoded`）由 HTML 标准定义，
+**放行的字符集不同**（数字、大小写字母，外加 `*`、`-`、`.`、`_`；注意 `~` 要转义而 `*` 不转义），
+**空格写 `+`、`+` 解回空格**。这四条差异任何一条走错，跨栈拿到的就是另一个值，所以单独一档并点名 `form_`。
+
+| 签名 | 语义 / 读数 | 边界/错误 | hutool 对位 | 差异声明 | 读数来源 |
+|---|---|---|---|---|---|
+| `form_encode(text : String) -> String` | 按 UTF-8 取字节：`A-Za-z0-9*-._` 原样出，空格出 `+`，其余出 `%XX`（**大写**十六进制）。`"hello world"`→`hello+world`；`"中文"`→`%E4%B8%AD%E6%96%87`；`"a=b&c"`→`a%3Db%26c`；`"*-._~"`→`*-._%7E`；`"a+b"`→`a%2Bb`；`"100%"`→`100%25`；`"~!@#$%^&*()"`→`%7E%21%40%23%24%25%5E%26*%28%29`；`""`→`""` | 恒不失败 | `PercentCodec.encode(cs, isFormUrlEncoded=true)` 档 / `HttpUtil.toParams(Map)` | 与 Python `urllib.parse.quote_plus` **不同**：那一档按 RFC 3986 unreserved 放行 `~` 而转义 `*`（`"*-._~"` 它给 `%2A-._~`）——本库跟 HTML/`URLSearchParams`，不跟它 | **两套独立实现互算**：手写 HTML 序列化器 ↔ Node `URLSearchParams` 的序列化，七个样本逐字节相等 |
+| `form_decode(text : String) -> String raise CodecError` | 上一条的逆：`+`→空格，`%XX`→字节（十六进制大小写都收），其余原样按 UTF-8 累积字节。`"a%2Bb"`→`"a+b"`；`"n=1+2"` 的值段 →`1 2`；`"%E4%B8%AD"`→`中`；`""`→`""` | `%` 后不是两位十六进制 ⇒ `IllegalChar(输入, %的下标)`；凑出的字节序列不是合法 UTF-8 ⇒ `BadUtf8(输入)` | `PercentCodec.decode` + `HttpUtil.decodeParam` | 与 core `percent.decode_lossy` 的"坏序列换 U+FFFD"不同档：本库**报错**——表单值坏掉通常是上游忘了编码，静默替换会把脏值带进库 | 同上：`URLSearchParams` 的 `get` 反解与 Python `unquote_plus`（+ 本库的坏序列判据）双路 |
+| `form_build(pairs : Array[(String, String)]) -> String` | 逐项 `key=value` 用 `&` 连接，键值各走 `form_encode`；**保序、允许重复键**、空数组出空串。`[("a","1"),("b","2")]`→`a=1&b=2`；`[("a","1"),("a","3")]`→`a=1&a=3`；`[("k","")]`→`k=`；`[("","")]`→`=`；`[]`→`""` | 恒不失败 | `UrlQuery.build` / `HttpUtil.toParams(Map)` | 键值都编码（hutool 那侧 charset 为 null 时不编码，是个静默分档）；本库不给"跳过编码"的档 | 逐条按定义算 |
+| `form_parse(query : String) -> Array[(String, String)] raise CodecError` | 按 `&` 切项（**空串整体返回空数组**，不是一项），每项按**第一个** `=` 切：没有 `=` 时值为空串；键值各走 `form_decode`。`"a=1&b=2"`→两对；`"t=a%3Db%26c"`→`("t","a=b&c")`；`"k"`→`("k","")`；`"="`→`("","")`；`"a=1&a=3"`→两对同键 | 同 `form_decode` | `UrlQuery.of(String, charset, autoRemovePath, true)` 的解析档 | **不做**"同名键合成数组"那种高级视图（那是 `Map` 层的语义，且各栈实现不同）；给扁平键值对序列，要分组自己 `match` | 往返恒等：`form_parse(form_build(cs)) == cs`（七组夹具） |
+
+## 8. URL 的组件划分、组装与语法归一化（对位 hutool `UrlBuilder` 的 parse/build 档）
+
+hutool `UrlBuilder` 的价值在两处：把一个 URL 串拆成组件（`of(url)`）与再拼回去（`build()`），
+外加 path 的 `.`/`..` 段整理。它的 `getSchemeWithDefault`/`getPortWithDefault`/`getPathStr`
+那几个"给默认值"的档各自往串里塞东西（补 `http`、path 空时补 `/`），**这些默认值散在 getter 里最容易漂**，
+所以本库把它们收敛成一处 `normalize`，并让它**幂等**。
+
+| 签名 | 语义 / 读数 | 边界/错误 | hutool 对位 | 差异声明 | 读数来源 |
+|---|---|---|---|---|---|
+| `pub(all) struct Url { scheme : String, userinfo : String, host : String, port : Int, path : String, query : String?, fragment : String? }` | 七个组件。`userinfo`/`host`/`path` 用空串表示"没有"；`port = -1` 表示未给端口；`query`/`fragment` 用 `None` 表示**连 `?`/`#` 都没有**（与"给了但为空"区分开——这直接影响 `to_string` 的往返恒等） | — | `UrlBuilder` 的字段 + `UrlPath`/`UrlQuery` | 拆成值类型而不是链式 builder：本库全同步、无 null，改一个字段的惯用法是 `Url::{ ...u, host: "x" }` | RFC 3986 §3 的组件定义 |
+| `Url::parse(text : String) -> Url raise CodecError` | 按 RFC 3986 §3 的 ABNF 从左到右切：`scheme ":"` → `"//" authority` → path → `"?" query` → `"#" fragment`；`authority` 内 `[userinfo "@"] host [":" port]`。读数：`"http://user@www.example.com:8080/a/b?q=1#frag"` → scheme `http`、userinfo `user`、host `www.example.com`、port `8080`、path `/a/b`、query `Some("q=1")`、fragment `Some("frag")`；`"https://example.com"` → path 空串、`query=None`、`fragment=None`；`"mailto:t@x.com"` → **非 `//` 开头就没有 authority**，`userinfo`/`host` 空、path `t@x.com`；`"urn:isbn:0451450765"` → path `isbn:0451450765`；`"?q=1"` → path 空、query `Some("q=1")`；`"http://example.com/a%2Fb?x=%7E"` → path 原样 `/a%2Fb`（**解析不解码**） | `%` 后不是两位十六进制 ⇒ `IllegalChar`。**端口位的下标口径定死**：端口从 `:` 之后第一个字符起算，遇到非数字就报**那个字符**的下标；空端口（`:` 后直接是 `/` 或结尾）报 **`:` 自己**的下标；全是数字但 `> 65535` ⇒ `RadixOutOfRange(值, 65535)`；authority 给了 `@` 而 userinfo/host 都空同理报出错处 | `UrlBuilder.of(url)` | 不做 IDN/punycode（要表）、不做 percent 解码、不猜缺失的 scheme（那是 `url_of_http` 的活） | 组件切分与 Python `urlsplit` 逐条对跑（含 `mailto`/`urn`/无 scheme 三档）；端口越界档 Python 直接抛 `ValueError`，本库给结构化错误 |
+| `Url::to_string(self : Self) -> String` | 有 `query` 就写 `?` 段（哪怕是空串），有 `fragment` 就写 `#` 段；`port >= 0` 才写 `:端口`；`userinfo` 非空才写 `user@`。**parse-then-build 往返恒等**是主判据：上面每一条 `parse` 读数都要求 `to_string` 还原原串 | 恒不失败 | `UrlBuilder.build()` | 与 hutool 不同：它靠三个 `get*WithDefault` 往输出里塞默认值，本库 `to_string` **一个字都不加** | 往返恒等（同一批夹具） |
+| `Url::normalize(self : Self) -> Url` | 语法归一：scheme 与 host 转小写；`http:80`/`https:443` 这一档**默认端口省略**；path 走 RFC 3986 §5.2.4 的点段删除；`%XX` 统一大写、落在 unreserved 里的三字节**还原成字符**；有 authority 而 path 为空 ⇒ path 归一为 `/`。**幂等**。读数：`HTTP://EXAMPLE.com:80/%7Efoo/a/../b/./c?Q=1#F` → `http://example.com/~foo/b/c?Q=1#F`；`http://example.com/a/b/../.././../x` → `http://example.com/x`；`http://example.com` → `http://example.com/`；`https://example.com:443/` → `https://example.com/`；`http://example.com:8080/` 原样；`http://example.com/a%2fB` → `http://example.com/a%2FB`；`http://example.com/%zz/a` 原样（非法转义**不猜**） | 恒不失败 | `UrlBuilder.of(...)` + `UrlPath` 的段整理 + hutool `normalize` 无对应 | **不做**大小写以外的语义归一（末尾斜杠、`index.html` 省略、`http`→`https` 升级都不做，那些会改语义）；query 与 fragment 不重编码 | §6.2.2 的等价对（`%7Efoo` ↔ `~foo`、`Example.com` ↔ `example.com`）＋ §5.2.4 规范自带的两个 worked example（`/a/b/c/./../../g`→`/a/g`、`mid/content=5/../6`→`mid/6`，本实现逐条复现）＋ 幂等断言 |
+| `url_of_http(text : String) -> Url raise CodecError` | hutool `ofHttp` 那一档：`text` 不以 `http://`/`https://` 开头（**大小写不敏感**）就补 `http://` 再解析。`"example.com/a"` → scheme `http`、host `example.com`、path `/a`；`"HTTPS://example.com"` → 不补，scheme 归一为 `https` | 同 `Url::parse` | `UrlBuilder.ofHttp(String)` | 命名不含糊：这是"猜测缺失的 scheme"，所以叫 `of_http` 而不是让 `parse` 偷偷做 | 定义即契约 |
+
+**G8 的对拍腿**在这一批挂两条：`form_encode` 的输入不含空格且不含 `+`/`*`/`~` 时与 core
+`percent.encode` 同结果；`form_decode` 在纯 `%XX`（无 `+`）输入上与 core `percent.decode` 同结果。
+这两条是"新档与 core 既有档在重叠输入上必须一致"的机器判据，不是润色。
+
+## 9. 这一批不含（写清楚，别让读者以为没做就是漏了）
 
 | 格子 | 结论 | 依据 |
 |---|---|---|
 | `Base16Codec` / `BCD` | **不做** | `Base16Codec` 就是 core `encoding/hex`（换名转发，AGENTS 直接拒）。`BCD` 在 hutool 里**自己标了 `@Deprecated`**，其逻辑是把两个十六进制位打进一个字节（含 `a-f`/`A-F`，奇数长度左侧补 `0`）——语义与 core hex 重合，唯一增量是"奇数长度左补零"这一档，而那是输入清洗问题不是编码问题 |
-| `PercentCodec` | **本批不含，另开 PR-A2** | core `encoding/percent` 已有 RFC 3986 的 percent-encoding；hutool 的增量只有 form-url-encoded 档（空格出 `+`、`+` 解回空格），那是**另一套语义**（表单不是 URI），和 `UrlBuilder` 一起定契约更清楚 |
-| `UrlBuilder` | **本批不含，另开 PR-A2** | 它是 URL 语法层（拆 scheme/host/port/path/query + 归一化），不是 codec；和 form 档同批 |
+| `PercentCodec` 的 percent 本体 / `UrlBuilder` 的引用解析 | **不做 / 另批** | percent-encoding 的 RFC 3986 档 core 已有（本包只在 §7 做表单那一档）；§5.2.2 的 base+reference 解析是另一套完整算法（另有 §5.4 的向量），要做单独一批 |
+| IDN / punycode、`UrlPath`/`UrlQuery` 的链式 builder、`addQuery` 过程式接口 | **不做** | IDN 要 RFC 3492 的表；builder 的"攒参数"用 `form_build(键值对数组)` 效果相同且可测，不必再引入可变链式对象 |
 | `Caesar` / `Rot` / `Morse` / `PunyCode` / `Hashids` | **不做 / 排后** | `Caesar`/`Rot` 是三行算术（写了就是转发层）；`Morse` 要符号表且无互解需求；`PunyCode` 要 IDN/ACE 全量规则（RFC 3492 的负载因子与上界表）；`Hashids` 依赖随机盐与数字表语义，归 `rand` 之后再看 |
 
-## 8. 血统与来源汇总
+## 10. 血统与来源汇总
+
+| 格子 | 真上游 | 备注 |
+|---|---|---|
+| §7 form 档 | **HTML Living Standard 的 application/x-www-form-urlencoded 序列化器**（放行 `A-Za-z0-9*-._`、空格出 `+`） | 不是 RFC 3986、也不是 Python `quote_plus`：三者在 `~` 与 `*` 上不同，spec 里把分歧写死。第二路取 Node `URLSearchParams`（同一序列化器的公开实现） |
+| §8 URL 组件与归一化 | **RFC 3986** §3（组件 ABNF）、§5.2.4（点段删除，规范自带两个 worked example）、§6.2.2（语法等价对：%7E↔~、host 小写、默认端口） | hutool 那侧是 `UrlBuilder`/`UrlPath`/`UrlQuery`（内部再靠 JDK `URI`），本库不搬其实现，只把"组件划分 + 组装 + 点段整理"这几档对齐语义 |
 
 | 格子 | 真上游 | 备注 |
 |---|---|---|

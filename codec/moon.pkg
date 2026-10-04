@@ -3,9 +3,17 @@ import {
   "mldong/moon-hutool/digest",
 }
 
-// 测试侧：core 的标准 Base64 用来做对拍腿（G8），utf8 造字节夹具
+// 测试侧：core 的标准 Base64 与 percent 用来做对拍腿（G8），utf8 造字节夹具
 import {
   "moonbitlang/core/encoding/base64",
+  "moonbitlang/core/encoding/percent",
   "moonbitlang/core/encoding/utf8",
   "mldong/moon-hutool/codec",
 } for "test"
+
+// 第二批（§7 form / §8 URL）的骨架期豁免：函数体还是 `abort`，于是
+// - 新增的 `BadUtf8` 变体没人构造（`unused_constructor`）
+// - 四条新签名写了 `raise CodecError` 而体里没 `raise`（`unused_error_type`）
+// 这两类全是"未实现"的机械后果。实现落地那一笔删掉——门禁 G12 拦着不让忘。
+
+warnings = "-unused_constructor-unused_error_type"

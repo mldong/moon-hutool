@@ -26,11 +26,21 @@ pub fn b64_encode_mime(Bytes) -> String
 
 pub fn b64_encode_url(Bytes, padding? : Bool) -> String
 
+pub fn form_build(Array[(String, String)]) -> String
+
+pub fn form_decode(String) -> String raise CodecError
+
+pub fn form_encode(String) -> String
+
+pub fn form_parse(String) -> Array[(String, String)] raise CodecError
+
 pub let radix_alphabet : String
 
 pub fn radix_decode(String, Int) -> Int64 raise CodecError
 
 pub fn radix_encode(Int64, Int) -> String raise CodecError
+
+pub fn url_of_http(String) -> Url raise CodecError
 
 // Errors
 pub suberror CodecError {
@@ -39,9 +49,22 @@ pub suberror CodecError {
   RadixOutOfRange(Int, Int)
   ValueOverflow(String)
   ChecksumMismatch
+  BadUtf8(String)
 }
 
 // Types and methods
+pub(all) struct Url {
+  scheme : String
+  userinfo : String
+  host : String
+  port : Int
+  path : String
+  query : String?
+  fragment : String?
+}
+pub fn Url::normalize(Self) -> Self
+pub fn Url::parse(String) -> Self raise CodecError
+pub fn Url::to_string(Self) -> String
 
 // Type aliases
 

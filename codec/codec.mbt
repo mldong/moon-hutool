@@ -5,7 +5,7 @@
 /// 并给外部读数来源（门禁 G5），实现只负责把契约里冻好的读数算出来。
 ///
 /// 三条贯穿性规则（core 已给的三件——`encoding/base64` 标准表、`encoding/hex`、`encoding/percent`——
-/// 本包一律不重新包装，见 spec §7）：
+/// 本包一律不重新包装，见 spec §9）：
 /// 1. **表的来源写死**：Base32/Base58/Base62 的读数完全由表序决定，不接受调用方传表。
 /// 2. **解码默认严格**：表外字符报错并给下标；宽松只出现在名字里点明 `lenient` 的那一档。
 /// 3. **空输入是合法输入**：RFC 4648 §10 的官方向量表第一条就是空串。
@@ -23,6 +23,8 @@ pub suberror CodecError {
   ValueOverflow(String)
   /// Base58Check 的 4 字节校验位不符（不带读数——摘要对人没有信息量，也不指向被改过的那一位）
   ChecksumMismatch
+  /// `%XX` 流解出来的字节不是合法 UTF-8：只带输入不带下标（出错位置在字节层，硬给个文本下标会指错）
+  BadUtf8(String)
 }
 
 ///|
@@ -291,6 +293,105 @@ pub fn radix_decode(text : String, radix : Int) -> Int64 raise CodecError {
   } else {
     acc.reinterpret_as_int64()
   }
+}
+
+///|
+/// x-www-form-urlencoded 的编码（HTML 序列化器：放行 `A-Za-z0-9*-._`、空格出 `+`、其余 `%XX` 大写）。
+///
+/// - Note: 与 core `encoding/percent.encode` 不是一档——那边走 RFC 3986 unreserved，
+///   于是 `~` 原样出、`*` 被转义、空格出 `%20`；表单这三条都不一样（spec §7）。
+///   除这三处外两档**同结果**，这条重叠区间由用例里的对拍腿钉住（门禁 G8）
+pub fn form_encode(text : String) -> String {
+  let _ = text
+  abort("moon-hutool: codec.form_encode 未实现（spec 05-codec #7）")
+}
+
+///|
+/// `form_encode` 的逆：`+` 解回空格，`%XX` 解成字节（十六进制大小写都收）
+///
+/// - Raises: `CodecError.IllegalChar`（`%` 后不是两位十六进制，携带 `%` 的下标）、
+///   `CodecError.BadUtf8`（解出的字节不是合法 UTF-8）
+/// - Note: 坏序列**报错**而不是换 U+FFFD——表单值坏掉通常是上游忘了编码
+pub fn form_decode(text : String) -> String raise CodecError {
+  let _ = text
+  abort("moon-hutool: codec.form_decode 未实现（spec 05-codec #7）")
+}
+
+///|
+/// 键值对 → 查询串：逐项 `key=value` 用 `&` 连接，键与值各走 `form_encode`
+///
+/// - Note: 保序、允许重复键；空数组出空串。不做 hutool 那个"charset 为 null 就不编码"的静默分档
+pub fn form_build(pairs : Array[(String, String)]) -> String {
+  let _ = pairs
+  abort("moon-hutool: codec.form_build 未实现（spec 05-codec #7）")
+}
+
+///|
+/// 查询串 → 键值对序列：按 `&` 切项（空串整体是空数组，不是一项），
+/// 每项按**第一个** `=` 切；没有 `=` 时值为空串
+///
+/// - Note: 不给"同名键自动合成数组"那种视图——那是 Map 层语义且各栈不同，要分组自己 `match`
+/// - Raises: `CodecError.IllegalChar`、`CodecError.BadUtf8`（键或值走 `form_decode`）
+pub fn form_parse(query : String) -> Array[(String, String)] raise CodecError {
+  let _ = query
+  abort("moon-hutool: codec.form_parse 未实现（spec 05-codec #7）")
+}
+
+///|
+/// URL 的七个组件（RFC 3986 §3）
+///
+/// `userinfo`/`host`/`path` 用空串表示"没有"；`port = -1` 表示未给端口；
+/// `query`/`fragment` 用 `None` 表示**连 `?`/`#` 都没有**——这个区分决定 `to_string` 的往返恒等。
+/// `Url::parse` 只切分不解码、不校验字符集（IDN 不做）
+pub(all) struct Url {
+  scheme : String
+  userinfo : String
+  host : String
+  port : Int
+  path : String
+  query : String?
+  fragment : String?
+}
+
+///|
+/// 切分一个 URL 串（scheme → authority → path → query → fragment）
+///
+/// - Note: 不以 `//` 开头就没有 authority（`mailto:`/`urn:` 那一档），`@` 也就不是 userinfo 的分隔符
+/// - Raises: `CodecError.IllegalChar`（结构不对：端口非数字、给了 `:` 而 host 为空等）、
+///   `CodecError.RadixOutOfRange(port, 65535)`（端口越界）
+pub fn Url::parse(text : String) -> Url raise CodecError {
+  let _ = text
+  abort("moon-hutool: codec.Url::parse 未实现（spec 05-codec #8）")
+}
+
+///|
+/// 组件拼回字符串：**一个字都不加**（不补 scheme、不补 `/`、不写没给过的端口）
+///
+/// - Note: hutool 那侧靠三个 `get*WithDefault` 往输出里塞默认值，最容易漂的一档在这里被剔除
+pub fn Url::to_string(self : Self) -> String {
+  let _ = self
+  abort("moon-hutool: codec.Url::to_string 未实现（spec 05-codec #8）")
+}
+
+///|
+/// 语法归一化（RFC 3986 §6.2.2 + §5.2.4）：scheme/host 小写、默认端口省略、
+/// path 点段删除、`%XX` 统一大写并把 unreserved 三字节还原、有 authority 而 path 空则补 `/`
+///
+/// - Note: **幂等**，且**只改写法不改语义**——末尾斜杠、`index.html` 省略、协议升级这些一律不做；
+///   非法转义（如 `%zz`）原样保留，不猜
+pub fn Url::normalize(self : Self) -> Url {
+  let _ = self
+  abort("moon-hutool: codec.Url::normalize 未实现（spec 05-codec #8）")
+}
+
+///|
+/// 缺协议就补 `http://` 再解析（hutool `UrlBuilder.ofHttp` 那一档）
+///
+/// - Parameters: 判"有没有协议"看的是 `http://`/`https://` 前缀，**大小写不敏感**
+/// - Note: 单独一条而不是让 `Url::parse` 偷偷补——猜缺失的协议是改语义，必须点名
+pub fn url_of_http(text : String) -> Url raise CodecError {
+  let _ = text
+  abort("moon-hutool: codec.url_of_http 未实现（spec 05-codec #8）")
 }
 
 ///|

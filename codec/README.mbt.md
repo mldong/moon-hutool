@@ -1,10 +1,10 @@
 # codec
 
-hutool `Codec` 家族的 MoonBit 对位：Base64 的 URL/MIME/宽松三档、Base32（含 hex 表）、Base58 与 Base58Check、Base62（两版表）、任意进制 Radix。
+hutool `Codec` 家族的 MoonBit 对位：Base64 的 URL/MIME/宽松三档、Base32（含 hex 表）、Base58 与 Base58Check、Base62（两版表）、任意进制 Radix，外加 x-www-form-urlencoded 的编解码/键值对往返，以及 URL 的组件划分、组装与语法归一化。
 
 完整边界矩阵与逐条读数来源见 [`docs/spec/05-codec.md`](https://github.com/mldong/moon-hutool/blob/master/docs/spec/05-codec.md)。
 
-> 状态：**已实现**（10-05）——下面每个块都是真被执行并被断言的用例（`moon test` 从本文件收 9 条）。期望串与 `codec_test.mbt` 同受"期望值冻结"约束：改任何期望须单独一笔并给外部读数来源（门禁 G5）。
+> 状态：**分两批**。第一批（Base64 三档 / Base32 / Base58 / Base62 / Radix）已经落地并在这三个块里保持断言；**第二批（§7 form 档、§8 URL 组件）此刻尚未落地**，相关块的红是设计态。期望串与 `codec_test.mbt` 同受"期望值冻结"约束：改任何期望须单独一笔并给外部读数来源（门禁 G5）。
 
 ## 三条先决口径
 
@@ -14,7 +14,7 @@ hutool `Codec` 家族的 MoonBit 对位：Base64 的 URL/MIME/宽松三档、Bas
 
 **三、空输入是合法输入。** RFC 4648 §10 的官方向量表第一条就是空串。
 
-`core` 已有的三件（`encoding/base64` 标准表、`encoding/hex`、`encoding/percent`）本包**不重新包装**，理由见 [`docs/ROADMAP.md`](https://github.com/mldong/moon-hutool/blob/master/docs/ROADMAP.md) 与 spec §7。
+`core` 已有的三件（`encoding/base64` 标准表、`encoding/hex`、`encoding/percent`）本包**不重新包装**，理由见 [`docs/ROADMAP.md`](https://github.com/mldong/moon-hutool/blob/master/docs/ROADMAP.md) 与 spec §9。
 
 ## Base64：三档不是三个体面名字
 
@@ -65,6 +65,7 @@ fn[A] err_text(g : () -> A raise @codec.CodecError) -> String {
     @codec.RadixOutOfRange(v, bound) => "RadixOutOfRange \{v} bound=\{bound}"
     @codec.ValueOverflow(input) => "ValueOverflow \{input}"
     @codec.ChecksumMismatch => "ChecksumMismatch"
+    @codec.BadUtf8(input) => "BadUtf8 \{input}"
   }
 }
 ```
@@ -207,6 +208,101 @@ test "两个端点" {
 }
 ```
 
+## x-www-form-urlencoded：表单不是 URI
+
+core 的 `encoding/percent` 走 RFC 3986 的 unreserved 集（空格出 `%20`、`~` 放行、`*` 转义）；
+表单那一档由 HTML 标准定义：**空格出 `+`、`~` 要转义、`*` 放行**。三条差异任何一条走错就是另一个值。
+
+```mbt check
+///|
+test "表单档与 percent 档的分歧点" {
+  assert_eq(@codec.form_encode("a b~*"), "a+b%7E*")
+  assert_eq(@percent.encode("a b~*"), "a%20b~%2A")
+  assert_eq(@codec.form_encode("中文"), "%E4%B8%AD%E6%96%87")
+  // `+` 与 `%2B` 不是一回事：前者是空格，后者才是加号
+  assert_eq(@codec.form_decode("a+b"), "a b")
+  assert_eq(@codec.form_decode("a%2Bb"), "a+b")
+  // 两档只在空格、`+`、`*`、`~` 四处不同：**其余输入必须同结果**（重叠区间一致才不是凭空另造一套）
+  for s in ["a=b&c", "中文", "100%", "foo.bar-baz_qux"] {
+    assert_eq(@codec.form_encode(s), @percent.encode(s))
+  }
+}
+```
+
+坏序列**报错**而不是换 U+FFFD：表单值坏掉通常是上游忘了编码，静默替换只会把脏值带进库。
+
+```mbt check
+///|
+test "坏转义与非法 UTF-8 各有读数" {
+  let got = try {
+    let _ = @codec.form_decode("%zz")
+    "没抛错"
+  } catch {
+    @codec.IllegalChar(input, at) => "IllegalChar \{input}@\{at}"
+    _ => "错种"
+  }
+  assert_eq(got, "IllegalChar %zz@0")
+  let bad = try {
+    let _ = @codec.form_decode("%E4%B8")
+    "没抛错"
+  } catch {
+    @codec.BadUtf8(_) => "BadUtf8"
+    _ => "错种"
+  }
+  assert_eq(bad, "BadUtf8")
+}
+```
+
+## URL 组件：`to_string` 一个字都不加
+
+hutool `UrlBuilder` 靠三个 `get*WithDefault` 往输出里塞默认值（补 `http`、path 空补 `/`），那是最容易漂的一档。
+本库把"补齐"单独收进 `normalize`，`to_string` 只做拼接，于是 **parse-then-build 对任意合法输入恒等**。
+
+```mbt check
+///|
+test "组件划分与原样往返" {
+  let u = @codec.Url::parse("http://user@www.example.com:8080/a/b?q=1#frag") catch {
+    _ => abort("夹具必须可解析")
+  }
+  assert_eq(u.userinfo, "user")
+  assert_eq(u.host, "www.example.com")
+  assert_eq(u.port, 8080)
+  assert_eq(u.query, Some("q=1"))
+  assert_eq(u.fragment, Some("frag"))
+  // 不以 `//` 开头就没有 authority：`mailto:` 的 `@` 属于 path
+  assert_eq(
+    (@codec.Url::parse("mailto:t@x.com") catch { _ => abort("夹具") }).path,
+    "t@x.com",
+  )
+  for t in ["https://example.com", "//example.com/p", "?q=1"] {
+    assert_eq(
+      (@codec.Url::parse(t) catch { _ => abort("夹具") }).to_string(),
+      t,
+    )
+  }
+}
+```
+
+`normalize` 只做语法等价：scheme/host 小写、默认端口省略、点段删除、`%XX` 大写并把 unreserved 还原，
+而且**幂等**；非法转义原样保留，不猜。
+
+```mbt check
+///|
+test "归一化是等价写法而非改语义" {
+  let n : (String) -> String = t => {
+    (@codec.Url::parse(t) catch { _ => abort("夹具") })
+    .normalize()
+    .to_string()
+  }
+  assert_eq(n("HTTP://EXAMPLE.com:80/%7Efoo"), "http://example.com/~foo")
+  assert_eq(n("http://example.com/a/b/../../x"), "http://example.com/x")
+  assert_eq(n("http://example.com"), "http://example.com/")
+  assert_eq(n("http://example.com/%zz/a"), "http://example.com/%zz/a")
+  assert_eq(n(n("http://a/x/y/../z")), "http://a/x/z")
+}
+```
+
+
 ## 这一层不做的事
 
-`Base16Codec`（就是 core `encoding/hex`，换名转发）、`BCD`（**hutool 自己标了 `@Deprecated`**，逻辑是把两个十六进制位打进一个字节，语义与 core hex 重合）；`PercentCodec` 的 form-url-encoded 档与 `UrlBuilder`（URL 语法层，另开一批，见 spec §7）；`Caesar`/`Rot`（三行算术）、`Morse`/`PunyCode`/`Hashids`（要符号表或随机盐语义）。逐条理由见 [`docs/ROADMAP.md`](https://github.com/mldong/moon-hutool/blob/master/docs/ROADMAP.md) 的「暂不做」「不做」两节。
+`Base16Codec`（就是 core `encoding/hex`，换名转发）、`BCD`（**hutool 自己标了 `@Deprecated`**，逻辑是把两个十六进制位打进一个字节，语义与 core hex 重合）；`Caesar`/`Rot`（三行算术）、`Morse`/`PunyCode`/`Hashids`（要符号表或随机盐语义）。URL 这一层**不含** RFC 3986 §5.2.2 的引用解析（`urljoin` 那一套 base + reference，是另一套完整算法，要做另起一批）、IDN/punycode（要 RFC 3492 的表）、`UrlPath`/`UrlQuery` 那种链式可变 builder（本库给值类型，改字段走 `Url::{ ...u, host: "x" }`；攒参数用 `form_build` 直接给键值对列表，效果相同且可测）。逐条理由见 [`docs/ROADMAP.md`](https://github.com/mldong/moon-hutool/blob/master/docs/ROADMAP.md) 的「暂不做」「不做」两节与 spec §9。
