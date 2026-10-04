@@ -130,6 +130,16 @@ PR-A 的合入标准：`moon check` 必须全绿（签名与类型自洽、文�
   `old_multi` 是从**第一处** `Bytes::from_array([` 切出来的，于是把另一个夹具（3 个 `0xff`）整个换成了 20 字节，
   `moon check` 与 PR-A 的全红都照样通过，直到 PR-B 跑断言才暴露。⇒ 工装改过的文件要 `git diff` 逐块看，
   夹具类改动尤其要单独确认，别信"它编过了"。
+- **`Map::keys()` 返回 `Iter[K]`，不是 `Array[K]`**：`Iter` 没有 `Eq` 实例，所以 `assert_eq(m.keys(), [1, 2])`
+  判 `Type Iter[Int] does not implement trait Eq`；同时 `[ .. ]` 会被当成**已废弃的 Iter 字面量**吃
+  `deprecated_syntax` 警告（新版写 `[| .. |]`）。⇒ 断言键序统一写 `.keys().to_array()`，
+  看到 `Iter` 相关这两条报错就是这个漏了。
+- **骨架期的泛型界会吃 `unused_trait_bound` 警告**：`fn[A, K : Hash + Eq]` 这类界在体里全是 `abort` 时
+  编译器看不到用处 ⇒ 骨架豁免串要带上它（`warnings = "-unused_constructor-unused_error_type-unused_trait_bound"`），
+  实现落地那一笔整行删（G12）。
+- 划"core 有什么"的边界时，两条**看着像没有其实有**的件要特别核：`Array::search_by(f) -> Int?`（还有
+  `find_index` 别名，所以别再造返 `-1` 的 `index_where`）、`Array::dedup(self) -> Unit`（原地、只去**相邻**重复，
+  文档自己写"要全去重请先排序"，所以它和保序全去重的 `distinct` 是两档，不能当一件）。
 - 用例首选 `assert_eq`；`inspect` 对集合走 `Show` 会吃废弃警告（core 立场：结果确定的用例用断言）。
 - `moon.mod` 是 TOML：注释用 `#`，`//` 会解析失败；`moon fmt` 会把 `[]` 写成 `[ ]`，改字段前先跑 fmt。
 

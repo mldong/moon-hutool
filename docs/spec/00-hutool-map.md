@@ -42,8 +42,8 @@
 
 | hutool | core 直接可用 | 本库补 | 不做 |
 |---|---|---|---|
-| `map/filter/reduce/distinct/groupBy/zip/flatten` | `Array::{map,filter,fold,dedup,zip,unzip,chunks,windows,flatten}`、`Iter::*`、`Array::sort/sort_by_key` | ③ 只补 `group_by/partition/split_avg/page/count_map` 这类 core 没有的组合 | **不给 `Array::map` 之类改名转发** |
-| `union/intersection/disjunction/subtract` | `HashSet::{union,intersection,difference,symmetric_difference}` | ③ Array 形态的薄组合（保序语义） | — |
+| `map/filter/reduce/distinct/groupBy/zip/flatten` | `Array::{map,filter,fold,dedup,zip,unzip,chunks,windows,flatten}`、`Iter::*`、`Array::sort/sort_by_key` | ③ `coll`（契约已冻结）：`group_by`、`partition`、`distinct`+`distinct_by`、`freq`、`page`+`page_count`、`union`+`intersection`+`subtract`、`maximum`+`minimum` 与按键两版——全是读 core 源码数出来的缺口 | **不给 `Array::map` 之类改名转发**；`index_where` 那种「找不到返 `-1`」的哨兵也不做（core `search_by` 给 `Int?`） |
+| `union/intersection/disjunction/subtract` | `HashSet::{union,intersection,difference,symmetric_difference}`（**只在集合类型上**，`Array`/`List`/`Iter` 一个都没有） | ③ `coll` 的数组形态三件：`union`/`intersection` 去重、`subtract` **保留左侧重复** | `disjunction` 不做（`Set::symmetric_difference` 已有，保序版需求没到） |
 | `LinkedHashMap`（插入序） | **`Map` 本身就是插入序**（Robin Hood + 链表，`builtin/LinkedHashMap.mbt.md`） | — | 不另造 LinkedHashMap |
 | `sortByProperty/sortByPinyin` | 无（依赖反射/`Collator`） | — | **不做**（无反射、无拼音表） |
 | `Table`（二维表）/`BiMap`/`CaseInsensitiveMap`/多值 Map | 无（`Map` 只有一层键） | ③ `mapx`（P2） | — |
