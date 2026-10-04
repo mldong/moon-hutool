@@ -63,14 +63,15 @@ test "回拨：容忍内钉住，超容忍报错" {
   let t = 1759552496789L
   let n = () => sf.next(t + 1L - 500L) catch { _ => -1L }
   assert_eq(sf.next(t) catch { _ => abort("夹具") }, 1974332385948475392L)
+  // 换毫秒 ⇒ sequence 归零
   assert_eq(
     sf.next(t + 1L) catch {
       _ => abort("夹具")
     },
-    1974332385948475393L,
+    1974332385952669696L,
   )
   // 回拨 500ms：仍用 last_timestamp = t+1，sequence 继续 +1
-  assert_eq(n(), 1974332385948475394L)
+  assert_eq(n(), 1974332385952669697L)
   let over = try {
     let _ = sf.next(t + 1L - 3000L)
     "未抛错"

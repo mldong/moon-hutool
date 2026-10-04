@@ -152,9 +152,10 @@ test "@id #2.2 时钟回拨：容忍内钉住，超容忍报错（携带回拨�
   let s = sf(1, 2, 2000L)
   let t = 1759552496789L
   assert_eq(next_id(s, t), 1974332385948475392L)
-  assert_eq(next_id(s, t + 1L), 1974332385948475393L)
+  // 换毫秒 ⇒ sequence 归零（不是继续 +1）
+  assert_eq(next_id(s, t + 1L), 1974332385952669696L)
   // 回拨 500ms ≤ 2000ms ⇒ 仍用 last_timestamp = t+1，sequence 继续 +1
-  assert_eq(next_id(s, t + 1L - 500L), 1974332385948475394L)
+  assert_eq(next_id(s, t + 1L - 500L), 1974332385952669697L)
   // 回拨 3000ms > 2000ms ⇒ 报错，携带回拨毫秒数
   assert_eq(err_shape(() => s.next(t + 1L - 3000L)), "ClockMovedBackwards 3000")
   // tolerance=0 ⇒ 任何回拨都失败
