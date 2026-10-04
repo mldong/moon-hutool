@@ -117,8 +117,12 @@ test "text.upper_first #1.13 ASCII 档" {
 // 门禁 G8 的实证腿：is_blank 的空白档建立在 core `Char::is_whitespace` 之上（并集，只可更宽）。
 // 这条断言把"core 判空白 ⇒ 本库必判空白"钉住：core 若在未来版本改了语义，这里先红，由我们决定跟不跟，
 // 而不是等用户在线上发现漂移。方向是单向的（本库可额外覆盖 hutool 独有码点），所以只断这个方向。
+
+///|
 test "text.is_blank #1.2 对拍 core Char::is_whitespace（G8）" {
-  let marks : Array[Char] = [' ', '\t', '\n', '\u{00A0}', '\u{1680}', '\u{2000}', '\u{2028}', '\u{3000}']
+  let marks : Array[Char] = [
+    ' ', '\t', '\n', '\u{00A0}', '\u{1680}', '\u{2000}', '\u{2028}', '\u{3000}',
+  ]
   for c in marks {
     assert_true(c.is_whitespace()) // core 侧读数先成立
     let s : String = "\{c}"

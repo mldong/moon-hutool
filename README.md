@@ -13,7 +13,7 @@ MoonBit 版 [hutool](https://github.com/chinabugotech/hutool) 风格工具库。
 | 读数 | 值 |
 |---|---|
 | `moon check --target wasm` | 全绿（0 warnings 0 errors） |
-| `moon test --target wasm` | **Total tests: 19, passed: 0, failed: 19** —— 每条都停在 `abort`，红就是设计态 |
+| `moon test --target wasm` | **Total tests: 20, passed: 0, failed: 20** —— 每条都停在 `abort`，红就是设计态 |
 | 已出契约的包 | `text`（字符串门面）、`digest`（MD5 / SHA-256 / HMAC-SHA-256） |
 | 已建目录待出契约 | 21 个包（见 `docs/spec/00-hutool-map.md`） |
 

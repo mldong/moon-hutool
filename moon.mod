@@ -19,7 +19,15 @@ repository = "https://github.com/mldong/moon-hutool"
 
 license = "Apache-2.0"
 
-keywords = ["moonbit", "hutool", "utility", "zero-dependency", "string", "date", "digest"]
+keywords = [
+  "moonbit",
+  "hutool",
+  "utility",
+  "zero-dependency",
+  "string",
+  "date",
+  "digest",
+]
 
 preferred_target = "wasm"
 
