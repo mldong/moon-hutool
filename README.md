@@ -6,16 +6,29 @@ MoonBit 版 [hutool](https://github.com/chinabugotech/hutool) 风格工具库。
 # moon.mod（本库无需任何 import 依赖声明）
 ```
 
-## 状态：骨架 + 契约（实现未开工）
+## 文档索引
 
-本仓当前处于**文档契约先行**阶段：签名、公开接口（`.mbti`）与期望值已冻结，函数体是 `abort("未实现…")`。
+| 要看什么 | 去哪 |
+|---|---|
+| **进度：哪些实现了、哪些在做、哪些暂不做** | [`docs/ROADMAP.md`](https://github.com/mldong/moon-hutool/blob/master/docs/ROADMAP.md) —— 逐包状态（`已实现`/`实现中`/`契约已冻结`/`未开工`/`暂不做`）+ 用例数 + 不做清单 |
+| **hutool 能力对照**（这个类在 MoonBit 侧打谁） | [`docs/spec/00-hutool-map.md`](https://github.com/mldong/moon-hutool/blob/master/docs/spec/00-hutool-map.md) —— 四列：hutool 类.方法 ｜ core 直接可用 ｜ 本库补 ｜ 不做 |
+| **某包的契约表**（签名/边界/差异/读数来源/血统） | [`docs/spec/01-text.md`](https://github.com/mldong/moon-hutool/blob/master/docs/spec/01-text.md)（text，已实现）· [`docs/spec/05-digest.md`](https://github.com/mldong/moon-hutool/blob/master/docs/spec/05-digest.md)（digest，实现中） |
+| **某包怎么用**（可执行示例，跑在 CI 里） | [`text/README.mbt.md`](https://github.com/mldong/moon-hutool/blob/master/text/README.mbt.md) · [`digest/README.mbt.md`](https://github.com/mldong/moon-hutool/blob/master/digest/README.mbt.md)；装好后也能直接在 mooncakes 包页看：[mldong/moon-hutool/text](https://mooncakes.io/docs/mldong/moon-hutool/text) |
+| **贡献规范与两条红线** | [`AGENTS.md`](https://github.com/mldong/moon-hutool/blob/master/AGENTS.md)（交付形状、与 core 的边界、期望值冻结、文档三层分工、本机语法坑） |
+| **门禁判据 G1~G10** | [`scripts/contract_gate.sh`](https://github.com/mldong/moon-hutool/blob/master/scripts/contract_gate.sh) · CI 见 [`.github/workflows/ci.yml`](https://github.com/mldong/moon-hutool/blob/master/.github/workflows/ci.yml) |
+
+> 本表里的仓内链接一律写成 GitHub 绝对地址：发布包根是模块目录，相对路径在 mooncakes 页面上是死链（这条由门禁 G10 盯着，索引不许漂成死链）。
+
+## 状态
+
+**文档契约先行**：每个包先交"契约表 + 签名 + `.mbti` + 期望值已冻结的用例"，再落实现（实现只许把红变绿）。当前 `text` 已实现，`digest` 契约已冻结、实现中，其余 21 包只有目录与范围声明。
 
 | 读数 | 值 |
 |---|---|
 | `moon check --target wasm` | 全绿（0 warnings 0 errors） |
 | `moon test --target wasm` | **Total tests: 37, passed: 23, failed: 14** —— `text` 全绿；剩 14 条是 `digest` 骨架（函数体 `abort`），红是设计态 |
 | 已实现 / 已出契约 | `text` 已实现（18 个公开函数）；`digest` 契约已冻结、实现中 |
-| 已建目录待出契约 | 21 个包（见 `docs/spec/00-hutool-map.md`） |
+| 已建目录待出契约 | 21 个包（状态逐行见 [`docs/ROADMAP.md`](https://github.com/mldong/moon-hutool/blob/master/docs/ROADMAP.md)） |
 
 期望值权威顺序：**契约表 + 测试里的期望值 > hutool 行为 > 直觉**。实现期改期望值必须单独一笔并给出外部读数来源（`scripts/contract_gate.sh` G5 拦改）。
 

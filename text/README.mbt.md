@@ -2,7 +2,7 @@
 
 hutool `StrUtil` / `CharSequenceUtil` 的 MoonBit 对位：空白判定、切分连接、子串截取、`{}` 占位、版本比较、脱敏掩码、命名法互转。
 
-契约与边界矩阵见 [`docs/spec/01-@text.md`](https://github.com/mldong/moon-hutool/blob/master/docs/spec/01-@text.md)。本页只放**典型用法**，每条都带期望值——这些 `test` 块会被 `moon test` 真编译真执行（抄 `moonbitlang/core/encoding/base64/README.mbt.md` 的机制），所以文档本身就是要通过的检查，不是装饰。
+契约与边界矩阵见 [`docs/spec/01-text.md`](https://github.com/mldong/moon-hutool/blob/master/docs/spec/01-text.md)。本页只放**典型用法**，每条都带期望值——这些 `test` 块会被 `moon test` 真编译真执行（抄 `moonbitlang/core/encoding/base64/README.mbt.md` 的机制），所以文档本身就是要通过的检查，不是装饰。
 
 > ⚠ 当前状态：实现未开工，函数体是 `abort`，本页示例**预期红**。签名与期望值已冻结，实现只负责把红变绿。
 

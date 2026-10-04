@@ -119,6 +119,14 @@ rm -f "$probe"
 [ "$caught" -ge 1 ] && ok "阳性对照正常（坏样本被抓到）" || bad "G9 自身失效：坏样本没抓到，这条判据不可信"
 
 
+echo "== G10 仓内文档链接可达（索引不许漂成死链）=="
+if python scripts/check_doc_links.py >/tmp/mh_links.log 2>&1; then
+  grep -E "^  PASS" /tmp/mh_links.log
+else
+  bad "有死链或自检失效："; sed -n '1,8p' /tmp/mh_links.log | sed 's/^/    /'
+fi
+
+
 echo
 if [ "$FAILS" = "0" ]; then
   echo "GATE GREEN：0 失败，$SKIPS 项 SKIP（SKIP 不等于通过，逐条看理由）"
