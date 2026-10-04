@@ -433,7 +433,7 @@ test "@id #5 nano_id_bytes_needed（hutool 的 mask/step 公式）" {
   )
   assert_eq(
     err_shape(() => @id.nano_id_bytes_needed(0, 21)),
-    "FieldOutOfRange alphabet_len 0 > 255",
+    "FieldOutOfRange alphabet_len=0 bound=1",
   )
   assert_eq(
     err_shape(() => @id.nano_id_bytes_needed(64, 0)),
@@ -465,7 +465,8 @@ test "@id #5 nano_id 注入版（默认表序、拒绝采样逐字节同序）" 
   // 非 2 的幂表：mask=3 ⇒ 索引 3 越表被丢，继续吃下一个字节
   assert_eq(g("abc", 4, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]), "abca")
   assert_eq(g("ab", 1, [1]), "b")
-  assert_eq(g("a", 5, [0, 1, 0, 1, 0, 1, 0]), "aaaaa")
+  // len==1 时 mask=1 ⇒ 奇数字节被拒，5 个字符至少要 9 字节（Python 镜像 hutool 现算：7 字节只出 4 个）
+  assert_eq(g("a", 5, [0, 1, 0, 1, 0, 1, 0, 1, 0]), "aaaaa")
 }
 
 ///|
