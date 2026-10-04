@@ -14,6 +14,8 @@ pub fn md5_hex(String) -> String
 
 pub fn md5_hex16(String) -> String
 
+pub fn md5_of_bytes(Bytes) -> Bytes
+
 pub fn sha256_bytes(String) -> Bytes
 
 pub fn sha256_hex(String) -> String

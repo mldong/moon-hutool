@@ -26,6 +26,19 @@ RFC 1321 附录 A.5 全部七条测试串（本机 `hashlib` 现算，与规范�
 
 hutool 对位 `DigestUtil.md5Hex` ｜ 差异：hutool 可传 `Charset`，本库固定 UTF-8（无字符集表，见 `docs/ROADMAP.md` 的「不做」列）｜ 读数来源：RFC 1321 A.5。
 
+## 2.1.1 `md5_of_bytes(data : Bytes) -> Bytes` —— 任意字节流的 MD5 入口
+
+`md5_bytes` 吃 `String`（内部固定按 UTF-8 编码），但有一类输入**不是任何字符串**：多段拼接出来的流、含 `0x00` 的原始字节、非 UTF-8 序列。`id.uuid_v3` 要的正是 `namespace 字节 ‖ name 字节` 这种拼接流（见 `docs/spec/04-id.md` #3.3），所以补这个字节版入口——**算法同一个**，只是入口的输入域放宽。
+
+| 输入 | 期望 | 说明 |
+|---|---|---|
+| `utf8("abc")` | `900150983cd24fb0d6963f7d28e17f72` | 与 2.1 的 `"abc"` 同值（对拍：`md5_of_bytes(utf8(s)) == md5_bytes(s)`） |
+| `utf8("中文")` | 与 `md5_bytes("中文")` 相等 | 对拍断言，不重复抄绝对值 |
+| DNS namespace 字节 ‖ `utf8("www.example.com")` | `5df418813aed051548a72f4a814cf09e` | 拼接流；这条就是 `uuid_v3(dns, "www.example.com")` 的**未改位**原值（改 version/variant 后是 `5df41881-3aed-3515-88a7-2f4a814cf09e`） |
+| 原始字节 `0x00..0x0f` | `1ac1ef01e96caf1be0d329331a4fc2a8` | 含 `0x00`，`String` 入口进不去的那一档 |
+
+hutool 对位 `Digester.digest(byte[])` ｜ 读数来源：RFC 1321 同一批向量 + 本机 `hashlib` 现算 ｜ 血统：无（纯算法入口，不涉及 Java 表达）
+
 ## 2.2 `md5_hex16(data : String) -> String` —— hutool/mldong 私有行为
 
 **取 32 位 hex 的第 8~24 位**（即 `hex[8:24]`），不在任何 RFC 里，但被大量项目当短摘要或口令列存储，语义漂移会打散存量数据 ⇒ 期望值必须对 v5-master 反推后冻结。

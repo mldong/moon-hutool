@@ -6,4 +6,6 @@ import {
 
 import {
   "mldong/moon-hutool/digest",
+  "moonbitlang/core/encoding/hex",
+  "moonbitlang/core/encoding/utf8",
 } for "test"

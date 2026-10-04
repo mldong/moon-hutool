@@ -302,6 +302,18 @@ pub fn md5_bytes(data : String) -> Bytes {
 }
 
 ///|
+/// MD5 对**任意字节流**（`md5_bytes` 的字节版入口，算法完全同一个）
+///
+/// - Parameters: `data` 任意 `Bytes`——含 `0x00`、非 UTF-8 序列、或多段拼接的结果都行
+/// - Returns: 16 字节原始摘要
+/// - Note: 存在的理由是 `id.uuid_v3` 要摘要 `namespace 字节 ‖ name 字节` 这种**拼接流**，
+///   它不是任何字符串，走 `String` 入口进不去（spec 2.5）。同一输入下
+///   `md5_of_bytes(utf8(s)) == md5_bytes(s)`，用例里带这条对拍断言
+pub fn md5_of_bytes(data : Bytes) -> Bytes {
+  words_to_bytes(md5_core(data), true)
+}
+
+///|
 /// MD5 十六进制小写 32 位（hutool `md5Hex`）
 pub fn md5_hex(data : String) -> String {
   to_hex_lower(md5_bytes(data))

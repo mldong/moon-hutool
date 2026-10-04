@@ -101,3 +101,38 @@ test "@digest.equal_digest #2.5 常量时间比较" {
   assert_true(@digest.equal_digest(a, @digest.md5_bytes("abc")))
   assert_false(@digest.equal_digest(a, @digest.md5_bytes("")))
 }
+
+///|
+test "@digest.md5 #2.5 md5_of_bytes 任意字节流（对拍 + 拼接流绝对读数）" {
+  // 对拍：同一内容走 String 入口与走 Bytes 入口必须同结果
+  assert_eq(
+    @hex.encode(@digest.md5_of_bytes(@utf8.encode("abc"))),
+    "900150983cd24fb0d6963f7d28e17f72", // RFC 1321 A.5 的 "abc"（0cc1… 是 "a"）
+  )
+  assert_true(
+    @digest.md5_of_bytes(@utf8.encode("中文")) == @digest.md5_bytes("中文"),
+  )
+  // 拼接流（id.uuid_v3 的形状）：namespace 字节 ‖ "www.example.com"
+  let ns : Bytes = Bytes::from_array([
+    0x6b, 0xa7, 0xb8, 0x10, 0x9d, 0xad, 0x11, 0xd1, 0x80, 0xb4, 0x00, 0xc0, 0x4f,
+    0xd4, 0x30, 0xc8,
+  ])
+  let stream : Array[Byte] = ns.to_array()
+  stream.append(@utf8.encode("www.example.com").to_array())
+  assert_eq(
+    @hex.encode(@digest.md5_of_bytes(Bytes::from_array(stream))),
+    "5df418813aed051548a72f4a814cf09e",
+  )
+  // 含 0x00 的原始字节流：String 入口进不去的那一档（0..15 十六字节）
+  assert_eq(
+    @hex.encode(
+      @digest.md5_of_bytes(
+        Bytes::from_array([
+          0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b,
+          0x0c, 0x0d, 0x0e, 0x0f,
+        ]),
+      ),
+    ),
+    "1ac1ef01e96caf1be0d329331a4fc2a8",
+  )
+}
