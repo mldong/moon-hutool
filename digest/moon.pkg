@@ -1,3 +1,9 @@
 import {
+  "moonbitlang/core/buffer",
+  "moonbitlang/core/encoding/hex",
+  "moonbitlang/core/encoding/utf8",
+}
+
+import {
   "mldong/moon-hutool/digest",
 } for "test"

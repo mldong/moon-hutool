@@ -77,6 +77,7 @@ PR-A 的合入标准：`moon check` 必须全绿（签名与类型自洽、文�
 
 ### 语法坑（本机 moon 0.1.20260920 / moonc v0.10.14 实测，别再撞）
 
+- `priv` **只对类型合法**（`priv struct`），写在 `fn` 上判 `No 'private' visibility for function`；类型不加 `priv` 又不在公开签名里出现，会吃 `missing_priv` 警告。
 - `.mbt` 里写 `import` 非法：`Invalid import declaration here. Move this declaration to moon.pkg`；测试专用依赖写在包的 `moon.pkg` 里 `} for "test"`。
 - `String` 字面量**不隐式转** `StringView`，且 `String` **没有** `as_view` ⇒ 对外 API 用 `String`。
 - `\u{...}` 只在 char 字面量合法，写进字符串会成插值 ⇒ `Lexing error: missing expression in string interpolation`。
@@ -128,3 +129,16 @@ PR-A 的合入标准：`moon check` 必须全绿（签名与类型自洽、文�
 - 包内三处措辞（`<pkg>/README.mbt.md`、`<pkg>_test.mbt` 头、`docs/spec/NN-<pkg>.md` 头）不许与读数矛盾；包转绿后仍写"预期红"就是红。
 - 挂点：CI 的门禁 G11 与本地 `.githooks/pre-push`（`pre-commit` 只跑 `moon check`，逐包跑用例太慢不放提交档）。
 - 新增包时的正确顺序：建目录 → **先在 ROADMAP 加一行**（状态"未开工"）→ 再写契约。反过来会被 G11 拦。
+
+### 摘要类实现的四条本机裁决（写实现前先看，别靠常识猜）
+
+- **没有 `0x..u` / `0x..u64` 这种十六进制后缀**（判词法错）⇒ 字面量写裸值靠返回类型推断；
+  但 `let mut a0 = 0x67452301` 会**推断成 Int**，与后面 UInt 混算全线 mismatch ⇒ IV 那批必须显式 `: UInt`。
+- `Array::create` / `Array::of_length` 在本版**不存在** ⇒ 定长累加用 `let w : Array[UInt] = []` + `w.push(...)`
+  （Array 是引用语义，别写 `let mut`，否则吃 `unused_mut` 警告卡零警告门禁）。
+- 位运算用中缀 `& | ^ << >>`；`lsl/lsr/land/lor/lxor` 那批方法已报废弃。取反**没有 `~`**，写 `x ^ 0xffffffff`。
+  `Int::to_uint` / `UInt::to_int` 也已废弃 ⇒ 用 `reinterpret_as_uint` / `reinterpret_as_int`。
+  `String::to_bytes` 废弃 ⇒ 字符串转字节走 `@encoding/utf8.encode`。
+- **长度域的字节序必须跟该算法取字的字节序一致**：MD5 是小端字 ⇒ 8 字节比特长度要按小端摆，
+  SHA-256 才用网络字节序。统一按大端写的症状很阴——空串（长度 0）与全部 SHA 向量都对，
+  只有"非空串的 MD5"才错，本轮就是这么撞的（镜像到 Python 逐向量比对才定位）。

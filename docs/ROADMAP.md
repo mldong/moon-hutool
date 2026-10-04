@@ -17,7 +17,7 @@
 | 包 | hutool 对位 | 状态 | 契约 | 用例 |
 |---|---|---|---|---|
 | `text` | `StrUtil` / `CharSequenceUtil` / `NamingCase` / `StrFormatter` | **已实现**（10-04，四目标 CI 待跑） | `docs/spec/01-text.md` | 13 条断言 + 10 个文档块，全绿 |
-| `digest` | `DigestUtil`（MD5 / SHA-256 / HMAC） | **契约已冻结**（实现中） | `docs/spec/05-digest.md` | 7 条 + 6 个文档块 |
+| `digest` | `DigestUtil`（MD5 / SHA-256 / HMAC） | **已实现**（10-04，官方向量 14 条全绿） | `docs/spec/05-digest.md` | 7 条 + 6 个文档块 |
 | `date` | `DateUtil` / `CalendarUtil` / `DatePattern` / `DateUnit` | 未开工（下一个出契约） | — | core **无任何 time 包**，本库最大"从无到有"块 |
 | `id` | `IdUtil`（雪花 / UUID v3·v4·v5 / ObjectId / NanoId） | 未开工 | — | worker/datacenter/时钟全显式注入 |
 | `codec` | `Base64`(url-safe·MIME·宽松解码) / `Base32` / `Base58` / `Base62` / `BCD` / `RadixUtil` / `PercentCodec` / `UrlBuilder` | 未开工 | — | core 已有标准 base64/hex/percent，只补缺口不转发 |
@@ -47,9 +47,8 @@
 <!-- READINGS:BEGIN 由 scripts/sync_status.py 生成，勿手改 -->
 | 读数（`moon test --target wasm`，当场跑） | 值 |
 |---|---|
-| 用例总数 | **37** —— 绿 23 / 红 14 |
-| 包状态 | 共 23 个：`已实现` 1 · `契约已冻结` 1 · `未开工` 21 |
-| 红的是谁 | `digest`（14 红） —— 未实现的包红是设计态 |
+| 用例总数 | **37** —— 绿 37 / 红 0 |
+| 包状态 | 共 23 个：`已实现` 2 · `契约已冻结` 0 · `未开工` 21 |
 <!-- READINGS:END -->
 
 | 项 | 值 |

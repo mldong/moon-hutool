@@ -1,6 +1,8 @@
 # 契约 05 · digest（摘要）
 
-> 状态：**签名与官方向量已冻结，实现未开工**（`digest/digest.mbt` 函数体 `abort`，`digest_test.mbt` 7 条用例预期红）。
+> 状态：**已实现**（10-04，`digest/digest.mbt`，14 条用例全绿）。本页期望值先冻结后实现；
+> 冻结过程中确实抓出两处我自己的错：MD5 第六条向量誊错一位（`419c9f`→`419d9f`）、`md5_hex16` 的中段口径需对 v5-master 反推——
+> **冻结不等于正确**，它的作用是逼每处改动都拿出外部证据。
 > **权威是规范文本，不是 hutool**：hutool-crypto 自己几乎不实现算法（是 `javax.crypto`/JCE 门面，全模块只有 RC4/XXTEA/Vigenere 是手写位运算），所以照它的"实现"抄没有意义；本包对着 RFC 1321 / FIPS 180-4 / RFC 2104 写，**验收只认官方向量**（门禁 G6）。
 > 输入一律按 **UTF-8 字节**参与运算（对齐 hutool `digest(String)` 的默认 charset；中文用例专门钉死这一档）。
 > core 无任何 digest 能力（本机实测 `md5|sha256|hmac` 在全 core 树命中 0）⇒ 整包自研，纯位运算无状态。
