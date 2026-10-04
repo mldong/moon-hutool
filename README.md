@@ -15,7 +15,7 @@ MoonBit 版 [hutool](https://github.com/chinabugotech/hutool) 风格工具库。
 | **某包的契约表**（签名/边界/差异/读数来源/血统） | [`docs/spec/01-text.md`](https://github.com/mldong/moon-hutool/blob/master/docs/spec/01-text.md)（text，已实现）· [`docs/spec/05-digest.md`](https://github.com/mldong/moon-hutool/blob/master/docs/spec/05-digest.md)（digest，实现中） |
 | **某包怎么用**（可执行示例，跑在 CI 里） | [`text/README.mbt.md`](https://github.com/mldong/moon-hutool/blob/master/text/README.mbt.md) · [`digest/README.mbt.md`](https://github.com/mldong/moon-hutool/blob/master/digest/README.mbt.md)；装好后也能直接在 mooncakes 包页看：[mldong/moon-hutool/text](https://mooncakes.io/docs/mldong/moon-hutool/text) |
 | **贡献规范与两条红线** | [`AGENTS.md`](https://github.com/mldong/moon-hutool/blob/master/AGENTS.md)（交付形状、与 core 的边界、期望值冻结、文档三层分工、本机语法坑） |
-| **门禁判据 G1~G10** | [`scripts/contract_gate.sh`](https://github.com/mldong/moon-hutool/blob/master/scripts/contract_gate.sh) · CI 见 [`.github/workflows/ci.yml`](https://github.com/mldong/moon-hutool/blob/master/.github/workflows/ci.yml) |
+| **门禁判据 G1~G11** | [`scripts/contract_gate.sh`](https://github.com/mldong/moon-hutool/blob/master/scripts/contract_gate.sh) · CI 见 [`.github/workflows/ci.yml`](https://github.com/mldong/moon-hutool/blob/master/.github/workflows/ci.yml) |
 
 > 本表里的仓内链接一律写成 GitHub 绝对地址：发布包根是模块目录，相对路径在 mooncakes 页面上是死链（这条由门禁 G10 盯着，索引不许漂成死链）。
 
@@ -75,7 +75,7 @@ fn demo() {
 export MOON_HOME=<moon 工具链目录>   # Git Bash 下用 /g/ 之类 POSIX 盘符写法
 moon check --target wasm && moon test --target wasm
 moon info && moon fmt                # .mbti 是公开接口，diff 即 API 变更评审面
-scripts/contract_gate.sh             # G1~G10 十条判据
+scripts/contract_gate.sh             # G1~G11 十一条判据
 ```
 
 约定见 [`AGENTS.md`](https://github.com/mldong/moon-hutool/blob/master/AGENTS.md)。

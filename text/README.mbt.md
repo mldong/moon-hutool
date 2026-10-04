@@ -4,7 +4,8 @@ hutool `StrUtil` / `CharSequenceUtil` 的 MoonBit 对位：空白判定、切分
 
 契约与边界矩阵见 [`docs/spec/01-text.md`](https://github.com/mldong/moon-hutool/blob/master/docs/spec/01-text.md)。本页只放**典型用法**，每条都带期望值——这些 `test` 块会被 `moon test` 真编译真执行（抄 `moonbitlang/core/encoding/base64/README.mbt.md` 的机制），所以文档本身就是要通过的检查，不是装饰。
 
-> ⚠ 当前状态：实现未开工，函数体是 `abort`，本页示例**预期红**。签名与期望值已冻结，实现只负责把红变绿。
+> 状态：**已实现**（10-04）。本页 10 个示例块由 `moon test` 真跑，text 侧共 23 条用例全绿（`wasm`/`js`/`wasm-gc` 三档读数一致）。
+> 期望值仍是冻结状态：要改任何一条，必须单独一笔并给外部读数来源（`AGENTS.md` 红线一，门禁 G5/G11 双重盯着）。
 
 ## 用法
 

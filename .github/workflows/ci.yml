@@ -33,7 +33,7 @@ jobs:
       - name: moon version
         run: moon version --all
 
-      - name: Run contract gate G1-G10
+      - name: Run contract gate G1-G11
         # 基线 37 = 20 条契约用例 + 17 条包文档 test 块；加用例时同步上调，别下调（下调＝用例被悄悄删掉）
         env:
           BASELINE_TESTS: "37"

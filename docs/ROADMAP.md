@@ -48,7 +48,7 @@
 | 契约已冻结 | 2（`text`、`digest`） |
 | 已实现 | **1**（`text`：18 个公开函数，`.mbti` 零漂移） |
 | 用例 | `moon test --target wasm` **Total tests: 37, passed: 23, failed: 14** —— 剩的 14 条全是 `digest` 骨架（函数体 `abort`），属设计态；`check` wasm/js 均 0 警告 |
-| 门禁 | G1~G10 见 `scripts/contract_gate.sh`（G9 引用红线、G10 死链自检）；正向 GREEN、负向对照敢红（基线抬到 99 立刻 RED + 退出码 1） |
+| 门禁 | G1~G11 见 `scripts/contract_gate.sh`（G9 引用红线、G10 死链自检、G11 状态读数一致性）；正向 GREEN、负向对照敢红（基线抬到 99 立刻 RED + 退出码 1） |
 
 ## 暂不做（排后，未定日期）
 

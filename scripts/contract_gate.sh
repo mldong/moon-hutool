@@ -127,6 +127,14 @@ else
 fi
 
 
+echo "== G11 状态声明与用例读数一致（防台账不回填）=="
+if python scripts/check_status_claims.py >/tmp/mh_status.log 2>&1; then
+  grep -E "^  (PASS|INFO)" /tmp/mh_status.log
+else
+  bad "状态句与当场读数不一致（见下）："; sed -n '1,12p' /tmp/mh_status.log | sed 's/^/    /'
+fi
+
+
 echo
 if [ "$FAILS" = "0" ]; then
   echo "GATE GREEN：0 失败，$SKIPS 项 SKIP（SKIP 不等于通过，逐条看理由）"
