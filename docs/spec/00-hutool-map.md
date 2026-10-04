@@ -63,10 +63,11 @@
 
 | hutool | core 直接可用 | 本库补 | 不做 |
 |---|---|---|---|
-| `Base64`（标准/去填充） | `encoding/base64::{encode(padding?),decode(ignore_whitespace?),decode_lossy}` | ② url-safe、MIME 76 换行、**严格/宽松双档解码** | 不重抄标准表实现 |
-| `Base32/Base58/Base62/RadixUtil/BCD` | 无 | ③ `codec`（P2） | — |
+| `Base64`（标准/去填充） | `encoding/base64::{encode(padding?),decode(ignore_whitespace?),decode_lossy}` | ② url-safe、MIME 76 换行、**严格/宽松双档解码**（[`05-codec.md`](https://github.com/mldong/moon-hutool/blob/master/docs/spec/05-codec.md) #2） | 不重抄标准表实现——标准档只以**对拍腿**出现（G8） |
+| `Base32/Base58/Base62/RadixUtil` | 无 | ③ `codec`（[`05-codec.md`](https://github.com/mldong/moon-hutool/blob/master/docs/spec/05-codec.md) #3~#6） | Base58Check 的校验位复用 `digest` 已冻结的 SHA-256，本包不重复实现摘要 |
+| `BCD` / `Base16Codec` | `encoding/hex` | **不做** | hutool `BCD` 自己标了 `@Deprecated`，逻辑就是把两个十六进制位打进一个字节；`Base16Codec` 更是同名转发（AGENTS「与 core 的边界」直接拒） |
 | `HexUtil` | `encoding/hex` | ③ 只在需要 `hexToInt/颜色` 等组合时补 | 不转发 encode/decode |
-| `PercentCodec`/`UrlBuilder` | `encoding/percent` | ③ URL 结构化组装（RFC 3986，P2） | — |
+| `PercentCodec`/`UrlBuilder` | `encoding/percent` | ③ URL 结构化组装 + form 的 `+` 档（RFC 3986，**codec 的 PR-A2**） | percent-encoding 本体已在 core；本包只补「空格出 `+`、`+` 解回空格」那一档，与 `UrlBuilder` 同批定契约 |
 | `ReUtil`/`PatternPool`/`RegexPool` | **core 有公开 `Regex`**（`prelude.mbt:93` 免 import 导出；`find/split/replace_by/命名组/Pattern 构造`） | ③ `re`：Java 风味语法翻译（`\d\w\s`→POSIX 类）+ 常量表 | 不自写正则引擎（**本轮更正**：曾有调研判"core 无正则"，实测为假） |
 | `Validator.isEmail/isIpv4/...` | 靠 core `Regex` 可表达 | ① `valid`（P4，逐个定义语言 + 正反样本对拍） | 不承诺与 hutool 正则逐字节等价（差异写 spec） |
 
