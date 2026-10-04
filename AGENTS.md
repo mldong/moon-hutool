@@ -140,6 +140,14 @@ PR-A 的合入标准：`moon check` 必须全绿（签名与类型自洽、文�
 - 划"core 有什么"的边界时，两条**看着像没有其实有**的件要特别核：`Array::search_by(f) -> Int?`（还有
   `find_index` 别名，所以别再造返 `-1` 的 `index_where`）、`Array::dedup(self) -> Unit`（原地、只去**相邻**重复，
   文档自己写"要全去重请先排序"，所以它和保序全去重的 `distinct` 是两档，不能当一件）。
+- **`Map::update_or_default(key, default, f)` 在键缺席时直接存 `default`、不套 `f`**（core 注释自己点了它
+  mirrors Rust `and_modify(f).or_insert(default)`，而 **Java `Map.merge` 是反的**）⇒ 计数写
+  `update_or_default(x, 1, v => v + 1)`，给 0 会让**每个计数静默少 1**（本轮实现期唯一一处红就是这个）。
+  配套的 `Map::get_or_init(key, () => v) -> v` 返回**存进去的那个值**，所以分组可以直接
+  `m.get_or_init(k, () => []).push(x)`（Array 是引用语义，push 生效）。
+- **`Array::clamped_view(start, end)` 的两个参是带标签可选参**：按位置传 `xs.clamped_view(s, e)` 判
+  `requires 1 positional arguments, but is given 3` ⇒ 写 `xs.clamped_view(start = s, end = e)`。
+  它把越界自然夹空，"越界给空数组"这类契约可以直接交给它，不必自己写边界分支。
 - 用例首选 `assert_eq`；`inspect` 对集合走 `Show` 会吃废弃警告（core 立场：结果确定的用例用断言）。
 - `moon.mod` 是 TOML：注释用 `#`，`//` 会解析失败；`moon fmt` 会把 `[]` 写成 `[ ]`，改字段前先跑 fmt。
 
