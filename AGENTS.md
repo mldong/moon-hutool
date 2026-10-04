@@ -109,6 +109,15 @@ PR-A 的合入标准：`moon check` 必须全绿（签名与类型自洽、文�
   `struct_never_constructed` / `unused_constructor` / `unused_error_type`——它们是"未实现"的机械后果，
   为消警告去写假实现才是本末倒置。豁免只允许出现在**体里还有 `abort`** 的包（门禁 **G12**，带阳性对照），
   实现落地那一笔必须删掉 `warnings` 行。
+- **字符出口走 `StringBuilder`，`@buffer.Buffer` 只装字节**：本版 `@buffer.Buffer` 的 `write_char` 报废弃，
+  且它在 wasm/js 档内部是 UTF-16——按 `write_char_utf8` 落 UTF-8 字节再 `to_string()`，会把两字节当一个
+  UTF-16 单元读，ASCII 十六进制串变成一串生僻字（`"00000000"` → `"〰〰〰〰"`，长度直接减半）。
+  症状是断言里看到"看着像编码坏了"的期望值，其实错在实现侧；字节流才用 `Buffer` + `to_bytes`（`digest` 那条腿的形状）。
+- **wasm 档 `Int` 是 32 位**：`(0xff.to_int() << 24)` 先溢出成 `-1`，再 `.to_int64()` 是符号扩展 ⇒ 拼无符号
+  大端字必须**先升到 Int64 再移位**（`id.object_id_timestamp("ffffffff…")` 该读出 `4294967295`，读成 `-1` 就是这个坑）。
+  换档读数不同，本机 wasm 三档都能跑出来，别留给 CI 发现。
+- `fn` 的返回类型加 `raise E` 时**整行不许被 fmt 拆断**（`-> Unit\n  raise E {` 判 `Unexpected line break here, missing {`）：
+  参数多的话把参数列表写成多行，`-> T raise E {` 留在同一行。
 - 用例首选 `assert_eq`；`inspect` 对集合走 `Show` 会吃废弃警告（core 立场：结果确定的用例用断言）。
 - `moon.mod` 是 TOML：注释用 `#`，`//` 会解析失败；`moon fmt` 会把 `[]` 写成 `[ ]`，改字段前先跑 fmt。
 
