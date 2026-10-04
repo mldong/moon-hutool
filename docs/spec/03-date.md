@@ -1,8 +1,9 @@
 # 契约 03 · date（日期时间）
 
-> 状态：**契约已冻结、实现未开工**（10-04）。签名在 `date/date.mbt`（函数体是 `abort`），公开接口在
-> `date/pkg.generated.mbti`，期望值在 `date/date_test.mbt` 与 `date/README.mbt.md`（本包 47 条用例此刻红是设计态）。
-> 实现期只许把红变绿；改任何期望串须单独一笔并给出外部读数来源（门禁 G5）。
+> 状态：**已实现**（10-05）。实现在 `date/date.mbt`，公开接口在 `date/pkg.generated.mbti`（契约先行到实现落地
+> **`.mbti` 零漂移**——公开签名一字未动），期望值在 `date/date_test.mbt` 与 `date/README.mbt.md`：47 条全绿，
+> wasm / js / wasm-gc 三档读数一致，native 档由 CI 出证。改任何期望串须单独一笔并给出外部读数来源（门禁 G5）；
+> 本轮落地时**期望串一字未改**，改掉的是一处实现算错（两位年窗口 `70..99` 那档）。
 >
 > core **没有任何时间能力**：没有 `time`/`date`/`calendar` 包，全树 `grep ZonedDateTime|Instant|calendar|weekday|leap_year`
 > 在非测试代码命中 0（本机 `G:\dev-tools\moon\lib\core` 实测）。能借的只有 `env.now()`（epoch 毫秒）。
@@ -203,6 +204,11 @@
 
 命名时区与 DST（tzdb 是要 FFI 或大表的东西）、`java.text` 全套 pattern（`EEEE`/`MMM`/`a`/`Z`/`X`/`ww`/`W`/`D`/`F`/`G`）、JDK 的 lenient 滚动与"猜格式"、闰秒、微秒/纳秒精度、农历/节气/生肖、调休与法定节假日表、RFC 7231 IMF 日期（要英文星期/月名表，随 `EEE`/`MMM` 一起再定，见 `docs/ROADMAP.md`）。
 
-## 4. 骨架期的三条警告豁免
+## 4. 骨架期那三条警告豁免：PR-B 已删
 
-`date/moon.pkg` 里 `warnings = "-struct_never_constructed-unused_constructor-unused_error_type"`：这三类全是"函数体还是 `abort`"的机械后果（类型没人构造、错误变体没人构造、签名写了 `raise` 但体里没 `raise`）。**实现落地那一笔必须删掉它**——那时这三类若还响就是真死码。门禁 G12 拦这件事：豁免只允许出现在**函数体还是 `abort`** 的包里——体里已经没有 `abort` 了却还压着豁免，当场报红（这条带阳性对照）。
+`date/moon.pkg` 在骨架期压过一行 `warnings`，把 `struct_never_constructed` / `unused_constructor` /
+`unused_error_type` 三类压掉——它们全是"实现还没写"的机械后果（类型没人构造、错误变体没人构造、签名写了
+`raise` 而体里没 `raise`），为了消警告去写假实现才是本末倒置。
+
+**PR-B 落地那一笔已把整行删掉**（门禁 G12 的棘轮就是拦"豁免活得比 `abort` 久"，带阳性对照）。
+现在这个包的零警告是真读数：`moon check` 0 警告、`moon info` 后 `.mbti` 无 diff、47 条用例全绿。
