@@ -88,3 +88,24 @@ PR-A 的合入标准：`moon check` 必须全绿（签名与类型自洽、文�
 ### 工具链
 
 `moon check` / `moon test` / `moon fmt --check` / `moon info`（`.mbti` 必须提交，`moon info` 后 `git diff --quiet -- '*.mbti'` 即接口漂移检查；`moon info` **没有** `--check`，只有 `--dry-run`）/ `moon bundle --all` / `moon coverage`。
+
+### 文档规范：使用说明要能在 mooncakes 上直接查
+
+本库的**文档就是契约的一部分**（不只是门面）。形状照 `moonbitlang/core` 实物抄：core 70 个包里 **64 个带 `README.mbt.md`**，函数文档分节样式取自 `array/array.mbt:15-35`。
+
+每个已交付包必须有三层文档，**分工不重复**：
+
+| 层 | 放什么 | 会被执行吗 |
+|---|---|---|
+| `///` 函数文档 | Summary → `Parameters:` 逐条 → `Returns` → 关键 Notes；一条 `示例见 README.mbt.md` 指路 | 块内若写 ` ```mbt check ` + `test {}` 会被编译执行（core 就这么用），本库**不在 `///` 里放示例**，避免同一期望值两处双写漂移 |
+| `<pkg>/README.mbt.md` | 包级说明 + **典型用法**，每段 ```mbt check 里一个 `test { assert… }` | ✅ 真编译真执行：`text/README.mbt.md` 落地后 `moon test` 从 20 条涨到 37 条（多出 17 条全是文档块） |
+| `docs/spec/NN-<pkg>.md` | 七列台账：签名｜语义｜边界/错误｜hutool 对位｜差异声明｜读数来源｜血统；**边界与负向矩阵**在这里（`<pkg>_test.mbt` 承接可执行部分） | 人读 + 门禁 G6 查规范引用 |
+
+机制细节（本机实测，别猜）：
+
+- 代码块标记写 ` ```mbt check ` —— core 的 `encoding/base64/README.mbt.md` 就是这个标记，20 个块全部被 `moon test` 收进用例。
+- 包文档里**引用自己包用自包别名** `@text.is_blank(...)`，**不要写 `import`**（`.mbt` 里写 import 非法，文档块同样不吃）。
+- 判文档是否真被验，看 `moon test` 的 `Total tests` 涨没涨，不看文件存不存在；只 `moon check` 会误判（文档测试属 test 档）。
+- 本地预览：`moon doc --serve`（默认 `127.0.0.1:3000`），或 `moon doc <符号名>` 查单个符号的文档。
+- 发布页渲染的是**模块目录里那份** README（发布包根＝模块目录）；跨目录链接一律写 GitHub 绝对地址，相对路径在 mooncakes 页面是死链。
+- 期望值此刻红是设计态（函数体 `abort`）。文档块里的期望串与 `<pkg>_test.mbt` 同受"期望值冻结"约束：实现期只许把红变绿。
