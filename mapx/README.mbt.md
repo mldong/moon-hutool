@@ -90,11 +90,16 @@ test "三种写法一个槽位，原样键是第一次写进去的那个" {
   assert_eq(m.get("CONTENT-TYPE"), Some("application/json"))
   assert_eq(m.get_key_of("content-type"), Some("Content-Type"))
   assert_eq(m.contains("x-trace-id"), true)
-  // 非 ASCII 不折叠：这条断言就是"折叠只管 ASCII"的边界
+  // 折叠判的是"这个字符是不是 ASCII 字母"，不看它旁边是什么：混排串里的 `A` 照样折叠
   let cjk : @mapx.CiMap[Int] = @mapx.CiMap::new()
   let _ = cjk.put("中文-A", 1)
   assert_eq(cjk.contains("中文-A"), true)
-  assert_eq(cjk.contains("中文-a"), false)
+  assert_eq(cjk.contains("中文-a"), true)
+  // 真正不折叠的是非 ASCII 字母本身：`Ä` 与 `ä` 是两个槽位
+  let umlaut : @mapx.CiMap[Int] = @mapx.CiMap::new()
+  let _ = umlaut.put("Ä", 1)
+  assert_eq(umlaut.contains("Ä"), true)
+  assert_eq(umlaut.contains("ä"), false)
 }
 ```
 

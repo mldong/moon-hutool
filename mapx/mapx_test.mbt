@@ -172,8 +172,16 @@ test "@mapx #7.7 contains / remove / to_map 都按折叠槽走；折叠只管 AS
   assert_eq(m.remove("ABC"), None)
   assert_eq(m.length(), 1)
   let _ = m.put("中文-A", 3)
+  // 折叠只看字符是不是 ASCII 字母，不看它周围：混排串里的 `A` 照样折叠，
+  // 所以 `中文-a` 命中的是同一个槽位（这条在契约期被我写反了，见更正 commit）
   assert_eq(m.contains("中文-A"), true)
-  assert_eq(m.contains("中文-a"), false)
+  assert_eq(m.contains("中文-a"), true)
+  // 真正"不折叠"的是非 ASCII 字母本身：`Ä` 与 `ä` 是两个槽位
+  let non_ascii : @mapx.CiMap[Int] = @mapx.CiMap::new()
+  let _ = non_ascii.put("Ä", 1)
+  assert_eq(non_ascii.contains("Ä"), true)
+  assert_eq(non_ascii.contains("ä"), false)
+  assert_eq(non_ascii.length(), 1)
   let e : @mapx.CiMap[Int] = @mapx.CiMap::new()
   assert_eq(e.length(), 0)
   assert_eq(e.get("anything"), None)
