@@ -8,7 +8,7 @@
 
 **spec 文件名的序号 = 该包在 [`docs/ROADMAP.md`](https://github.com/mldong/moon-hutool/blob/master/docs/ROADMAP.md) 逐包表里的行号**（`01-text`、`02-digest`、`03-date`、`04-id` … `23-typex`）。它是**稳定 ID 不是排名**：包挪进"暂不做"也不改号，号一旦发过就不再动。这条由门禁 G13 守着——某行的「契约」列与它的行号对不上就报红（防止"号"和"表"各漂各的，这个不一致曾经真的存在过）。
 
-已定契约的包：`01-text.md`、`02-digest.md`、`03-date.md`。
+已定契约的包：`01-text.md`、`02-digest.md`、`03-date.md`、`04-id.md`。
 
 ## 1. 字符串（hutool `StrUtil` / `CharSequenceUtil`，实测 1838 非注释行）
 

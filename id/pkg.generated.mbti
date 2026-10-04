@@ -2,10 +2,111 @@
 package "mldong/moon-hutool/id"
 
 // Values
+pub fn id_range_for_timestamps(Int64, Int64) -> IdRange raise IdError
+
+pub fn is_object_id(String) -> Bool
+
+pub fn name_uuid(String) -> String
+
+pub fn nano_id(String, Int, Bytes) -> String raise IdError
+
+pub let nano_id_alphabet : String
+
+pub fn nano_id_bytes_needed(Int, Int) -> Int raise IdError
+
+pub fn nano_id_default() -> String raise IdError
+
+pub fn nano_id_random(String, Int) -> String raise IdError
+
+pub let nano_id_size : Int
+
+pub fn object_id(Int64, Int64, Int64) -> String raise IdError
+
+pub fn object_id_timestamp(String) -> Int64 raise IdError
+
+pub let snowflake_epoch : Int64
+
+pub fn snowflake_id(Int64, Int, Int, Int64) -> Int64 raise IdError
+
+pub let snowflake_max_node : Int
+
+pub let snowflake_max_sequence : Int64
+
+pub fn snowflake_parts(Int64) -> SnowflakeParts raise IdError
+
+pub let uuid_nil : String
+
+pub let uuid_ns_dns : String
+
+pub let uuid_ns_oid : String
+
+pub let uuid_ns_url : String
+
+pub let uuid_ns_x500 : String
+
+pub fn uuid_v3(String, String) -> String raise IdError
+
+pub fn uuid_v4(Bytes) -> String raise IdError
+
+pub fn uuid_v4_random() -> String raise IdError
+
+pub fn uuid_version(String) -> Int raise IdError
 
 // Errors
+pub suberror IdError {
+  FieldOutOfRange(String, Int64, Int64)
+  TimestampOverflow(Int64)
+  ClockMovedBackwards(Int64)
+  EntropyTooShort(Int, Int)
+  NoEntropy
+  BadLength(String, Int, Int)
+  BadHex(String, Int)
+}
 
 // Types and methods
+pub struct IdRange {
+  start : Int64
+  finish : Int64
+} derive(Compare, Eq)
+pub fn IdRange::compare(Self, Self) -> Int
+pub fn IdRange::equal(Self, Self) -> Bool
+pub fn IdRange::not_equal(Self, Self) -> Bool
+pub fn IdRange::op_ge(Self, Self) -> Bool
+pub fn IdRange::op_gt(Self, Self) -> Bool
+pub fn IdRange::op_le(Self, Self) -> Bool
+pub fn IdRange::op_lt(Self, Self) -> Bool
+
+pub struct ObjectIdGen {
+  machine : Int64
+  mut counter : Int64
+}
+pub fn ObjectIdGen::new(Int64, start_counter? : Int64) -> Self raise IdError
+pub fn ObjectIdGen::next(Self, Int64) -> String raise IdError
+
+pub struct Snowflake {
+  datacenter_id : Int
+  worker_id : Int
+  tolerance_millis : Int64
+  mut last_timestamp : Int64
+  mut sequence : Int64
+}
+pub fn Snowflake::new(Int, Int, tolerance_millis? : Int64) -> Self raise IdError
+pub fn Snowflake::next(Self, Int64) -> Int64 raise IdError
+pub fn Snowflake::next_string(Self, Int64) -> String raise IdError
+
+pub struct SnowflakeParts {
+  timestamp_millis : Int64
+  datacenter_id : Int
+  worker_id : Int
+  sequence : Int64
+} derive(Compare, Eq)
+pub fn SnowflakeParts::compare(Self, Self) -> Int
+pub fn SnowflakeParts::equal(Self, Self) -> Bool
+pub fn SnowflakeParts::not_equal(Self, Self) -> Bool
+pub fn SnowflakeParts::op_ge(Self, Self) -> Bool
+pub fn SnowflakeParts::op_gt(Self, Self) -> Bool
+pub fn SnowflakeParts::op_le(Self, Self) -> Bool
+pub fn SnowflakeParts::op_lt(Self, Self) -> Bool
 
 // Type aliases
 

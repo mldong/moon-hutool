@@ -1,1 +1,9 @@
-// 依赖在此声明；占位期不 import 任何 core 包（未使用的 import 会吃 unused_package 警告并卡零警告门禁）
+import {
+  "mldong/moon-hutool/id",
+} for "test"
+
+// 骨架期豁免（体全 abort ⇒ 类型/变体没人构造、签名有 raise 而体里没 raise、
+// 状态字段声明了 mut 却没人改）。
+// 实现落地那一笔必须删掉——门禁 G12 拦着不让忘。
+
+warnings = "-struct_never_constructed-unused_constructor-unused_error_type-unused_mut"
