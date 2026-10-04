@@ -16,8 +16,8 @@
 
 | 包 | hutool 对位 | 状态 | 契约 | 用例 |
 |---|---|---|---|---|
-| `text` | `StrUtil` / `CharSequenceUtil` / `NamingCase` / `StrFormatter` | **契约已冻结** | `docs/spec/01-text.md` | 12 条断言 + 6 个文档块 |
-| `digest` | `DigestUtil`（MD5 / SHA-256 / HMAC） | **契约已冻结** | `docs/spec/05-digest.md` | 7 条 + 6 个文档块 |
+| `text` | `StrUtil` / `CharSequenceUtil` / `NamingCase` / `StrFormatter` | **已实现**（10-04，四目标 CI 待跑） | `docs/spec/01-text.md` | 13 条断言 + 10 个文档块，全绿 |
+| `digest` | `DigestUtil`（MD5 / SHA-256 / HMAC） | **契约已冻结**（实现中） | `docs/spec/05-digest.md` | 7 条 + 6 个文档块 |
 | `date` | `DateUtil` / `CalendarUtil` / `DatePattern` / `DateUnit` | 未开工（下一个出契约） | — | core **无任何 time 包**，本库最大"从无到有"块 |
 | `id` | `IdUtil`（雪花 / UUID v3·v4·v5 / ObjectId / NanoId） | 未开工 | — | worker/datacenter/时钟全显式注入 |
 | `codec` | `Base64`(url-safe·MIME·宽松解码) / `Base32` / `Base58` / `Base62` / `BCD` / `RadixUtil` / `PercentCodec` / `UrlBuilder` | 未开工 | — | core 已有标准 base64/hex/percent，只补缺口不转发 |
@@ -46,8 +46,8 @@
 |---|---|
 | 包总数 | 23 |
 | 契约已冻结 | 2（`text`、`digest`） |
-| 已实现 | **0**（函数体全是 `abort`） |
-| 用例 | `moon test --target wasm` **Total tests: 37, passed: 0, failed: 37** —— 全红是设计态；`check` wasm/js 均 0 警告 |
+| 已实现 | **1**（`text`：18 个公开函数，`.mbti` 零漂移） |
+| 用例 | `moon test --target wasm` **Total tests: 37, passed: 23, failed: 14** —— 剩的 14 条全是 `digest` 骨架（函数体 `abort`），属设计态；`check` wasm/js 均 0 警告 |
 | 门禁 | G1~G9 见 `scripts/contract_gate.sh`；正向 GREEN、负向对照敢红（基线抬到 99 立刻 RED + 退出码 1） |
 
 ## 暂不做（排后，未定日期）

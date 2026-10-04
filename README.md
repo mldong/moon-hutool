@@ -13,8 +13,8 @@ MoonBit 版 [hutool](https://github.com/chinabugotech/hutool) 风格工具库。
 | 读数 | 值 |
 |---|---|
 | `moon check --target wasm` | 全绿（0 warnings 0 errors） |
-| `moon test --target wasm` | **Total tests: 37, passed: 0, failed: 37**（20 条契约用例 + 17 条包文档里的 `test` 块）—— 每条都停在 `abort`，红就是设计态 |
-| 已出契约的包 | `text`（字符串门面）、`digest`（MD5 / SHA-256 / HMAC-SHA-256） |
+| `moon test --target wasm` | **Total tests: 37, passed: 23, failed: 14** —— `text` 全绿；剩 14 条是 `digest` 骨架（函数体 `abort`），红是设计态 |
+| 已实现 / 已出契约 | `text` 已实现（18 个公开函数）；`digest` 契约已冻结、实现中 |
 | 已建目录待出契约 | 21 个包（见 `docs/spec/00-hutool-map.md`） |
 
 期望值权威顺序：**契约表 + 测试里的期望值 > hutool 行为 > 直觉**。实现期改期望值必须单独一笔并给出外部读数来源（`scripts/contract_gate.sh` G5 拦改）。
