@@ -44,9 +44,11 @@ pub fn[A, K : Hash + Eq] group_by(
   xs : Array[A],
   key : (A) -> K,
 ) -> Map[K, Array[A]] {
-  let _ = xs
-  let _ = key
-  abort("moon-hutool: coll.group_by 未实现（spec 06-coll #6.1）")
+  let m : Map[K, Array[A]] = Map([])
+  for x in xs {
+    m.get_or_init(key(x), () => []).push(x)
+  }
+  m
 }
 
 ///|
@@ -58,9 +60,16 @@ pub fn[A, K : Hash + Eq] group_by(
 /// - Note: core 的 `filter` 只给一边，`extract_if` 会**改掉输入**；两桶都要且不动输入，
 ///   就是这一件。hutool 对位 `CollUtil.splitBy`/`ListUtil.partition`
 pub fn[A] partition(xs : Array[A], pred : (A) -> Bool) -> (Array[A], Array[A]) {
-  let _ = xs
-  let _ = pred
-  abort("moon-hutool: coll.partition 未实现（spec 06-coll #6.2）")
+  let yes : Array[A] = []
+  let no : Array[A] = []
+  for x in xs {
+    if pred(x) {
+      yes.push(x)
+    } else {
+      no.push(x)
+    }
+  }
+  (yes, no)
 }
 
 ///|
@@ -71,8 +80,7 @@ pub fn[A] partition(xs : Array[A], pred : (A) -> Bool) -> (Array[A], Array[A]) {
 ///   所以本件是真缺口。**别和 `dedup` 混用**：`[1, 2, 1]` 走 `dedup` 还是 `[1, 2, 1]`，
 ///   走本函数是 `[1, 2]`。已排序输入上两者同结果——这条由用例里的对拍腿钉住（门禁 G8）
 pub fn[A : Hash + Eq] distinct(xs : Array[A]) -> Array[A] {
-  let _ = xs
-  abort("moon-hutool: coll.distinct 未实现（spec 06-coll #6.3）")
+  distinct_by(xs, x => x)
 }
 
 ///|
@@ -82,9 +90,16 @@ pub fn[A : Hash + Eq] distinct(xs : Array[A]) -> Array[A] {
 /// - Note: hutool `CollUtil.distinct` 只能按 `equals` 去值，按字段去重要 `uniq` 那种
 ///   反射实现——本库无反射，键由闭包给。与 `distinct` 的关系：`key` 取恒等时两者同结果
 pub fn[A, K : Hash + Eq] distinct_by(xs : Array[A], key : (A) -> K) -> Array[A] {
-  let _ = xs
-  let _ = key
-  abort("moon-hutool: coll.distinct_by 未实现（spec 06-coll #6.3）")
+  let out : Array[A] = []
+  let seen : Map[K, Bool] = Map([])
+  for x in xs {
+    let k = key(x)
+    if !seen.contains(k) {
+      let _ = seen.set(k, true)
+      out.push(x)
+    }
+  }
+  out
 }
 
 ///|
@@ -94,8 +109,13 @@ pub fn[A, K : Hash + Eq] distinct_by(xs : Array[A], key : (A) -> K) -> Array[A] 
 /// - Note: core 的 `Array::count(value)` 只数**一个**值，全量统计要自己折——本件就是那一次折。
 ///   hutool 对位 `CollUtil.countMap`
 pub fn[A : Hash + Eq] freq(xs : Array[A]) -> Map[A, Int] {
-  let _ = xs
-  abort("moon-hutool: coll.freq 未实现（spec 06-coll #6.4）")
+  let m : Map[A, Int] = Map([])
+  for x in xs {
+    // core 的 `update_or_default` 在键缺席时**直接存默认值、不套 `f`**（Java `Map.merge` 相反），
+    // 所以计数默认值给 1 而不是 0——给 0 会让每个计数少 1
+    m.update_or_default(x, 1, v => v + 1)
+  }
+  m
 }
 
 ///|
@@ -118,10 +138,15 @@ pub fn[A] page(
   page_number : Int,
   page_size : Int,
 ) -> Array[A] raise CollError {
-  let _ = xs
-  let _ = page_number
-  let _ = page_size
-  abort("moon-hutool: coll.page 未实现（spec 06-coll #6.5）")
+  if page_size < 1 {
+    raise NonPositivePageSize(page_size)
+  }
+  if page_number < 1 {
+    raise NonPositivePageNumber(page_number)
+  }
+  let s = (page_number - 1) * page_size
+  let e = s + page_size
+  xs.clamped_view(start=s, end=e).to_owned()
 }
 
 ///|
@@ -135,9 +160,13 @@ pub fn[A] page(
 /// - Note: 与 `page` 的配对读法：`page_count(xs.length(), size)` 是页号的上界，
 ///   越界页号在 `page` 那一档给空数组，两者不矛盾
 pub fn page_count(total : Int, page_size : Int) -> Int raise CollError {
-  let _ = total
-  let _ = page_size
-  abort("moon-hutool: coll.page_count 未实现（spec 06-coll #6.7）")
+  if page_size < 1 {
+    raise NonPositivePageSize(page_size)
+  }
+  if total < 0 {
+    raise NegativeTotal(total)
+  }
+  (total + page_size - 1) / page_size
 }
 
 ///|
@@ -147,9 +176,9 @@ pub fn page_count(total : Int, page_size : Int) -> Int raise CollError {
 ///   这边给**可以安全展示的数组**且顺序确定。hutool 对位 `CollUtil.union`（那侧用
 ///   `LinkedHashSet` 保序，与本库同判）
 pub fn[A : Hash + Eq] union(a : Array[A], b : Array[A]) -> Array[A] {
-  let _ = a
-  let _ = b
-  abort("moon-hutool: coll.union 未实现（spec 06-coll #6.8）")
+  let all = a.copy()
+  all.append(b)
+  distinct(all)
 }
 
 ///|
@@ -159,9 +188,11 @@ pub fn[A : Hash + Eq] union(a : Array[A], b : Array[A]) -> Array[A] {
 ///   的档位，它同样落在 `LinkedHashSet` 上）。要"按行保留重复"的交集是 join 语义，归 `mapx`
 ///   之后的批次再看，本包不掺
 pub fn[A : Hash + Eq] intersection(a : Array[A], b : Array[A]) -> Array[A] {
-  let _ = a
-  let _ = b
-  abort("moon-hutool: coll.intersection 未实现（spec 06-coll #6.8）")
+  let in_b : Map[A, Bool] = Map([])
+  for x in b {
+    let _ = in_b.set(x, true)
+  }
+  distinct(a).filter(x => in_b.contains(x))
 }
 
 ///|
@@ -172,9 +203,11 @@ pub fn[A : Hash + Eq] intersection(a : Array[A], b : Array[A]) -> Array[A] {
 ///   本库只做 `subtract` 这一件，`disjunction` **不做**（`Set` 已有 `symmetric_difference`，
 ///   要保序版本再单独提需求）
 pub fn[A : Hash + Eq] subtract(a : Array[A], b : Array[A]) -> Array[A] {
-  let _ = a
-  let _ = b
-  abort("moon-hutool: coll.subtract 未实现（spec 06-coll #6.8）")
+  let in_b : Map[A, Bool] = Map([])
+  for x in b {
+    let _ = in_b.set(x, true)
+  }
+  a.filter(x => !in_b.contains(x))
 }
 
 ///|
@@ -185,15 +218,13 @@ pub fn[A : Hash + Eq] subtract(a : Array[A], b : Array[A]) -> Array[A] {
 /// - Note: core 只有 `Iter::maximum`（要先 `.iter()`）与 `List::maximum`，`Array` 上没有——
 ///   本件是把那条腿直接接在 `Array` 上，语义与 `Iter::maximum` 一致（对拍腿，门禁 G8）
 pub fn[A : Compare] maximum(xs : Array[A]) -> A? {
-  let _ = xs
-  abort("moon-hutool: coll.maximum 未实现（spec 06-coll #6.9）")
+  maximum_by_key(xs, x => x)
 }
 
 ///|
 /// 最小值，口径与 `maximum` 对称（并列取第一个、空给 `None`）
 pub fn[A : Compare] minimum(xs : Array[A]) -> A? {
-  let _ = xs
-  abort("moon-hutool: coll.minimum 未实现（spec 06-coll #6.9）")
+  minimum_by_key(xs, x => x)
 }
 
 ///|
@@ -205,15 +236,43 @@ pub fn[A : Compare] minimum(xs : Array[A]) -> A? {
 /// - Note: 这一件是"取分值最高的那条记录"的常用姿势。core 的 `sort_by_key` 已有但那是排序，
 ///   只要最大时不必付 O(n log n)；`@cmp.maximum_by_key` 只有二元版，没有折叠版
 pub fn[A, K : Compare] maximum_by_key(xs : Array[A], key : (A) -> K) -> A? {
-  let _ = xs
-  let _ = key
-  abort("moon-hutool: coll.maximum_by_key 未实现（spec 06-coll #6.10）")
+  if xs.is_empty() {
+    None
+  } else {
+    let mut best = xs[0]
+    let mut best_key = key(best)
+    let mut i = 1
+    while i < xs.length() {
+      let x = xs[i]
+      let k = key(x)
+      if k > best_key {
+        best = x
+        best_key = k
+      }
+      i = i + 1
+    }
+    Some(best)
+  }
 }
 
 ///|
 /// 按键取最小，口径与 `maximum_by_key` 对称
 pub fn[A, K : Compare] minimum_by_key(xs : Array[A], key : (A) -> K) -> A? {
-  let _ = xs
-  let _ = key
-  abort("moon-hutool: coll.minimum_by_key 未实现（spec 06-coll #6.10）")
+  if xs.is_empty() {
+    None
+  } else {
+    let mut best = xs[0]
+    let mut best_key = key(best)
+    let mut i = 1
+    while i < xs.length() {
+      let x = xs[i]
+      let k = key(x)
+      if k < best_key {
+        best = x
+        best_key = k
+      }
+      i = i + 1
+    }
+    Some(best)
+  }
 }

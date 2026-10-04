@@ -4,8 +4,8 @@ hutool `CollUtil` / `ListUtil` 高频子集的 MoonBit 对位：按键分组、�
 
 完整边界矩阵与逐条读数来源见 [`docs/spec/06-coll.md`](https://github.com/mldong/moon-hutool/blob/master/docs/spec/06-coll.md)。
 
-> 状态：**契约已冻结、实现未开工**——`coll/coll.mbt` 的函数体是 `abort`，下面每个块的期望值此刻红是设计态。
-> 期望串与 `coll_test.mbt` 同受"期望值冻结"约束：实现期只许把红变绿（门禁 G5）。
+> 状态：**已实现**（10-05）——`coll/coll.mbt` 的 16 个公开项落地，下面每个块的期望值都是当场跑出来的读数；
+> wasm / js / wasm-gc 三档一致。期望串受"期望值冻结"约束：改任何期望须单独一笔并给外部读数来源（门禁 G5）。
 
 ## 这一包的全部理由是"core 没有哪几件"
 

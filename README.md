@@ -28,9 +28,9 @@ MoonBit 版 [hutool](https://github.com/chinabugotech/hutool) 风格工具库。
 <!-- READINGS:BEGIN 由 scripts/sync_status.py 生成，勿手改 -->
 | 读数（`moon test --target wasm`，当场跑） | 值 |
 |---|---|
-| 用例总数 | **171** —— 绿 142 / 红 29 |
-| 包状态 | 共 23 个：`已实现` 4 · `契约已冻结` 2 · `未开工` 17 |
-| 红的是谁 | `codec`（13 红）、`coll`（16 红） —— 未实现的包红是设计态 |
+| 用例总数 | **171** —— 绿 158 / 红 13 |
+| 包状态 | 共 23 个：`已实现` 5 · `契约已冻结` 1 · `未开工` 17 |
+| 红的是谁 | `codec`（13 红） —— 未实现的包红是设计态 |
 <!-- READINGS:END -->
 
 逐包的"哪个实现了、哪个在做、哪个暂不做"看 [`docs/ROADMAP.md`](https://github.com/mldong/moon-hutool/blob/master/docs/ROADMAP.md)——它是进度的唯一真相，且每个真实存在的包都必须在那里有一行（门禁 G11 查这条）。

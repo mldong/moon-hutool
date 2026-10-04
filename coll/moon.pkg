@@ -1,16 +1,7 @@
-// 骨架期：实现体全是 abort，所以不 import 任何非测试依赖
-// （未使用的 import 会吃 unused_package 警告并卡零警告门禁）。
+// 实现已落地 ⇒ 骨架期那三条豁免（`unused_constructor`/`unused_error_type`/`unused_trait_bound`）
+// 一并删掉：门禁 G12 查的就是"体里已经没有 abort 却还压着豁免"。
 // 测试侧只用 prelude 里就有的 core 方法做对拍腿（`chunks`/`dedup`/`iter().maximum()`，门禁 G8），
-// 不需要额外 import。
+// 所以本包不 import 任何非测试依赖。
 import {
   "mldong/moon-hutool/coll",
 } for "test"
-
-// 骨架期豁免（三类全是"未实现"的机械后果，不是代码缺陷）：
-// - `unused_constructor`：`CollError` 的三个变体还没人构造
-// - `unused_error_type`：`page`/`page_count` 签名写了 `raise CollError` 而体里没 `raise`
-// - `unused_trait_bound`：`Hash + Eq` / `Compare` 这些界是给调用方约束元素用的，
-//   体里全是 `abort` 时编译器看不到它们被用到（实现落地后自然消失）
-// 实现落地那一笔必须删掉整行——门禁 G12 拦着不让忘。
-
-warnings = "-unused_constructor-unused_error_type-unused_trait_bound"

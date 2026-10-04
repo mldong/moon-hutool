@@ -21,7 +21,7 @@
 | `date` | `DateUtil` / `CalendarUtil` / `DatePattern` / `DateUnit` | **已实现**（10-05，47 条全绿，wasm / js / wasm-gc 三档读数一致，`.mbti` 零漂移） | `docs/spec/03-date.md` | 47 条（31 断言块 + 16 文档块），全绿；core **无任何 time 包**，本库最大"从无到有"块（整包自研：偏移显式传、无 tzdb/DST、proleptic Gregorian + 天文纪年） |
 | `id` | `IdUtil`（雪花 / UUID v3·v4 / ObjectId / NanoId） | **已实现**（10-05，32 条全绿，wasm / js / wasm-gc 三档读数一致，native 档由 CI 出证） | `docs/spec/04-id.md` | 32 条（22 断言块 + 10 文档块），全绿；时钟与熵全显式注入，**v5 待 `digest` 的 SHA-1**（hutool 本身无 v5） |
 | `codec` | `Base64`(url-safe·MIME·宽松解码) / `Base32` / `Base58`(含 Check) / `Base62` / `RadixUtil` / `x-www-form-urlencoded` / `UrlBuilder` | **契约已冻结**（10-05 分两批：第一批 24 条绿，第二批 13 条红是设计态） | `docs/spec/05-codec.md` | 37 条（24 断言块 + 13 文档块），其中 §7 form 档与 §8 URL 组件的 13 条此刻红（函数体 `abort`）；读数走 RFC 4648 §10 向量 + 两套独立实现互算（Base58/62 无 RFC），form 档以 HTML 序列化器 ↔ Node `URLSearchParams` 双路互算、URL 档以 RFC 3986 §3/§5.2.4/§6.2.2 加 Python `urlsplit` 对跑；`BCD` 判**不做**（上游已 `@Deprecated`、语义即 core hex），§5.2.2 引用解析与 IDN 另批 |
-| `coll` | `CollUtil` / `ListUtil` / `IterUtil` 的高频子集 | **契约已冻结**（10-05，16 条红是设计态） | `docs/spec/06-coll.md` | 16 条（11 断言块 + 5 文档块）；core `Array` 对外可写的方法几十条量级、扫描口径写在 spec §1（`chunks`/`dedup`/`flatten`/`zip`/`join`/`sort_by_key`/`shuffle`/`search_by` 全都有），本包只补**读源码数出来的缺口**：分组、两桶划分、保序去重与按键去重、频次表、分页、数组版并/交/差、`Array` 上的极值与按键极值；对拍腿三条（`distinct`↔`dedup`、`page`↔`chunks`、`maximum`↔`Iter::maximum`）；`index_where` 那种"找不到返 `-1`"的哨兵**不做**（core `search_by` 给 `Int?`） |
+| `coll` | `CollUtil` / `ListUtil` / `IterUtil` 的高频子集 | **已实现**（10-05，16 条全绿，wasm / js / wasm-gc 三档读数一致，`.mbti` 零漂移） | `docs/spec/06-coll.md` | 16 条（11 断言块 + 5 文档块）全绿；core `Array` 对外可写的方法几十条量级、扫描口径写在 spec §1（`chunks`/`dedup`/`flatten`/`zip`/`join`/`sort_by_key`/`shuffle`/`search_by` 全都有），本包只补**读源码数出来的缺口**：分组、两桶划分、保序去重与按键去重、频次表、分页、数组版并/交/差、`Array` 上的极值与按键极值；对拍腿三条（`distinct`↔`dedup`、`page`↔`chunks`、`maximum`↔`Iter::maximum`）；`index_where` 那种"找不到返 `-1`"的哨兵**不做**（core `search_by` 给 `Int?`） |
 | `mapx` | `MapUtil` / `Table`(二维表) / `BiMap` / `CaseInsensitiveMap` | 未开工 | — | `Map` 本身已保插入序，不再造 LinkedHashMap |
 | `num` | `NumberUtil` / `NumberChineseFormatter` / `MathUtil` / `Calculator` / `Money`(薄) | 未开工 | — | 含 core 缺的 `gcd/lcm/ext_gcd/mod_inverse` |
 | `conv` | `Convert`（无反射版） | 未开工 | — | `Json`→类型显式 `match` + 注册闭包 |
@@ -47,9 +47,9 @@
 <!-- READINGS:BEGIN 由 scripts/sync_status.py 生成，勿手改 -->
 | 读数（`moon test --target wasm`，当场跑） | 值 |
 |---|---|
-| 用例总数 | **171** —— 绿 142 / 红 29 |
-| 包状态 | 共 23 个：`已实现` 4 · `契约已冻结` 2 · `未开工` 17 |
-| 红的是谁 | `codec`（13 红）、`coll`（16 红） —— 未实现的包红是设计态 |
+| 用例总数 | **171** —— 绿 158 / 红 13 |
+| 包状态 | 共 23 个：`已实现` 5 · `契约已冻结` 1 · `未开工` 17 |
+| 红的是谁 | `codec`（13 红） —— 未实现的包红是设计态 |
 <!-- READINGS:END -->
 
 | 项 | 值 |
