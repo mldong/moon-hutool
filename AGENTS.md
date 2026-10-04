@@ -169,6 +169,9 @@ PR-A 的合入标准：`moon check` 必须全绿（签名与类型自洽、文�
 - `Map` 的字面量构造写 **`Map([("a", 1), ("b", 2)])`**。别去点 `Map.of([...])`：一来 `src.of` 判
   `has no method of`，二来按函数形式调判 `Function with labelled arguments can only be applied directly`
   （`of` 那一档是有标签参的构造函数，不能按位置传）。同一份代码里 `Map::new()` 也可用（`new` 无标签参）。
+- **空表字面量 `Map([])` 就要键有 `Hash + Eq`**：所以"内部持有两张 `Map`"的容器（如 `BiMap`）
+  连 `new` 都必须带 `K : Hash + Eq, V : Hash + Eq`（反向那张的键是 V）。**界也是契约**——
+  契约期写松了，实现期就被编译器逼着收紧并动 `.mbti`；写界时说清"这个方法的哪一步用到它的可散列性"。
 - 用例首选 `assert_eq`；`inspect` 对集合走 `Show` 会吃废弃警告（core 立场：结果确定的用例用断言）。
 - `moon.mod` 是 TOML：注释用 `#`，`//` 会解析失败；`moon fmt` 会把 `[]` 写成 `[ ]`，改字段前先跑 fmt。
 

@@ -1,8 +1,9 @@
 # 契约 07 · mapx（Map 的组合件）
 
-> 状态：**契约已冻结、实现未开工**（第一批）。签名骨架在 `mapx/mapx.mbt`（函数体是 `abort`），公开接口在
-> `mapx/pkg.generated.mbti`，期望值在 `mapx/mapx_test.mbt` 与 `mapx/README.mbt.md`——本包用例此刻全红是设计态。
-> 实现那一笔只许把红变绿；改任何期望串须单独一笔并给外部读数来源（门禁 G5）。
+> 状态：**契约与实现两笔都交完**（10-05，第一批）。签名骨架先冻结（`42ef15f`），实现随后落地；
+> 公开接口在 `mapx/pkg.generated.mbti`，期望值在 `mapx/mapx_test.mbt` 与 `mapx/README.mbt.md`，
+> 16 条期望值**一字未改**地从红变绿（唯一一处期望改动是契约期我自己写反的 `中文-a` 那条，单独走 `d61524e`）。
+> 改任何期望串须单独一笔并给外部读数来源（门禁 G5）。
 >
 > **范围分两批**：第一批 = `BiMap` + `CiMap`（大小写不敏感映射）+ `Map` 的两个组合件；
 > `Table`（二维表）自成一块，另起第二批（§9）。理由：`Table` 是"行列两个索引 + 一张网格"的第三种形状，
@@ -99,7 +100,7 @@ new of remove retain set to_array to_json update update_or_default values`
 这三条都进用例。不写死的话，实现期最容易发生的就是"顺手换成 `HashMap`"——那时键序还在，
 但 `values()` 出现重复就没人拦得住。
 
-## 8. 骨架期的两条编译器裁决（进 AGENTS）
+## 8. 骨架期与实现期的四条编译器/契约裁决（进 AGENTS）
 
 - **泛型 `suberror` 不支持**（见 §2 的 ⚠）：错误面想带泛型读数就只能改设计，不是改语法。
 - **泛型结构体的方法必须写全 `Self` 的参数**：`self : Self` 判
@@ -107,6 +108,10 @@ new of remove retain set to_array to_json update update_or_default values`
   另外骨架体里必须**碰一下字段**（`let _ = self.forward`），否则未使用的类型参数判 **4027 错误**
   （不是警告，`warnings` 豁免串压不住），而 `struct_never_constructed` 是警告、可以豁免。
   这两类的分界在 moon.pkg 的注释里写明了。
+- **界也是契约，写松了实现会逼你收紧**：`BiMap::new` 与 `remove` 在契约期只写了 `K : Hash + Eq`，
+  实现那一笔被迫补成 `V : Hash + Eq`——空表字面量 `Map([])` 就要键有界，而本件内部是**两张** `Map`
+  （正向键是 K、反向键是 V），删一个键必须同时摘掉反向那条。签名以 `mapx/pkg.generated.mbti` 为准。
+  记在这里是为了下一个包别再犯：写界的时候要说清"这个方法的哪一步会用到它的可散列性"。
 
 ## 9. 这一批不含
 

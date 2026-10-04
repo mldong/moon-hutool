@@ -1,15 +1,9 @@
-// 骨架期：实现体全是 abort，所以不 import 任何非测试依赖
+// 只用 prelude 就有的 `Map`/`Array`，所以本包不 import 任何非测试依赖；测试侧同理
 // （未使用的 import 会吃 unused_package 警告并卡零警告门禁）。
-// 本包只用 prelude 就有的 `Map`，不需要 core 包路径；测试侧同理。
 import {
   "mldong/moon-hutool/mapx",
 } for "test"
 
-// 骨架期豁免（全是"未实现"的机械后果，不是代码缺陷）：
-// - `unused_constructor`：`MapError` 的两个变体还没人构造
-// - `unused_error_type`：签名写了 `raise MapError[K]` 而体里没 `raise`
-// - `unused_trait_bound`：`Hash + Eq` 这些界在体里没被用到
-// - `struct_never_constructed`：`BiMap`/`CiMap` 还没被构造出来
-// 实现落地那一笔必须整行删掉——门禁 G12 拦着不让忘。
-
-warnings = "-unused_constructor-unused_error_type-unused_trait_bound-struct_never_constructed"
+// 骨架期的那四条豁免（`unused_constructor`/`unused_error_type`/`unused_trait_bound`/
+// `struct_never_constructed`）已随实现落地整行删除——门禁 G12 查的就是
+// "体里已无 `abort` 却还压着豁免"，那时这四类再响就是真死码。

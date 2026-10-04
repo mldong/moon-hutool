@@ -40,9 +40,10 @@ pub struct BiMap[K, V] {
 ///|
 /// 建一张空的双向映射
 ///
-/// - Note: 构造不需要 `Hash + Eq`，因为约束只在真正做查找的方法上出现（core 的 `Map::new` 同样宽松）
-pub fn[K, V] BiMap::new() -> BiMap[K, V] {
-  abort("moon-hutool: mapx.BiMap::new 未实现（spec 07-mapx #7.1）")
+/// - Note: 键与值**都要** `Hash + Eq`——这不是风格选择：空表字面量 `Map([])` 就要求键有界，
+///   而本件内部是两张 `Map`（正向键是 K、反向键是 V）。实现那一笔把界补上了，签名以 `.mbti` 为准。
+pub fn[K : Hash + Eq, V : Hash + Eq] BiMap::new() -> BiMap[K, V] {
+  { forward: Map([]), backward: Map([]), }
 }
 
 ///|
@@ -57,8 +58,12 @@ pub fn[K, V] BiMap::new() -> BiMap[K, V] {
 pub fn[K : Hash + Eq, V : Hash + Eq] BiMap::of(
   pairs : Array[(K, V)],
 ) -> BiMap[K, V] raise MapError {
-  let _ = pairs
-  abort("moon-hutool: mapx.BiMap::of 未实现（spec 07-mapx #7.5）")
+  let m : BiMap[K, V] = BiMap::new()
+  for (k, v) in pairs {
+    // 逐条走 `put` 的判据：构造与后续写入共用一套规则，不另开第二套
+    let _ = m.put(k, v)
+  }
+  m
 }
 
 ///|
@@ -74,11 +79,15 @@ pub fn[K : Hash + Eq, V : Hash + Eq] BiMap::put(
   key : K,
   value : V,
 ) -> V? raise MapError {
-  let _ = self.forward
-  let _ = self.backward
-  let _ = key
-  let _ = value
-  abort("moon-hutool: mapx.BiMap::put 未实现（spec 07-mapx #7.2）")
+  match self.backward.get(value) {
+    Some(holder) =>
+      if holder != key {
+        // 整次调用不生效：半途写下去，两个方向就永久错位了
+        raise ValueConflict
+      }
+    None => ()
+  }
+  self.link(key, value)
 }
 
 ///|
@@ -92,29 +101,30 @@ pub fn[K : Hash + Eq, V : Hash + Eq] BiMap::force_put(
   key : K,
   value : V,
 ) -> K? {
-  let _ = self.forward
-  let _ = self.backward
-  let _ = key
-  let _ = value
-  abort("moon-hutool: mapx.BiMap::force_put 未实现（spec 07-mapx #7.3）")
+  let evicted = match self.backward.get(value) {
+    Some(holder) => if holder == key { None } else { Some(holder) }
+    None => None
+  }
+  match evicted {
+    Some(old_key) => {
+      let _ = self.drop_key(old_key)
+    }
+    None => ()
+  }
+  let _ = self.link(key, value)
+  evicted
 }
 
 ///|
 /// 键 → 值
 pub fn[K : Hash + Eq, V] BiMap::get(self : BiMap[K, V], key : K) -> V? {
-  let _ = self.forward
-  let _ = self.backward
-  let _ = key
-  abort("moon-hutool: mapx.BiMap::get 未实现（spec 07-mapx #7.1）")
+  self.forward.get(key)
 }
 
 ///|
 /// 值 → 键（本件存在的理由）
 pub fn[K, V : Hash + Eq] BiMap::get_key(self : BiMap[K, V], value : V) -> K? {
-  let _ = self.forward
-  let _ = self.backward
-  let _ = value
-  abort("moon-hutool: mapx.BiMap::get_key 未实现（spec 07-mapx #7.1）")
+  self.backward.get(value)
 }
 
 ///|
@@ -126,9 +136,7 @@ pub fn[K : Hash + Eq, V] BiMap::contains_key(
   let _ = self.forward
   let _ = self.backward
   let _ = key
-  abort(
-    "moon-hutool: mapx.BiMap::contains_key 未实现（spec 07-mapx #7.1）",
-  )
+  self.forward.contains(key)
 }
 
 ///|
@@ -140,20 +148,18 @@ pub fn[K, V : Hash + Eq] BiMap::contains_value(
   let _ = self.forward
   let _ = self.backward
   let _ = value
-  abort(
-    "moon-hutool: mapx.BiMap::contains_value 未实现（spec 07-mapx #7.1）",
-  )
+  self.backward.contains(value)
 }
 
 ///|
 /// 按键删除，返回被删的值；顺带删掉它的反向条目
 ///
 /// - Returns: 该键原本的值；键不存在 ⇒ `None`（幂等，第二次删同一个键也是 `None`）
-pub fn[K : Hash + Eq, V] BiMap::remove(self : BiMap[K, V], key : K) -> V? {
-  let _ = self.forward
-  let _ = self.backward
-  let _ = key
-  abort("moon-hutool: mapx.BiMap::remove 未实现（spec 07-mapx #7.4）")
+pub fn[K : Hash + Eq, V : Hash + Eq] BiMap::remove(
+  self : BiMap[K, V],
+  key : K,
+) -> V? {
+  self.drop_key(key)
 }
 
 ///|
@@ -166,41 +172,37 @@ pub fn[K : Hash + Eq, V] BiMap::remove(self : BiMap[K, V], key : K) -> V? {
 pub fn[K : Hash + Eq, V : Hash + Eq] BiMap::inverse(
   self : BiMap[K, V],
 ) -> BiMap[V, K] {
-  let _ = self.forward
-  let _ = self.backward
-  abort("moon-hutool: mapx.BiMap::inverse 未实现（spec 07-mapx #7.1）")
+  let out : BiMap[V, K] = BiMap::new()
+  for (k, v) in self.forward.to_array() {
+    // 顺序取正向的插入序，而不是直接换用 backward——那会丢掉正向的顺序
+    out.forward.set(v, k)
+    out.backward.set(k, v)
+  }
+  out
 }
 
 ///|
 /// 条目数。两个方向恒等，所以不需要单独的"反向长度"
 pub fn[K, V] BiMap::length(self : BiMap[K, V]) -> Int {
-  let _ = self.forward
-  let _ = self.backward
-  abort("moon-hutool: mapx.BiMap::length 未实现（spec 07-mapx #7.1）")
+  self.forward.length()
 }
 
 ///|
 /// 键序列：插入序
 pub fn[K, V] BiMap::keys(self : BiMap[K, V]) -> Array[K] {
-  let _ = self.forward
-  let _ = self.backward
-  abort("moon-hutool: mapx.BiMap::keys 未实现（spec 07-mapx #7.1）")
+  self.forward.keys().to_array()
 }
 
 ///|
 /// 值序列：插入序，且**互不重复**（双向不变式的直接推论，用例逐档断言）
 pub fn[K, V] BiMap::values(self : BiMap[K, V]) -> Array[V] {
-  let _ = self.forward
-  let _ = self.backward
-  abort("moon-hutool: mapx.BiMap::values 未实现（spec 07-mapx #7.1）")
+  self.forward.values().to_array()
 }
 
 ///|
 /// 键值对序列：插入序。与 `keys()`/`values()`/`length()` 三者必须自洽
 pub fn[K, V] BiMap::to_pairs(self : BiMap[K, V]) -> Array[(K, V)] {
-  let _ = self.forward
-  let _ = self.backward
-  abort("moon-hutool: mapx.BiMap::to_pairs 未实现（spec 07-mapx #7.1）")
+  self.forward.to_array()
 }
 
 ///|
@@ -215,7 +217,7 @@ pub struct CiMap[V] {
 ///|
 /// 建一张空的表
 pub fn[V] CiMap::new() -> CiMap[V] {
-  abort("moon-hutool: mapx.CiMap::new 未实现（spec 07-mapx #7.6）")
+  { slots: Map([]), }
 }
 
 ///|
@@ -229,18 +231,21 @@ pub fn[V] CiMap::new() -> CiMap[V] {
 ///   `moonbitlang/core` 里没有，`Char` 连 `to_lowercase` 都没有，拖一张表进来等于把一个
 ///   工具库的发布节奏绑到码表上（与「不做」清单同口径）
 pub fn[V] CiMap::put(self : CiMap[V], key : String, value : V) -> V? {
-  let _ = self.slots
-  let _ = key
-  let _ = value
-  abort("moon-hutool: mapx.CiMap::put 未实现（spec 07-mapx #7.6）")
+  let slot = fold_ascii(key)
+  let old = self.slots.get(slot)
+  // 原样键取首次写入的那一个：覆盖只换值，不换键
+  let orig = match old {
+    Some((o, _)) => o
+    None => key
+  }
+  self.slots.set(slot, (orig, value))
+  old.map(p => p.1)
 }
 
 ///|
 /// 按折叠键查值
 pub fn[V] CiMap::get(self : CiMap[V], key : String) -> V? {
-  let _ = self.slots
-  let _ = key
-  abort("moon-hutool: mapx.CiMap::get 未实现（spec 07-mapx #7.6）")
+  self.slots.get(fold_ascii(key)).map(p => p.1)
 }
 
 ///|
@@ -248,39 +253,34 @@ pub fn[V] CiMap::get(self : CiMap[V], key : String) -> V? {
 ///
 /// - Returns: 首次写入时的原样键；查不到 ⇒ `None`
 pub fn[V] CiMap::get_key_of(self : CiMap[V], key : String) -> String? {
-  let _ = self.slots
-  let _ = key
-  abort("moon-hutool: mapx.CiMap::get_key_of 未实现（spec 07-mapx #7.6）")
+  self.slots.get(fold_ascii(key)).map(p => p.0)
 }
 
 ///|
 /// 槽位在不在（大小写无关）
 pub fn[V] CiMap::contains(self : CiMap[V], key : String) -> Bool {
-  let _ = self.slots
-  let _ = key
-  abort("moon-hutool: mapx.CiMap::contains 未实现（spec 07-mapx #7.7）")
+  self.slots.contains(fold_ascii(key))
 }
 
 ///|
 /// 按折叠键删除，返回被删的值
 pub fn[V] CiMap::remove(self : CiMap[V], key : String) -> V? {
-  let _ = self.slots
-  let _ = key
-  abort("moon-hutool: mapx.CiMap::remove 未实现（spec 07-mapx #7.7）")
+  let slot = fold_ascii(key)
+  let old = self.slots.get(slot)
+  let _ = self.slots.remove(slot)
+  old.map(p => p.1)
 }
 
 ///|
 /// 槽位数（不是写入次数：撞过同一槽位的 `put` 不增加）
 pub fn[V] CiMap::length(self : CiMap[V]) -> Int {
-  let _ = self.slots
-  abort("moon-hutool: mapx.CiMap::length 未实现（spec 07-mapx #7.6）")
+  self.slots.length()
 }
 
 ///|
 /// 原样键序列：按槽位的首次写入顺序
 pub fn[V] CiMap::keys(self : CiMap[V]) -> Array[String] {
-  let _ = self.slots
-  abort("moon-hutool: mapx.CiMap::keys 未实现（spec 07-mapx #7.6）")
+  self.slots.values().map(p => p.0).to_array()
 }
 
 ///|
@@ -289,8 +289,11 @@ pub fn[V] CiMap::keys(self : CiMap[V]) -> Array[String] {
 /// - Note: 这是出口，不是中转——返回的 `Map` 之后按普通大小写敏感规则工作，
 ///   想继续不敏感就留在 `CiMap` 里
 pub fn[V] CiMap::to_map(self : CiMap[V]) -> Map[String, V] {
-  let _ = self.slots
-  abort("moon-hutool: mapx.CiMap::to_map 未实现（spec 07-mapx #7.7）")
+  let out : Map[String, V] = Map([])
+  for (_, p) in self.slots.to_array() {
+    out.set(p.0, p.1)
+  }
+  out
 }
 
 ///|
@@ -304,9 +307,14 @@ pub fn[K : Hash + Eq, A, B] filter_map(
   m : Map[K, A],
   f : (K, A) -> B?,
 ) -> Map[K, B] {
-  let _ = m
-  let _ = f
-  abort("moon-hutool: mapx.filter_map 未实现（spec 07-mapx #7.8）")
+  let out : Map[K, B] = Map([])
+  m.each((k, v) => {
+    match f(k, v) {
+      Some(y) => out.set(k, y)
+      None => ()
+    }
+  })
+  out
 }
 
 ///|
@@ -326,8 +334,81 @@ pub fn[K : Hash + Eq, V] rename_key(
   old_key : K,
   new_key : K,
 ) -> Map[K, V] raise MapError {
-  let _ = m
-  let _ = old_key
-  let _ = new_key
-  abort("moon-hutool: mapx.rename_key 未实现（spec 07-mapx #7.9）")
+  // `old_key == new_key` 时自己不算"撞车"——不加这一条，重命名成同名会误报
+  if new_key != old_key && m.contains(new_key) {
+    raise KeyAlreadyExists
+  }
+  let out : Map[K, V] = Map([])
+  m.each((k, v) => if k != old_key { out.set(k, v) })
+  match m.get(old_key) {
+    // 原键不存在就什么都不做（同 hutool 的 no-op 档）；存在才把值挂到末尾
+    Some(v) => out.set(new_key, v)
+    None => ()
+  }
+  out
+}
+
+// ==== 私有件：双向映射的两步底层动作与 ASCII 折叠，都不进 `.mbti` ====
+
+///|
+/// 删掉一个键并同步摘掉它的反向条目，返回被删的值
+fn[K : Hash + Eq, V : Hash + Eq] BiMap::drop_key(
+  self : Self[K, V],
+  key : K,
+) -> V? {
+  let old = self.forward.get(key)
+  let _ = self.forward.remove(key)
+  match old {
+    Some(v) => {
+      let _ = self.backward.remove(v)
+    }
+    None => ()
+  }
+  old
+}
+
+///|
+/// 写入一对并同步两个方向，返回该键原来的值。
+/// 拆成两件是因为 `put` 与 `force_put` 的**判据**不同（前者先拒绝、后者先挤掉），
+/// 而"写完保持互逆"这一步完全一样——两份实现迟早分叉
+fn[K : Hash + Eq, V : Hash + Eq] BiMap::link(
+  self : Self[K, V],
+  key : K,
+  value : V,
+) -> V? {
+  let old = self.forward.get(key)
+  match old {
+    Some(v) => {
+      let _ = self.backward.remove(v)
+    }
+    None => ()
+  }
+  // 只 set 不 remove：core 的 `Map` 对已存在的键是就地换值，位置不动。
+  // 先删后插会让"改一个已有键"悄悄把它挪到末尾——契约要的是插入序保持（hutool/Java `LinkedHashMap` 同档）
+  self.forward.set(key, value)
+  self.backward.set(value, key)
+  old
+}
+
+///|
+/// ASCII 小写折叠：只动 `A-Z`。非 ASCII 原样——core 没有 Unicode 大小写表
+/// （`Char` 连 `to_lowercase` 都没有，见 AGENTS），拖码表进来就是把发布节奏绑到码表上
+fn fold_ascii(text : String) -> String {
+  let buf = StringBuilder()
+  for c in text.to_array() {
+    let v = c.to_int()
+    if v >= 65 && v <= 90 {
+      buf.write_char(ascii_char(v + 32))
+    } else {
+      buf.write_char(c)
+    }
+  }
+  buf.to_string()
+}
+
+///|
+/// `Int::to_char()` 返回 `Char?`；这里只喂 `[97, 122]`（折叠后的 ASCII 字母），
+/// 那个区间全合法，None 分支不可达
+fn ascii_char(v : Int) -> Char {
+  v.to_char().unwrap()
 }

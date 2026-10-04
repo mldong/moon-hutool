@@ -25,10 +25,10 @@ pub fn[K, V : Hash + Eq] BiMap::get_key(Self[K, V], V) -> K?
 pub fn[K : Hash + Eq, V : Hash + Eq] BiMap::inverse(Self[K, V]) -> Self[V, K]
 pub fn[K, V] BiMap::keys(Self[K, V]) -> Array[K]
 pub fn[K, V] BiMap::length(Self[K, V]) -> Int
-pub fn[K, V] BiMap::new() -> Self[K, V]
+pub fn[K : Hash + Eq, V : Hash + Eq] BiMap::new() -> Self[K, V]
 pub fn[K : Hash + Eq, V : Hash + Eq] BiMap::of(Array[(K, V)]) -> Self[K, V] raise MapError
 pub fn[K : Hash + Eq, V : Hash + Eq] BiMap::put(Self[K, V], K, V) -> V? raise MapError
-pub fn[K : Hash + Eq, V] BiMap::remove(Self[K, V], K) -> V?
+pub fn[K : Hash + Eq, V : Hash + Eq] BiMap::remove(Self[K, V], K) -> V?
 pub fn[K, V] BiMap::to_pairs(Self[K, V]) -> Array[(K, V)]
 pub fn[K, V] BiMap::values(Self[K, V]) -> Array[V]
 

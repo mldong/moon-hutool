@@ -4,8 +4,8 @@ hutool `MapUtil` 家族与 `BiMap` / `CaseInsensitiveMap` 的 MoonBit 对位：�
 
 完整边界矩阵与逐条读数来源见 [`docs/spec/07-mapx.md`](https://github.com/mldong/moon-hutool/blob/master/docs/spec/07-mapx.md)。
 
-> 状态：**契约已冻结、实现未开工**（第一批）——`mapx/mapx.mbt` 的函数体是 `abort`，下面每个块的期望值此刻红是设计态。
-> 期望串与 `mapx_test.mbt` 同受"期望值冻结"约束：实现期只许把红变绿（门禁 G5）。
+> 状态：**已实现**（10-05，第一批）——`mapx/mapx.mbt` 的 28 个公开项落地，下面每个块的期望值都是当场跑出来的
+> 读数，wasm / js / wasm-gc 三档一致。期望串受"期望值冻结"约束：改任何期望须单独一笔并给外部读数来源（门禁 G5）。
 > `Table`（二维表）自成一块，另起第二批。
 
 ## 先说这一包不做什么
