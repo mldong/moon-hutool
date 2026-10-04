@@ -1,0 +1,49 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "mldong/moon-hutool/text"
+
+// Values
+pub fn compare_version(String, String) -> Int
+
+pub fn first_non_blank(Array[String?]) -> String?
+
+pub fn format(String, Array[String]) -> String
+
+pub fn hide(String, Int, Int, Char) -> String
+
+pub fn is_blank(String) -> Bool
+
+pub fn is_empty(String) -> Bool
+
+pub fn join(Array[String], String) -> String
+
+pub fn lower_first(String) -> String
+
+pub fn split(String, Char, trim_result? : Bool) -> Array[String]
+
+pub fn sub_after(String, String) -> String
+
+pub fn sub_before(String, String) -> String
+
+pub fn sub_between(String, String, String, include_sep? : Bool) -> String
+
+pub fn to_camel_case(String) -> String
+
+pub fn to_kebab_case(String) -> String
+
+pub fn to_pascal_case(String) -> String
+
+pub fn to_underline_case(String) -> String
+
+pub fn trim(String) -> String
+
+pub fn trim_opt(String?) -> String?
+
+pub fn upper_first(String) -> String
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits

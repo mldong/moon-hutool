@@ -1,0 +1,3 @@
+import {
+  "mldong/moon-hutool/text",
+} for "test"

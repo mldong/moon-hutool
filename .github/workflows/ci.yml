@@ -1,0 +1,87 @@
+name: CI
+
+# 四目标矩阵 + 契约门禁。
+# 骨架期（契约已冻结、实现未开工）：check / fmt / info / 零依赖 / 用例收集数 都是**阻断**的；
+# 用例本身预期全红（函数体 abort），所以 test 步骤只断"收集到的用例数 ≥ 基线"，不断"全过"。
+# 实现相位把 test 的容忍换成真绿即可（见 AGENTS.md 交付形状）。
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  MOON_VERSION: latest
+
+jobs:
+  gate:
+    name: 契约门禁（wasm + js）
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install MoonBit toolchain
+        run: |
+          curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash
+          echo "$HOME/.moon/bin" >> $GITHUB_PATH
+
+      - name: moon version
+        run: moon version --all
+
+      - name: Run contract gate G1-G8
+        # 基线 20 = 骨架期已冻结的用词条数；加实现时同步上调，别下调（下调=用例被悄悄删掉）
+        env:
+          BASELINE_TESTS: "20"
+          GATE_TARGETS: "wasm js"
+        run: bash scripts/contract_gate.sh
+
+  targets:
+    name: 多目标编译 ${{ matrix.target }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [wasm, wasm-gc, js, native]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install MoonBit toolchain
+        run: |
+          curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash
+          echo "$HOME/.moon/bin" >> $GITHUB_PATH
+
+      # 零依赖 + 零 FFI + 零 async 的推论：四档都必须编得过。任一档红就是破坏了本库的立身之本。
+      - name: moon check --target ${{ matrix.target }}
+        run: moon check --target ${{ matrix.target }}
+
+      - name: 收集用例数（不要求通过，骨架期实现是 abort）
+        env:
+          TARGET: ${{ matrix.target }}
+        run: |
+          out=$(moon test --target "$TARGET" 2>&1 || true)
+          total=$(printf '%s\n' "$out" | grep -oE 'Total tests: [0-9]+' | grep -oE '[0-9]+' | head -1)
+          echo "target=$TARGET collected=${total:-0}"
+          test "${total:-0}" -ge 20 || { echo "FAIL: $TARGET 档收集用例数为 0（静默丢弃 = 没有套件）"; exit 1; }
+
+  expect-freeze:
+    name: 期望值冻结（仅 PR）
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # 实现 PR 不许动测试期望值与 spec 的"读数来源"列；要动必须单独一笔（人工评审）。
+      # 给了 GATE_FREEZE_BASE 才激活 G5（脚本内其余判据照常跑）。
+      - name: G5
+        env:
+          GATE_FREEZE_BASE: ${{ github.event.pull_request.base.sha }}
+          GATE_TARGETS: "wasm"
+          BASELINE_TESTS: "20"
+        run: bash scripts/contract_gate.sh

@@ -1,0 +1,27 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "mldong/moon-hutool/digest"
+
+// Values
+pub fn equal_digest(Bytes, Bytes) -> Bool
+
+pub fn hmac_sha256_bytes(String, String) -> Bytes
+
+pub fn hmac_sha256_hex(String, String) -> String
+
+pub fn md5_bytes(String) -> Bytes
+
+pub fn md5_hex(String) -> String
+
+pub fn md5_hex16(String) -> String
+
+pub fn sha256_bytes(String) -> Bytes
+
+pub fn sha256_hex(String) -> String
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits

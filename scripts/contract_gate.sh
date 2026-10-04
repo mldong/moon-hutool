@@ -1,0 +1,113 @@
+#!/usr/bin/env bash
+# moon-hutool 契约门禁 G1~G8
+#
+# 原则：每条判据都必须"真跑过且敢报红"。凡当前环境跑不了的项，显式打 SKIP + 理由，
+# 绝不伪装成 PASS（恒绿但没测的套件比红灯更危险）。
+#
+# 用法：
+#   scripts/contract_gate.sh                 # 全跑（本机默认 wasm 一档做深，其余档做 check）
+#   GATE_TARGETS="wasm" scripts/contract_gate.sh
+#   GATE_FREEZE_BASE=<commit> scripts/contract_gate.sh   # PR-B 时打开期望值冻结检查（G5）
+set -uo pipefail
+cd "$(git rev-parse --show-toplevel)"
+export PYTHONIOENCODING=utf-8
+FAILS=0; SKIPS=0
+ok()  { echo "  PASS $*"; }
+bad() { echo "  FAIL $*"; FAILS=$((FAILS+1)); }
+skip(){ echo "  SKIP $*"; SKIPS=$((SKIPS+1)); }
+GATE_TARGETS="${GATE_TARGETS:-wasm js}"
+BASELINE_TESTS="${BASELINE_TESTS:-20}"
+
+echo "== G1 零依赖（moon tree 无第三方节点 + moon.mod 无 deps）=="
+if tree_json=$(moon tree --json 2>/dev/null) && [ -n "$tree_json" ]; then
+  if python - "$tree_json" <<'PY'
+import json,sys
+d=json.loads(sys.argv[1]); bad=[]
+def walk(n):
+    name=n.get("name") or n.get("package") or ""
+    if name and not name.startswith("moonbitlang/core") and not name.startswith("mldong/moon-hutool"):
+        bad.append(name)
+    for c in n.get("deps") or n.get("children") or []: walk(c)
+roots=d if isinstance(d,list) else [d]
+for r in roots: walk(r)
+print("\n".join(sorted(set(bad))) if bad else "")
+sys.exit(1 if bad else 0)
+PY
+  then bad=""
+    if grep -qE '^\s*(deps|import)\s*=' moon.mod; then bad="moon.mod 存在 deps/import 段"
+    else bad=$(find . -name moon.pkg -not -path './_build/*' -exec grep -l '^\s*"moonbitlang/\(async\|x\|regexp\|moonback\)\|"\(moonbitstack\|Betterlol\|mizchi\|bobzhang\|justjavac\|tonyfettes\)/' {} \; | head -3)
+    fi
+    [ -z "$bad" ] && ok "零第三方节点，moon.mod 无 deps，包级无注册表依赖" || bad "发现第三方：$bad"
+  else bad="树里有第三方节点（见上）"
+  fi
+else skip "moon tree --json 不可用（本机 moon 版本或网络）；退化为 moon.mod/moon.pkg 静态扫描"
+  grep -qE '^\s*(deps|import)\s*=' moon.mod && bad "moon.mod 有 deps" || ok "moon.mod 无 deps"
+fi
+
+echo "== G2 零 FFI =="
+n=$(grep -rn 'extern "' --include='*.mbt' . 2>/dev/null | grep -v '_build/' | wc -l | tr -d ' ')
+[ "$n" = "0" ] && ok "全仓 extern 命中 0" || bad "有 $n 处 extern —— 违反零依赖定义"
+n2=$(grep -rl 'native-stub' --include='moon.pkg' . 2>/dev/null | wc -l | tr -d ' ')
+[ "$n2" = "0" ] && ok "无 native-stub" || bad "有 $n2 个包带 native-stub"
+
+echo "== G3 逐档编译 + 用例收集数 =="
+for t in $GATE_TARGETS; do
+  if moon check --target "$t" >/tmp/mh_check_$t.log 2>&1; then
+    w=$(grep -c "Warning" /tmp/mh_check_$t.log || true)
+    [ "$w" = "0" ] && ok "check $t 全绿（0 警告）" || bad "check $t 有 $w 条警告（零警告是门禁）"
+  else bad "check $t 失败：$(tail -2 /tmp/mh_check_$t.log | tr '\n' ' ')"; fi
+  if moon test --target "$t" >/tmp/mh_test_$t.log 2>&1 || true; then
+    got=$(grep -oE "Total tests: [0-9]+" /tmp/mh_test_$t.log | head -1 | grep -oE "[0-9]+")
+    got=${got:-0}
+    # 骨架期允许红（函数体是 abort），但**必须收到用例**——收集数为 0 就是永真死格
+    if [ "$got" -ge "$BASELINE_TESTS" ]; then ok "test $t 收集 $got 条（≥ 基线 $BASELINE_TESTS）"; else bad "test $t 只收集 $got 条 < 基线 $BASELINE_TESTS（静默丢用例）"; fi
+  else bad "test $t 无法运行"; fi
+done
+
+echo "== G4 格式与公开接口 =="
+if moon fmt --check >/tmp/mh_fmt.log 2>&1; then ok "moon fmt --check 干净"; else bad "有文件需 moon fmt：$(grep -c . /tmp/mh_fmt.log) 行输出"; fi
+if command -v git >/dev/null && git rev-parse --git-dir >/dev/null 2>&1; then
+  moon info >/tmp/mh_info.log 2>&1 || bad "moon info 执行失败"
+  if git diff --quiet -- '*.mbti' 2>/dev/null; then ok ".mbti 无漂移（公开接口未意外变动）"; else bad ".mbti 有未提交漂移——API 变动须显式评审"; fi
+else skip "非 git 工作树，跳过 .mbti 漂移检查"
+fi
+
+echo "== G5 期望值冻结（PR-B）=="
+if [ -n "${GATE_FREEZE_BASE:-}" ]; then
+  ch=$(git diff --name-only "$GATE_FREEZE_BASE" -- '*_test.mbt' 'docs/spec/*' 2>/dev/null)
+  if [ -z "$ch" ]; then ok "测试与 spec 未被实现 PR 触碰"
+  elif [ "${ALLOW_EXPECTATION_CHANGE:-0}" = "1" ]; then skip "已授权改动：$(echo "$ch" | tr '\n' ' ')"
+  else bad "实现期改了期望值/契约，须单独一笔并给外部读数来源：$ch"; fi
+else skip "未给 GATE_FREEZE_BASE（仅 CI 的 PR-B job 与该检查有关）"
+fi
+
+echo "== G6 官方向量在位 =="
+vc=$(grep -ohE "RFC [0-9]{4}|FIPS 180-4" docs/spec/*.md 2>/dev/null | sort -u | wc -l | tr -d ' ')
+ac=$(grep -rhoE "assert_eq|assert_true|assert_false" */[a-z]*_test.mbt 2>/dev/null | wc -l | tr -d ' ')
+if [ "$vc" -ge 2 ] && [ "$ac" -ge 20 ]; then ok "spec 引用 $vc 组规范、测试断言 $ac 条"
+else bad "spec 规范引用 $vc / 断言 $ac —— 摘要类必须挂官方向量"; fi
+# 阳性对照：故意查一个不存在的关键字，确认 grep 管道本身在干活（防空转）
+[ "$(grep -rhoE "NOSUCHTOKEN_zzz" docs/spec/*.md 2>/dev/null | wc -l | tr -d ' ')" = "0" ] && ok "对照项正常（管道能出 0）" || bad "对照项异常：过滤器不可信"
+
+echo "== G7 文档即测试 =="
+blocks=$(grep -rhoE '^```mbt check' --include='README.mbt.md' . 2>/dev/null | wc -l | tr -d ' ')
+if [ "$blocks" = "0" ]; then
+  skip "本仓尚无 README.mbt.md 的 mbt check 块——实现相位**每个已交付包必须自带一份**（AGENTS 规则），否则这条就是没套件"
+else
+  got=$(moon test --target wasm 2>&1 | grep -oE "Total tests: [0-9]+" | grep -oE "[0-9]+")
+  [ "${got:-0}" -gt 0 ] && ok "$blocks 个文档块已被收集（用例总数 $got）" || bad "文档块存在却没被收集（判据档位用错）"
+fi
+
+echo "== G8 包 core 的对拍腿 =="
+pk=$(grep -rlE "core 直接可用|对拍" docs/spec/*.md 2>/dev/null | wc -l | tr -d ' ')
+hb=$(grep -rhoE "对拍" */[a-z]*_test.mbt 2>/dev/null | wc -l | tr -d ' ')
+if [ "$hb" -ge 1 ]; then ok "spec 有 $pk 份声明可复用 core，测试里有 $hb 处对拍断言"
+else bad "声明复用 core 却没有对拍腿（core 语义漂移会被静默吞掉）"; fi
+
+echo
+if [ "$FAILS" = "0" ]; then
+  echo "GATE GREEN：0 失败，$SKIPS 项 SKIP（SKIP 不等于通过，逐条看理由）"
+else
+  echo "GATE RED：$FAILS 项失败，$SKIPS 项 SKIP"
+fi
+[ "$FAILS" = "0" ]
