@@ -1,8 +1,10 @@
 # 契约 05 · codec（编码解码）
 
-> 状态：**契约已冻结、实现未开工**（10-05）。签名骨架在 `codec/codec.mbt`，公开接口在
-> `codec/pkg.generated.mbti`，期望值在 `codec/codec_test.mbt` 与 `codec/README.mbt.md`（本包用例此刻红是设计态）。
-> 实现期只许把红变绿；改任何期望串须单独一笔并给外部读数来源（门禁 G5）。
+> 状态：**已实现**（10-05）——24 条用例全绿，wasm / js / wasm-gc 三档读数一致，native 档由 CI 出证，
+> 且 `moon info` 后 **`.mbti` 零漂移**（实现没动任何公开签名）。实现在 `codec/codec.mbt`，
+> 公开接口在 `codec/pkg.generated.mbti`，期望值在 `codec/codec_test.mbt` 与 `codec/README.mbt.md`。
+> 改任何期望串须单独一笔并给外部读数来源（门禁 G5）：本轮实现前动过一条——`MZXWE1==` 的非法字符
+> 下标从 4 改成 5，判据就是逐位数（M0 Z1 X2 W3 E4 **1=5**）。
 >
 > **本包只做 core 没有的档位**（`AGENTS.md`「与 core 的边界」）：core 的 `encoding/base64` 只有**标准表**
 > （`encode(bytes, padding?)` / `decode(text, ignore_whitespace?)` / `decode_lossy`），`encoding/hex` 就是 Base16，
@@ -58,7 +60,7 @@ Base64 是 1→非法、2/3→合法、0→合法。这两套余数就是"不可
 | `b58_encode(data : Bytes) -> String` | Bitcoin 表 `123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz`；**前导零字节按个数折成前导 `1`**。`bytes(range(16))` → `12drXXUifSrRnXLGbXg8E`；`b'\x00\x00hi'` → `118wr`；`b'Hello World!'` → `2NEpo7TZRRrLZSi2U`；`b'\xff\xff\xff'` → `2UzHL`；`utf8("中文")` → `2xu16HBbU`；`b''` → `""`；`b'\x00'` → `1` | 无 | `Base58.encode(byte[])` | 一致（这条 hutool 本身也是照 Bitcoin 规范） | **两套独立实现互算**：大数 `int.from_bytes` 反复折半 ↔ 逐字节长除法，全部样本逐条相等；另加反解恒等 |
 | `b58_decode(text : String) -> Bytes raise CodecError` | 上条的逆；`1` 前缀折回等长的前导零字节 | `0`/`O`/`I`/`l` 这四个字符**不在表里** ⇒ `IllegalChar(输入, 下标)`（`"0OIl"` 报 `@0`） | `Base58.decode` | 一致 | 同上 |
 | `b58_check_encode(data : Bytes, version? : Int = 0) -> String raise CodecError` | `version`(0..255) ‖ data ‖ 双 SHA-256 的前 4 字节，再整体 Base58。夹具 `data = hash160(sha256("mldong")) = 2d73f6a4885ce62118417eb73fb405a0539efa21`、`version=0` → `159LKv1gGepptdXG7coMf6QhdTrgDsG7i2`（34 字符）；`version=0x80` → `taQYMpAZ9k8ya7NMFKS9j9FQC2qRF1Z741` | `version` 不在 0..255 ⇒ `RadixOutOfRange(version, 255)` | `Base58.encodeChecked(version, data)` | 摘要取的是**双 SHA-256 前 4 字节**（Bitcoin 规则），不是 RIPEMD-160；`digest` 包已有 SHA-256 ⇒ 本包不重复实现摘要 | 校验位由 `hashlib` 现算（SHA-256 本身已被 `digest` 的 FIPS 向量钉住）；文本由 `b58_encode` 的两套实现 |
-| `b58_check_decode(text : String, version? : Int) -> Bytes raise CodecError` | 解出 payload；给了 `version` 就同时校验首字节 | 长度不足 4 字节 ⇒ `BadPadding(输入, 0)`；校验位不符 ⇒ `ChecksumMismatch`（改末位后的 `…G7i3` 必报这条）；给了 `version` 而不符 ⇒ `IllegalChar(输入, 0)`（版本位不匹配，本质是"这串不属于该命名空间"） | `Base58.decodeChecked(text, withVersion)` | hutool 那侧返回 `(version, payload)` 二元组且靠 `ValidateException`；本库把 version 变成**调用方给的校验条件**，不返回元组——调用方几乎都是"我知道该是哪个版本才来解" | 正反两档现算 |
+| `b58_check_decode(text : String, version? : Int) -> Bytes raise CodecError` | 解出 payload；给了 `version` 就同时校验首字节 | 长度不足 5 字节（`version ‖ 校验位` 自己就占 5 字节）⇒ `BadPadding(输入, 0)`；校验位不符 ⇒ `ChecksumMismatch`（改末位后的 `…G7i3` 必报这条）；给了 `version` 而不符 ⇒ `IllegalChar(输入, 0)`（版本位不匹配，本质是"这串不属于该命名空间"） | `Base58.decodeChecked(text, withVersion)` | hutool 那侧返回 `(version, payload)` 二元组且靠 `ValidateException`；本库把 version 变成**调用方给的校验条件**，不返回元组——调用方几乎都是"我知道该是哪个版本才来解" | 正反两档现算 |
 
 ## 5. Base62（GMP 表；hutool 自带大小写两版表）
 

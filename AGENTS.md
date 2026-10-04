@@ -109,6 +109,10 @@ PR-A 的合入标准：`moon check` 必须全绿（签名与类型自洽、文�
   `struct_never_constructed` / `unused_constructor` / `unused_error_type`——它们是"未实现"的机械后果，
   为消警告去写假实现才是本末倒置。豁免只允许出现在**体里还有 `abort`** 的包（门禁 **G12**，带阳性对照），
   实现落地那一笔必须删掉 `warnings` 行。
+- **`Bytes::from_array([...].exact_view())` 这种链式写法会挡住元素类型推断**：判
+  `has type: Array[Int], wanted: Array[Byte]`，而 `Bytes::from_array` 的参数本来就是 `ArrayView[Byte]`
+  ⇒ 直接写 `Bytes::from_array([...])`。同理，外层 `let x : Bytes = ...` 的标注**不会**倒推进数组字面量。
+  测试里要放字节夹具就用 `fn bts(xs : Array[Byte]) -> Bytes`（参数标注让字面量在 Array[Byte] 上下文里定型）。
 - **字符出口走 `StringBuilder`，`@buffer.Buffer` 只装字节**：本版 `@buffer.Buffer` 的 `write_char` 报废弃，
   且它在 wasm/js 档内部是 UTF-16——按 `write_char_utf8` 落 UTF-8 字节再 `to_string()`，会把两字节当一个
   UTF-16 单元读，ASCII 十六进制串变成一串生僻字（`"00000000"` → `"〰〰〰〰"`，长度直接减半）。
@@ -118,6 +122,14 @@ PR-A 的合入标准：`moon check` 必须全绿（签名与类型自洽、文�
   换档读数不同，本机 wasm 三档都能跑出来，别留给 CI 发现。
 - `fn` 的返回类型加 `raise E` 时**整行不许被 fmt 拆断**（`-> Unit\n  raise E {` 判 `Unexpected line break here, missing {`）：
   参数多的话把参数列表写成多行，`-> T raise E {` 留在同一行。
+- **`0u` / `1u64` 这类 UInt 字面量后缀本版不合法**（判 `Parse error, unexpected token id (lowercase start)`）
+  ⇒ 需要 UInt64 的零/边界就写带标注的 `let zero : UInt64 = 0`，大常数直接写十进制裸值靠标注定型。
+  配套：`Int64::to_uint64()` 已废弃 ⇒ 用 `reinterpret_as_uint64()`，`UInt64 → Int64` 用 `reinterpret_as_int64()`；
+  **`Char` 没有 `to_lowercase`/`to_uppercase`** ⇒ ASCII 档自己按码位加 32（Base32 那种"大小写都收"的反查表就这么做）。
+- **一次性工装（字符串替换）改完必须逐处核对**：本轮用 `s.replace(old_multi, ...)` 还原一个多行字节夹具，
+  `old_multi` 是从**第一处** `Bytes::from_array([` 切出来的，于是把另一个夹具（3 个 `0xff`）整个换成了 20 字节，
+  `moon check` 与 PR-A 的全红都照样通过，直到 PR-B 跑断言才暴露。⇒ 工装改过的文件要 `git diff` 逐块看，
+  夹具类改动尤其要单独确认，别信"它编过了"。
 - 用例首选 `assert_eq`；`inspect` 对集合走 `Show` 会吃废弃警告（core 立场：结果确定的用例用断言）。
 - `moon.mod` 是 TOML：注释用 `#`，`//` 会解析失败；`moon fmt` 会把 `[]` 写成 `[ ]`，改字段前先跑 fmt。
 
