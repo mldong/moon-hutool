@@ -19,7 +19,7 @@
 | `text` | `StrUtil` / `CharSequenceUtil` / `NamingCase` / `StrFormatter` | **已实现**（10-04，四目标 CI 待跑） | `docs/spec/01-text.md` | 13 条断言 + 10 个文档块，全绿 |
 | `digest` | `DigestUtil`（MD5 / SHA-256 / HMAC） | **已实现**（10-04，官方向量 14 条全绿） | `docs/spec/02-digest.md` | 7 条 + 6 个文档块 |
 | `date` | `DateUtil` / `CalendarUtil` / `DatePattern` / `DateUnit` | **契约已冻结**（10-04，签名 + 期望值就位，函数体 `abort`；wasm/js/wasm-gc 三档读数一致） | `docs/spec/03-date.md` | 47 条（31 断言块 + 16 文档块），46 红 · 1 绿（绿的那条只碰 pattern 常量）；core **无任何 time 包**，本库最大"从无到有"块 |
-| `id` | `IdUtil`（雪花 / UUID v3·v4 / ObjectId / NanoId） | **契约已冻结**（10-05，签名 + 期望值就位，函数体 `abort`） | `docs/spec/04-id.md` | 32 条（22 断言块 + 10 文档块），31 红 · 1 绿（绿的只碰常量）；时钟与熵全显式注入，**v5 待 `digest` 的 SHA-1**（hutool 本身无 v5） |
+| `id` | `IdUtil`（雪花 / UUID v3·v4 / ObjectId / NanoId） | **已实现**（10-05，32 条全绿，wasm / js / wasm-gc 三档读数一致，native 档由 CI 出证） | `docs/spec/04-id.md` | 32 条（22 断言块 + 10 文档块），全绿；时钟与熵全显式注入，**v5 待 `digest` 的 SHA-1**（hutool 本身无 v5） |
 | `codec` | `Base64`(url-safe·MIME·宽松解码) / `Base32` / `Base58` / `Base62` / `BCD` / `RadixUtil` / `PercentCodec` / `UrlBuilder` | 未开工 | — | core 已有标准 base64/hex/percent，只补缺口不转发 |
 | `coll` | `CollUtil` / `ListUtil` / `IterUtil` 的高频子集 | 未开工 | — | `Array` 已有 123 方法，只做分组/分页/分片这类组合 |
 | `mapx` | `MapUtil` / `Table`(二维表) / `BiMap` / `CaseInsensitiveMap` | 未开工 | — | `Map` 本身已保插入序，不再造 LinkedHashMap |
@@ -47,9 +47,9 @@
 <!-- READINGS:BEGIN 由 scripts/sync_status.py 生成，勿手改 -->
 | 读数（`moon test --target wasm`，当场跑） | 值 |
 |---|---|
-| 用例总数 | **117** —— 绿 40 / 红 77 |
-| 包状态 | 共 23 个：`已实现` 2 · `契约已冻结` 2 · `未开工` 19 |
-| 红的是谁 | `date`（46 红）、`id`（31 红） —— 未实现的包红是设计态 |
+| 用例总数 | **117** —— 绿 71 / 红 46 |
+| 包状态 | 共 23 个：`已实现` 3 · `契约已冻结` 1 · `未开工` 19 |
+| 红的是谁 | `date`（46 红） —— 未实现的包红是设计态 |
 <!-- READINGS:END -->
 
 | 项 | 值 |

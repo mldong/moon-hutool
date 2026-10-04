@@ -1,9 +1,11 @@
 import {
+  "moonbitlang/core/buffer",
+  "moonbitlang/core/encoding/hex",
+  "moonbitlang/core/encoding/utf8",
+  "moonbitlang/core/env",
+  "mldong/moon-hutool/digest",
+}
+
+import {
   "mldong/moon-hutool/id",
 } for "test"
-
-// 骨架期豁免（体全 abort ⇒ 类型/变体没人构造、签名有 raise 而体里没 raise、
-// 状态字段声明了 mut 却没人改）。
-// 实现落地那一笔必须删掉——门禁 G12 拦着不让忘。
-
-warnings = "-struct_never_constructed-unused_constructor-unused_error_type-unused_mut"

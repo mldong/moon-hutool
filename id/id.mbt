@@ -1,9 +1,8 @@
 ///|
 /// moon-hutool/id —— ID 生成（hutool `IdUtil` 家族的 MoonBit 对位）
 ///
-/// 契约：`docs/spec/04-id.md`。本文件此刻是**签名骨架**，函数体一律 `abort("…未实现…")`：
-/// `moon check` 全绿、`moon test` 本包预期红。期望值权威在 `id_test.mbt` 与 spec 表——
-/// 实现期只许把红变绿，改期望值须单独一笔并给外部读数来源（门禁 G5）。
+/// 契约：`docs/spec/04-id.md`。期望值权威在 `id_test.mbt` 与 spec 表——实现只把红变绿，
+/// 改期望值须单独一笔并给外部读数来源（门禁 G5）。
 ///
 /// 三条贯穿性规则（core 与 hutool 在这里给的都不是"能直接搬"的形状，所以口径写死在这里）：
 /// 1. **时钟与熵都是参数**：`Snowflake::next(now_millis)`、`ObjectIdGen::next(timestamp_secs)`、
@@ -87,6 +86,54 @@ pub struct ObjectIdGen {
 }
 
 ///|
+/// 41 位窗口能装下的最大时间偏移（`2^41 - 1`）；再加就压到符号位
+let ts_delta_max : Int64 = 2199023255551L
+
+///|
+/// 位移常数（hutool `Snowflake` 与 MyBatis-Plus `IdWorker` 都是 22/17/12）
+let ts_shift : Int = 22
+
+///|
+let dc_shift : Int = 17
+
+///|
+let worker_shift : Int = 12
+
+///|
+/// 一个 Int32 的无符号满值：ObjectId 的 machine/counter 上界，也是时间戳取低 32 位的掩码
+let u32_max : Int64 = 4294967295L
+
+///|
+/// 规范 UUID 串的长度（32 个十六进制字符 + 4 个连字符）
+let uuid_str_len : Int = 36
+
+///|
+/// 越界就报 `FieldOutOfRange`，携带**被违反的那一侧**边界（破下界给下界、破上界给上界）
+fn check_range(
+  name : String,
+  value : Int64,
+  low : Int64,
+  high : Int64,
+) -> Unit raise IdError {
+  if value < low {
+    raise FieldOutOfRange(name, value, low)
+  }
+  if value > high {
+    raise FieldOutOfRange(name, value, high)
+  }
+}
+
+///|
+fn check_int(
+  name : String,
+  value : Int,
+  low : Int,
+  high : Int,
+) -> Unit raise IdError {
+  check_range(name, value.to_int64(), low.to_int64(), high.to_int64())
+}
+
+///|
 /// 按位组装一个雪花 ID（纯函数，无状态、不读时钟）
 ///
 /// - Parameters: `timestamp_millis` 必须落在 `[snowflake_epoch, snowflake_epoch + 2^41 - 1]`；
@@ -100,8 +147,16 @@ pub fn snowflake_id(
   worker_id : Int,
   sequence : Int64,
 ) -> Int64 raise IdError {
-  let _ = (timestamp_millis, datacenter_id, worker_id, sequence)
-  abort("moon-hutool: id.snowflake_id 未实现（spec 04-id #2.1）")
+  check_int("datacenter_id", datacenter_id, 0, snowflake_max_node)
+  check_int("worker_id", worker_id, 0, snowflake_max_node)
+  check_range("sequence", sequence, 0L, snowflake_max_sequence)
+  let delta = timestamp_millis - snowflake_epoch
+  if delta < 0L || delta > ts_delta_max {
+    raise TimestampOverflow(timestamp_millis)
+  }
+  let dc_part = datacenter_id.to_int64() << dc_shift
+  let worker_part = worker_id.to_int64() << worker_shift
+  (delta << ts_shift) | dc_part | worker_part | sequence
 }
 
 ///|
@@ -109,8 +164,19 @@ pub fn snowflake_id(
 ///
 /// - Raises: `IdError.TimestampOverflow` —— 负数 ID 或解出早于纪年起点的时刻
 pub fn snowflake_parts(id : Int64) -> SnowflakeParts raise IdError {
-  let _ = id
-  abort("moon-hutool: id.snowflake_parts 未实现（spec 04-id #2.1）")
+  // 算术右移：负数 ID 解出的时刻必然早于纪年起始，由下一个判断兜住
+  let ts = (id >> ts_shift) + snowflake_epoch
+  if ts < snowflake_epoch {
+    raise TimestampOverflow(ts)
+  }
+  let dc = ((id >> dc_shift) & 31L).to_int()
+  let worker = ((id >> worker_shift) & 31L).to_int()
+  {
+    timestamp_millis: ts,
+    datacenter_id: dc,
+    worker_id: worker,
+    sequence: id & snowflake_max_sequence,
+  }
 }
 
 ///|
@@ -122,10 +188,11 @@ pub fn id_range_for_timestamps(
   start_millis : Int64,
   end_millis : Int64,
 ) -> IdRange raise IdError {
-  let _ = (start_millis, end_millis)
-  abort(
-    "moon-hutool: id.id_range_for_timestamps 未实现（spec 04-id #2.1）",
+  let start = snowflake_id(start_millis, 0, 0, 0L)
+  let finish = snowflake_id(
+    end_millis, snowflake_max_node, snowflake_max_node, snowflake_max_sequence,
   )
+  { start, finish, }
 }
 
 ///|
@@ -140,8 +207,17 @@ pub fn Snowflake::new(
   worker_id : Int,
   tolerance_millis? : Int64 = 2000L,
 ) -> Snowflake raise IdError {
-  let _ = (datacenter_id, worker_id, tolerance_millis)
-  abort("moon-hutool: id.Snowflake::new 未实现（spec 04-id #2.2）")
+  check_int("datacenter_id", datacenter_id, 0, snowflake_max_node)
+  check_int("worker_id", worker_id, 0, snowflake_max_node)
+  check_range("tolerance_millis", tolerance_millis, 0L, 9223372036854775807L)
+  // -1 是"还没发过号"的哨兵（同 hutool 的 lastTimestamp = -1L）
+  {
+    datacenter_id,
+    worker_id,
+    tolerance_millis,
+    last_timestamp: -1L,
+    sequence: 0L,
+  }
 }
 
 ///|
@@ -152,8 +228,27 @@ pub fn Snowflake::new(
 ///   超过则 `raise ClockMovedBackwards`。**同毫秒序列用尽时把逻辑时间戳 +1**（不忙等真实时钟）
 /// - Raises: `IdError.ClockMovedBackwards`、`IdError.TimestampOverflow`
 pub fn Snowflake::next(self : Self, now_millis : Int64) -> Int64 raise IdError {
-  let _ = (self, now_millis)
-  abort("moon-hutool: id.Snowflake::next 未实现（spec 04-id #2.2）")
+  let mut ts = if now_millis < self.last_timestamp {
+    let offset = self.last_timestamp - now_millis
+    if offset > self.tolerance_millis {
+      raise ClockMovedBackwards(offset)
+    }
+    // 容忍内：钉在上次的时刻，绝不把号发回到过去
+    self.last_timestamp
+  } else {
+    now_millis
+  }
+  if ts == self.last_timestamp {
+    self.sequence = (self.sequence + 1L) & snowflake_max_sequence
+    if self.sequence == 0L {
+      // 同毫秒 4096 个用尽 ⇒ 推进逻辑时间戳（文件头规则 3）
+      ts = ts + 1L
+    }
+  } else {
+    self.sequence = 0L
+  }
+  self.last_timestamp = ts
+  snowflake_id(ts, self.datacenter_id, self.worker_id, self.sequence)
 }
 
 ///|
@@ -164,8 +259,8 @@ pub fn Snowflake::next_string(
   self : Self,
   now_millis : Int64,
 ) -> String raise IdError {
-  let _ = (self, now_millis)
-  abort("moon-hutool: id.Snowflake::next_string 未实现（spec 04-id #2.2）")
+  let id = self.next(now_millis)
+  id.to_string()
 }
 
 ///|
@@ -189,14 +284,102 @@ pub let uuid_ns_oid : String = "6ba7b812-9dad-11d1-80b4-00c04fd430c8"
 pub let uuid_ns_x500 : String = "6ba7b814-9dad-11d1-80b4-00c04fd430c8"
 
 ///|
+/// 十六进制字符 → 数值，非十六进制给 `None`（大小写都收）
+fn hex_value(c : Char) -> Int? {
+  let v = c.to_int()
+  if v >= 48 && v <= 57 {
+    Some(v - 48)
+  } else if v >= 97 && v <= 102 {
+    Some(v - 87)
+  } else if v >= 65 && v <= 70 {
+    Some(v - 55)
+  } else {
+    None
+  }
+}
+
+///|
+/// 取一个十六进制字符的值，非法即 `BadHex`（携带下标，脏串才定位得了）
+fn nibble_at(chars : Array[Char], src : String, at : Int) -> Int raise IdError {
+  match hex_value(chars[at]) {
+    Some(v) => v
+    None => raise BadHex(src, at)
+  }
+}
+
+///|
+/// 规范串里连字符固定落在这四个下标
+fn dash_slot(i : Int) -> Bool {
+  i == 8 || i == 13 || i == 18 || i == 23
+}
+
+///|
+/// 36 位规范串 → 16 字节（长度、连字符位置、字符集三样都校验）
+fn uuid_bytes(canonical : String) -> Bytes raise IdError {
+  let chars = canonical.to_array()
+  let n = chars.length()
+  if n != uuid_str_len {
+    raise BadLength(canonical, n, uuid_str_len)
+  }
+  let buf = @buffer.Buffer()
+  let mut i = 0
+  while i < n {
+    if dash_slot(i) {
+      if chars[i] != '-' {
+        raise BadHex(canonical, i)
+      }
+      i = i + 1
+    } else {
+      let hi = nibble_at(chars, canonical, i)
+      let lo = nibble_at(chars, canonical, i + 1)
+      buf.write_byte(((hi << 4) | lo).to_byte())
+      i = i + 2
+    }
+  }
+  buf.to_bytes()
+}
+
+///|
+/// 原始字节 → 小写十六进制（`@hex.encode` 的大小写档不赌，显式落小写）
+fn to_hex_lower(data : Bytes) -> String {
+  @hex.encode(data).to_lower()
+}
+
+///|
+/// 置 version 与 variant（RFC 4122 §4.1.1）：`byte[6]` 高四位 = version，`byte[8]` 高两位 = 10
+fn with_version(data : Bytes, version : Int) -> Bytes {
+  let arr = data.to_array()
+  arr[6] = ((arr[6].to_int() & 0x0f) | (version << 4)).to_byte()
+  arr[8] = ((arr[8].to_int() & 0x3f) | 0x80).to_byte()
+  Bytes::from_array(arr.exact_view())
+}
+
+///|
+/// 16 字节 → 36 位规范串（小写、连字符落 8/13/18/23）
+fn to_canonical(data : Bytes) -> String {
+  let chars = to_hex_lower(data).to_array()
+  let buf = StringBuilder()
+  for i in 0..<32 {
+    // 字符出口走 StringBuilder，不走 @buffer.Buffer：后者在 wasm/js 档内部是 UTF-16，
+    // write_char 还带废弃警告（本包的 @buffer.Buffer 只用来装**字节**，配 to_bytes 用）
+    if i == 8 || i == 12 || i == 16 || i == 20 {
+      buf.write_char('-')
+    }
+    buf.write_char(chars[i])
+  }
+  buf.to_string()
+}
+
+///|
 /// 名字空间 UUID（MD5(namespace 字节 ‖ name)）——**hutool 没有这一档**，按 RFC 4122 §4.3 补
 ///
 /// - Parameters: `ns` 必须是 36 位规范串（可用本包的 `uuid_ns_*`）；
 ///   `name` 按 **UTF-8 字节**参与运算（与 `digest` 同口径）
 /// - Raises: `IdError.BadLength`、`IdError.BadHex`（namespace 形状不对）
 pub fn uuid_v3(ns : String, name : String) -> String raise IdError {
-  let _ = (ns, name)
-  abort("moon-hutool: id.uuid_v3 未实现（spec 04-id #3.3）")
+  // namespace 参与运算的是它的 16 个**原始字节**，不是那串 36 字符的文本（同 CPython `uuid.uuid3`）
+  let stream = uuid_bytes(ns) + @utf8.encode(name)
+  to_canonical(with_version(@digest.md5_of_bytes(stream), 3))
 }
 
 ///|
@@ -206,8 +389,11 @@ pub fn uuid_v3(ns : String, name : String) -> String raise IdError {
 ///
 /// - Raises: `IdError.EntropyTooShort(16, got)`
 pub fn uuid_v4(rand : Bytes) -> String raise IdError {
-  let _ = rand
-  abort("moon-hutool: id.uuid_v4 未实现（spec 04-id #3.5）")
+  let n = rand.length()
+  if n != 16 {
+    raise EntropyTooShort(16, n)
+  }
+  to_canonical(with_version(rand, 4))
 }
 
 ///|
@@ -216,7 +402,10 @@ pub fn uuid_v4(rand : Bytes) -> String raise IdError {
 /// - Raises: `IdError.NoEntropy` —— 取不到熵就失败，**绝不静默回落固定种子**
 ///   （那会产出"看着能用、实际可预测"的 ID）
 pub fn uuid_v4_random() -> String raise IdError {
-  abort("moon-hutool: id.uuid_v4_random 未实现（spec 04-id #3.6）")
+  match @env.rand(16) {
+    Some(data) => uuid_v4(data)
+    None => raise NoEntropy
+  }
 }
 
 ///|
@@ -225,8 +414,7 @@ pub fn uuid_v4_random() -> String raise IdError {
 /// 与 Java 侧互解时要用这条而不是 `uuid_v3`（hutool `UUID.nameUUIDFromBytes` 同档）。
 /// 输入固定按 UTF-8 编码——Java 那侧 `getBytes()` 会随平台默认字符集变，本库不跟
 pub fn name_uuid(name : String) -> String {
-  let _ = name
-  abort("moon-hutool: id.name_uuid 未实现（spec 04-id #3.4）")
+  to_canonical(with_version(@digest.md5_of_bytes(@utf8.encode(name)), 3))
 }
 
 ///|
@@ -235,8 +423,18 @@ pub fn name_uuid(name : String) -> String {
 /// - Raises: `IdError.BadLength`、`IdError.BadHex`
 /// - Note: 只读 version，不判 variant——"这串是不是合法 UUID"是 `valid` 包的活
 pub fn uuid_version(canonical : String) -> Int raise IdError {
-  let _ = canonical
-  abort("moon-hutool: id.uuid_version 未实现（spec 04-id #3.7）")
+  let b = uuid_bytes(canonical)
+  b[6].to_int() >> 4
+}
+
+///|
+/// 大端写一个 Int32（只取低 32 位）
+fn write_u32_be(buf : @buffer.Buffer, value : Int64) -> Unit {
+  let v = value & u32_max
+  buf.write_byte(((v >> 24) & 255L).to_int().to_byte())
+  buf.write_byte(((v >> 16) & 255L).to_int().to_byte())
+  buf.write_byte(((v >> 8) & 255L).to_int().to_byte())
+  buf.write_byte((v & 255L).to_int().to_byte())
 }
 
 ///|
@@ -250,8 +448,32 @@ pub fn object_id(
   machine : Int64,
   counter : Int64,
 ) -> String raise IdError {
-  let _ = (timestamp_secs, machine, counter)
-  abort("moon-hutool: id.object_id 未实现（spec 04-id #4）")
+  check_range("machine", machine, 0L, u32_max)
+  check_range("counter", counter, 0L, u32_max)
+  let buf = @buffer.Buffer()
+  write_u32_be(buf, timestamp_secs)
+  write_u32_be(buf, machine)
+  write_u32_be(buf, counter)
+  to_hex_lower(buf.to_bytes())
+}
+
+///|
+/// 24 位十六进制 → 12 字节（长度与字符集都校验）
+fn object_id_bytes(id : String) -> Bytes raise IdError {
+  let chars = id.to_array()
+  let n = chars.length()
+  if n != 24 {
+    raise BadLength(id, n, 24)
+  }
+  let buf = @buffer.Buffer()
+  let mut i = 0
+  while i < 24 {
+    let hi = nibble_at(chars, id, i)
+    let lo = nibble_at(chars, id, i + 1)
+    buf.write_byte(((hi << 4) | lo).to_byte())
+    i = i + 2
+  }
+  buf.to_bytes()
 }
 
 ///|
@@ -259,8 +481,13 @@ pub fn object_id(
 ///
 /// - Raises: `IdError.BadLength`、`IdError.BadHex`
 pub fn object_id_timestamp(id : String) -> Int64 raise IdError {
-  let _ = id
-  abort("moon-hutool: id.object_id_timestamp 未实现（spec 04-id #4）")
+  let b = object_id_bytes(id)
+  // 一律升到 Int64 再移位：wasm 档的 Int 是 32 位，255 << 24 先溢出成 -1 再符号扩展就错了
+  let v0 = b[0].to_int().to_int64()
+  let v1 = b[1].to_int().to_int64()
+  let v2 = b[2].to_int().to_int64()
+  let v3 = b[3].to_int().to_int64()
+  (v0 << 24) | (v1 << 16) | (v2 << 8) | v3
 }
 
 ///|
@@ -269,8 +496,19 @@ pub fn object_id_timestamp(id : String) -> Int64 raise IdError {
 /// hutool `isValid` 会先去掉 `-` 再判长度，于是带连字符的串它判真；本库判假——
 /// 连字符不是 ObjectId 的合法形状，容它只会让脏数据往下走
 pub fn is_object_id(s : String) -> Bool {
-  let _ = s
-  abort("moon-hutool: id.is_object_id 未实现（spec 04-id #4）")
+  let chars = s.to_array()
+  if chars.length() != 24 {
+    false
+  } else {
+    let mut ok = true
+    for c in chars {
+      match hex_value(c) {
+        None => ok = false
+        Some(_) => ()
+      }
+    }
+    ok
+  }
 }
 
 ///|
@@ -282,8 +520,9 @@ pub fn ObjectIdGen::new(
   machine : Int64,
   start_counter? : Int64 = 0L,
 ) -> ObjectIdGen raise IdError {
-  let _ = (machine, start_counter)
-  abort("moon-hutool: id.ObjectIdGen::new 未实现（spec 04-id #4）")
+  check_range("machine", machine, 0L, u32_max)
+  check_range("counter", start_counter, 0L, u32_max)
+  { machine, counter: start_counter, }
 }
 
 ///|
@@ -292,8 +531,9 @@ pub fn ObjectIdGen::next(
   self : Self,
   timestamp_secs : Int64,
 ) -> String raise IdError {
-  let _ = (self, timestamp_secs)
-  abort("moon-hutool: id.ObjectIdGen::next 未实现（spec 04-id #4）")
+  let id = object_id(timestamp_secs, self.machine, self.counter)
+  self.counter = (self.counter + 1L) & u32_max
+  id
 }
 
 ///|
@@ -307,6 +547,29 @@ pub let nano_id_alphabet : String = "_-0123456789abcdefghijklmnopqrstuvwxyzABCDE
 pub let nano_id_size : Int = 21
 
 ///|
+/// hutool 的 mask 式 `(2 << (int) floor(log(len-1) / log(2))) - 1`，用整数位长代替 `log`。
+///
+/// `len == 1` 时 Java 那侧 `(int)` 强转把 `-Infinity` 折成 0 ⇒ mask=1；本库照此定死（spec 04 #5）
+fn nano_mask(alphabet_len : Int) -> Int {
+  if alphabet_len <= 1 {
+    1
+  } else {
+    let mut k = alphabet_len - 1
+    let mut shift = 0
+    while k > 1 {
+      k = k >> 1
+      shift = shift + 1
+    }
+    (2 << shift) - 1
+  }
+}
+
+///|
+fn ceil_div(a : Int, b : Int) -> Int {
+  (a + b - 1) / b
+}
+
+///|
 /// 生成 `size` 个字符需要注入多少随机字节（hutool 的 `step` 公式，暴露出来才凑得了注入）
 ///
 /// `mask = (2 << floor(log2(len - 1))) - 1`、`step = ceil(1.6 * mask * size / len)`；
@@ -317,31 +580,63 @@ pub fn nano_id_bytes_needed(
   alphabet_len : Int,
   size : Int,
 ) -> Int raise IdError {
-  let _ = (alphabet_len, size)
-  abort("moon-hutool: id.nano_id_bytes_needed 未实现（spec 04-id #5）")
+  check_int("alphabet_len", alphabet_len, 1, 255)
+  if size < 1 {
+    raise BadLength("nano_id size", size, 1)
+  }
+  // hutool 写的是 `(int) ceil(1.6 * mask * size / len)`；1.6 = 8/5，走精确有理式免得浮点漂
+  ceil_div(8 * nano_mask(alphabet_len) * size, 5 * alphabet_len)
+}
+
+///|
+/// 拒绝采样：按序吃 `rand`，`(b & mask)` 落在表内才取字符，凑够 `want` 个就停（剩余字节丢掉）
+fn nano_fill(
+  buf : StringBuilder,
+  chars : Array[Char],
+  want : Int,
+  rand : Bytes,
+) -> Int {
+  let len = chars.length()
+  let mask = nano_mask(len)
+  let total = rand.length()
+  let mut k = 0
+  let mut i = 0
+  while k < want && i < total {
+    let r = rand[i].to_int() & mask
+    if r < len {
+      buf.write_char(chars[r])
+      k = k + 1
+    }
+    i = i + 1
+  }
+  k
 }
 
 ///|
 /// NanoId 的**注入版**（拒绝采样，逐字节与 hutool 同序）
 ///
 /// - Parameters: `alphabet` 按**码点**索引（非 ASCII 表也能用）；`rand` 是注入的随机字节
-/// - Raises: `IdError.EntropyTooShort`（注入字节用完仍没凑够）、`IdError.BadLength`（空表）、
-///   `IdError.FieldOutOfRange`（表长 ≥ 256）
+/// - Raises: `IdError.EntropyTooShort`（注入字节用完仍没凑够，携带应需字节数与实得字节数）、
+///   `IdError.FieldOutOfRange`（空表、表长 ≥ 256、`size < 1`——都携带被违反的那一侧边界）
 pub fn nano_id(
   alphabet : String,
   size : Int,
   rand : Bytes,
 ) -> String raise IdError {
-  let _ = (alphabet, size, rand)
-  abort("moon-hutool: id.nano_id 未实现（spec 04-id #5）")
-}
-
-///|
-/// NanoId 便捷版：默认表 + 默认长度 + `env.rand`
-///
-/// - Raises: `IdError.NoEntropy`
-pub fn nano_id_default() -> String raise IdError {
-  abort("moon-hutool: id.nano_id_default 未实现（spec 04-id #5）")
+  let chars = alphabet.to_array()
+  let len = chars.length()
+  check_int("alphabet_len", len, 1, 255)
+  if size < 1 {
+    raise FieldOutOfRange("size", size.to_int64(), 1L)
+  }
+  let buf = StringBuilder()
+  let got = nano_fill(buf, chars, size, rand)
+  if got < size {
+    // 注入的熵是一次性的，不会像随机源那样再给一轮 ⇒ 明确报缺多少，绝不拿固定字节补齐
+    let need = nano_id_bytes_needed(len, size)
+    raise EntropyTooShort(need, rand.length())
+  }
+  buf.to_string()
 }
 
 ///|
@@ -349,6 +644,25 @@ pub fn nano_id_default() -> String raise IdError {
 ///
 /// - Raises: `IdError.NoEntropy` 及 `nano_id` 的全部错误
 pub fn nano_id_random(alphabet : String, size : Int) -> String raise IdError {
-  let _ = (alphabet, size)
-  abort("moon-hutool: id.nano_id_random 未实现（spec 04-id #5）")
+  let chars = alphabet.to_array()
+  let need = nano_id_bytes_needed(chars.length(), size)
+  let buf = StringBuilder()
+  let mut k = 0
+  while k < size {
+    // 一轮取 need 个字节可能因拒绝采样不够（同 hutool 的 do-while），所以再取一轮
+    let rand = match @env.rand(need) {
+      Some(data) => data
+      None => raise NoEntropy
+    }
+    k = k + nano_fill(buf, chars, size - k, rand)
+  }
+  buf.to_string()
+}
+
+///|
+/// NanoId 便捷版：默认表 + 默认长度 + `env.rand`
+///
+/// - Raises: `IdError.NoEntropy`
+pub fn nano_id_default() -> String raise IdError {
+  nano_id_random(nano_id_alphabet, nano_id_size)
 }

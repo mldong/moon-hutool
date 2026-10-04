@@ -4,7 +4,7 @@ hutool `IdUtil` 家族的 MoonBit 对位：雪花 ID、UUID（v3 / v4 / JDK 兼�
 
 完整边界矩阵与逐条读数来源见 [`docs/spec/04-id.md`](https://github.com/mldong/moon-hutool/blob/master/docs/spec/04-id.md)。
 
-> 状态：**契约已冻结、实现未开工**——函数体是 `abort`，下面每个块的期望值此刻红是设计态。期望串与 `id_test.mbt` 同受"期望值冻结"约束：实现期只许把红变绿（门禁 G5）。
+> 状态：**已实现**（10-05）——下面每个块都是真被执行并被断言的用例（`moon test` 从本文件收 10 条）。期望串与 `id_test.mbt` 同受"期望值冻结"约束：改任何期望须单独一笔并给外部读数来源（门禁 G5）。
 
 ## 三条先决口径
 
