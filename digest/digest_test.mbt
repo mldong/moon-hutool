@@ -23,7 +23,7 @@ test "@digest.md5 #2.1 RFC 1321 A.5 全部七条测试串" {
     @digest.md5_hex(
       "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789",
     ),
-    content="d174ab98d277d9f5a5611c2c9f419c9f",
+    content="d174ab98d277d9f5a5611c2c9f419d9f",
   )
   inspect(
     @digest.md5_hex(
