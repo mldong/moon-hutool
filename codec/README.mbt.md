@@ -38,10 +38,7 @@ fn bts(xs : Array[Byte]) -> Bytes {
 
 ///|
 fn bytes_of_fff() -> Bytes {
-  bts([
-    0x2d, 0x73, 0xf6, 0xa4, 0x88, 0x5c, 0xe6, 0x21, 0x18, 0x41, 0x7e, 0xb7, 0x3f,
-    0xb4, 0x05, 0xa0, 0x53, 0x9e, 0xfa, 0x21,
-  ])
+  bts([0xff, 0xff, 0xff])
 }
 ```
 
@@ -103,7 +100,7 @@ test "填充的两种下标口径" {
   )
   assert_eq(
     err_text(() => @codec.b32_decode("MZXWE1==")),
-    "IllegalChar MZXWE1==@4",
+    "IllegalChar MZXWE1==@5",
   )
 }
 ```

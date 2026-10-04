@@ -192,7 +192,7 @@ test "@codec #3 b32 的非 ASCII 档与解码往返（大小写都收）" {
 test "@codec #3 b32 的负向档（表外字符给下标、填充余数给位置）" {
   assert_eq(
     err_shape(() => @codec.b32_decode("MZXWE1==")),
-    "IllegalChar MZXWE1==@4",
+    "IllegalChar MZXWE1==@5",
   )
   // 余 6 不可能（合法余数是 0/2/4/5/7）⇒ 没有「=」时报余数段起始位
   assert_eq(err_shape(() => @codec.b32_decode("MZXW6Y")), "BadPadding MZXW6Y@0")
