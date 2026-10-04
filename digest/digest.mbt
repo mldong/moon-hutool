@@ -1,7 +1,7 @@
 ///|
 /// moon-hutool/digest —— 摘要（hutool `DigestUtil` 的 MoonBit 对位）
 ///
-/// 契约：`docs/spec/05-digest.md`。骨架期函数体 `abort`，`moon check` 绿、`moon test` 预期红。
+/// 契约：`docs/spec/05-digest.md`；进度：`docs/ROADMAP.md`。骨架期函数体 `abort`，`moon check` 绿、`moon test` 预期红。
 ///
 /// **权威是规范不是 hutool**：hutool-crypto 自己几乎不实现算法（是 JCE/`javax.crypto` 门面，
 /// 全模块只有 RC4/XXTEA/Vigenere 是手写位运算），所以本包对着 RFC 1321 / FIPS 180-4 / RFC 2104 实现，
@@ -27,8 +27,8 @@ pub fn md5_hex(data : String) -> String {
 ///|
 /// MD5 中段 16 位（hutool `md5Hex16` = 取 32 位 hex 的第 8~24 位）
 ///
-/// ⚠ 这是 **hutool/mldong 私有行为**，不在任何 RFC 里。mldong 14 栈有存量数据靠它，
-/// 语义漂移等于把用户口令校验打散 ⇒ 期望值必须对着 v5-master 反推后冻结，不许凭印象
+/// ⚠ 这是 **hutool 的私有行为**，不在任何 RFC 里；不少项目拿它当短摘要或口令列存储，
+/// 语义漂移会打散存量数据 ⇒ 期望值必须对着 v5-master 反推后冻结，不许凭印象
 pub fn md5_hex16(data : String) -> String {
   let _ = data
   abort("moon-hutool: digest.md5_hex16 未实现（spec 05-digest #2.2）")

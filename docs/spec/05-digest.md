@@ -22,18 +22,18 @@ RFC 1321 附录 A.5 全部七条测试串（本机 `hashlib` 现算，与规范�
 | `"1234...7890"` ×8（80 字符） | `57edf4a22be3c955ac49da2e2107b67a` |
 | `"中文"` | `a7bac2239fcdcb3a067903d8077c4a07` ← **UTF-8 档**，非 UTF-16/GB18030 |
 
-hutool 对位 `DigestUtil.md5Hex` ｜ 差异：hutool 可传 `Charset`，本库固定 UTF-8（无字符集表，见 hub 方案 §5.8）｜ 读数来源：RFC 1321 A.5。
+hutool 对位 `DigestUtil.md5Hex` ｜ 差异：hutool 可传 `Charset`，本库固定 UTF-8（无字符集表，见 `docs/ROADMAP.md` 的「不做」列）｜ 读数来源：RFC 1321 A.5。
 
 ## 2.2 `md5_hex16(data : String) -> String` —— hutool/mldong 私有行为
 
-**取 32 位 hex 的第 8~24 位**（即 `hex[8:24]`），不在任何 RFC 里。mldong 14 栈有存量数据靠它，语义漂移等于打散用户口令校验 ⇒ 期望值必须对 v5-master 反推后冻结。
+**取 32 位 hex 的第 8~24 位**（即 `hex[8:24]`），不在任何 RFC 里，但被大量项目当短摘要或口令列存储，语义漂移会打散存量数据 ⇒ 期望值必须对 v5-master 反推后冻结。
 
 | 输入 | 期望 |
 |---|---|
 | `"message digest"` | `7cb7938d525a2f31` |
 | `"中文"` | `9fcdcb3a067903d8` |
 
-**14 栈登录口令形状**（契约的一部分，不只是示例）：`md5_hex(salt + pwd)`，`salt="MLDONG" pwd="123456"` → `16f8368573e7c2401851c1b47293d27b`。
+**口令列常见形状**（契约的一部分，不只是示例）：`md5_hex(salt + password)`，salt 逐用户随机；本表用固定串 `salt123` + `passw0rd` 只钉算法读数 → `96d950b3c3b90997910b05907037133f`。
 hutool 对位 `DigestUtil.md5Hex16` ｜ 读数来源：hutool v5-master 实测 + 本机 hashlib 交叉核对。
 
 ## 2.3 SHA-256
@@ -64,7 +64,7 @@ block size = **64 字节**；键长 > 64 ⇒ **先对键做一次 SHA-256** 再�
 | 键长 80 > 64 | `"a"` ×80 | `"Test Using Larger Than Block-Size Key - Hash Key First"` | `7502d8b2069f64dcbca4d51628fdc86a17200b3fad268755483946baf3d99fa8` |
 
 hutool 对位 `HMac(HmacAlgorithm.HmacSHA256)` ｜ 读数来源：RFC 2104 §5 + RFC 4231 §4（本机 hashlib 核对）。
-⚠ 键的字节解释固定为 **UTF-8**；需要原始二进制密钥（如 JWT 的 32 随机字节）的调用方走 `_bytes` 入口的后续扩展档（此刻不放公开骨架——口径 5：先证明需要再加）。
+⚠ 键的字节解释固定为 **UTF-8**；需要原始二进制密钥（如 JWT 的 32 随机字节）的调用方走 `_bytes` 入口的后续扩展档（此刻不放公开骨架——先证明需要再加（别预铺 API））。
 
 ## 2.5 `equal_digest(a : Bytes, b : Bytes) -> Bool`
 
@@ -82,9 +82,9 @@ hutool 对位：无（hutool 直接用 `equals`）⇒ **本库主动加的一条
 
 | 项 | 相位 | 说明 |
 |---|---|---|
-| `md5*` / `sha256*` / `hmac_sha256*` / `equal_digest` | **P1（本契约）** | 14 栈登录、签名、站内信校验的最小集 |
+| `md5*` / `sha256*` / `hmac_sha256*` / `equal_digest` | **P1（见 ROADMAP）** | 登录口令列、签名、消息校验的最小集 |
 | `sha1*`（含 UUID v5 依赖）、`sha512*` | P6 | 官方向量同法冻结后再实现 |
-| `sm3`、`ripemd160`、`sha3/keccak` | §5.7 二期 | 国密合规出口 / 需要新算法工程 |
+| `sm3`、`ripemd160`、`sha3/keccak` | `docs/ROADMAP.md` 的「暂不做」档 | 国密合规出口 / 需要新算法工程 |
 | `Digester`（salt + saltPosition + digestCount 迭代） | P6 | hutool 私有行为，期望值全量对 v5-master 反推后才进契约 |
-| AES / RSA / EC / BCrypt / Argon2 / PBKDF2 | §5.7 二期不排期 | 非对称要自写 `gcd`/`mod_inverse`（core 无）+ ASN.1 DER |
-| 流式/增量摘要（`Digest` 对象一次喂一块） | §5.7 二期 | core 无 io；本库不做带状态的写接口 |
+| AES / RSA / EC / BCrypt / Argon2 / PBKDF2 | `docs/ROADMAP.md` 的「暂不做」档不排期 | 非对称要自写 `gcd`/`mod_inverse`（core 无）+ ASN.1 DER |
+| 流式/增量摘要（`Digest` 对象一次喂一块） | `docs/ROADMAP.md` 的「暂不做」档 | core 无 io；本库不做带状态的写接口 |

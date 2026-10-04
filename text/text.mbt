@@ -1,7 +1,7 @@
 ///|
 /// moon-hutool/text —— 字符串门面（hutool `StrUtil`/`CharSequenceUtil` 的 MoonBit 对位）
 ///
-/// 契约：`docs/spec/01-text.md`。本文件此刻是**签名骨架**（口径 5：只包 core 给不了的语义层，不转发同一语义），
+/// 契约：`docs/spec/01-text.md`。本文件此刻是**签名骨架**（边界规则见 `AGENTS.md`：只包 core 给不了的语义层，不转发同一语义），
 /// 函数体一律 `abort("…未实现…")`：`moon check` 全绿、`moon test` 预期红。
 /// 期望值权威在 `text_test.mbt` 与 spec 表——实现期只许把红变绿，改期望值须单独一笔并给外部读数来源（门禁 G5）。
 ///

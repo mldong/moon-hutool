@@ -117,8 +117,8 @@ hutool 对位 `NamingCase`（全仓唯一实现处，`StrUtil.*` 全是委托）
 ## 1.13 `upper_first` / `lower_first`（ASCII 档）
 
 `upper_first("hutool")` → `"Hutool"`；`upper_first("")` → `""`。
-**差异声明（重要）**：core `String::to_upper/to_lower` 文档原文只处理 `A–Z`/`a–z`，非 ASCII 字母原样返回 ⇒ 本库**不承诺 Unicode 大小写**（不假装 hutool/Java 的 `toUpperCase()`）。要 Unicode 档就等数据表件（hub 方案 §5.7 二期），届时另开函数名而不是改这里的语义。
+**差异声明（重要）**：core `String::to_upper/to_lower` 文档原文只处理 `A–Z`/`a–z`，非 ASCII 字母原样返回 ⇒ 本库**不承诺 Unicode 大小写**（不假装 hutool/Java 的 `toUpperCase()`）。要 Unicode 档就等数据表件（hub 方案 `docs/ROADMAP.md` 的「暂不做」档），届时另开函数名而不是改这里的语义。
 
 ## 1.14 本包不承诺清单
 
-`pad_start/pad_end/repeat/has_prefix/contains/replace/split_once/to_upper(ASCII)/trim_space` 等 **core 已有同义能力，本包一律不转发**（口径 5：不写转发层）。需要时在调用点直接用 `@string` / `String::*`。判据与理由见 hub `docs/moon-hutool-plan.md` §4.5；对拍腿（门禁 G8）只适用于"包了语义层"的格子，这里没有格子可拍。
+`pad_start/pad_end/repeat/has_prefix/contains/replace/split_once/to_upper(ASCII)/trim_space` 等 **core 已有同义能力，本包一律不转发**（边界规则见 `AGENTS.md`「与 core 的边界」）。需要时在调用点直接用 `@string` / `String::*`。判据与理由见 `AGENTS.md`；对拍腿（门禁 G8）只适用于"包了语义层"的格子，这里没有格子可拍。

@@ -2,7 +2,7 @@
 
 四列口径（**代码不转发、文档给映射**）：
 
-- **core 直接可用** —— MoonBit 标准库已有同义能力，调用点直接打它，本库**不写转发层**（口径 5）
+- **core 直接可用** —— MoonBit 标准库已有同义能力，调用点直接打它，本库**不写转发层**（规则见 `AGENTS.md`「与 core 的边界」）
 - **本库补** —— 本库提供，且标明补的是哪类：① hutool 契约形状 / ② 环境显式化 / ③ 分散入口收成可测出口
 - **不做** —— JVM 特性、FFI、或明确不承诺（理由见文末与 `AGENTS.md`）
 
@@ -33,8 +33,8 @@
 | `sha1/sha256/sha512` | 无 | ② P1 只做 sha256，sha1/sha512 在 P6 | — |
 | `hmac*` | 无 | ② `digest.hmac_sha256_*`（block size 64、长键先哈希） | — |
 | `Digester(salt,saltPosition,digestCount)` | 无 | P6（hutool 私有行为，先反推再冻结） | — |
-| 国密 `sm3`、`ripemd160`、SHA-3 | 无 | — | §5.7 二期 |
-| 对称/非对称（AES/DES/RSA/EC/SM2）、BCrypt/Argon2/PBKDF2 | 无；`BigInt::pow(modulus)` + `math::probable_prime` 是门票，缺 gcd 族与 ASN.1 | — | §5.7 二期不排期 |
+| 国密 `sm3`、`ripemd160`、SHA-3 | 无 | — | `docs/ROADMAP.md` 的「暂不做」档 |
+| 对称/非对称（AES/DES/RSA/EC/SM2）、BCrypt/Argon2/PBKDF2 | 无；`BigInt::pow(modulus)` + `math::probable_prime` 是门票，缺 gcd 族与 ASN.1 | — | `docs/ROADMAP.md` 的「暂不做」档不排期 |
 
 ## 3. 集合与 Map（`CollUtil` 1265 行 / `MapUtil` 590 行）
 
@@ -53,9 +53,9 @@
 |---|---|---|---|
 | 当前时间 | `env.now() -> UInt64`（epoch ms，唯一时钟） | ② `date.Clock`（注入式） | 直接读系统时区（无接口） |
 | 日历换算 | 无 | ③ `date`（civil↔epoch，Hinnant 算法） | — |
-| 时区/DST | 无；`moonbitlang/x/time` 也只有固定偏移 + 自备 TZif | ② 显式 `offset_minutes` | **不支持命名时区与 DST**（口径 2） |
+| 时区/DST | 无；`moonbitlang/x/time` 也只有固定偏移 + 自备 TZif | ② 显式 `offset_minutes` | **不支持命名时区与 DST**（本库固定口径：不支持命名时区与 DST） |
 | `format/parse` | 无 | ① 封闭 pattern 子集（`y M d H h m s S E Z X a`，其余字符**显式拒绝**）+ ISO8601 / RFC 7231 两个专用解析器 | hutool 的"智能无格式 parse"、`java.text` 全套词法、lenient 语义 |
-| `ChineseDate`/农历/节气/生肖 | 无 | — | §5.7 二期，且**码表独立成数据件** |
+| `ChineseDate`/农历/节气/生肖 | 无 | — | `docs/ROADMAP.md` 的「暂不做」档，且**码表独立成数据件** |
 
 ## 5. 编解码 / 正则 / 校验
 
@@ -79,7 +79,7 @@
 | `BloomFilter` | 无 | ③ `bloom`（P5） | — |
 | `CronUtil` | 无 | ③ `cron`（P5，5~7 段解析 + `match` + `next_after`） | **调度器不做**（无 async/线程，只算不触发） |
 | `TextSimilarity`/`Simhash` | `diff::{edit_distance_str,edit_distance_str_within,levenshtein_edits}` **已有** | ③ `textsim`：归一化分值、Jaro/Dice、SimHash | `similar` 按**实现**（最长公共子串/较大长度）不按 javadoc 的"莱文斯坦"说法 |
-| `ZipUtil`/gzip/deflate | 无 | — | §5.7 二期（RFC 1951 独立工程） |
+| `ZipUtil`/gzip/deflate | 无 | — | `docs/ROADMAP.md` 的「暂不做」档（RFC 1951 独立工程） |
 | `CSV`/`Props`/`Ini` | 无 | ③ `csv`、`ini`（P5，**API 只收 `String`/`Bytes`**） | 文件读写 |
 | `Convert`（注册表 + 反射） | `json::{to_json,from_json,derive}` **已有** | ① `conv`（P3：`Json`→类型显式 `match`，无反射） | 运行时类型探测 |
 | `NumberUtil`/`BigDecimal` | `BigInt::pow(exp, modulus?)`、`math::*`、`double::*`；**无 Decimal、无 gcd/lcm** | ③ `num`（P3：含 `gcd/lcm/ext_gcd/mod_inverse`）+ 薄 `Money`（`Int64` 分 + `allocate`） | 完整 `BigDecimal` 语义、`DecimalFormat` 全套 pattern |

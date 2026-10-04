@@ -46,10 +46,10 @@ test "@digest.md5 #2.1 输入按 UTF-8 字节（中文钉死这一档）" {
 test "@digest.md5_hex16 #2.2 hutool 私有行为＝取 32 位 hex 的 8~24 位" {
   inspect(@digest.md5_hex16("message digest"), content="7cb7938d525a2f31")
   inspect(@digest.md5_hex16("中文"), content="9fcdcb3a067903d8")
-  // mldong 14 栈登录口令形状 md5(salt + pwd)：存量数据靠这条
+  // 口令列常见形状 md5(salt + password)，salt 逐用户随机；此处固定串只为钉住算法读数
   inspect(
-    @digest.md5_hex("MLDONG123456"),
-    content="16f8368573e7c2401851c1b47293d27b",
+    @digest.md5_hex("salt123" + "passw0rd"),
+    content="96d950b3c3b90997910b05907037133f",
   )
 }
 
