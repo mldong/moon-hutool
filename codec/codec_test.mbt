@@ -597,3 +597,14 @@ test "@codec #8 url_of_http：只在既无 scheme 又非协议相对时补 http:
     "http://example.com/b",
   )
 }
+
+///|
+test "@codec #8 normalize 不还原 `%2E`：字面段不许被点段删除吃掉（RFC 3986 §6.2.2.2）" {
+  let n : (String) -> String = t => url_of(t).normalize().to_string()
+  // `%2E%2E` 在语法上是字面段，不是"上跳一层"；还原成 `..` 就会被 §5.2.4 吃掉，等于改语义
+  assert_eq(n("http://a/%2E%2E/x"), "http://a/%2E%2E/x")
+  // 大小写十六进制都归一成大写，但点号的还原始终排除
+  assert_eq(n("http://a/%2e/b"), "http://a/%2E/b")
+  // 同一段里两种命运并存：`%7E` 是 `~`（unreserved 且不是点）⇒ 还原；`%2E` 是点 ⇒ 不还原
+  assert_eq(n("http://a/%7E%2E/b"), "http://a/~%2E/b")
+}
