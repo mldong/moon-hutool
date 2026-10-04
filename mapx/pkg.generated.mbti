@@ -1,6 +1,10 @@
 // Generated using `moon info`, DON'T EDIT IT
 package "mldong/moon-hutool/mapx"
 
+import {
+  "moonbitlang/core/set",
+}
+
 // Values
 pub fn[K : Hash + Eq, A, B] filter_map(Map[K, A], (K, A) -> B?) -> Map[K, B]
 
@@ -44,6 +48,27 @@ pub fn[V] CiMap::new() -> Self[V]
 pub fn[V] CiMap::put(Self[V], String, V) -> V?
 pub fn[V] CiMap::remove(Self[V], String) -> V?
 pub fn[V] CiMap::to_map(Self[V]) -> Map[String, V]
+
+pub struct Table[R, C, V] {
+  rows : Map[R, Map[C, V]]
+  cols : Map[C, @set.Set[R]]
+}
+pub fn[R, C, V] Table::clear(Self[R, C, V]) -> Unit
+pub fn[R : Hash + Eq, C : Hash + Eq, V] Table::column(Self[R, C, V], C) -> Map[R, V]
+pub fn[R, C, V] Table::columns(Self[R, C, V]) -> Array[C]
+pub fn[R : Hash + Eq, C : Hash + Eq, V] Table::contains(Self[R, C, V], R, C) -> Bool
+pub fn[R, C : Hash + Eq, V] Table::contains_column(Self[R, C, V], C) -> Bool
+pub fn[R : Hash + Eq, C, V] Table::contains_row(Self[R, C, V], R) -> Bool
+pub fn[R, C, V : Eq] Table::contains_value(Self[R, C, V], V) -> Bool
+pub fn[R : Hash + Eq, C : Hash + Eq, V] Table::get(Self[R, C, V], R, C) -> V?
+pub fn[R : Hash + Eq, C : Hash + Eq, V] Table::new() -> Self[R, C, V]
+pub fn[R : Hash + Eq, C : Hash + Eq, V] Table::of(Array[(R, C, V)]) -> Self[R, C, V]
+pub fn[R : Hash + Eq, C : Hash + Eq, V] Table::put(Self[R, C, V], R, C, V) -> V?
+pub fn[R : Hash + Eq, C : Hash + Eq, V] Table::remove(Self[R, C, V], R, C) -> V?
+pub fn[R : Hash + Eq, C : Hash + Eq, V] Table::row(Self[R, C, V], R) -> Map[C, V]
+pub fn[R, C, V] Table::rows(Self[R, C, V]) -> Array[R]
+pub fn[R, C, V] Table::size(Self[R, C, V]) -> Int
+pub fn[R, C, V] Table::to_cells(Self[R, C, V]) -> Array[(R, C, V)]
 
 // Type aliases
 

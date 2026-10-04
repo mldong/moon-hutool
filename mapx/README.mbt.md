@@ -4,8 +4,9 @@ hutool `MapUtil` 家族与 `BiMap` / `CaseInsensitiveMap` 的 MoonBit 对位：�
 
 完整边界矩阵与逐条读数来源见 [`docs/spec/07-mapx.md`](https://github.com/mldong/moon-hutool/blob/master/docs/spec/07-mapx.md)。
 
-> 状态：**已实现**（10-05，第一批）——`mapx/mapx.mbt` 的 28 个公开项落地，下面每个块的期望值都是当场跑出来的
-> 读数，wasm / js / wasm-gc 三档一致。期望串受"期望值冻结"约束：改任何期望须单独一笔并给外部读数来源（门禁 G5）。
+> 状态：**分两批**。第一批（`BiMap`/`CiMap`/`Map` 两个组合件，28 个公开项）已落地，下面相关块的读数都是当场跑的；
+> **第二批 `Table` 此刻是契约骨架**，它那几个块的读数红是设计态。三档（wasm / js / wasm-gc）口径一致。
+> 期望串受"期望值冻结"约束：改任何期望须单独一笔并给外部读数来源（门禁 G5）。
 > `Table`（二维表）自成一块，另起第二批。
 
 ## 先说这一包不做什么
@@ -168,3 +169,68 @@ Unicode 大小写折叠（要码表，折叠只覆盖 ASCII）、`remove_null_va
 按键排序成 `TreeMap`（core 有 `SortedMap`）、按值排序（`to_array()` + `coll` 的组合件即可）。
 `Table`（二维表）是本包**第二批**的内容。逐条理由见 [`docs/ROADMAP.md`](https://github.com/mldong/moon-hutool/blob/master/docs/ROADMAP.md)
 的「暂不做」「不做」两节与 spec §9。
+
+## `Table`：二维表（第二批）
+
+`Table[R, C, V]` 对位 hutool `cn.hutool.core.map.multi.Table` 与 Guava `Table`：**格坐标**的表，
+不是矩阵——`size()` 数的是**格数**，稀疏就小。两条索引（行主索引 + "哪些行在这一列有值"）都藏在结构体里，
+所以行向与列向读取都是 O(该行列数 / 该列行数)，而**值不建第三张索引**：`contains_value` 就是遍历，
+为一个低频查询维护三份一致性不划算（这条取舍写进 spec §10，不是遗漏）。
+
+```mbt check
+///|
+test "格坐标读写：稀疏表不必是矩形" {
+  let m = @mapx.Table::of([("r1", "c1", 1), ("r1", "c2", 2), ("r2", "c1", 3)])
+  assert_eq(m.size(), 3)
+  assert_eq(m.get("r1", "c1"), Some(1))
+  assert_eq(m.get("r1", "c3"), None)
+  assert_eq(m.contains("r2", "c1"), true)
+  assert_eq(m.rows(), ["r1", "r2"])
+  assert_eq(m.columns(), ["c1", "c2"])
+  assert_eq(m.to_cells(), [("r1", "c1", 1), ("r1", "c2", 2), ("r2", "c1", 3)])
+}
+```
+
+顺序口径是 Java 那侧**没法**承诺的（那边是 `HashMap`，`columnKeys()` 的返回序无从定义）；
+本库的 `Map` 保插入序，于是"行序 = 首次写入该行、列序 = 首次写入该列"成了契约。
+覆盖一个已有格**什么都不挪**——行序、列序、`size()` 全不变。
+
+```mbt check
+///|
+test "覆盖不挪位；删到空就连键一起摘" {
+  let m = @mapx.Table::of([("r1", "c1", 1), ("r1", "c2", 2), ("r2", "c1", 3)])
+  assert_eq(m.put("r1", "c2", 9), Some(2))
+  assert_eq(m.rows(), ["r1", "r2"])
+  assert_eq(m.columns(), ["c1", "c2"])
+  assert_eq(m.size(), 3)
+  // r2 只有 c1 一个格：删掉它，r2 这行就从 rows() 消失
+  assert_eq(m.remove("r2", "c1"), Some(3))
+  assert_eq(m.rows(), ["r1"])
+  assert_eq(m.columns(), ["c1", "c2"])
+  // c2 最后一个格被删掉 ⇒ 该列也消失；空行/空列都不留幽灵
+  assert_eq(m.remove("r1", "c2"), Some(9))
+  assert_eq(m.columns(), ["c1"])
+  assert_eq(m.remove("r1", "c2"), None)
+}
+```
+
+`row()` / `column()` 给的是**副本**（内部索引绝不外借），`clear()` 一次清空，`Table::of` 逐条走 `put`
+所以同格重复给值是后者胜。
+
+```mbt check
+///|
+test "行列取副本、of 同格后者胜、clear 清空" {
+  let m = @mapx.Table::of([("r1", "c1", 1), ("r1", "c1", 2), ("a", "z", 5)])
+  assert_eq(m.size(), 2)
+  assert_eq(m.get("r1", "c1"), Some(2))
+  assert_eq(m.row("r1").keys().to_array(), ["c1"])
+  assert_eq(m.column("c1").keys().to_array(), ["r1"])
+  let snapshot = m.row("r1")
+  let _ = snapshot.remove("c1")
+  assert_eq(m.get("r1", "c1"), Some(2))
+  m.clear()
+  assert_eq(m.rows(), [])
+  assert_eq(m.columns(), [])
+  assert_eq(m.to_cells(), [])
+}
+```

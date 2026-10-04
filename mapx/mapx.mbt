@@ -412,3 +412,208 @@ fn fold_ascii(text : String) -> String {
 fn ascii_char(v : Int) -> Char {
   v.to_char().unwrap()
 }
+
+///|
+/// 二维表：`行键 × 列键 → 值`，hutool `cn.hutool.core.map.multi.Table`（+ `AbsTable`/`HashBasedTable`）
+/// 与 Guava `Table` 的 MoonBit 对位。
+///
+/// 内部两张索引：`rows` 是行主索引（行 → 列 → 值），`cols` 只记"哪些行在这一列有值"，
+/// 用来把列向读取从 O(格数) 降到 O(该列格数)。**值不建第三张索引**（取舍写在 spec §10：
+/// 为一件低频查询维护三份一致性，代价大于收益）。
+///
+/// 字段刻意不公开：两张索引必须同步，放出去单改一张就破坏了列向读取。
+pub struct Table[R, C, V] {
+  rows : Map[R, Map[C, V]]
+  cols : Map[C, Set[R]]
+}
+
+///|
+/// 建一张空表
+///
+/// - Note: 两张索引的键都要 `Hash + Eq`——`Map([])` 字面量与 `Set([])` 就要键有界（界是契约的一部分）
+pub fn[R : Hash + Eq, C : Hash + Eq, V] Table::new() -> Table[R, C, V] {
+  abort("moon-hutool: mapx.Table::new 未实现（spec 07-mapx #7.12）")
+}
+
+///|
+/// 由三元组序列建表：**逐条走 `put`**，所以同格重复给值时后者胜
+///
+/// - Parameters: `cells`：`(行键, 列键, 值)` 序列。行键序与列键序都由**首次写入**决定
+pub fn[R : Hash + Eq, C : Hash + Eq, V] Table::of(
+  cells : Array[(R, C, V)],
+) -> Table[R, C, V] {
+  let _ = cells
+  abort("moon-hutool: mapx.Table::of 未实现（spec 07-mapx #7.18）")
+}
+
+///|
+/// 放一个格，返回该行该列原来的值
+///
+/// - Returns: 被覆盖的旧值；这个格原本是空的 ⇒ `None`（**新格与覆盖就靠这个区分**）
+/// - Note: 覆盖**不挪位**——行列键序都不动（core `Map` 对已存在的键就地换值）。
+///   行/列首次出现时才追加到各自索引的末尾
+pub fn[R : Hash + Eq, C : Hash + Eq, V] Table::put(
+  self : Table[R, C, V],
+  row : R,
+  column : C,
+  value : V,
+) -> V? {
+  let _ = self.rows
+  let _ = self.cols
+  let _ = (row, column, value)
+  abort("moon-hutool: mapx.Table::put 未实现（spec 07-mapx #7.13）")
+}
+
+///|
+/// 取一个格：不给默认值、也不猜邻近行列
+pub fn[R : Hash + Eq, C : Hash + Eq, V] Table::get(
+  self : Table[R, C, V],
+  row : R,
+  column : C,
+) -> V? {
+  let _ = self.rows
+  let _ = self.cols
+  let _ = (row, column)
+  abort("moon-hutool: mapx.Table::get 未实现（spec 07-mapx #7.12）")
+}
+
+///|
+/// 删一个格，返回被删的值
+///
+/// - Note: **删到空就把键一起摘掉**：某行最后一个格被删 ⇒ 该行从 `rows()` 消失；
+///   某列最后一个格被删 ⇒ 该列从 `columns()` 消失。留着空行/空列会让 `size()` 与
+///   `rows().length()` 说的是两件事，`row()` 也白给一张空 Map
+pub fn[R : Hash + Eq, C : Hash + Eq, V] Table::remove(
+  self : Table[R, C, V],
+  row : R,
+  column : C,
+) -> V? {
+  let _ = self.rows
+  let _ = self.cols
+  let _ = (row, column)
+  abort("moon-hutool: mapx.Table::remove 未实现（spec 07-mapx #7.16）")
+}
+
+///|
+/// 这个格在不在
+pub fn[R : Hash + Eq, C : Hash + Eq, V] Table::contains(
+  self : Table[R, C, V],
+  row : R,
+  column : C,
+) -> Bool {
+  let _ = self.rows
+  let _ = self.cols
+  let _ = (row, column)
+  abort("moon-hutool: mapx.Table::contains 未实现（spec 07-mapx #7.12）")
+}
+
+///|
+/// 有没有这一行（这行里至少有一个格）
+pub fn[R : Hash + Eq, C, V] Table::contains_row(
+  self : Table[R, C, V],
+  row : R,
+) -> Bool {
+  let _ = self.rows
+  let _ = self.cols
+  let _ = row
+  abort(
+    "moon-hutool: mapx.Table::contains_row 未实现（spec 07-mapx #7.17）",
+  )
+}
+
+///|
+/// 有没有这一列（这列里至少有一个格）
+pub fn[R, C : Hash + Eq, V] Table::contains_column(
+  self : Table[R, C, V],
+  column : C,
+) -> Bool {
+  let _ = self.rows
+  let _ = self.cols
+  let _ = column
+  abort(
+    "moon-hutool: mapx.Table::contains_column 未实现（spec 07-mapx #7.17）",
+  )
+}
+
+///|
+/// 有没有这个值。O(格数) 的遍历——值不建索引是这一件明码的取舍
+pub fn[R, C, V : Eq] Table::contains_value(
+  self : Table[R, C, V],
+  value : V,
+) -> Bool {
+  let _ = self.rows
+  let _ = self.cols
+  let _ = value
+  abort(
+    "moon-hutool: mapx.Table::contains_value 未实现（spec 07-mapx #7.17）",
+  )
+}
+
+///|
+/// 取一行（列键 → 值），**返回副本**
+///
+/// - Note: 改它不动表；行不存在 ⇒ 空 Map（不报错，与 `column` 同档）
+pub fn[R : Hash + Eq, C : Hash + Eq, V] Table::row(
+  self : Table[R, C, V],
+  row : R,
+) -> Map[C, V] {
+  let _ = self.rows
+  let _ = self.cols
+  let _ = row
+  abort("moon-hutool: mapx.Table::row 未实现（spec 07-mapx #7.15）")
+}
+
+///|
+/// 取一列（行键 → 值），**返回副本**；键序是该列有值的行按 `rows()` 的顺序
+pub fn[R : Hash + Eq, C : Hash + Eq, V] Table::column(
+  self : Table[R, C, V],
+  column : C,
+) -> Map[R, V] {
+  let _ = self.rows
+  let _ = self.cols
+  let _ = column
+  abort("moon-hutool: mapx.Table::column 未实现（spec 07-mapx #7.15）")
+}
+
+///|
+/// 行键序列：**按首次写入该行的顺序**（core `Map` 保插入序，Java 那侧无从承诺）
+pub fn[R, C, V] Table::rows(self : Table[R, C, V]) -> Array[R] {
+  let _ = self.rows
+  let _ = self.cols
+  abort("moon-hutool: mapx.Table::rows 未实现（spec 07-mapx #7.14）")
+}
+
+///|
+/// 列键序列：**按首次写入该列的顺序**（与行序无关——`put` 一个新列时追加到末尾）
+pub fn[R, C, V] Table::columns(self : Table[R, C, V]) -> Array[C] {
+  let _ = self.rows
+  let _ = self.cols
+  abort("moon-hutool: mapx.Table::columns 未实现（spec 07-mapx #7.14）")
+}
+
+///|
+/// 格数，**不是行×列**：稀疏表里有几格就是几
+pub fn[R, C, V] Table::size(self : Table[R, C, V]) -> Int {
+  let _ = self.rows
+  let _ = self.cols
+  abort("moon-hutool: mapx.Table::size 未实现（spec 07-mapx #7.12）")
+}
+
+///|
+/// 全部格，**行优先展开**：外层按 `rows()` 的序，行内按该行首次写入的列序
+///
+/// - Note: 这一件取代 hutool 的 `cellSet()` 与 `forEach(Consumer3)`——给一个可断言的数组，
+///   而不是两种遍历姿势
+pub fn[R, C, V] Table::to_cells(self : Table[R, C, V]) -> Array[(R, C, V)] {
+  let _ = self.rows
+  let _ = self.cols
+  abort("moon-hutool: mapx.Table::to_cells 未实现（spec 07-mapx #7.19）")
+}
+
+///|
+/// 清空成一张空表（两张索引一起清，键序也随之作废）
+pub fn[R, C, V] Table::clear(self : Table[R, C, V]) -> Unit {
+  let _ = self.rows
+  let _ = self.cols
+  abort("moon-hutool: mapx.Table::clear 未实现（spec 07-mapx #7.18）")
+}

@@ -1,8 +1,9 @@
 # 契约 07 · mapx（Map 的组合件）
 
-> 状态：**契约与实现两笔都交完**（10-05，第一批）。签名骨架先冻结（`42ef15f`），实现随后落地；
-> 公开接口在 `mapx/pkg.generated.mbti`，期望值在 `mapx/mapx_test.mbt` 与 `mapx/README.mbt.md`，
-> 16 条期望值**一字未改**地从红变绿（唯一一处期望改动是契约期我自己写反的 `中文-a` 那条，单独走 `d61524e`）。
+> 状态：**分两批**。第一批（§3~§5 的 `BiMap`/`CiMap`/`Map` 组合件）已随 `01257bc` 落地，16 条期望值
+> 一字未改地从红变绿（唯一一处期望改动是契约期我写反的 `中文-a`，单独走 `d61524e`）；
+> **§10 是第二批 `Table` 的契约，此刻尚未落地**（方法体走 `abort`，新增 11 条用例的红是设计态）。
+> 公开接口在 `mapx/pkg.generated.mbti`，期望值在 `mapx/mapx_test.mbt`、`mapx/table_test.mbt` 与 `mapx/README.mbt.md`。
 > 改任何期望串须单独一笔并给外部读数来源（门禁 G5）。
 >
 > **范围分两批**：第一批 = `BiMap` + `CiMap`（大小写不敏感映射）+ `Map` 的两个组合件；
@@ -117,9 +118,35 @@ new of remove retain set to_array to_json update update_or_default values`
 
 | 格子 | 结论 | 依据 |
 |---|---|---|
-| `Table`（二维表）、`TableMap` | **第二批** | 行列双索引 + 一张网格是第三种形状，混进这份契约会让两边各自承诺的东西看不清 |
+| `Table`（二维表）、`TableMap` | **第二批已定契约，见 §10**（实现待下一笔） | 行列双索引 + 一张网格是第三种形状，混进第一批会让两边各自承诺的东西看不清 |
 | `ForestMap`/`LinkedForestMap`（树形键空间）、`MultiValueMap`、`MergeMap`、`FixedLinkedHashMap`、`ReferenceConcurrentMap`/`SafeConcurrentHashMap` | **不做 / 排后** | 树形与多值各自是一整块语义；并发档需要运行时并发能力，与零依赖契约（全同步）结构冲突 |
 | `MapProxy`/`MapBuilder`/`CamelCaseMap` | **不做** | 反射动态代理做不到（AGENTS 的 core 边界条）；builder 在同步无 null 的写法里就是 `Map([...])`；驼峰/下划线键转换属 `text` 的 `NamingCase`，已在 text 交付 |
 | Unicode 大小写折叠（`İ`/`ı` 这类非 ASCII 一对一特例） | **不做** | 要码表；本库折叠只覆盖 ASCII，非 ASCII 原样（§4） |
 | `remove_null_value`/`removeNullKey` | **不做** | 本库无 null，`Option` 才是缺席的表达方式；为它写一档等于教调用方造一个本库不存在的东西 |
 | `sortByValue`/`sort`(键排序成 `TreeMap`) | **不做** | core 有 `SortedMap`/`immut/sorted_map`；要"按值排序"就 `to_array()` + `coll` 的按键极值/排序组合，不在本包再造一套比较件 |
+
+## 10. `Table` —— 二维表（第二批）
+
+`pub struct Table[R, C, V] { rows : Map[R, Map[C, V]], cols : Map[C, Set[R]] }`，**字段不公开**。
+`rows` 是行主索引（行 → 列 → 值），`cols` 只记"哪些行在这一列有值"（`Set` 在 core 里保插入序），
+于是行向读取是 O(该行格数)、列向是 O(该列格数)，而两张索引必须同步——放出去单改一张就把列向读取打坏了。
+
+| # | 签名 | 冻结读数 | 边界/错误 | hutool 对位 | 差异声明 |
+|---|---|---|---|---|---|
+| 7.12 | `new` / `of(cells : Array[(R, C, V)])` / `get(row, column) -> V?` / `contains(row, column)` / `size()` / `rows()` / `columns()` / `to_cells()` | 夹具 `[("r1","c1",1),("r1","c2",2),("r2","c1",3)]`：`size() = 3`（**不是 2×2=4**）、`get("r1","c1") = Some(1)`、`get("r1","c3") = None`、`get("r3","c1") = None`、`contains("r2","c1") = true`、`rows() = ["r1","r2"]`、`columns() = ["c1","c2"]`、`to_cells()` 就是那三条原序；空表四条全空 | 行不存在与格不存在**同答 `None`**（不区分"没这行"和"这行没这列"——要区分用 `contains_row`） | `Table.of(...)`/`HashBasedTable`、`get`/`contains`/`size` | `get` 给 `V?` 不给 `null`；`size()` 数格不数行列 |
+| 7.13 | `put(row, column, value) -> V?` | 覆盖 `put("r1","c2",9)` 返回 `Some(2)`，之后 `rows()`/`columns()` **一个都不挪位**、`size()` 不变、`get` 读到 9；新格 `put("r1","c1",7)` 在空表上返回 `None` | 恒不失败 | `Table.put(r, c, v)`（返回旧值） | **覆盖不换位置**：core `Map` 对已存在键就地换值。hutool 那侧本来也是 `HashMap`，位置无从谈——这一档是本库新增的承诺而不是转述 |
+| 7.14 | 同上（键序口径） | 空表上 `put("r1","later_col",1)` 再 `put("r2","earlier_name",2)` ⇒ `rows() = ["r1","r2"]`、`columns() = ["later_col","earlier_name"]`——**列序与行序无关**，只看该列第一次被写到的时刻；再覆盖 `put("r1","later_col",5)` 两序都不变 | — | `rowKeySet()` / `columnKeys()`（Java 无序） | 顺序是**本库升格出来的契约**：core `Map`/`Set` 保插入序，Java 那侧承诺不了，所以不能指望两边读数相同 |
+| 7.15 | `row(row) -> Map[C, V]` / `column(column) -> Map[R, V]` | 夹具下 `row("r1").keys() = ["c1","c2"]`、`column("c1").keys() = ["r1","r2"]`（列向按 `rows()` 的顺序给）；不存在的行/列 ⇒ **空 Map** 而不是报错 | 返回的是**副本**：`row("r1")` 拿到后 `.remove("c1")`，表里 `get("r1","c1")` 仍是 `Some(1)`、`size()` 不变 | `getRow` / `getColumn`（那侧给的是包装视图） | 不给视图给副本：内部两张索引一旦外借，一改就散架。代价是一次 O(该行格数) 复制 |
+| 7.16 | `remove(row, column) -> V?` | 夹具下 `remove("r2","c1") = Some(3)` ⇒ `r2` 那行被清空 ⇒ `rows()` 只剩 `["r1"]`，而 `c1` 还有 `r1` 在 ⇒ `columns()` 仍是两条；继续 `remove("r1","c2")` ⇒ `columns()` 收成 `["c1"]`；再 `remove("r2","c1") = None` 且**什么都不动** | 删不存在的格幂等 | `remove(r, c)` | **删到空就把行键/列键一起摘掉**：留着空行空列，`rows().length()` 与 `size()` 就各说各话，`row()` 还白给一张空 Map。hutool/Guava 同档（Guava 明写会清掉空行），本库把两维都清 |
+| 7.17 | `contains_row` / `contains_column` / `contains_value` | 夹具下 `contains_row("r1") = true`、`contains_row("r9") = false`、`contains_column("c2") = true`、`contains_column("c3") = false`、`contains_value(3) = true`、`contains_value(99) = false`；把 `("r1","c1")` 改成 3 后值 3 仍在、`size()` 不变 | — | `containsRow` / `containsColumn` / `containsValue` | 行列两档走索引（O(1)），**值那一档只遍历**：为它建第三张索引，就得在每次 `put`/`remove` 时同步三份一致性，收益不值。这条写死免得下一个人"顺手补上" |
+| 7.18 | `of` 的重复档 / `clear()` | `of([("r1","c1",1),("r1","c1",2)])` ⇒ `size() = 1`、`get = Some(2)`、`rows() = ["r1"]`、`columns() = ["c1"]`（同格后者胜）；`clear()` 后 `rows()`/`columns()`/`to_cells()` 全空、`size() = 0`；`of([])` 是空表 | 恒不失败 | `putAll` / `clear` | `of` 就是"逐条 `put`"，不给第二套合并语义（`putAll` 那侧同样是逐条） |
+| 7.19 | 遍历序（`to_cells`） | `[("b","y",1),("a","x",2),("b","x",3)]` ⇒ `rows() = ["b","a"]`、`columns() = ["y","x"]`、`to_cells() = [("b","y",1),("b","x",3),("a","x",2)]`——**行优先**，外层按 `rows()`，行内按该行首次写入的列序 | — | `cellSet()` / `forEach(Consumer3)` | 不给 `cellSet()`（Java 要靠 `Cell` 对象 + `equals/hashCode`）也不给 `forEach`：**给一个可断言的数组**，一种姿势而不是两种 |
+
+`Table` **不引入错误面**：它没有一个需要报错的档——`get`/`remove` 用 `V?` 表达缺席，`put`/`of`/`clear` 恒成功。
+`MapError` 只服务第一批的 `BiMap`/`rename_key`。
+
+### 10.1 为什么 `Table` 值得单独一批
+
+它是"行列双索引"的第三种形状：`BiMap`/`CiMap` 都只是**键空间的变形**（一层键），
+而 `Table` 是"两个键合起来定位一个值 + 两维各自的遍历"。混在同一份契约里，
+评审时看不出"键空间变形"与"双索引一致性"各自的承诺，所以 `42ef15f` 那笔只交第一批。
