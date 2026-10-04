@@ -39,6 +39,24 @@ hutool 对位 `DigestUtil.md5Hex` ｜ 差异：hutool 可传 `Charset`，本库�
 
 hutool 对位 `Digester.digest(byte[])` ｜ 读数来源：RFC 1321 同一批向量 + 本机 `hashlib` 现算 ｜ 血统：无（纯算法入口，不涉及 Java 表达）
 
+## 2.1.2 `sha256_of_bytes(data : Bytes) -> Bytes` —— 任意字节流的 SHA-256 入口
+
+与 2.1.1 同一条理由，另一侧也成立：`sha256_bytes` 吃 `String`，而有一类输入**不是任何字符串**。
+`codec.b58_check_encode/decode` 的校验位定义就是对 `version ‖ payload` 这串**二进制**做双 SHA-256
+（见 [`docs/spec/05-codec.md`](https://github.com/mldong/moon-hutool/blob/master/docs/spec/05-codec.md) #4），
+走 `String` 入口根本进不去。这条腿原本已作为私有 `sha256_raw` 存在于 HMAC 内部，本轮提升为公开入口——
+**算法同一个**，只是输入域放宽。
+
+| 输入 | 期望 | 说明 |
+|---|---|---|
+| `utf8("abc")` | `ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad` | FIPS 180-4 的 `"abc"` 样例，与 `sha256_hex("abc")` 同值（对拍） |
+| `utf8("中文")` | 与 `sha256_bytes("中文")` 相等 | 对拍断言，不重复抄绝对值 |
+| `utf8("")` | `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` | 空流样例（FIPS 180-4） |
+| 原始字节 `0x00..0x0f` | `be45cb2605bf36bebde684841a28f0fd43c69850a3dce5fedba69928ee3a8991` | 含 `0x00`，`String` 入口进不去的那一档 |
+| `0x00 ‖ hash160(sha256("mldong"))` 的**双摘要** | `1691915ba1e735a0da235d3de9484308bc5a388ba782fba717f2ba768e26bcdc`（前 4 字节 `1691915b` 即 Base58Check 校验位） | `codec` 的夹具腿：payload 是 `2d73f6a4885ce62118417eb73fb405a0539efa21`，地址读数冻在 05-codec #4 |
+
+hutool 对位 `Digester.digest(byte[])` / `DigestUtil.sha256(byte[])` ｜ 读数来源：FIPS 180-4 样例 + 本机 `hashlib` 现算 ｜ 血统：无（纯算法入口）
+
 ## 2.2 `md5_hex16(data : String) -> String` —— hutool/mldong 私有行为
 
 **取 32 位 hex 的第 8~24 位**（即 `hex[8:24]`），不在任何 RFC 里，但被大量项目当短摘要或口令列存储，语义漂移会打散存量数据 ⇒ 期望值必须对 v5-master 反推后冻结。

@@ -20,6 +20,8 @@ pub fn sha256_bytes(String) -> Bytes
 
 pub fn sha256_hex(String) -> String
 
+pub fn sha256_of_bytes(Bytes) -> Bytes
+
 // Errors
 
 // Types and methods

@@ -342,8 +342,14 @@ pub fn sha256_hex(data : String) -> String {
 }
 
 ///|
-/// SHA-256 的原始字节入口（HMAC 内层要拼原始字节，不能只走 String）
-fn sha256_raw(data : Bytes) -> Bytes {
+/// SHA-256 对**任意字节流**（`sha256_bytes` 的字节版入口，算法完全同一个）
+///
+/// - Parameters: `data` 任意 `Bytes`——含 `0x00`、非 UTF-8 序列、或多段拼接的结果都行
+/// - Returns: 32 字节原始摘要
+/// - Note: 存在的有两条：HMAC 内层要拼原始字节；`codec.b58_check_*` 要对**二进制 payload**
+///   做双 SHA-256（Base58Check 的校验位），那也不是任何字符串（spec 2.1.2）。同一输入下
+///   `sha256_of_bytes(utf8(s)) == sha256_bytes(s)`，用例里带这条对拍断言
+pub fn sha256_of_bytes(data : Bytes) -> Bytes {
   words_to_bytes(sha256_core(data), false)
 }
 
@@ -362,9 +368,9 @@ pub fn hmac_sha256_bytes(key : String, data : String) -> Bytes {
     outer.write_byte((b ^ 0x5c).reinterpret_as_int().to_byte())
   }
   inner.write_bytes(@utf8.encode(data))
-  let ih = sha256_raw(inner.to_bytes())
+  let ih = sha256_of_bytes(inner.to_bytes())
   outer.write_bytes(ih)
-  sha256_raw(outer.to_bytes())
+  sha256_of_bytes(outer.to_bytes())
 }
 
 ///|

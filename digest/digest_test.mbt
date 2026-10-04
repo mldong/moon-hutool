@@ -136,3 +136,38 @@ test "@digest.md5 #2.5 md5_of_bytes 任意字节流（对拍 + 拼接流绝对�
     "1ac1ef01e96caf1be0d329331a4fc2a8",
   )
 }
+
+///|
+test "@digest.sha256 #2.1.2 sha256_of_bytes 任意字节流（对拍 + 空流 + 含 0x00 + 双摘要）" {
+  assert_eq(
+    @hex.encode(@digest.sha256_of_bytes(@utf8.encode("abc"))),
+    "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad", // FIPS 180-4 的 "abc"
+  )
+  // 对拍：同一内容走 String 入口与走 Bytes 入口必须同结果
+  assert_true(
+    @digest.sha256_of_bytes(@utf8.encode("中文")) ==
+    @digest.sha256_bytes("中文"),
+  )
+  assert_eq(
+    @hex.encode(@digest.sha256_of_bytes(@utf8.encode(""))),
+    "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855", // 空流也是 FIPS 的样例
+  )
+  // 含 0x00 的原始流：String 入口进不去的那一档
+  let raw : Bytes = Bytes::from_array([
+    0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c,
+    0x0d, 0x0e, 0x0f,
+  ])
+  assert_eq(
+    @hex.encode(@digest.sha256_of_bytes(raw)),
+    "be45cb2605bf36bebde684841a28f0fd43c69850a3dce5fedba69928ee3a8991",
+  )
+  // codec 的 Base58Check 走的就是这条腿：version 0x00 ‖ hash160 的双摘要（前 4 字节就是校验位）
+  let body : Bytes = Bytes::from_array([
+    0x00, 0x2d, 0x73, 0xf6, 0xa4, 0x88, 0x5c, 0xe6, 0x21, 0x18, 0x41, 0x7e, 0xb7,
+    0x3f, 0xb4, 0x05, 0xa0, 0x53, 0x9e, 0xfa, 0x21,
+  ])
+  assert_eq(
+    @hex.encode(@digest.sha256_of_bytes(@digest.sha256_of_bytes(body))),
+    "1691915ba1e735a0da235d3de9484308bc5a388ba782fba717f2ba768e26bcdc",
+  )
+}
