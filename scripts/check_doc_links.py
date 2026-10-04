@@ -20,6 +20,28 @@ import sys
 REPO = "mldong/moon-hutool"
 LINK = re.compile(r"\[[^\]]*\]\(([^)\s]+)")
 
+TRACKED = None
+
+
+def tracked_paths():
+    """仓内真相 = git 跟踪的文件清单。
+
+    不用 `os.path.exists`：那条判据在两处会骗人——① 本地有、没提交的文件照样"可达"（克隆出去就是死链）；
+    ② Windows 的路径规则会把 `...` 这类不像路径的串当存在（本机绿、Linux CI 红，本轮就是这么撞的）。
+    """
+    global TRACKED
+    if TRACKED is None:
+        out = subprocess.run(["git", "ls-files"], capture_output=True, text=True,
+                             encoding="utf-8", errors="replace")
+        TRACKED = set(l.strip().replace("\\", "/") for l in out.stdout.splitlines() if l.strip())
+    return TRACKED
+
+
+def strip_code(text):
+    """去掉围栏代码块与行内反引号：代码散文里的 `[A](...)` 不是 markdown 链接（AGENTS 的语法坑就是这么写的）"""
+    text = re.sub(r"```.*?```", "", text, flags=re.S)
+    return re.sub(r"`[^`\n]*`", "", text)
+
 
 def tracked_md():
     out = subprocess.run(
@@ -46,16 +68,17 @@ def resolve(target, base_file):
 
 def scan(files):
     dead = []
+    have = tracked_paths()
     for f in files:
         try:
             text = io.open(f, encoding="utf-8", errors="replace").read()
         except OSError:
             continue
-        for m in LINK.finditer(text):
+        for m in LINK.finditer(strip_code(text)):
             internal, path = resolve(m.group(1), f)
             if not internal or not path:
                 continue
-            if not os.path.exists(path):
+            if path.replace("\\", "/") not in have:
                 dead.append("{} -> {}".format(f, m.group(1)))
     return dead
 
@@ -64,20 +87,31 @@ SELFTEST = """# probe
 [相对死链](docs/spec/__no_such__.md)
 [绝对死链](https://github.com/{repo}/blob/master/text/__no_such__.mbt)
 [外部链接不算死链](https://mooncakes.io/docs/mldong/moon-hutool/text)
-""".format(repo=REPO)
+[指向本地未提交文件]({ghost})
+ 代码散文里的这个形状不算链接：`fn shape[A](__no_such_in_code__)`
+"""
 
 
 def selftest():
     probe = "_g10_probe.md"
-    io.open(probe, "w", encoding="utf-8").write(SELFTEST)
+    ghost = "_g10_ghost.md"  # 存在于工作树、没进 git ⇒ 克隆出去就是死链
+    io.open(ghost, "w", encoding="utf-8").write("# ghost\n")
+    io.open(probe, "w", encoding="utf-8").write(
+        SELFTEST.format(repo=REPO, ghost=ghost))
     try:
         dead = scan([probe])
     finally:
         os.remove(probe)
-    if len(dead) >= 2:
-        print("  PASS 自检：2 条死链样本都被抓到（另有外部链接被正确放过）")
+        os.remove(ghost)
+    # 三条坏样本都要抓到；且代码散文里的 `[A](...)` 形状不许变成假阳性
+    want = ("docs/spec/__no_such__.md", "text/__no_such__.mbt", ghost)
+    hit = [w for w in want if any(w in d for d in dead)]
+    fp = [d for d in dead if "__no_such_in_code__" in d]
+    if len(hit) == 3 and not fp:
+        print("  PASS 自检：3 条死链样本都抓到（含「本地有但没提交」那一档），代码散文没误判")
         return 0
-    print("  FAIL 自检失效：只抓到 {} 条，这条判据不可信：{}".format(len(dead), dead))
+    print("  FAIL 自检失效：抓到 {} 条（应含 {}），代码内误判 {} 条：{}".format(
+        len(dead), list(want), len(fp), dead))
     return 1
 
 

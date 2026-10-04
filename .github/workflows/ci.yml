@@ -66,7 +66,14 @@ jobs:
           out=$(moon test --target "$TARGET" 2>&1 || true)
           total=$(printf '%s\n' "$out" | grep -oE 'Total tests: [0-9]+' | grep -oE '[0-9]+' | head -1)
           echo "target=$TARGET collected=${total:-0}"
-          test "${total:-0}" -ge 20 || { echo "FAIL: $TARGET 档收集用例数不足（静默丢弃 = 没有套件）"; exit 1; }
+          test "${total:-0}" -ge 20 || {
+            echo "FAIL: $TARGET 档收集用例数不足（静默丢弃 = 没有套件）"
+            # 不失败时也把原始读数留下：这档到底是编不过、跑不起、还是真把用例丢了
+            echo "::group::$TARGET moon test 原始输出（末 40 行）"
+            printf '%s\n' "$out" | tail -40
+            echo "::endgroup::"
+            exit 1
+          }
 
   expect-freeze:
     name: 期望值冻结（仅 PR）

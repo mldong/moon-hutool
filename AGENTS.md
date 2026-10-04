@@ -95,7 +95,8 @@ PR-A 的合入标准：`moon check` 必须全绿（签名与类型自洽、文�
   （`DayOutOfRange(Int, Int, Int)` 合法，`DayOutOfRange(month : Int, …)` 判词法错）；`raise` 不要求额外 `impl Error`。
 - **带效果标注的函数参数类型要写成 `()` 而不是 `Unit`**：`f : () -> A raise E` 合法，
   `f : Unit -> A raise E` 会被读成"参数是 Unit"（`has type: function type, wanted: Unit`）。
-  泛型写在 `fn` 上：`fn[A] shape(...)`，不是 `fn shape[A](...)`。文档块里的带标注闭包同形：
+  泛型参数要紧跟 `fn` 关键字（写作 `fn[A] shape(...)`）；把 `[A]` 放在函数名后面判词法错
+  （`Parse error, unexpected `fn f[T]`, you may expect `fn[T] f``）。文档块里的带标注闭包同形：
   `let show : (String) -> String = (s) => { ... }`（`let show = (s : String) -> String { ... }` 判 `s is unbound`）。
 - **`moon.pkg` 的 `warnings` 键只能出现一次、值只能是字符串**，多个 flag 要**连写不加空格/逗号**：
   `warnings = "-struct_never_constructed-unused_constructor-unused_error_type"`（写成空格或逗号分隔会被 moonc 打回Usage）。
