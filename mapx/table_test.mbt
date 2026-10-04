@@ -1,6 +1,6 @@
 // moon-hutool/mapx 的 Table 部分：契约用例（黑盒，与 `mapx_test.mbt` 同包）。
 //
-// 状态：**已随第二批落地**（10-05）——`Table` 的方法实现完，本文件 11 条与第一批的 16 条同轮转绿，
+// 状态：**已随第二批落地**（10-05）——`Table` 的 16 个方法实现完，本文件 11 + 1 条与第一批 16 条同轮转绿，
 // 期望串一字未改。实现期改任何期望串 = 门禁 G5 拦下，须单独一笔并给外部读数来源。
 //
 // 读数权威（逐条来源见 docs/spec/07-mapx.md §10 的「读数来源」列）：
@@ -143,5 +143,20 @@ test "@mapx #7.19 to_cells 是行优先展开：行按首写序，行内列按�
   assert_eq(m.rows(), ["b", "a"])
   assert_eq(m.columns(), ["y", "x"])
   assert_eq(m.to_cells(), [("b", "y", 1), ("b", "x", 3), ("a", "x", 2)])
+  assert_eq(m.size(), 3)
+}
+
+///|
+test "@mapx #7.20 column 的键序跟着 rows() 走，而不是该列自己的写入序" {
+  // 夹具刻意让两种顺序分岔：`b` 列先被 r2 写入、后被 r1 写入，
+  // 而 rows() 是 ["r1","r2"] —— 按 rows() 扫给 ["r1","r2"]，按该列写入序给 ["r2","r1"]
+  let m = @mapx.Table::of([("r1", "a", 1), ("r2", "b", 2), ("r1", "b", 3)])
+  assert_eq(m.rows(), ["r1", "r2"])
+  assert_eq(m.columns(), ["a", "b"])
+  assert_eq(m.column("b").keys().to_array(), ["r1", "r2"])
+  assert_eq(m.column("b").get("r1"), Some(3))
+  assert_eq(m.column("b").get("r2"), Some(2))
+  // 同一个夹具钉住行优先展开，免得"列向按行序"被误读成遍历也跟着列序
+  assert_eq(m.to_cells(), [("r1", "a", 1), ("r1", "b", 3), ("r2", "b", 2)])
   assert_eq(m.size(), 3)
 }

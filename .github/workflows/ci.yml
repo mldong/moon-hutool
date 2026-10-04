@@ -36,7 +36,7 @@ jobs:
       - name: Run contract gate G1-G13
         # 基线 142 = text 23 + digest 16 + date 47 + id 32 + codec 24（用例只许增不许减：减到低于基线就是有用例被悄悄删掉）
         env:
-          BASELINE_TESTS: "199"
+          BASELINE_TESTS: "200"
           GATE_TARGETS: "wasm js"
         run: bash scripts/contract_gate.sh
 
@@ -100,5 +100,5 @@ jobs:
         env:
           GATE_FREEZE_BASE: ${{ github.event.pull_request.base.sha }}
           GATE_TARGETS: "wasm"
-          BASELINE_TESTS: "199"
+          BASELINE_TESTS: "200"
         run: bash scripts/contract_gate.sh
