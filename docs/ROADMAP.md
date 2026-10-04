@@ -42,13 +42,19 @@
 
 ## 当前总读数
 
-| 指标 | 值 |
+这块数字由 `python scripts/sync_status.py --write` 当场跑出来生成，**不手写**（手写必漏，见 `AGENTS.md`）：
+
+<!-- READINGS:BEGIN 由 scripts/sync_status.py 生成，勿手改 -->
+| 读数（`moon test --target wasm`，当场跑） | 值 |
 |---|---|
-| 包总数 | 23 |
-| 契约已冻结 | 2（`text`、`digest`） |
-| 已实现 | **1**（`text`：18 个公开函数，`.mbti` 零漂移） |
-| 用例 | `moon test --target wasm` **Total tests: 37, passed: 23, failed: 14** —— 剩的 14 条全是 `digest` 骨架（函数体 `abort`），属设计态；`check` wasm/js 均 0 警告 |
-| 门禁 | G1~G11 见 `scripts/contract_gate.sh`（G9 引用红线、G10 死链自检、G11 状态读数一致性）；正向 GREEN、负向对照敢红（基线抬到 99 立刻 RED + 退出码 1） |
+| 用例总数 | **37** —— 绿 23 / 红 14 |
+| 包状态 | 共 23 个：`已实现` 1 · `契约已冻结` 1 · `未开工` 21 |
+| 红的是谁 | `digest`（14 红） —— 未实现的包红是设计态 |
+<!-- READINGS:END -->
+
+| 项 | 值 |
+|---|---|
+| 门禁 | G1~G11 见 `scripts/contract_gate.sh`（G9 引用红线、G10 死链自检、G11 状态读数一致）；正向 GREEN、负向对照敢红（基线抬到 99 立刻 RED + 退出码 1） |
 
 ## 暂不做（排后，未定日期）
 

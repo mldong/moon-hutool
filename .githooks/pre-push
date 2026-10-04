@@ -1,0 +1,6 @@
+#!/bin/sh
+# 推送前跑状态读数一致性（会逐包跑 moon test，比 pre-commit 慢，故放这一档）
+python scripts/sync_status.py --check || {
+  echo "→ 读数不一致：先跑 python scripts/sync_status.py --write 再提交"
+  exit 1
+}

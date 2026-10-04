@@ -21,14 +21,19 @@ MoonBit 版 [hutool](https://github.com/chinabugotech/hutool) 风格工具库。
 
 ## 状态
 
-**文档契约先行**：每个包先交"契约表 + 签名 + `.mbti` + 期望值已冻结的用例"，再落实现（实现只许把红变绿）。当前 `text` 已实现，`digest` 契约已冻结、实现中，其余 21 包只有目录与范围声明。
+**文档契约先行**：每个包先交"契约表 + 签名 + `.mbti` + 期望值已冻结的用例"，再落实现（实现只许把红变绿）。`moon check --target wasm` 与 `js` 档均 0 警告。
 
-| 读数 | 值 |
+下面这块数字**由脚本当场跑出来**，不手写——手写就要靠人记得改，包一多必漏（详见 `AGENTS.md`「状态数字不手写」）：
+
+<!-- READINGS:BEGIN 由 scripts/sync_status.py 生成，勿手改 -->
+| 读数（`moon test --target wasm`，当场跑） | 值 |
 |---|---|
-| `moon check --target wasm` | 全绿（0 warnings 0 errors） |
-| `moon test --target wasm` | **Total tests: 37, passed: 23, failed: 14** —— `text` 全绿；剩 14 条是 `digest` 骨架（函数体 `abort`），红是设计态 |
-| 已实现 / 已出契约 | `text` 已实现（18 个公开函数）；`digest` 契约已冻结、实现中 |
-| 已建目录待出契约 | 21 个包（状态逐行见 [`docs/ROADMAP.md`](https://github.com/mldong/moon-hutool/blob/master/docs/ROADMAP.md)） |
+| 用例总数 | **37** —— 绿 23 / 红 14 |
+| 包状态 | 共 23 个：`已实现` 1 · `契约已冻结` 1 · `未开工` 21 |
+| 红的是谁 | `digest`（14 红） —— 未实现的包红是设计态 |
+<!-- READINGS:END -->
+
+逐包的"哪个实现了、哪个在做、哪个暂不做"看 [`docs/ROADMAP.md`](https://github.com/mldong/moon-hutool/blob/master/docs/ROADMAP.md)——它是进度的唯一真相，且每个真实存在的包都必须在那里有一行（门禁 G11 查这条）。
 
 期望值权威顺序：**契约表 + 测试里的期望值 > hutool 行为 > 直觉**。实现期改期望值必须单独一笔并给出外部读数来源（`scripts/contract_gate.sh` G5 拦改）。
 

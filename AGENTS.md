@@ -118,3 +118,13 @@ PR-A 的合入标准：`moon check` 必须全绿（签名与类型自洽、文�
 ### 批量改文档的坑：正则边界要吃掉 `-` 和路径字符
 
 给包文档批量加自包别名时用了 `s/\btext\./@text./g` 一类写法，结果把行内代码与链接里的文件名 `docs/spec/01-text.md` 一起改成 `01-@text.md`——**当场造出一条死链，而且标和 URL 一起坏，肉眼扫不出来**。这类改动的边界必须显式排除 `/`、`-` 与反引号上下文，改完跑 `python scripts/check_doc_links.py`（门禁 G10）验一遍；G10 自带阳性对照（喂两条假死链，要求都抓到），所以它不会悄悄失效。
+
+### 状态数字不手写（G11 的立身理由）
+
+包一多，"记得改文档"这件事一定会失败——本轮 `text` 转绿后有三处文档还写着"实现未开工"，是 owner 逐条点出来的。所以状态改成**生成物 + 漂移检查**，与 `moon info` 管 `.mbti` 同一招：
+
+- `README.md` 与 `docs/ROADMAP.md` 里的 `READINGS:BEGIN/END` 块**由脚本生成**：`python scripts/sync_status.py --write`。手改这些数字，`--check` 当场报红。
+- `docs/ROADMAP.md` 的逐包表是进度的唯一真相，两条硬约束：**每个真实存在的包必须有一行**（新包没登记 → 红）；**每行状态词必须等于当场 `moon test --package` 的读数**（绿了写"未开工"、没绿写"已实现" → 红）。
+- 包内三处措辞（`<pkg>/README.mbt.md`、`<pkg>_test.mbt` 头、`docs/spec/NN-<pkg>.md` 头）不许与读数矛盾；包转绿后仍写"预期红"就是红。
+- 挂点：CI 的门禁 G11 与本地 `.githooks/pre-push`（`pre-commit` 只跑 `moon check`，逐包跑用例太慢不放提交档）。
+- 新增包时的正确顺序：建目录 → **先在 ROADMAP 加一行**（状态"未开工"）→ 再写契约。反过来会被 G11 拦。
