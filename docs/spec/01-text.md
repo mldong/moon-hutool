@@ -60,15 +60,15 @@ hutool 对位 `CollUtil.join` ｜ 差异：MoonBit 侧元素无 null，故不出
 
 | 用例 | 期望 | 要点 |
 |---|---|---|
-| `sub_before("path/to/file.txt", "/")` | `"path/to"` | 按**首个**分隔符 |
+| `sub_before("path/to/file.txt", "/")` | `"path"` | 按**首个**分隔符（`CharSequenceUtil.java:2369` 的 `isLastSeparator` 默认 false） |
 | `sub_before("nope", "/")` | `"nope"` | 未命中 → **整串** |
-| `sub_after("path/to/file.txt", "/")` | `"file.txt"` | 按**首个**分隔符之后全部 |
+| `sub_after("path/to/file.txt", "/")` | `"to/file.txt"` | 首个分隔符之后的**全部**（`:2446` 同默认） |
 | `sub_after("nope", "/")` | `""` | 未命中 → **空串**（与上一行不对称，别"顺手统一"） |
 | `sub_between("hutool{abc}end", "{", "}")` | `"abc"` | |
 | `sub_between(..., include_sep=true)` | `"{abc}"` | |
 | `sub_between("hutool abc end", "{", "}")` | `""` | 任一界定符缺失 → 空串 |
 
-hutool 对位 `subBefore/subAfter/subBetween` ｜ 读数来源：hutool v5-master 实测。
+hutool 对位 `subBefore/subAfter/subBetween` ｜ 差异：hutool 的 `isLastSeparator=true` 取尾档**本库不出**（先证明需要再加）｜ 读数来源：hutool v5-master 源码 `text/CharSequenceUtil.java:2359-2470`。
 
 ## 1.8 `format(template : String, args : Array[String]) -> String`
 
@@ -96,7 +96,7 @@ hutool 对位 `firstNonBlank` ｜ 读数来源：hutool v5-master 实测。
 | 用例 | 期望 | 要点 |
 |---|---|---|
 | `hide("13012345678", 3, 7, '*')` | `"130****5678"` | 区间 `[start, end)` |
-| `hide("中文测试", 1, 3, '*')` | `"中**"` | **码点**下标，不是 UTF-16 单元（core `length()` 是 UTF-16 计数，这里必须用 `char_length()`） |
+| `hide("中文测试", 1, 3, '*')` | `"中**试"` | **码点**下标，且区间外字符全保留（hutool javadoc：`hide("jackduan@163.com",2,3)` → `ja*kduan@163.com`） |
 | `hide("abc", 1, 99, '*')` | `"a**"` | 越界**夹紧**不报错 |
 
 hutool 对位 `CharSequenceUtil.hide` ｜ 读数来源：hutool v5-master 实测 + core `String::char_length` 语义。

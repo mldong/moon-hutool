@@ -55,9 +55,11 @@ test "text.join #1.6" {
 
 ///|
 test "text.sub_* #1.7 未命中行为不对称" {
-  assert_eq(@text.sub_before("path/to/file.txt", "/"), "path/to")
+  // 默认取**第一个**分隔符（hutool subBefore/subAfter 的 isLastSeparator 默认 false，
+  // 证据 CharSequenceUtil.java:2369、2446 `pos = isLastSeparator ? lastIndexOf : indexOf`）
+  assert_eq(@text.sub_before("path/to/file.txt", "/"), "path")
   assert_eq(@text.sub_before("nope", "/"), "nope") // 未命中→整串
-  assert_eq(@text.sub_after("path/to/file.txt", "/"), "file.txt")
+  assert_eq(@text.sub_after("path/to/file.txt", "/"), "to/file.txt")
   assert_eq(@text.sub_after("nope", "/"), "") // 未命中→空串
   assert_eq(@text.sub_between("hutool{abc}end", "{", "}"), "abc")
   assert_eq(
@@ -94,7 +96,8 @@ test "text.first_non_blank #1.10" {
 ///|
 test "text.hide #1.11 码点下标与越界夹紧" {
   assert_eq(@text.hide("13012345678", 3, 7, '*'), "130****5678")
-  assert_eq(@text.hide("中文测试", 1, 3, '*'), "中**") // 码点计，不是 UTF-16 单元
+  // 码点计，且**区间外字符全部保留**（hutool hide javadoc：hide("jackduan@163.com",2,3) → "ja*kduan@163.com"）
+  assert_eq(@text.hide("中文测试", 1, 3, '*'), "中**试")
   assert_eq(@text.hide("abc", 1, 99, '*'), "a**") // 越界夹紧
 }
 

@@ -30,14 +30,15 @@ test "is_empty 与 is_blank 分档" {
 
 ## 截取：未命中时两个方向不对称
 
-`sub_before` 未命中给**整串**，`sub_after` 未命中给**空串**。这是 hutool 的真实行为，别"顺手统一"：
+`sub_before` 未命中给**整串**，`sub_after` 未命中给**空串**——两个方向不对称，别"顺手统一"。
+两者都按**第一个**分隔符切（hutool `isLastSeparator` 默认 false，源码 `CharSequenceUtil.java:2369/2446`）：
 
 ```mbt check
 ///|
 test "sub_before / sub_after 未命中" {
-  assert_eq(@text.sub_before("path/to/file.txt", "/"), "path/to")
+  assert_eq(@text.sub_before("path/to/file.txt", "/"), "path") // 首个分隔符，不是最后一个
   assert_eq(@text.sub_before("nope", "/"), "nope") // 未命中 → 整串
-  assert_eq(@text.sub_after("path/to/file.txt", "/"), "file.txt")
+  assert_eq(@text.sub_after("path/to/file.txt", "/"), "to/file.txt")
   assert_eq(@text.sub_after("nope", "/"), "") // 未命中 → 空串
 }
 
@@ -101,7 +102,7 @@ test "compare_version" {
 ///|
 test "hide 码点下标" {
   assert_eq(@text.hide("13012345678", 3, 7, '*'), "130****5678")
-  assert_eq(@text.hide("中文测试", 1, 3, '*'), "中**")
+  assert_eq(@text.hide("中文测试", 1, 3, '*'), "中**试") // 区间外字符保留
   assert_eq(@text.hide("abc", 1, 99, '*'), "a**") // 越界夹紧，不报错
 }
 ```
