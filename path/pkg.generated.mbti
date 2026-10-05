@@ -2,10 +2,41 @@
 package "mldong/moon-hutool/path"
 
 // Values
+pub fn combine(String, String) -> String
+
+pub fn compare_patterns(String, String, String) -> Int
+
+pub fn default_options() -> PathOptions
+
+pub fn default_separator() -> String
+
+pub fn extract_variables(String, String) -> Map[String, String] raise PathError
+
+pub fn extract_variables_with(String, String, PathOptions) -> Map[String, String] raise PathError
+
+pub fn extract_within(String, String) -> String
+
+pub fn is_pattern(String) -> Bool
+
+pub fn match_path(String, String) -> Bool
+
+pub fn match_path_with(String, String, PathOptions) -> Bool
+
+pub fn match_start_with(String, String, PathOptions) -> Bool
 
 // Errors
+pub suberror PathError {
+  NoMatch(String, String)
+  CapturingVar(String)
+  CaptureGroupRegex(String)
+}
 
 // Types and methods
+pub(all) struct PathOptions {
+  separator : String
+  case_sensitive : Bool
+  trim_tokens : Bool
+}
 
 // Type aliases
 
