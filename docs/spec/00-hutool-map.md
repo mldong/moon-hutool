@@ -76,7 +76,7 @@
 
 | hutool | core | 本库补 | 不做 |
 |---|---|---|---|
-| `DFA/SensitiveUtil` | 无 | ③ `dfa`（**契约已冻结**，10-05 第一批 9 件 + 2 类型 + 停顿字符表）：`new_word_tree` 建树、`is_match`/`first_match`/`first_found`/`match_all`/`match_all_words`/`match_all_mode`/`match_all_words_mode` 七档查询、`is_stop_char`/`is_not_stop_char` | **`SensitiveUtil` 静态全局表与 `containsSensitive(Object)` 反射档不做**（无全局可变注册表、无反射）；`clear`/`setCharFilter` 第一批不放；**密集档不做性能承诺**（参照实现最坏 `O(n²)`，本库同形状，Aho-Corasick 是另一个算法族）。两条实测更正：默认档是**最左起点里的最短命中**（不是本表旧写的"最大长度命中"——最长要 `density=true` 且 `greed=true` 两条同时开），且 `greed` 在 `density=false` 时**完全惰性**（参照实现的那行 `break` 排在贪婪判定之前） |
+| `DFA/SensitiveUtil` | 无 | ③ `dfa` **已实现**（10-05 两笔：9 件 + `WordTree`/`FoundWord` + 停顿字符表）：`new_word_tree` 建树、`is_match`/`first_match`/`first_found`/`match_all`/`match_all_words`/`match_all_mode`/`match_all_words_mode` 七档查询、`is_stop_char`/`is_not_stop_char` | **`SensitiveUtil` 静态全局表与 `containsSensitive(Object)` 反射档不做**（无全局可变注册表、无反射）；`clear`/`setCharFilter` 不放；**密集档不做性能承诺**（参照实现最坏 `O(n²)`，本库同形状，Aho-Corasick 是另一个算法族）。两条实测更正：默认档是**最左起点里的最短命中**（不是本表旧写的"最大长度命中"——最长要 `density=true` 且 `greed=true` 两条同时开），且 `greed` 在 `density=false` 时**完全惰性**（参照实现的那行 `break` 排在贪婪判定之前） |
 | `AntPathMatcher` | 无 | ③ `path`（P5，token 匹配不靠正则）**血统 = Spring-core（Apache-2.0）** | — |
 | `CacheUtil`/`SimpleCache`（LRU/LFU/Timed） | 无 | ③ `cache`（P5）**显式 `prune()`** | `schedulePrune` 守护线程语义、`WeakCache` |
 | `HashUtil`（murmur/fnv/ketama…）/`CRC8/CRC16` | 无（`Hash` trait 只服务 HashMap，js 档走 extern 不可当摘要用） | ③ `hash`（P5） | — |

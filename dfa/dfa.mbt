@@ -34,12 +34,87 @@ pub struct FoundWord {
 ///|
 /// 关键词树（DFA 式逐字符转移）。构造只认词表，之后是只读的匹配器。
 ///
-/// - Note: 字段刻意不公开——树的内部形状（节点表 + 结束标记）是实现细节，
-///   暴露出去就等于承诺"可以手工改节点"。
+/// - Note: 树是值，建完只读。两个字段会进 `.mbti`（MoonBit 的 `pub struct` 默认把形状摊给接口文件，
+///   本仓 `mapx` 的 `BiMap`/`Table` 同形），但**契约只承诺经 `new_word_tree` 构造的树**——
+///   手工拼一棵树等于自己决定"结束标记放哪儿"，那一档语义没冻。
 pub struct WordTree {
-  // 实现期填：节点邻接表 + 每条路径的结束标记（参照实现把结束标记挂在"父节点的字符集"上，
-  // 那正是 `红、领巾` 能命中 `红领巾` 而 `红领巾、` 不会多命中一档的原因）
-  placeholder : Int
+  // 节点表：`children[i][c] = j` 表示节点 i 吃字符 c 转到节点 j，`ends[j]` 表示"走到 j 就是完整词"。
+  // 参照实现把结束标记挂在**父节点的字符集**上（`parent.setEnd(currentChar)`），这里等价地挂在目标节点上——
+  // 只是形状不同；`红、领巾` 命中 `红领巾` 靠的是"停顿字符不进转移、但占住 found 区间"。
+  children : Array[Map[Char, Int]]
+  ends : Array[Bool]
+}
+
+///|
+// 新节点：空转移表 + 非终止。返回新节点下标（根是 0，所以首个新节点恒为 1）。
+fn new_node(children : Array[Map[Char, Int]], ends : Array[Bool]) -> Int {
+  children.push(Map([]))
+  ends.push(false)
+  children.length() - 1
+}
+
+///|
+// 把一个词并进树里：只有"参与匹配"的字符进转移（停顿字符直接跳过，参照实现同一条），
+// 路径最后一个节点标终止。**一个字符都没进过树就不标终止**——这正是"空串/全停顿词永不命中"的来处。
+fn add_word(
+  children : Array[Map[Char, Int]],
+  ends : Array[Bool],
+  word : String,
+) -> Unit {
+  let mut cur = 0
+  let mut last = -1
+  for c in word.to_array() {
+    if is_stop_char(c) {
+      continue
+    }
+    if children[cur].contains(c) {
+      cur = children[cur][c]
+    } else {
+      let idx = new_node(children, ends)
+      children[cur][c] = idx
+      cur = idx
+    }
+    last = cur
+  }
+  if last >= 0 {
+    ends[last] = true
+  }
+}
+
+///|
+// 码点 → 该码点起点的 **UTF-16 码元**下标（承诺口径见契约 §0 规则 2：非 BMP 字符占两位）。
+fn unit_offsets(cs : Array[Char]) -> Array[Int] {
+  let out : Array[Int] = []
+  let mut acc = 0
+  for c in cs {
+    out.push(acc)
+    // 运算符只能落在行尾（core 语法），所以 if 先成一个绑定再加
+    let w = if c.to_int() > 0xffff { 2 } else { 1 }
+    acc = acc + w
+  }
+  out
+}
+
+///|
+// 取码点闭区间 `lo..=hi` 的原文（`found` 用，停顿字符原样在内）。
+fn span(cs : Array[Char], lo : Int, hi : Int) -> String {
+  let buf = StringBuilder()
+  let mut k = lo
+  while k <= hi {
+    buf.write_char(cs[k])
+    k = k + 1
+  }
+  buf.to_string()
+}
+
+///|
+// 走过路径上的字符（`word` 用，停顿字符已剥掉）。
+fn key_text(ks : Array[Char]) -> String {
+  let buf = StringBuilder()
+  for c in ks {
+    buf.write_char(c)
+  }
+  buf.to_string()
 }
 
 ///|
@@ -56,7 +131,13 @@ pub struct WordTree {
 /// let t = @dfa.new_word_tree(["ab", "b"])
 /// ```
 pub fn new_word_tree(words : Array[String]) -> WordTree {
-  abort("moon-hutool/dfa 第一批未实现（契约 docs/spec/14-dfa.md）")
+  let children : Array[Map[Char, Int]] = []
+  let ends : Array[Bool] = []
+  let _ = new_node(children, ends)
+  for w in words {
+    add_word(children, ends, w)
+  }
+  WordTree::{ children, ends, }
 }
 
 ///|
@@ -64,7 +145,7 @@ pub fn new_word_tree(words : Array[String]) -> WordTree {
 ///
 /// - Raises: 无——纯查询
 pub fn WordTree::is_match(self : WordTree, text : String) -> Bool {
-  abort("moon-hutool/dfa 第一批未实现（契约 docs/spec/14-dfa.md）")
+  self.first_found(text) is Some(_)
 }
 
 ///|
@@ -73,7 +154,10 @@ pub fn WordTree::is_match(self : WordTree, text : String) -> Bool {
 ///
 /// - Raises: 无——纯查询
 pub fn WordTree::first_match(self : WordTree, text : String) -> String? {
-  abort("moon-hutool/dfa 第一批未实现（契约 docs/spec/14-dfa.md）")
+  match self.first_found(text) {
+    Some(f) => Some(f.found)
+    None => None
+  }
 }
 
 ///|
@@ -81,7 +165,12 @@ pub fn WordTree::first_match(self : WordTree, text : String) -> String? {
 ///
 /// - Raises: 无——纯查询
 pub fn WordTree::first_found(self : WordTree, text : String) -> FoundWord? {
-  abort("moon-hutool/dfa 第一批未实现（契约 docs/spec/14-dfa.md）")
+  let r = self.match_all_words_mode(text, 1, false, false)
+  if r.length() > 0 {
+    Some(r[0])
+  } else {
+    None
+  }
 }
 
 ///|
@@ -89,7 +178,7 @@ pub fn WordTree::first_found(self : WordTree, text : String) -> FoundWord? {
 ///
 /// - Raises: 无——纯查询
 pub fn WordTree::match_all(self : WordTree, text : String) -> Array[String] {
-  abort("moon-hutool/dfa 第一批未实现（契约 docs/spec/14-dfa.md）")
+  self.match_all_mode(text, -1, false, false)
 }
 
 ///|
@@ -100,7 +189,7 @@ pub fn WordTree::match_all_words(
   self : WordTree,
   text : String,
 ) -> Array[FoundWord] {
-  abort("moon-hutool/dfa 第一批未实现（契约 docs/spec/14-dfa.md）")
+  self.match_all_words_mode(text, -1, false, false)
 }
 
 ///|
@@ -122,7 +211,11 @@ pub fn WordTree::match_all_mode(
   density : Bool,
   greed : Bool,
 ) -> Array[String] {
-  abort("moon-hutool/dfa 第一批未实现（契约 docs/spec/14-dfa.md）")
+  let out : Array[String] = []
+  for f in self.match_all_words_mode(text, limit, density, greed) {
+    out.push(f.found)
+  }
+  out
 }
 
 ///|
@@ -136,7 +229,60 @@ pub fn WordTree::match_all_words_mode(
   density : Bool,
   greed : Bool,
 ) -> Array[FoundWord] {
-  abort("moon-hutool/dfa 第一批未实现（契约 docs/spec/14-dfa.md）")
+  let cs = text.to_array()
+  let n = cs.length()
+  let off = unit_offsets(cs)
+  let out : Array[FoundWord] = []
+  let mut done = false
+  let mut i = 0
+  while i < n && !done {
+    let ks : Array[Char] = []
+    let mut cur = 0
+    let mut j = i
+    let mut stop = false
+    while j < n && !stop {
+      let c = cs[j]
+      if is_stop_char(c) {
+        // 词中间的停顿字符留在 found 区间里、不进 word；词首的整格跳过
+        // （参照实现那句 `i++` 就是这一档，实测起点因此后移）
+        if ks.length() == 0 {
+          i = i + 1
+        }
+        j = j + 1
+      } else if false == self.children[cur].contains(c) {
+        // 非关键字：整段放弃，下一起点重扫
+        stop = true
+      } else {
+        ks.push(c)
+        let child = self.children[cur][c]
+        if self.ends[child] {
+          out.push(FoundWord::{
+            word: key_text(ks),
+            found: span(cs, i, j),
+            start: off[i],
+            end: off[j],
+          })
+          if limit > 0 && out.length() >= limit {
+            done = true
+            stop = true
+          } else if false == density {
+            // 非密集档：命中后整段跳过（下一起点 = j + 1）
+            i = j
+            stop = true
+          } else if false == greed {
+            // 密集档 + 非贪婢：同起点不往长里读
+            stop = true
+          }
+        }
+        if !stop {
+          cur = child
+          j = j + 1
+        }
+      }
+    }
+    i = i + 1
+  }
+  out
 }
 
 ///|
@@ -150,7 +296,23 @@ pub fn WordTree::match_all_words_mode(
 /// - Note: **码表按口径独立成数据件**：`stop_chars.mbt` 只放数据、不放逻辑，实现那一笔一起进。
 /// - Raises: 无——纯查表
 pub fn is_stop_char(c : Char) -> Bool {
-  abort("moon-hutool/dfa 第一批未实现（契约 docs/spec/14-dfa.md）")
+  let cu = c.to_int()
+  // 表有序，二分；表本体在 stop_chars.mbt（数据件）
+  let mut lo = 0
+  let mut hi = stop_cache.length() - 1
+  let mut found = false
+  while !found && lo <= hi {
+    let mid = (lo + hi) / 2
+    let v = stop_cache[mid]
+    if v == cu {
+      found = true
+    } else if v < cu {
+      lo = mid + 1
+    } else {
+      hi = mid - 1
+    }
+  }
+  found
 }
 
 ///|
@@ -158,5 +320,10 @@ pub fn is_stop_char(c : Char) -> Bool {
 /// 建树时的过滤谓词用它，读起来不必再取反）。
 /// - Raises: 无——纯查表
 pub fn is_not_stop_char(c : Char) -> Bool {
-  abort("moon-hutool/dfa 第一批未实现（契约 docs/spec/14-dfa.md）")
+  false == is_stop_char(c)
 }
+
+///|
+// 停顿字符表的**只读缓存**（顶层绑定，不是全局可变注册表——没有一个写入口）。
+// 每个字符重新 alloc 一张 327 项的表，BMP 扫描那种调用量下会白烧分配。
+let stop_cache : Array[Int] = stop_table()

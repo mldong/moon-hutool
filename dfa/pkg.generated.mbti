@@ -19,7 +19,8 @@ pub struct FoundWord {
 }
 
 pub struct WordTree {
-  placeholder : Int
+  children : Array[Map[Char, Int]]
+  ends : Array[Bool]
 }
 pub fn WordTree::first_found(Self, String) -> FoundWord?
 pub fn WordTree::first_match(Self, String) -> String?
