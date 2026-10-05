@@ -2,6 +2,35 @@
 package "mldong/moon-hutool/valid"
 
 // Values
+pub fn is_car_driving_licence(String) -> Bool
+
+pub fn is_car_vin(String) -> Bool
+
+pub fn is_general(String) -> Bool
+
+pub fn is_general_at_least(String, Int) -> Bool
+
+pub fn is_general_between(String, Int, Int) -> Bool
+
+pub fn is_hex(String) -> Bool
+
+pub fn is_ipv4(String) -> Bool
+
+pub fn is_ipv6(String) -> Bool
+
+pub fn is_mac(String) -> Bool
+
+pub fn is_mobile(String) -> Bool
+
+pub fn is_money(String) -> Bool
+
+pub fn is_plate_number(String) -> Bool
+
+pub fn is_uuid(String) -> Bool
+
+pub fn is_word(String) -> Bool
+
+pub fn is_zip_code(String) -> Bool
 
 // Errors
 

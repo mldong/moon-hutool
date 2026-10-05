@@ -69,7 +69,7 @@
 | `HexUtil` | `encoding/hex` | ③ 只在需要 `hexToInt/颜色` 等组合时补 | 不转发 encode/decode |
 | `PercentCodec`/`UrlBuilder` | `encoding/percent` | ③ URL 结构化组装 + form 的 `+` 档（RFC 3986，**codec 的 PR-A2**） | percent-encoding 本体已在 core；本包只补「空格出 `+`、`+` 解回空格」那一档，与 `UrlBuilder` 同批定契约 |
 | `ReUtil`/`PatternPool`/`RegexPool` | **core 有公开 `Regex`**（`prelude.mbt:93` 免 import 导出；`find/split/replace_by/命名组/Pattern 构造`）。引擎面四条实测（10-05，探针 114 条跑 wasm/js/wasm-gc **三档逐字节相同**）：纯 MoonBit 的 Brzozowski 导数自动机（`js` 档不借宿主 `RegExp`）、`.` 默认 DOTALL、`^`/`$` 恒整串（无 `MULTILINE`）、`\d \w \s \xHH \p{L} \1 \A \z \Q (?=) (?<=) (?i) a{300}` 一律**编译期报错** | ③ `re`：#10.1~#10.24 共 **24 件**（判断/取组/批量/位置/模板/删除/切分/转义/回调）+ `ReError` 两档，契约表 [`10-re.md`](10-re.md)；`RegexPool`/`PatternPool` 常量表留第二批 | **语法自动翻译**（`\d\w\s`→POSIX 类）**判不做**——**本轮更正**：原计划就是"翻译"，但实测两边**合法集不同**（`(?i)`、`a{300}`、`\1` 在 Java 侧合法、core 侧编译期报错），把改写塞进库里等于在引擎之上再造一份语义，还要替调用方吞掉"这串本来不该用"的信号；等价改写是**给调用方看的对照**（`(?i:…)`、`[[:digit:]]` 这类），表在 `10-re.md` §7，不是本包的义务。曾有调研判"core 无正则"，实测为假 |
-| `Validator.isEmail/isIpv4/...` | 靠 core `Regex` 可表达 | ① `valid`（P4，逐个定义语言 + 正反样本对拍） | 不承诺与 hutool 正则逐字节等价（差异写 spec） |
+| `Validator.isEmail/isIpv4/...` | 靠 core `Regex` 可表达，**但 hutool 那 34 条 `RegexPool` 常量里 24 条带 core 不收的写法**（`\d` 18/`\w` 4/`\xHH` 2，普查见 `10-re.md` §4 第 7 条）⇒ 每条都得先改写成 core 方言 | ① `valid`：第一批 15 件已冻契约（`11-valid.md`，#11.1~#11.15，127 条样本两腿逐条对撞、**0 条分岔**） | **立场是"改写到命中集相同为止"**，不是"承诺逐字节等价"：等价件进契约、不等价的件**整件挂账**（`is_email` 的 `\xHH`、中文族的代理对码元区间、`is_letter`/`is_upper_case`/`is_lower_case` 的 Unicode 类别表、`is_birthday` 的 `find()`+时钟、`is_url` 的 `java.net.URL` 解析器）；`is_citizen_id`/`is_credit_code` 的校验位与区划码表归第 19 行 `typex`；hutool 那 38 个 `validateXxx(value, errorMsg)` 抛 `ValidateException` 的变体与 18 个存在性判定**不搬** |
 
 ## 6. 算法件
 

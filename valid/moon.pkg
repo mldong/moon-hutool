@@ -1,1 +1,10 @@
-// 依赖在此声明；占位期不 import 任何 core 包（未使用的 import 会吃 unused_package 警告并卡零警告门禁）
+// 本包的底座是 core 的 `@string.Regex`。骨架期先不 import：体里全是 `abort`，
+// 多写一条就出 `unused_package`（G3 零警告当场拦），实现落地那一笔再把这行加回来。
+import {
+  "mldong/moon-hutool/valid",
+} for "test"
+
+// 契约冻结态（PR-A）：公开项的体全是 `abort`，机械后果是形参没人用这一类警告。
+// 实现落地那一笔整行删除（G12 盯着这一条）。
+
+warnings = "-unused_value"
