@@ -692,3 +692,26 @@ core 数值语义侧（全部当场实测，三档 `wasm`/`js`/`wasm-gc` 读数�
   `while true { ... return x }` 判 "这个 while 要产出 DateTime，请加 nobreak 块" ⇒ 改成条件循环 + 末尾表达式。
 - **Windows 腿的两条老坑本轮各撞一次**：`javac -cp "a.jar;b.jar"` 用 `/c/...` 形式的 POSIX 路径会"包不存在"，
   要先 `cygpath -w`；`grep -a` 之前忘了 `tr -d ''` 会让中文读数整段被当 Binary file 吞掉。
+
+
+## csv PR-A（10-06：契约冻结一笔，432 = 绿 425 / 红 7）——新判据第一次真的拦下了东西
+
+- **「期望串必须能由本库出口形状产出、且腿要给完整形状」这条判据第一次落地就用了 37 次**：参照在
+  「要表头却够不到那一行」的组合上于 `read()` 内部就失败（`IllegalArgumentException:No header available!`、
+  `NullPointerException ... this.header is null`），表头之后的行/行数/byName 全都没有读数 ⇒ 这 37 组
+  **从冻结面里剔除**（384 → 347 条读断言），不拿推导当期望值。**反面教训**：cron 那一轮就是把 Java 异常串
+  当期望灌进去了 12 条，落地轮才发现产不出。
+- **本版编译器六则（全部实测撞出）**：记录更新语法 `{ base with x = 1 }` **不接**（Parse error:
+  unexpected token `with`）⇒ 配置档必须逐字段照抄默认值再改要改的那个；跨包构造值要 `pub(all) struct`，
+  否则判 "Cannot create values of the read-only type"；类型别名关键字是 `pub type X = T`（`typealias` 判
+  unexpected lowercase id）；函数返回类型只能 `-> T`，`fn f(i : Int) : T` 是解析错；`alias` 是保留字
+  （Warning: reserved_keyword，零警告门禁下必须改名）；测试包里用本包类型要写 `@csv.CsvLine`（否则
+  Warning: test_unqualified_package）。
+- **生成器的转义层要归零**：把 MoonBit 源码嵌进 python 三引号串里，`'''` 会被 python 解码成 `'''` 提前
+  终结字符串，于是一个字符字面量把整个生成器打翻，连着三四轮在「补转义」上原地打转。正确形状：**helper 代码
+  单独存一个 .txt，脚本只读它做拼接**，断言文本由脚本现算——两层分离后一次通过。腿的输出同理：Windows 上
+  `java >` 落的是 GBK，读回要 `encoding="gbk"`，不能当 UTF-8。
+- **参照语义里最容易被想当然的几条**（都有读数在 spec §3）：默认 `headerLineNo=-1` 即**不认表头**、
+  默认 `skipEmptyRows=true` 但**行号照推**、注释符只在行首生效、引号必须整包裹才剥（`a"b`、`"a"x` 原样留引号）、
+  引号内两写 `""` 只出一个 `"`、字段只剥首尾 CR/LF 不剥空白、null 默认写空串而 `always_delimit_text` 下写 `""`、
+  **5.8.35 的写方法名是 `writeLine`，没有 `writeRow`**（那是 hutool 6 的命名，照 6 的 API 写契约会整面错）。
