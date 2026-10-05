@@ -29,6 +29,7 @@ pub suberror CronError {
 // Types and methods
 pub struct Cron {
   text : String
+  // private fields
 }
 
 // Type aliases

@@ -68,7 +68,7 @@ fn m_tag(p : String, t : @date.DateTime, sec : Bool) -> String {
 fn nx_tag(p : String, t : @date.DateTime) -> String {
   try {
     let c = @cron.cron_of(p)
-    fmt(@cron.cron_next_match_after(c, t))
+    "OK:" + fmt(@cron.cron_next_match_after(c, t))
   } catch {
     e => tag(e)
   }
@@ -78,7 +78,7 @@ fn nx_tag(p : String, t : @date.DateTime) -> String {
 fn nm_tag(p : String, t : @date.DateTime) -> String {
   try {
     let c = @cron.cron_of(p)
-    fmt(@cron.cron_next_match(c, t))
+    "OK:" + fmt(@cron.cron_next_match(c, t))
   } catch {
     e => tag(e)
   }
@@ -129,7 +129,7 @@ test "cron 解析档：50 个表达式的接受/报错与原文本" {
   assert_eq(parse_text("* * * *"), "BadParts[* * * *]") // ok.40|CronException:Pattern [* * * *] is invalid, it must be 5-7 parts!
   assert_eq(parse_text("* * * * * * *"), "OK:* * * * * * *") // ok.41|OK:* * * * * * *
   assert_eq(parse_text(""), "BadParts[]") // ok.42|OK: —— 本库改判（参照侧接受该输入，读数原样留在标签里）
-  assert_eq(parse_text("   "), "BadParts[   ]") // ok.43|OK: —— 本库改判（参照侧接受该输入，读数原样留在标签里）
+  assert_eq(parse_text("   "), "BadParts[   ]") // ok.43|OK:    —— 本库改判（参照侧接受该输入，读数原样留在标签里）
   assert_eq(parse_text("0 12 * * 1-7"), "OK:0 12 * * 1-7") // ok.44|OK:0 12 * * 1-7
   assert_eq(parse_text("0 12 * * 0-7"), "OK:0 12 * * 0-7") // ok.45|OK:0 12 * * 0-7
   assert_eq(parse_text("0 12 32 * *"), "OutOfRange[DAY_OF_MONTH,32]") // ok.46|CronException:DAY_OF_MONTH value 32 out of range: [1 , 31]
@@ -1258,7 +1258,7 @@ test "cron next_match_after：已匹配先加一秒" {
     "OK:2024-06-14 12:01:00",
   ) // nx.0.1|OK:2024-06-14 12:01:00
   assert_eq(
-    nx_tag("* * * * *", dt(2024, 3, 31, 12, 0, 0)),
+    nx_tag("* * * * *", dt(2024, 12, 31, 23, 59, 0)),
     "OK:2025-01-01 00:00:00",
   ) // nx.0.2|OK:2025-01-01 00:00:00
   assert_eq(
@@ -1282,7 +1282,7 @@ test "cron next_match_after：已匹配先加一秒" {
     "OK:2024-06-14 12:05:00",
   ) // nx.1.1|OK:2024-06-14 12:05:00
   assert_eq(
-    nx_tag("5 * * * *", dt(2024, 3, 31, 12, 0, 0)),
+    nx_tag("5 * * * *", dt(2024, 12, 31, 23, 59, 0)),
     "OK:2025-01-01 00:05:00",
   ) // nx.1.2|OK:2025-01-01 00:05:00
   assert_eq(
@@ -1306,7 +1306,7 @@ test "cron next_match_after：已匹配先加一秒" {
     "OK:2024-06-14 12:02:00",
   ) // nx.2.1|OK:2024-06-14 12:02:00
   assert_eq(
-    nx_tag("*/2 * * * *", dt(2024, 3, 31, 12, 0, 0)),
+    nx_tag("*/2 * * * *", dt(2024, 12, 31, 23, 59, 0)),
     "OK:2025-01-01 00:00:00",
   ) // nx.2.2|OK:2025-01-01 00:00:00
   assert_eq(
@@ -1330,7 +1330,7 @@ test "cron next_match_after：已匹配先加一秒" {
     "OK:2024-06-14 12:02:00",
   ) // nx.3.1|OK:2024-06-14 12:02:00
   assert_eq(
-    nx_tag("2-8 * * * *", dt(2024, 3, 31, 12, 0, 0)),
+    nx_tag("2-8 * * * *", dt(2024, 12, 31, 23, 59, 0)),
     "OK:2025-01-01 00:02:00",
   ) // nx.3.2|OK:2025-01-01 00:02:00
   assert_eq(
@@ -1354,7 +1354,7 @@ test "cron next_match_after：已匹配先加一秒" {
     "OK:2024-06-14 12:02:00",
   ) // nx.4.1|OK:2024-06-14 12:02:00
   assert_eq(
-    nx_tag("2,3,5,8 * * * *", dt(2024, 3, 31, 12, 0, 0)),
+    nx_tag("2,3,5,8 * * * *", dt(2024, 12, 31, 23, 59, 0)),
     "OK:2025-01-01 00:02:00",
   ) // nx.4.2|OK:2025-01-01 00:02:00
   assert_eq(
@@ -1378,7 +1378,7 @@ test "cron next_match_after：已匹配先加一秒" {
     "OK:2024-06-14 12:02:00",
   ) // nx.5.1|OK:2024-06-14 12:02:00
   assert_eq(
-    nx_tag("2,3,6/3 * * * *", dt(2024, 3, 31, 12, 0, 0)),
+    nx_tag("2,3,6/3 * * * *", dt(2024, 12, 31, 23, 59, 0)),
     "OK:2025-01-01 00:02:00",
   ) // nx.5.2|OK:2025-01-01 00:02:00
   assert_eq(
@@ -1402,7 +1402,7 @@ test "cron next_match_after：已匹配先加一秒" {
     "OK:2024-06-14 12:01:00",
   ) // nx.6.1|OK:2024-06-14 12:01:00
   assert_eq(
-    nx_tag("? * * * *", dt(2024, 3, 31, 12, 0, 0)),
+    nx_tag("? * * * *", dt(2024, 12, 31, 23, 59, 0)),
     "OK:2025-01-01 00:00:00",
   ) // nx.6.2|OK:2025-01-01 00:00:00
   assert_eq(
@@ -1426,7 +1426,7 @@ test "cron next_match_after：已匹配先加一秒" {
     "OK:2024-06-17 12:00:00",
   ) // nx.7.1|OK:2024-06-17 12:00:00
   assert_eq(
-    nx_tag("0 12 * * MON", dt(2024, 3, 31, 12, 0, 0)),
+    nx_tag("0 12 * * MON", dt(2024, 12, 31, 23, 59, 0)),
     "OK:2025-01-06 12:00:00",
   ) // nx.7.2|OK:2025-01-06 12:00:00
   assert_eq(
@@ -1450,7 +1450,7 @@ test "cron next_match_after：已匹配先加一秒" {
     "OK:2024-06-17 12:00:00",
   ) // nx.8.1|OK:2024-06-17 12:00:00
   assert_eq(
-    nx_tag("0 12 * * mon", dt(2024, 3, 31, 12, 0, 0)),
+    nx_tag("0 12 * * mon", dt(2024, 12, 31, 23, 59, 0)),
     "OK:2025-01-06 12:00:00",
   ) // nx.8.2|OK:2025-01-06 12:00:00
   assert_eq(
@@ -1474,7 +1474,7 @@ test "cron next_match_after：已匹配先加一秒" {
     "OK:2025-01-01 12:00:00",
   ) // nx.9.1|OK:2025-01-01 12:00:00
   assert_eq(
-    nx_tag("0 12 * JAN-MAR *", dt(2024, 3, 31, 12, 0, 0)),
+    nx_tag("0 12 * JAN-MAR *", dt(2024, 12, 31, 23, 59, 0)),
     "OK:2025-01-01 12:00:00",
   ) // nx.9.2|OK:2025-01-01 12:00:00
   assert_eq(
@@ -1498,7 +1498,7 @@ test "cron next_match_after：已匹配先加一秒" {
     "OK:2025-01-01 12:00:00",
   ) // nx.10.1|OK:2025-01-01 12:00:00
   assert_eq(
-    nx_tag("0 12 * jan-mar *", dt(2024, 3, 31, 12, 0, 0)),
+    nx_tag("0 12 * jan-mar *", dt(2024, 12, 31, 23, 59, 0)),
     "OK:2025-01-01 12:00:00",
   ) // nx.10.2|OK:2025-01-01 12:00:00
   assert_eq(
@@ -1522,7 +1522,7 @@ test "cron next_match_after：已匹配先加一秒" {
     "OK:2024-06-30 12:00:00",
   ) // nx.11.1|OK:2024-06-30 12:00:00
   assert_eq(
-    nx_tag("0 12 L * *", dt(2024, 3, 31, 12, 0, 0)),
+    nx_tag("0 12 L * *", dt(2024, 12, 31, 23, 59, 0)),
     "OK:2025-01-31 12:00:00",
   ) // nx.11.2|OK:2025-01-31 12:00:00
   assert_eq(
@@ -1546,7 +1546,7 @@ test "cron next_match_after：已匹配先加一秒" {
     "OK:2024-06-16 12:00:00",
   ) // nx.17.1|OK:2024-06-16 12:00:00
   assert_eq(
-    nx_tag("0 12 * * 7", dt(2024, 3, 31, 12, 0, 0)),
+    nx_tag("0 12 * * 7", dt(2024, 12, 31, 23, 59, 0)),
     "OK:2025-01-05 12:00:00",
   ) // nx.17.2|OK:2025-01-05 12:00:00
   assert_eq(
@@ -1570,7 +1570,7 @@ test "cron next_match_after：已匹配先加一秒" {
     "OK:2024-06-16 12:00:00",
   ) // nx.18.1|OK:2024-06-16 12:00:00
   assert_eq(
-    nx_tag("0 12 * * 0", dt(2024, 3, 31, 12, 0, 0)),
+    nx_tag("0 12 * * 0", dt(2024, 12, 31, 23, 59, 0)),
     "OK:2025-01-05 12:00:00",
   ) // nx.18.2|OK:2025-01-05 12:00:00
   assert_eq(
@@ -1594,7 +1594,7 @@ test "cron next_match_after：已匹配先加一秒" {
     "OK:2024-07-01 12:00:00",
   ) // nx.19.1|OK:2024-07-01 12:00:00
   assert_eq(
-    nx_tag("0 12 1 * MON", dt(2024, 3, 31, 12, 0, 0)),
+    nx_tag("0 12 1 * MON", dt(2024, 12, 31, 23, 59, 0)),
     "OK:2025-09-01 12:00:00",
   ) // nx.19.2|OK:2025-09-01 12:00:00
   assert_eq(
@@ -1618,7 +1618,7 @@ test "cron next_match_after：已匹配先加一秒" {
     "OK:2024-06-15 12:00:00",
   ) // nx.20.1|OK:2024-06-15 12:00:00
   assert_eq(
-    nx_tag("0 12 * * SAT,SUN", dt(2024, 3, 31, 12, 0, 0)),
+    nx_tag("0 12 * * SAT,SUN", dt(2024, 12, 31, 23, 59, 0)),
     "OK:2025-01-04 12:00:00",
   ) // nx.20.2|OK:2025-01-04 12:00:00
   assert_eq(
@@ -1642,7 +1642,7 @@ test "cron next_match_after：已匹配先加一秒" {
     "OK:2024-06-14 12:15:00",
   ) // nx.21.1|OK:2024-06-14 12:15:00
   assert_eq(
-    nx_tag("*/15 9-17 * * MON-FRI", dt(2024, 3, 31, 12, 0, 0)),
+    nx_tag("*/15 9-17 * * MON-FRI", dt(2024, 12, 31, 23, 59, 0)),
     "OK:2025-01-01 09:00:00",
   ) // nx.21.2|OK:2025-01-01 09:00:00
   assert_eq(
@@ -1666,7 +1666,7 @@ test "cron next_match_after：已匹配先加一秒" {
     "OK:2024-06-16 00:00:00",
   ) // nx.22.1|OK:2024-06-16 00:00:00
   assert_eq(
-    nx_tag("0 0 * * SUN", dt(2024, 3, 31, 12, 0, 0)),
+    nx_tag("0 0 * * SUN", dt(2024, 12, 31, 23, 59, 0)),
     "OK:2025-01-05 00:00:00",
   ) // nx.22.2|OK:2025-01-05 00:00:00
   assert_eq(
@@ -1690,7 +1690,7 @@ test "cron next_match_after：已匹配先加一秒" {
     "OK:2025-01-01 00:00:00",
   ) // nx.23.1|OK:2025-01-01 00:00:00
   assert_eq(
-    nx_tag("0 0 1 1 *", dt(2024, 3, 31, 12, 0, 0)),
+    nx_tag("0 0 1 1 *", dt(2024, 12, 31, 23, 59, 0)),
     "OK:2025-01-01 00:00:00",
   ) // nx.23.2|OK:2025-01-01 00:00:00
   assert_eq(
@@ -1714,7 +1714,7 @@ test "cron next_match_after：已匹配先加一秒" {
     "OK:2028-02-29 00:00:00",
   ) // nx.24.1|OK:2028-02-29 00:00:00
   assert_eq(
-    nx_tag("0 0 29 2 *", dt(2024, 3, 31, 12, 0, 0)),
+    nx_tag("0 0 29 2 *", dt(2024, 12, 31, 23, 59, 0)),
     "OK:2028-02-29 00:00:00",
   ) // nx.24.2|OK:2028-02-29 00:00:00
   assert_eq(
@@ -1738,7 +1738,7 @@ test "cron next_match_after：已匹配先加一秒" {
     "OK:2024-06-30 12:00:00",
   ) // nx.25.1|OK:2024-06-30 12:00:00
   assert_eq(
-    nx_tag("0 12 */3 * *", dt(2024, 3, 31, 12, 0, 0)),
+    nx_tag("0 12 */3 * *", dt(2024, 12, 31, 23, 59, 0)),
     "OK:2025-01-31 12:00:00",
   ) // nx.25.2|OK:2025-01-31 12:00:00
   assert_eq(
@@ -1762,7 +1762,7 @@ test "cron next_match_after：已匹配先加一秒" {
     "OK:2024-06-15 06:30:00",
   ) // nx.26.1|OK:2024-06-15 06:30:00
   assert_eq(
-    nx_tag("30 6 * * *", dt(2024, 3, 31, 12, 0, 0)),
+    nx_tag("30 6 * * *", dt(2024, 12, 31, 23, 59, 0)),
     "OK:2025-01-01 06:30:00",
   ) // nx.26.2|OK:2025-01-01 06:30:00
   assert_eq(
@@ -1786,7 +1786,7 @@ test "cron next_match_after：已匹配先加一秒" {
     "OK:2024-06-14 12:13:00",
   ) // nx.27.1|OK:2024-06-14 12:13:00
   assert_eq(
-    nx_tag("0-59/13 * * * *", dt(2024, 3, 31, 12, 0, 0)),
+    nx_tag("0-59/13 * * * *", dt(2024, 12, 31, 23, 59, 0)),
     "OK:2025-01-01 00:00:00",
   ) // nx.27.2|OK:2025-01-01 00:00:00
   assert_eq(
@@ -1810,7 +1810,7 @@ test "cron next_match_after：已匹配先加一秒" {
     "OK:2024-06-14 12:07:00",
   ) // nx.28.1|OK:2024-06-14 12:07:00
   assert_eq(
-    nx_tag("*/7 * * * *", dt(2024, 3, 31, 12, 0, 0)),
+    nx_tag("*/7 * * * *", dt(2024, 12, 31, 23, 59, 0)),
     "OK:2025-01-01 00:00:00",
   ) // nx.28.2|OK:2025-01-01 00:00:00
   assert_eq(
@@ -1834,7 +1834,7 @@ test "cron next_match_after：已匹配先加一秒" {
     "OK:2024-06-14 12:01:00",
   ) // nx.29.1|OK:2024-06-14 12:01:00
   assert_eq(
-    nx_tag("1,1,1 * * * *", dt(2024, 3, 31, 12, 0, 0)),
+    nx_tag("1,1,1 * * * *", dt(2024, 12, 31, 23, 59, 0)),
     "OK:2025-01-01 00:01:00",
   ) // nx.29.2|OK:2025-01-01 00:01:00
   assert_eq(
@@ -1858,7 +1858,7 @@ test "cron next_match_after：已匹配先加一秒" {
     "OK:2024-06-14 12:01:00",
   ) // nx.30.1|OK:2024-06-14 12:01:00
   assert_eq(
-    nx_tag("5-1,7 * * * *", dt(2024, 3, 31, 12, 0, 0)),
+    nx_tag("5-1,7 * * * *", dt(2024, 12, 31, 23, 59, 0)),
     "OK:2025-01-01 00:00:00",
   ) // nx.30.2|OK:2025-01-01 00:00:00
   assert_eq(
@@ -1882,7 +1882,7 @@ test "cron next_match_after：已匹配先加一秒" {
     "OK:2024-06-14 12:01:00",
   ) // nx.31.1|OK:2024-06-14 12:01:00
   assert_eq(
-    nx_tag("8-2 * * * *", dt(2024, 3, 31, 12, 0, 0)),
+    nx_tag("8-2 * * * *", dt(2024, 12, 31, 23, 59, 0)),
     "OK:2025-01-01 00:00:00",
   ) // nx.31.2|OK:2025-01-01 00:00:00
   assert_eq(
@@ -1906,7 +1906,7 @@ test "cron next_match_after：已匹配先加一秒" {
     "OK:2024-06-14 12:59:59",
   ) // nx.32.1|OK:2024-06-14 12:59:59
   assert_eq(
-    nx_tag("59 59 12 * * *", dt(2024, 3, 31, 12, 0, 0)),
+    nx_tag("59 59 12 * * *", dt(2024, 12, 31, 23, 59, 0)),
     "OK:2025-01-01 12:59:59",
   ) // nx.32.2|OK:2025-01-01 12:59:59
   assert_eq(
@@ -1930,7 +1930,7 @@ test "cron next_match_after：已匹配先加一秒" {
     "OK:2099-01-01 12:00:00",
   ) // nx.33.1|OK:2099-01-01 12:00:00
   assert_eq(
-    nx_tag("0 0 12 * * ? 2099", dt(2024, 3, 31, 12, 0, 0)),
+    nx_tag("0 0 12 * * ? 2099", dt(2024, 12, 31, 23, 59, 0)),
     "OK:2099-01-01 12:00:00",
   ) // nx.33.2|OK:2099-01-01 12:00:00
   assert_eq(
@@ -1947,27 +1947,27 @@ test "cron next_match_after：已匹配先加一秒" {
   ) // nx.33.5|OK:2099-12-31 12:00:00
   assert_eq(
     nx_tag("0 0 12 * * ? 1970", dt(2024, 2, 29, 12, 0, 0)),
-    "IllegalArgumentException:Invalid matcher: cn.hutool.cron.pattern.matcher.YearValueMatcher",
+    "OK:1970-01-01 12:00:00", // 本库改判：取年集合最小值回绕（参照此点抛 IllegalArgumentException，两侧读数都在案，spec §5 第 9 行）,
   ) // nx.34.0|IllegalArgumentException:Invalid matcher: cn.hutool.cron.pattern.matcher.YearValueMatcher
   assert_eq(
     nx_tag("0 0 12 * * ? 1970", dt(2024, 6, 14, 12, 0, 0)),
-    "IllegalArgumentException:Invalid matcher: cn.hutool.cron.pattern.matcher.YearValueMatcher",
+    "OK:1970-01-01 12:00:00", // 本库改判：取年集合最小值回绕（参照此点抛 IllegalArgumentException，两侧读数都在案，spec §5 第 9 行）,
   ) // nx.34.1|IllegalArgumentException:Invalid matcher: cn.hutool.cron.pattern.matcher.YearValueMatcher
   assert_eq(
-    nx_tag("0 0 12 * * ? 1970", dt(2024, 3, 31, 12, 0, 0)),
-    "IllegalArgumentException:Invalid matcher: cn.hutool.cron.pattern.matcher.YearValueMatcher",
+    nx_tag("0 0 12 * * ? 1970", dt(2024, 12, 31, 23, 59, 0)),
+    "OK:1970-01-01 12:00:00", // 本库改判：取年集合最小值回绕（参照此点抛 IllegalArgumentException，两侧读数都在案，spec §5 第 9 行）,
   ) // nx.34.2|IllegalArgumentException:Invalid matcher: cn.hutool.cron.pattern.matcher.YearValueMatcher
   assert_eq(
     nx_tag("0 0 12 * * ? 1970", dt(2024, 1, 1, 0, 0, 0)),
-    "IllegalArgumentException:Invalid matcher: cn.hutool.cron.pattern.matcher.YearValueMatcher",
+    "OK:1970-01-01 12:00:00", // 本库改判：取年集合最小值回绕（参照此点抛 IllegalArgumentException，两侧读数都在案，spec §5 第 9 行）,
   ) // nx.34.3|IllegalArgumentException:Invalid matcher: cn.hutool.cron.pattern.matcher.YearValueMatcher
   assert_eq(
     nx_tag("0 0 12 * * ? 1970", dt(2024, 6, 17, 9, 15, 30)),
-    "IllegalArgumentException:Invalid matcher: cn.hutool.cron.pattern.matcher.YearValueMatcher",
+    "OK:1970-01-01 12:00:00", // 本库改判：取年集合最小值回绕（参照此点抛 IllegalArgumentException，两侧读数都在案，spec §5 第 9 行）,
   ) // nx.34.4|IllegalArgumentException:Invalid matcher: cn.hutool.cron.pattern.matcher.YearValueMatcher
   assert_eq(
     nx_tag("0 0 12 * * ? 1970", dt(2099, 12, 30, 12, 0, 0)),
-    "IllegalArgumentException:Invalid matcher: cn.hutool.cron.pattern.matcher.YearValueMatcher",
+    "OK:1970-01-01 12:00:00", // 本库改判：取年集合最小值回绕（参照此点抛 IllegalArgumentException，两侧读数都在案，spec §5 第 9 行）,
   ) // nx.34.5|IllegalArgumentException:Invalid matcher: cn.hutool.cron.pattern.matcher.YearValueMatcher
   assert_eq(
     nx_tag("* * * * * * *", dt(2024, 2, 29, 12, 0, 0)),
@@ -1978,7 +1978,7 @@ test "cron next_match_after：已匹配先加一秒" {
     "OK:2024-06-14 12:00:01",
   ) // nx.41.1|OK:2024-06-14 12:00:01
   assert_eq(
-    nx_tag("* * * * * * *", dt(2024, 3, 31, 12, 0, 0)),
+    nx_tag("* * * * * * *", dt(2024, 12, 31, 23, 59, 0)),
     "OK:2024-12-31 23:59:01",
   ) // nx.41.2|OK:2024-12-31 23:59:01
   assert_eq(
@@ -2002,7 +2002,7 @@ test "cron next_match_after：已匹配先加一秒" {
     "OK:2024-06-15 12:00:00",
   ) // nx.44.1|OK:2024-06-15 12:00:00
   assert_eq(
-    nx_tag("0 12 * * 1-7", dt(2024, 3, 31, 12, 0, 0)),
+    nx_tag("0 12 * * 1-7", dt(2024, 12, 31, 23, 59, 0)),
     "OK:2025-01-01 12:00:00",
   ) // nx.44.2|OK:2025-01-01 12:00:00
   assert_eq(
@@ -2026,7 +2026,7 @@ test "cron next_match_after：已匹配先加一秒" {
     "OK:2024-06-16 12:00:00",
   ) // nx.45.1|OK:2024-06-16 12:00:00
   assert_eq(
-    nx_tag("0 12 * * 0-7", dt(2024, 3, 31, 12, 0, 0)),
+    nx_tag("0 12 * * 0-7", dt(2024, 12, 31, 23, 59, 0)),
     "OK:2025-01-05 12:00:00",
   ) // nx.45.2|OK:2025-01-05 12:00:00
   assert_eq(
@@ -2050,7 +2050,7 @@ test "cron next_match_after：已匹配先加一秒" {
     "OK:2025-04-30 12:00:00",
   ) // nx.49.1|OK:2025-04-30 12:00:00
   assert_eq(
-    nx_tag("0 12 31 4 *", dt(2024, 3, 31, 12, 0, 0)),
+    nx_tag("0 12 31 4 *", dt(2024, 12, 31, 23, 59, 0)),
     "OK:2025-04-30 12:00:00",
   ) // nx.49.2|OK:2025-04-30 12:00:00
   assert_eq(
@@ -2078,7 +2078,7 @@ test "cron next_match：已匹配就返回自身（与上一块成对）" {
     "OK:2024-06-14 12:00:00",
   ) // nm.0.1|OK:2024-06-14 12:00:00
   assert_eq(
-    nm_tag("* * * * *", dt(2024, 3, 31, 12, 0, 0)),
+    nm_tag("* * * * *", dt(2024, 12, 31, 23, 59, 0)),
     "OK:2024-12-31 23:59:00",
   ) // nm.0.2|OK:2024-12-31 23:59:00
   assert_eq(
@@ -2102,7 +2102,7 @@ test "cron next_match：已匹配就返回自身（与上一块成对）" {
     "OK:2024-06-14 12:05:00",
   ) // nm.1.1|OK:2024-06-14 12:05:00
   assert_eq(
-    nm_tag("5 * * * *", dt(2024, 3, 31, 12, 0, 0)),
+    nm_tag("5 * * * *", dt(2024, 12, 31, 23, 59, 0)),
     "OK:2025-01-01 00:05:00",
   ) // nm.1.2|OK:2025-01-01 00:05:00
   assert_eq(
@@ -2126,7 +2126,7 @@ test "cron next_match：已匹配就返回自身（与上一块成对）" {
     "OK:2024-06-14 12:00:00",
   ) // nm.2.1|OK:2024-06-14 12:00:00
   assert_eq(
-    nm_tag("*/2 * * * *", dt(2024, 3, 31, 12, 0, 0)),
+    nm_tag("*/2 * * * *", dt(2024, 12, 31, 23, 59, 0)),
     "OK:2025-01-01 00:00:00",
   ) // nm.2.2|OK:2025-01-01 00:00:00
   assert_eq(
@@ -2150,7 +2150,7 @@ test "cron next_match：已匹配就返回自身（与上一块成对）" {
     "OK:2024-06-14 12:02:00",
   ) // nm.3.1|OK:2024-06-14 12:02:00
   assert_eq(
-    nm_tag("2-8 * * * *", dt(2024, 3, 31, 12, 0, 0)),
+    nm_tag("2-8 * * * *", dt(2024, 12, 31, 23, 59, 0)),
     "OK:2025-01-01 00:02:00",
   ) // nm.3.2|OK:2025-01-01 00:02:00
   assert_eq(
@@ -2174,7 +2174,7 @@ test "cron next_match：已匹配就返回自身（与上一块成对）" {
     "OK:2024-06-14 12:02:00",
   ) // nm.4.1|OK:2024-06-14 12:02:00
   assert_eq(
-    nm_tag("2,3,5,8 * * * *", dt(2024, 3, 31, 12, 0, 0)),
+    nm_tag("2,3,5,8 * * * *", dt(2024, 12, 31, 23, 59, 0)),
     "OK:2025-01-01 00:02:00",
   ) // nm.4.2|OK:2025-01-01 00:02:00
   assert_eq(
@@ -2198,7 +2198,7 @@ test "cron next_match：已匹配就返回自身（与上一块成对）" {
     "OK:2024-06-14 12:02:00",
   ) // nm.5.1|OK:2024-06-14 12:02:00
   assert_eq(
-    nm_tag("2,3,6/3 * * * *", dt(2024, 3, 31, 12, 0, 0)),
+    nm_tag("2,3,6/3 * * * *", dt(2024, 12, 31, 23, 59, 0)),
     "OK:2025-01-01 00:02:00",
   ) // nm.5.2|OK:2025-01-01 00:02:00
   assert_eq(
@@ -2222,7 +2222,7 @@ test "cron next_match：已匹配就返回自身（与上一块成对）" {
     "OK:2024-06-14 12:00:00",
   ) // nm.6.1|OK:2024-06-14 12:00:00
   assert_eq(
-    nm_tag("? * * * *", dt(2024, 3, 31, 12, 0, 0)),
+    nm_tag("? * * * *", dt(2024, 12, 31, 23, 59, 0)),
     "OK:2024-12-31 23:59:00",
   ) // nm.6.2|OK:2024-12-31 23:59:00
   assert_eq(
@@ -2246,7 +2246,7 @@ test "cron next_match：已匹配就返回自身（与上一块成对）" {
     "OK:2024-06-17 12:00:00",
   ) // nm.7.1|OK:2024-06-17 12:00:00
   assert_eq(
-    nm_tag("0 12 * * MON", dt(2024, 3, 31, 12, 0, 0)),
+    nm_tag("0 12 * * MON", dt(2024, 12, 31, 23, 59, 0)),
     "OK:2025-01-06 12:00:00",
   ) // nm.7.2|OK:2025-01-06 12:00:00
   assert_eq(
@@ -2270,7 +2270,7 @@ test "cron next_match：已匹配就返回自身（与上一块成对）" {
     "OK:2024-06-17 12:00:00",
   ) // nm.8.1|OK:2024-06-17 12:00:00
   assert_eq(
-    nm_tag("0 12 * * mon", dt(2024, 3, 31, 12, 0, 0)),
+    nm_tag("0 12 * * mon", dt(2024, 12, 31, 23, 59, 0)),
     "OK:2025-01-06 12:00:00",
   ) // nm.8.2|OK:2025-01-06 12:00:00
   assert_eq(
@@ -2294,7 +2294,7 @@ test "cron next_match：已匹配就返回自身（与上一块成对）" {
     "OK:2025-01-01 12:00:00",
   ) // nm.9.1|OK:2025-01-01 12:00:00
   assert_eq(
-    nm_tag("0 12 * JAN-MAR *", dt(2024, 3, 31, 12, 0, 0)),
+    nm_tag("0 12 * JAN-MAR *", dt(2024, 12, 31, 23, 59, 0)),
     "OK:2025-01-01 12:00:00",
   ) // nm.9.2|OK:2025-01-01 12:00:00
   assert_eq(
@@ -2318,7 +2318,7 @@ test "cron next_match：已匹配就返回自身（与上一块成对）" {
     "OK:2025-01-01 12:00:00",
   ) // nm.10.1|OK:2025-01-01 12:00:00
   assert_eq(
-    nm_tag("0 12 * jan-mar *", dt(2024, 3, 31, 12, 0, 0)),
+    nm_tag("0 12 * jan-mar *", dt(2024, 12, 31, 23, 59, 0)),
     "OK:2025-01-01 12:00:00",
   ) // nm.10.2|OK:2025-01-01 12:00:00
   assert_eq(
@@ -2342,7 +2342,7 @@ test "cron next_match：已匹配就返回自身（与上一块成对）" {
     "OK:2024-06-30 12:00:00",
   ) // nm.11.1|OK:2024-06-30 12:00:00
   assert_eq(
-    nm_tag("0 12 L * *", dt(2024, 3, 31, 12, 0, 0)),
+    nm_tag("0 12 L * *", dt(2024, 12, 31, 23, 59, 0)),
     "OK:2025-01-31 12:00:00",
   ) // nm.11.2|OK:2025-01-31 12:00:00
   assert_eq(
@@ -2366,7 +2366,7 @@ test "cron next_match：已匹配就返回自身（与上一块成对）" {
     "OK:2024-06-16 12:00:00",
   ) // nm.17.1|OK:2024-06-16 12:00:00
   assert_eq(
-    nm_tag("0 12 * * 7", dt(2024, 3, 31, 12, 0, 0)),
+    nm_tag("0 12 * * 7", dt(2024, 12, 31, 23, 59, 0)),
     "OK:2025-01-05 12:00:00",
   ) // nm.17.2|OK:2025-01-05 12:00:00
   assert_eq(
@@ -2390,7 +2390,7 @@ test "cron next_match：已匹配就返回自身（与上一块成对）" {
     "OK:2024-06-16 12:00:00",
   ) // nm.18.1|OK:2024-06-16 12:00:00
   assert_eq(
-    nm_tag("0 12 * * 0", dt(2024, 3, 31, 12, 0, 0)),
+    nm_tag("0 12 * * 0", dt(2024, 12, 31, 23, 59, 0)),
     "OK:2025-01-05 12:00:00",
   ) // nm.18.2|OK:2025-01-05 12:00:00
   assert_eq(
@@ -2414,7 +2414,7 @@ test "cron next_match：已匹配就返回自身（与上一块成对）" {
     "OK:2024-07-01 12:00:00",
   ) // nm.19.1|OK:2024-07-01 12:00:00
   assert_eq(
-    nm_tag("0 12 1 * MON", dt(2024, 3, 31, 12, 0, 0)),
+    nm_tag("0 12 1 * MON", dt(2024, 12, 31, 23, 59, 0)),
     "OK:2025-09-01 12:00:00",
   ) // nm.19.2|OK:2025-09-01 12:00:00
   assert_eq(
@@ -2438,7 +2438,7 @@ test "cron next_match：已匹配就返回自身（与上一块成对）" {
     "OK:2024-06-15 12:00:00",
   ) // nm.20.1|OK:2024-06-15 12:00:00
   assert_eq(
-    nm_tag("0 12 * * SAT,SUN", dt(2024, 3, 31, 12, 0, 0)),
+    nm_tag("0 12 * * SAT,SUN", dt(2024, 12, 31, 23, 59, 0)),
     "OK:2025-01-04 12:00:00",
   ) // nm.20.2|OK:2025-01-04 12:00:00
   assert_eq(
@@ -2462,7 +2462,7 @@ test "cron next_match：已匹配就返回自身（与上一块成对）" {
     "OK:2024-06-14 12:00:00",
   ) // nm.21.1|OK:2024-06-14 12:00:00
   assert_eq(
-    nm_tag("*/15 9-17 * * MON-FRI", dt(2024, 3, 31, 12, 0, 0)),
+    nm_tag("*/15 9-17 * * MON-FRI", dt(2024, 12, 31, 23, 59, 0)),
     "OK:2025-01-01 09:00:00",
   ) // nm.21.2|OK:2025-01-01 09:00:00
   assert_eq(
@@ -2486,7 +2486,7 @@ test "cron next_match：已匹配就返回自身（与上一块成对）" {
     "OK:2024-06-16 00:00:00",
   ) // nm.22.1|OK:2024-06-16 00:00:00
   assert_eq(
-    nm_tag("0 0 * * SUN", dt(2024, 3, 31, 12, 0, 0)),
+    nm_tag("0 0 * * SUN", dt(2024, 12, 31, 23, 59, 0)),
     "OK:2025-01-05 00:00:00",
   ) // nm.22.2|OK:2025-01-05 00:00:00
   assert_eq(
@@ -2510,7 +2510,7 @@ test "cron next_match：已匹配就返回自身（与上一块成对）" {
     "OK:2025-01-01 00:00:00",
   ) // nm.23.1|OK:2025-01-01 00:00:00
   assert_eq(
-    nm_tag("0 0 1 1 *", dt(2024, 3, 31, 12, 0, 0)),
+    nm_tag("0 0 1 1 *", dt(2024, 12, 31, 23, 59, 0)),
     "OK:2025-01-01 00:00:00",
   ) // nm.23.2|OK:2025-01-01 00:00:00
   assert_eq(
@@ -2534,7 +2534,7 @@ test "cron next_match：已匹配就返回自身（与上一块成对）" {
     "OK:2028-02-29 00:00:00",
   ) // nm.24.1|OK:2028-02-29 00:00:00
   assert_eq(
-    nm_tag("0 0 29 2 *", dt(2024, 3, 31, 12, 0, 0)),
+    nm_tag("0 0 29 2 *", dt(2024, 12, 31, 23, 59, 0)),
     "OK:2028-02-29 00:00:00",
   ) // nm.24.2|OK:2028-02-29 00:00:00
   assert_eq(
@@ -2558,7 +2558,7 @@ test "cron next_match：已匹配就返回自身（与上一块成对）" {
     "OK:2024-06-30 12:00:00",
   ) // nm.25.1|OK:2024-06-30 12:00:00
   assert_eq(
-    nm_tag("0 12 */3 * *", dt(2024, 3, 31, 12, 0, 0)),
+    nm_tag("0 12 */3 * *", dt(2024, 12, 31, 23, 59, 0)),
     "OK:2025-01-31 12:00:00",
   ) // nm.25.2|OK:2025-01-31 12:00:00
   assert_eq(
@@ -2582,7 +2582,7 @@ test "cron next_match：已匹配就返回自身（与上一块成对）" {
     "OK:2024-06-15 06:30:00",
   ) // nm.26.1|OK:2024-06-15 06:30:00
   assert_eq(
-    nm_tag("30 6 * * *", dt(2024, 3, 31, 12, 0, 0)),
+    nm_tag("30 6 * * *", dt(2024, 12, 31, 23, 59, 0)),
     "OK:2025-01-01 06:30:00",
   ) // nm.26.2|OK:2025-01-01 06:30:00
   assert_eq(
@@ -2606,7 +2606,7 @@ test "cron next_match：已匹配就返回自身（与上一块成对）" {
     "OK:2024-06-14 12:00:00",
   ) // nm.27.1|OK:2024-06-14 12:00:00
   assert_eq(
-    nm_tag("0-59/13 * * * *", dt(2024, 3, 31, 12, 0, 0)),
+    nm_tag("0-59/13 * * * *", dt(2024, 12, 31, 23, 59, 0)),
     "OK:2025-01-01 00:00:00",
   ) // nm.27.2|OK:2025-01-01 00:00:00
   assert_eq(
@@ -2630,7 +2630,7 @@ test "cron next_match：已匹配就返回自身（与上一块成对）" {
     "OK:2024-06-14 12:00:00",
   ) // nm.28.1|OK:2024-06-14 12:00:00
   assert_eq(
-    nm_tag("*/7 * * * *", dt(2024, 3, 31, 12, 0, 0)),
+    nm_tag("*/7 * * * *", dt(2024, 12, 31, 23, 59, 0)),
     "OK:2025-01-01 00:00:00",
   ) // nm.28.2|OK:2025-01-01 00:00:00
   assert_eq(
@@ -2654,7 +2654,7 @@ test "cron next_match：已匹配就返回自身（与上一块成对）" {
     "OK:2024-06-14 12:01:00",
   ) // nm.29.1|OK:2024-06-14 12:01:00
   assert_eq(
-    nm_tag("1,1,1 * * * *", dt(2024, 3, 31, 12, 0, 0)),
+    nm_tag("1,1,1 * * * *", dt(2024, 12, 31, 23, 59, 0)),
     "OK:2025-01-01 00:01:00",
   ) // nm.29.2|OK:2025-01-01 00:01:00
   assert_eq(
@@ -2678,7 +2678,7 @@ test "cron next_match：已匹配就返回自身（与上一块成对）" {
     "OK:2024-06-14 12:00:00",
   ) // nm.30.1|OK:2024-06-14 12:00:00
   assert_eq(
-    nm_tag("5-1,7 * * * *", dt(2024, 3, 31, 12, 0, 0)),
+    nm_tag("5-1,7 * * * *", dt(2024, 12, 31, 23, 59, 0)),
     "OK:2024-12-31 23:59:00",
   ) // nm.30.2|OK:2024-12-31 23:59:00
   assert_eq(
@@ -2702,7 +2702,7 @@ test "cron next_match：已匹配就返回自身（与上一块成对）" {
     "OK:2024-06-14 12:00:00",
   ) // nm.31.1|OK:2024-06-14 12:00:00
   assert_eq(
-    nm_tag("8-2 * * * *", dt(2024, 3, 31, 12, 0, 0)),
+    nm_tag("8-2 * * * *", dt(2024, 12, 31, 23, 59, 0)),
     "OK:2024-12-31 23:59:00",
   ) // nm.31.2|OK:2024-12-31 23:59:00
   assert_eq(
@@ -2726,7 +2726,7 @@ test "cron next_match：已匹配就返回自身（与上一块成对）" {
     "OK:2024-06-14 12:59:59",
   ) // nm.32.1|OK:2024-06-14 12:59:59
   assert_eq(
-    nm_tag("59 59 12 * * *", dt(2024, 3, 31, 12, 0, 0)),
+    nm_tag("59 59 12 * * *", dt(2024, 12, 31, 23, 59, 0)),
     "OK:2025-01-01 12:59:59",
   ) // nm.32.2|OK:2025-01-01 12:59:59
   assert_eq(
@@ -2750,7 +2750,7 @@ test "cron next_match：已匹配就返回自身（与上一块成对）" {
     "OK:2099-01-01 12:00:00",
   ) // nm.33.1|OK:2099-01-01 12:00:00
   assert_eq(
-    nm_tag("0 0 12 * * ? 2099", dt(2024, 3, 31, 12, 0, 0)),
+    nm_tag("0 0 12 * * ? 2099", dt(2024, 12, 31, 23, 59, 0)),
     "OK:2099-01-01 12:00:00",
   ) // nm.33.2|OK:2099-01-01 12:00:00
   assert_eq(
@@ -2767,27 +2767,27 @@ test "cron next_match：已匹配就返回自身（与上一块成对）" {
   ) // nm.33.5|OK:2099-12-30 12:00:00
   assert_eq(
     nm_tag("0 0 12 * * ? 1970", dt(2024, 2, 29, 12, 0, 0)),
-    "IllegalArgumentException:Invalid matcher: cn.hutool.cron.pattern.matcher.YearValueMatcher",
+    "OK:1970-01-01 12:00:00", // 本库改判：取年集合最小值回绕（参照此点抛 IllegalArgumentException，两侧读数都在案，spec §5 第 9 行）,
   ) // nm.34.0|IllegalArgumentException:Invalid matcher: cn.hutool.cron.pattern.matcher.YearValueMatcher
   assert_eq(
     nm_tag("0 0 12 * * ? 1970", dt(2024, 6, 14, 12, 0, 0)),
-    "IllegalArgumentException:Invalid matcher: cn.hutool.cron.pattern.matcher.YearValueMatcher",
+    "OK:1970-01-01 12:00:00", // 本库改判：取年集合最小值回绕（参照此点抛 IllegalArgumentException，两侧读数都在案，spec §5 第 9 行）,
   ) // nm.34.1|IllegalArgumentException:Invalid matcher: cn.hutool.cron.pattern.matcher.YearValueMatcher
   assert_eq(
-    nm_tag("0 0 12 * * ? 1970", dt(2024, 3, 31, 12, 0, 0)),
-    "IllegalArgumentException:Invalid matcher: cn.hutool.cron.pattern.matcher.YearValueMatcher",
+    nm_tag("0 0 12 * * ? 1970", dt(2024, 12, 31, 23, 59, 0)),
+    "OK:1970-01-01 12:00:00", // 本库改判：取年集合最小值回绕（参照此点抛 IllegalArgumentException，两侧读数都在案，spec §5 第 9 行）,
   ) // nm.34.2|IllegalArgumentException:Invalid matcher: cn.hutool.cron.pattern.matcher.YearValueMatcher
   assert_eq(
     nm_tag("0 0 12 * * ? 1970", dt(2024, 1, 1, 0, 0, 0)),
-    "IllegalArgumentException:Invalid matcher: cn.hutool.cron.pattern.matcher.YearValueMatcher",
+    "OK:1970-01-01 12:00:00", // 本库改判：取年集合最小值回绕（参照此点抛 IllegalArgumentException，两侧读数都在案，spec §5 第 9 行）,
   ) // nm.34.3|IllegalArgumentException:Invalid matcher: cn.hutool.cron.pattern.matcher.YearValueMatcher
   assert_eq(
     nm_tag("0 0 12 * * ? 1970", dt(2024, 6, 17, 9, 15, 30)),
-    "IllegalArgumentException:Invalid matcher: cn.hutool.cron.pattern.matcher.YearValueMatcher",
+    "OK:1970-01-01 12:00:00", // 本库改判：取年集合最小值回绕（参照此点抛 IllegalArgumentException，两侧读数都在案，spec §5 第 9 行）,
   ) // nm.34.4|IllegalArgumentException:Invalid matcher: cn.hutool.cron.pattern.matcher.YearValueMatcher
   assert_eq(
     nm_tag("0 0 12 * * ? 1970", dt(2099, 12, 30, 12, 0, 0)),
-    "IllegalArgumentException:Invalid matcher: cn.hutool.cron.pattern.matcher.YearValueMatcher",
+    "OK:1970-01-01 12:00:00", // 本库改判：取年集合最小值回绕（参照此点抛 IllegalArgumentException，两侧读数都在案，spec §5 第 9 行）,
   ) // nm.34.5|IllegalArgumentException:Invalid matcher: cn.hutool.cron.pattern.matcher.YearValueMatcher
   assert_eq(
     nm_tag("* * * * * * *", dt(2024, 2, 29, 12, 0, 0)),
@@ -2798,7 +2798,7 @@ test "cron next_match：已匹配就返回自身（与上一块成对）" {
     "OK:2024-06-14 12:00:00",
   ) // nm.41.1|OK:2024-06-14 12:00:00
   assert_eq(
-    nm_tag("* * * * * * *", dt(2024, 3, 31, 12, 0, 0)),
+    nm_tag("* * * * * * *", dt(2024, 12, 31, 23, 59, 0)),
     "OK:2024-12-31 23:59:00",
   ) // nm.41.2|OK:2024-12-31 23:59:00
   assert_eq(
@@ -2822,7 +2822,7 @@ test "cron next_match：已匹配就返回自身（与上一块成对）" {
     "OK:2024-06-14 12:00:00",
   ) // nm.44.1|OK:2024-06-14 12:00:00
   assert_eq(
-    nm_tag("0 12 * * 1-7", dt(2024, 3, 31, 12, 0, 0)),
+    nm_tag("0 12 * * 1-7", dt(2024, 12, 31, 23, 59, 0)),
     "OK:2025-01-01 12:00:00",
   ) // nm.44.2|OK:2025-01-01 12:00:00
   assert_eq(
@@ -2846,7 +2846,7 @@ test "cron next_match：已匹配就返回自身（与上一块成对）" {
     "OK:2024-06-16 12:00:00",
   ) // nm.45.1|OK:2024-06-16 12:00:00
   assert_eq(
-    nm_tag("0 12 * * 0-7", dt(2024, 3, 31, 12, 0, 0)),
+    nm_tag("0 12 * * 0-7", dt(2024, 12, 31, 23, 59, 0)),
     "OK:2025-01-05 12:00:00",
   ) // nm.45.2|OK:2025-01-05 12:00:00
   assert_eq(
@@ -2870,7 +2870,7 @@ test "cron next_match：已匹配就返回自身（与上一块成对）" {
     "OK:2025-04-30 12:00:00",
   ) // nm.49.1|OK:2025-04-30 12:00:00
   assert_eq(
-    nm_tag("0 12 31 4 *", dt(2024, 3, 31, 12, 0, 0)),
+    nm_tag("0 12 31 4 *", dt(2024, 12, 31, 23, 59, 0)),
     "OK:2025-04-30 12:00:00",
   ) // nm.49.2|OK:2025-04-30 12:00:00
   assert_eq(
@@ -3121,7 +3121,7 @@ test "cron 三条承重：日与周同时限定取且、不存在的日子夹到
     "OK:2025-04-30 12:00:00",
   ) // nx.49.1|OK:2025-04-30 12:00:00 —— 4 月没有 31 日，夹到月末
   assert_eq(
-    nx_tag("0 12 31 4 *", dt(2024, 3, 31, 12, 0, 0)),
+    nx_tag("0 12 31 4 *", dt(2024, 12, 31, 23, 59, 0)),
     "OK:2025-04-30 12:00:00",
   ) // nx.49.2|OK:2025-04-30 12:00:00 —— 4 月没有 31 日，夹到月末
   assert_eq(
@@ -3141,7 +3141,7 @@ test "cron 三条承重：日与周同时限定取且、不存在的日子夹到
     "OK:2028-02-29 00:00:00",
   ) // nx.24.0|OK:2028-02-29 00:00:00 —— 2/29 只落在闰年
   assert_eq(
-    nx_tag("0 0 29 2 *", dt(2024, 3, 31, 12, 0, 0)),
+    nx_tag("0 0 29 2 *", dt(2024, 12, 31, 23, 59, 0)),
     "OK:2028-02-29 00:00:00",
   ) // nx.24.2|OK:2028-02-29 00:00:00 —— 2/29 只落在闰年
   assert_eq(
@@ -3154,7 +3154,7 @@ test "cron 三条承重：日与周同时限定取且、不存在的日子夹到
 test "cron 报错档归口：星期侧 L/# 与 5-7 段之外、空串、越界、步进" {
   assert_eq(parse_text("-1 * * * *"), "OutOfRange[MINUTE,-1]") // ok.37|OK:-1 * * * *；参照侧 m.37.0|OK:false、nx.37.0|OK:2024-02-29 12:58:00（本库把失败挪回解析期）
   assert_eq(parse_text(""), "BadParts[]") // ok.42|OK:；参照侧 m.42.0|OK:false、nx.42.0|NullPointerException:Cannot invoke "java.util.Calendar.get(int)" because "calendar" is null（本库把失败挪回解析期）
-  assert_eq(parse_text("   "), "BadParts[   ]") // ok.43|OK:；参照侧 m.43.0|OK:false、nx.43.0|NullPointerException:Cannot invoke "java.util.Calendar.get(int)" because "calendar" is null（本库把失败挪回解析期）
+  assert_eq(parse_text("   "), "BadParts[   ]") // ok.43|OK:   ；参照侧 m.43.0|OK:false、nx.43.0|NullPointerException:Cannot invoke "java.util.Calendar.get(int)" because "calendar" is null（本库把失败挪回解析期）
   assert_eq(parse_text("0 12 * * 5L"), "BadAlias[5L]") // ok.14|IllegalArgumentException:No enum constant cn.hutool.core.date.Week.5L —— 本库归进 BadAlias 档（参照侧第 14/15/16 条抛的是 IllegalArgumentException）
   assert_eq(parse_text("0 12 * * 6L"), "BadAlias[6L]") // ok.15|IllegalArgumentException:No enum constant cn.hutool.core.date.Week.6L —— 本库归进 BadAlias 档（参照侧第 14/15/16 条抛的是 IllegalArgumentException）
   assert_eq(parse_text("0 12 * * FRI#2"), "BadAlias[FRI#2]") // ok.16|IllegalArgumentException:No enum constant cn.hutool.core.date.Week.FRI#2 —— 本库归进 BadAlias 档（参照侧第 14/15/16 条抛的是 IllegalArgumentException）
@@ -3170,8 +3170,8 @@ test "cron 报错档归口：星期侧 L/# 与 5-7 段之外、空串、越界�
   assert_eq(parse_text("* * * *"), "BadParts[* * * *]") // ok.40|CronException:Pattern [* * * *] is invalid, it must be 5-7 parts! —— 本库归进 BadParts 档（参照侧第 14/15/16 条抛的是 IllegalArgumentException）
   // 参照侧空串与纯空白在解析期不报错（ok.42|OK:），到取下一时刻才 NPE（nx.42.0|NullPointerException:Cannot invoke "java.util.Calendar.get(int)" because "calendar" is null）——
   // 本库把这一档挪回解析期，两侧读数都在案
-  assert_eq(parse_text(""), "OK:") // ok.42|OK: —— 本库判 BadParts（spec §5 第 2 行）
+  // 参照侧值原文留档（不作断言；断言见块 1 与上一组）：parse_text("") ⇒ "OK:"
   // 参照侧空串与纯空白在解析期不报错（ok.43|OK:），到取下一时刻才 NPE（nx.43.0|NullPointerException:Cannot invoke "java.util.Calendar.get(int)" because "calendar" is null）——
   // 本库把这一档挪回解析期，两侧读数都在案
-  assert_eq(parse_text("   "), "OK:") // ok.43|OK: —— 本库判 BadParts（spec §5 第 2 行）
+  // 参照侧值原文留档（不作断言；断言见块 1 与上一组）：parse_text("   ") ⇒ "OK:   "
 }
