@@ -2,7 +2,7 @@
 // moon-hutool/bloom —— 布隆过滤器（位图层 + 过滤器层 + 聚合层）
 // 对位 hutool `cn.hutool.bloomfilter.*`——**件不在 hutool-core**：`unzip -l hutool-core.jar` 现读 `bloom` 是 0 条，
 // 全在独立 artifact `hutool-bloomFilter-5.8.35.jar`（19,216 字节、21 个 class，与 `dfa`/`cache` 两行同形）。
-// 契约真相在 `docs/spec/18-bloom.md`；本文件是签名骨架——函数体是 abort，落地笔（PR-B）替换。
+// 契约真相在 `docs/spec/18-bloom.md`；本文件是落地实现：签名与期望值由契约笔冻结，本笔只让红变绿。
 //
 // 一句话口径：位置 = `abs(hash(s).longValue() % size)`（**取模在前、绝对值在后**），
 // 词下标 = `(int)(i / 32或64)`（Java 整除向零截断 + 窄化回绕都跟随），词内位 = `i & (宽-1)`；
@@ -56,7 +56,7 @@ pub struct BitField {
 /// 本库用闭包表达，不建类族
 pub struct Filter {
   size : Int64
-  hash : HashFn
+  hf : HashFn
   field : BitField
 }
 
@@ -64,6 +64,54 @@ pub struct Filter {
 /// #18.6 聚合层：一组过滤器，`contains` 要全命中、`add` 是各层返回值的逻辑或。对位 `BitMapBloomFilter`
 pub struct Bloom {
   filters : Array[Filter]
+}
+
+///|
+// 内部三件：档位换成位数、把 Int64 折回"32 位符号整数"、以及把参照侧的两步行号算式摆平。
+// 为什么不用 Int32 类型：本版没有 `Int64::to_int32`，而 `Int` 的位宽随目标变
+// （wasm32 是 32 位、native 是 64 位）——回绕必须自己按 32 位摆平，才谈得上三档同值。
+fn width_bits(w : WordWidth) -> Int64 {
+  match w {
+    W32 => 32L
+    W64 => 64L
+  }
+}
+
+///|
+fn wrap32(x : Int64) -> Int64 {
+  let m = x & 0xffffffffL
+  if m >= 0x80000000L {
+    0L - (0x100000000L - m)
+  } else {
+    m
+  }
+}
+
+///|
+// 本版 Int64 的移位要绕 `reinterpret_as_uint64`（同 `hash` 包 shl32/lshr32 那一对的形状）
+fn shl64(a : Int64, n : Int) -> Int64 {
+  (a.reinterpret_as_uint64() << n).reinterpret_as_int64()
+}
+
+///|
+// 参照侧 `int r = (int)(i / MACHINE)`：先向零截断除、再窄化回绕，两步都照做——
+// 2^40 因此回绕成 r=0（静默污染第 0 词），2^32 回绕成 134217728 才撞越界
+fn row_of(i : Int64, w : WordWidth) -> Int64 {
+  wrap32(i / width_bits(w))
+}
+
+///|
+// 词下标 + 词内位。越界判定用的是**回绕之后**的行号，与参照侧 AIOOBE 里的 index 同值
+// （`oob.add.2^32` 报 134217728、`trunc.oob.999` 报 31）
+fn BitField::locate(self : BitField, i : Int64) -> (Int, Int) raise BloomError {
+  let r = row_of(i, self.width)
+  let c = (i & (width_bits(self.width) - 1L)).to_int()
+  let len = self.words.length()
+  let idx = r.to_int()
+  if idx < 0 || idx >= len {
+    raise IndexOutOfRange(r, len)
+  }
+  (idx, c)
 }
 
 ///|
@@ -75,7 +123,11 @@ pub struct Bloom {
 ///
 /// - Raises: `BloomError.BadWidth(n)`：`n` 不是 32 也不是 64
 pub fn word_width(n : Int) -> WordWidth raise BloomError {
-  abort("moon-hutool bloom: 契约已冻结，实现待落地")
+  match n {
+    32 => W32
+    64 => W64
+    _ => raise BadWidth(n)
+  }
 }
 
 ///|
@@ -87,7 +139,13 @@ pub fn new_bit_field(
   nbits : Int64,
   width? : WordWidth = WordWidth::W32,
 ) -> BitField raise BloomError {
-  abort("moon-hutool bloom: 契约已冻结，实现待落地")
+  let w = width_bits(width)
+  if nbits < 0L {
+    // 参照同点在 new int[负数] / new long[负数]，时机就是构造期
+    raise BadBitCount(nbits)
+  }
+  // 词数按地板除截断：size=1000 只给 31 个词，尾部零头位天然不可用（跟随项，见 spec §5 第 4 行）
+  BitField::{ width, nbits, words: Array::make((nbits / w).to_int(), 0L), }
 }
 
 ///|
@@ -97,7 +155,10 @@ pub fn new_bit_field(
 ///
 /// - Raises: `BloomError.IndexOutOfRange(r, len)`：参照侧的 `ArrayIndexOutOfBoundsException`
 pub fn BitField::add(self : BitField, i : Int64) -> Unit raise BloomError {
-  abort("moon-hutool bloom: 契约已冻结，实现待落地")
+  let (r, c) = self.locate(i)
+  let m = shl64(1L, c)
+  let v = self.words[r] | m
+  self.words[r] = if self.width is W32 { wrap32(v) } else { v }
 }
 
 ///|
@@ -106,7 +167,11 @@ pub fn BitField::add(self : BitField, i : Int64) -> Unit raise BloomError {
 ///
 /// - Raises: 同 #18.9
 pub fn BitField::contains(self : BitField, i : Int64) -> Bool raise BloomError {
-  abort("moon-hutool bloom: 契约已冻结，实现待落地")
+  let (r, c) = self.locate(i)
+  // 参照是 (words[r] >>> c) & 1 == 1。它等价于"第 c 位是 1"——右移的符号填充永远碰不到第 0 位，
+  // 所以这里用位与而不是移位：既躲开本版 Int64 移位要绕 reinterpret 的层，
+  // 也让 W32 档"符号位被负位置占过"那条读数（w32.after.neg）照样读得出来
+  (self.words[r] & shl64(1L, c)) != 0L
 }
 
 ///|
@@ -115,7 +180,11 @@ pub fn BitField::contains(self : BitField, i : Int64) -> Bool raise BloomError {
 ///
 /// - Raises: 同 #18.9
 pub fn BitField::remove(self : BitField, i : Int64) -> Unit raise BloomError {
-  abort("moon-hutool bloom: 契约已冻结，实现待落地")
+  let (r, c) = self.locate(i)
+  let m = shl64(1L, c)
+  // 本版没有取反中缀 `~`，按补码恒等式 `~x == x ^ -1` 摆
+  let v = self.words[r] & (m ^ -1L)
+  self.words[r] = if self.width is W32 { wrap32(v) } else { v }
 }
 
 ///|
@@ -123,13 +192,13 @@ pub fn BitField::remove(self : BitField, i : Int64) -> Unit raise BloomError {
 /// （如 `w32.after.neg|[-2147483645, …]`）；W64 档直接是 `long`，含 `1L << 63` 的负读数
 /// （`w64.after.639` 末位是 `-9223372036854775808`）
 pub fn BitField::words(self : BitField) -> Array[Int64] {
-  abort("moon-hutool bloom: 契约已冻结，实现待落地")
+  self.words
 }
 
 ///|
 /// #18.13 词数 = `nbits / 宽` 的截断值（不是向上取整，理由同 #18.8；两侧读数 `w32.*`/`w64.*`）
 pub fn BitField::word_count(self : BitField) -> Int {
-  abort("moon-hutool bloom: 契约已冻结，实现待落地")
+  self.words.length()
 }
 
 ///|
@@ -142,7 +211,9 @@ pub fn new_filter(
   hash : HashFn,
   width? : WordWidth = WordWidth::W32,
 ) -> Filter raise BloomError {
-  abort("moon-hutool bloom: 契约已冻结，实现待落地")
+  // 参照 init() 先按 machineNum 选档再建图；本库那一步由 #18.7 把关（枚举里已是合法值），
+  // 这里的 raise 只可能来自位图长度：size < 0（对应参照侧 new int[负数]）
+  Filter::{ size, hf: hash, field: new_bit_field(size, width~), }
 }
 
 ///|
@@ -152,7 +223,18 @@ pub fn new_filter(
 ///
 /// - Raises: `BloomError.ZeroSize`：`size == 0`
 pub fn Filter::position(self : Filter, s : String) -> Int64 raise BloomError {
-  abort("moon-hutool bloom: 契约已冻结，实现待落地")
+  if self.size == 0L {
+    // 参照侧此刻才是 ArithmeticException: / by zero——构造成功、第一次取模才炸，时机照钉
+    raise ZeroSize
+  }
+  // 取模在前、绝对值在后：h 是负数时先拿到负余数（Java 语义），再被 abs 翻正
+  let f = self.hf
+  let rem = f(s) % self.size
+  if rem < 0L {
+    0L - rem
+  } else {
+    rem
+  }
 }
 
 ///|
@@ -161,7 +243,13 @@ pub fn Filter::position(self : Filter, s : String) -> Int64 raise BloomError {
 ///
 /// - Raises: #18.15 与 #18.9 的并
 pub fn Filter::add(self : Filter, s : String) -> Bool raise BloomError {
-  abort("moon-hutool bloom: 契约已冻结，实现待落地")
+  let p = self.position(s)
+  if self.field.contains(p) {
+    false
+  } else {
+    self.field.add(p)
+    true
+  }
 }
 
 ///|
@@ -170,14 +258,44 @@ pub fn Filter::add(self : Filter, s : String) -> Bool raise BloomError {
 ///
 /// - Raises: 同 #18.16
 pub fn Filter::contains(self : Filter, s : String) -> Bool raise BloomError {
-  abort("moon-hutool bloom: 契约已冻结，实现待落地")
+  self.field.contains(self.position(s))
 }
 
 ///|
 /// #18.18 该过滤器的词表终态（`f.elf.words|[0, 0, 0, 2, 67108864, 0, …]`、`tiny.words`、
 /// `q.words.elf|[68190763]` 三条就是它——终态而不是行为反推）
 pub fn Filter::words(self : Filter) -> Array[Int64] {
-  abort("moon-hutool bloom: 契约已冻结，实现待落地")
+  self.field.words
+}
+
+///|
+// 默认五过滤器之一：把 `hash` 包那件的 `Int` 返回值按参照侧 `longValue()` 的语义符号扩展到 `Int64`
+fn h_java_default(s : String) -> Int64 {
+  @hash.java_default_hash(s).to_int64()
+}
+
+///|
+// 默认五过滤器之一：把 `hash` 包那件的 `Int` 返回值按参照侧 `longValue()` 的语义符号扩展到 `Int64`
+fn h_elf(s : String) -> Int64 {
+  @hash.elf_hash(s).to_int64()
+}
+
+///|
+// 默认五过滤器之一：把 `hash` 包那件的 `Int` 返回值按参照侧 `longValue()` 的语义符号扩展到 `Int64`
+fn h_js(s : String) -> Int64 {
+  @hash.js_hash(s).to_int64()
+}
+
+///|
+// 默认五过滤器之一：把 `hash` 包那件的 `Int` 返回值按参照侧 `longValue()` 的语义符号扩展到 `Int64`
+fn h_pjw(s : String) -> Int64 {
+  @hash.pjw_hash(s).to_int64()
+}
+
+///|
+// 默认五过滤器之一：把 `hash` 包那件的 `Int` 返回值按参照侧 `longValue()` 的语义符号扩展到 `Int64`
+fn h_sdbm(s : String) -> Int64 {
+  @hash.sdbm_hash(s).to_int64()
 }
 
 ///|
@@ -185,7 +303,9 @@ pub fn Filter::words(self : Filter) -> Array[Int64] {
 /// `bits = mNum * 1024 * 1024 * 8`。总函数，负 m 照样算出负位数（`bits.-5|-8388608`），
 /// 报错留给 #18.8 与 #18.20 各自的时机
 pub fn bloom_bits_for(m : Int) -> Int64 {
-  abort("moon-hutool bloom: 契约已冻结，实现待落地")
+  // NumberUtil.div(m, 5).longValue()：两个整数相除的 BigDecimal 商截断到 long，
+  // 与"向零取整的整数除"同值（小数部分直接丢），负档 m=-5 也给 -1（读数 mnum.-5|-1）
+  m.to_int64() / 5L * 1024L * 1024L * 8L
 }
 
 ///|
@@ -194,7 +314,17 @@ pub fn bloom_bits_for(m : Int) -> Int64 {
 ///
 /// - Raises: `BloomError.BadBitCount(bits)`：`bits < 0`（`bf.negm`）；`ZeroSize` 在第一次查询时（`bf.m1.*`）
 pub fn new_bloom(m : Int) -> Bloom raise BloomError {
-  abort("moon-hutool bloom: 契约已冻结，实现待落地")
+  let bits = bloom_bits_for(m)
+  // 顺序照参照源码：DefaultFilter(javaDefaultHash) → ELF → JS → PJW → SDBM
+  let hs : Array[(String) -> Int64] = [
+    h_java_default, h_elf, h_js, h_pjw, h_sdbm,
+  ]
+  let fs : Array[Filter] = []
+  for h in hs {
+    // 参照侧的失败时机就在构造里（new int[负数]），所以这里让 raise 直接往外透
+    fs.push(new_filter(bits, h))
+  }
+  Bloom::{ filters: fs, }
 }
 
 ///|
@@ -202,7 +332,7 @@ pub fn new_bloom(m : Int) -> Bloom raise BloomError {
 /// （spec §5 第 3 行），故本件不收 `m`；终态与 `BitMapBloomFilter(m, filters...)` 替换后等价
 /// （`bf.one.*`、`bf.two.*`、`bf.mix.*`、`q.*` 四组读数为凭）
 pub fn new_bloom_with(filters : Array[Filter]) -> Bloom {
-  abort("moon-hutool bloom: 契约已冻结，实现待落地")
+  Bloom::{ filters, }
 }
 
 ///|
@@ -213,7 +343,14 @@ pub fn new_bloom_with(filters : Array[Filter]) -> Bloom {
 ///
 /// - Raises: 各过滤器 #18.16 的并
 pub fn Bloom::add(self : Bloom, s : String) -> Bool raise BloomError {
-  abort("moon-hutool bloom: 契约已冻结，实现待落地")
+  let mut flag = false
+  // 参照是 `flag |= filter.add(str)`：`|=` 不短路，每个过滤器都会被调到（副作用要保全），
+  // 所以先取值再合并，不写 `flag = flag || f.add(s)`——那个会短路，后面的过滤器就漏加了
+  for f in self.filters {
+    let r = f.add(s)
+    flag = flag || r
+  }
+  flag
 }
 
 ///|
@@ -222,5 +359,11 @@ pub fn Bloom::add(self : Bloom, s : String) -> Bool raise BloomError {
 ///
 /// - Raises: 各过滤器 #18.17 的并
 pub fn Bloom::contains(self : Bloom, s : String) -> Bool raise BloomError {
-  abort("moon-hutool bloom: 契约已冻结，实现待落地")
+  // 全命中才算命中：任一过滤器说不含即刻返回（这一侧参照确实短路）
+  for f in self.filters {
+    if !f.contains(s) {
+      return false
+    }
+  }
+  true
 }

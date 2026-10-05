@@ -42,7 +42,7 @@ pub fn Bloom::contains(Self, String) -> Bool raise BloomError
 
 pub struct Filter {
   size : Int64
-  hash : (String) -> Int64
+  hf : (String) -> Int64
   field : BitField
 }
 pub fn Filter::add(Self, String) -> Bool raise BloomError
