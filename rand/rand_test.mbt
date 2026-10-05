@@ -75,7 +75,7 @@ test "rand：四张字符表原样（#12.1~#12.4）" {
 // (0,1) 含下不含上 ⇒ 恒 0；不含下含上 ⇒ 恒 1；双不含 ⇒ 空域；双含时等值不是空域（0,0 ⇒ 恒 0）
 test "rand：random_int 的界值与空域（#12.5）" {
   assert_eq(@rand.random_int(seeded(), 0, 1), 0)
-  assert_eq(@rand.random_int(seeded(), 0, 1, incl_min=false), 1)
+  assert_eq(@rand.random_int(seeded(), 0, 1, incl_min=false, incl_max=true), 1)
   assert_eq(@rand.random_int(seeded(), 0, 2, incl_min=false, incl_max=false), 1)
   assert_eq(@rand.random_int(seeded(), -1, 0), -1)
   assert_eq(@rand.random_int(seeded(), 0, 0, incl_min=true, incl_max=true), 0)
@@ -161,7 +161,7 @@ test "rand：字符串族六件（#12.8~#12.14）" {
   let wo = @rand.random_string_without(r, 400, "aA1")
   assert_eq(wo.length(), 400)
   assert_eq(
-    outside("bcdefghijklmnopqrstuvwxyzBCDEFGHIJKLMNOPQRSTUVWXYZ23456789", wo),
+    outside("bcdefghijklmnopqrstuvwxyzBCDEFGHIJKLMNOPQRSTUVWXYZ023456789", wo),
     0,
   )
   assert_eq(
