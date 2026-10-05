@@ -113,7 +113,7 @@ pub fn page_total_page_long(count : Int64, size : Int) -> Int {
 }
 
 ///|
-/// #23.13 页码彩虹条（默认展示 5 个）
+/// #23.13 页码彩虹条（默认展示 10 个）
 /// - Returns: 页号数组（参照可能给 `null`——腿的 `P.*.RAINBOW` 读数里带 `<null>` 档，映射成空数组还是 raise 记在 spec §5）
 /// - Raises: 无
 /// - Note: hutool 对位 `static int[] rainbow(int, int)`

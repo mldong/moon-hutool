@@ -527,7 +527,7 @@ test "PageUtil 首末页号与总页数（firstPageNo = 0 档）" {
   @typex.typex_set_first_page_no(0)
   assert_eq(@typex.page_trans_to_start_end(2, 10), (20, 30)) // P2.pair|20,30
   @typex.typex_set_first_page_no(0)
-  assert_eq(arr_str(@typex.page_rainbow(2, 10)), "1,2,3,4,5") // P2.rainbow|1,2,3,4,5
+  assert_eq(arr_str(@typex.page_rainbow(2, 10)), "1,2,3,4,5,6,7,8,9,10") // P2.rainbow|1,2,3,4,5,6,7,8,9,10
   @typex.typex_set_first_page_no(0) // 档位先设后测（全局静态）
   assert_eq(@typex.page_get_start(1, 0), 0) // P3.start|0
   @typex.typex_set_first_page_no(0)
@@ -543,7 +543,7 @@ test "PageUtil 首末页号与总页数（firstPageNo = 0 档）" {
   @typex.typex_set_first_page_no(0)
   assert_eq(@typex.page_trans_to_start_end(-1, 10), (0, 10)) // P5.pair|0,10
   @typex.typex_set_first_page_no(0)
-  assert_eq(arr_str(@typex.page_rainbow(-1, 10)), "1,2,3,4,5") // P5.rainbow|1,2,3,4,5
+  assert_eq(arr_str(@typex.page_rainbow(-1, 10)), "1,2,3,4,5,6,7,8,9,10") // P5.rainbow|1,2,3,4,5,6,7,8,9,10
   @typex.typex_set_first_page_no(0) // 档位先设后测（全局静态）
   assert_eq(@typex.page_get_start(3, 7), 21) // P6.start|21
   @typex.typex_set_first_page_no(0)
@@ -551,7 +551,7 @@ test "PageUtil 首末页号与总页数（firstPageNo = 0 档）" {
   @typex.typex_set_first_page_no(0)
   assert_eq(@typex.page_trans_to_start_end(3, 7), (21, 28)) // P6.pair|21,28
   @typex.typex_set_first_page_no(0)
-  assert_eq(arr_str(@typex.page_rainbow(3, 7)), "1,2,3,4,5") // P6.rainbow|1,2,3,4,5
+  assert_eq(arr_str(@typex.page_rainbow(3, 7)), "1,2,3,4,5,6,7") // P6.rainbow|1,2,3,4,5,6,7
   assert_eq(@typex.page_total_page(0, 10), 0) // P2000.total|0
   assert_eq(@typex.page_total_page(1, 10), 1) // P2001.total|1
   assert_eq(@typex.page_total_page(10, 10), 1) // P2002.total|1
@@ -571,8 +571,8 @@ test "PageUtil 首末页号与总页数（firstPageNo = 0 档）" {
   assert_eq(arr_str(@typex.page_rainbow_count(2, 2, 1)), "2") // P50003.rainbow3|2
   assert_eq(arr_str(@typex.page_rainbow_count(-3, 8, 4)), "1,2,3,4") // P50004.rainbow3|1,2,3,4
   assert_eq(arr_str(@typex.page_rainbow_count(9, 10, 3)), "8,9,10") // P50005.rainbow3|8,9,10
-  // P6000.segment|参照给 Segment 对象（cn.hutool.core.lang.DefaultSegment@4b85612c），本库不收（spec §1）
-  // P6001.segment|参照给 Segment 对象（cn.hutool.core.lang.DefaultSegment@5c29bfd），本库不收（spec §1）
+  // P6000.segment|参照给 Segment 对象（cn.hutool.core.lang.DefaultSegment@7aec35a），本库不收（spec §1）
+  // P6001.segment|参照给 Segment 对象（cn.hutool.core.lang.DefaultSegment@42110406），本库不收（spec §1）
   @typex.typex_set_first_page_no(0) // 档位先设后测（全局静态）
   assert_eq(@typex.page_get_start(0, 10), 0) // P0.start|0
   @typex.typex_set_first_page_no(0)
@@ -580,7 +580,7 @@ test "PageUtil 首末页号与总页数（firstPageNo = 0 档）" {
   @typex.typex_set_first_page_no(0)
   assert_eq(@typex.page_trans_to_start_end(0, 10), (0, 10)) // P0.pair|0,10
   @typex.typex_set_first_page_no(0)
-  assert_eq(arr_str(@typex.page_rainbow(0, 10)), "1,2,3,4,5") // P0.rainbow|1,2,3,4,5
+  assert_eq(arr_str(@typex.page_rainbow(0, 10)), "1,2,3,4,5,6,7,8,9,10") // P0.rainbow|1,2,3,4,5,6,7,8,9,10
   @typex.typex_set_first_page_no(0) // 档位先设后测（全局静态）
   assert_eq(@typex.page_get_start(1, 10), 10) // P1.start|10
   @typex.typex_set_first_page_no(0)
@@ -588,7 +588,7 @@ test "PageUtil 首末页号与总页数（firstPageNo = 0 档）" {
   @typex.typex_set_first_page_no(0)
   assert_eq(@typex.page_trans_to_start_end(1, 10), (10, 20)) // P1.pair|10,20
   @typex.typex_set_first_page_no(0)
-  assert_eq(arr_str(@typex.page_rainbow(1, 10)), "1,2,3,4,5") // P1.rainbow|1,2,3,4,5
+  assert_eq(arr_str(@typex.page_rainbow(1, 10)), "1,2,3,4,5,6,7,8,9,10") // P1.rainbow|1,2,3,4,5,6,7,8,9,10
   @typex.typex_set_first_page_no(0) // 档位先设后测（全局静态）
   assert_eq(@typex.page_get_start(2, 10), 20) // P2.start|20
   @typex.typex_set_first_page_no(0)
@@ -596,7 +596,7 @@ test "PageUtil 首末页号与总页数（firstPageNo = 0 档）" {
   @typex.typex_set_first_page_no(0)
   assert_eq(@typex.page_trans_to_start_end(2, 10), (20, 30)) // P2.pair|20,30
   @typex.typex_set_first_page_no(0)
-  assert_eq(arr_str(@typex.page_rainbow(2, 10)), "1,2,3,4,5") // P2.rainbow|1,2,3,4,5
+  assert_eq(arr_str(@typex.page_rainbow(2, 10)), "1,2,3,4,5,6,7,8,9,10") // P2.rainbow|1,2,3,4,5,6,7,8,9,10
   @typex.typex_set_first_page_no(0) // 档位先设后测（全局静态）
   assert_eq(@typex.page_get_start(1, 0), 0) // P3.start|0
   @typex.typex_set_first_page_no(0)
@@ -620,7 +620,7 @@ test "PageUtil 首末页号与总页数（firstPageNo = 0 档）" {
   @typex.typex_set_first_page_no(0)
   assert_eq(@typex.page_trans_to_start_end(-1, 10), (0, 10)) // P5.pair|0,10
   @typex.typex_set_first_page_no(0)
-  assert_eq(arr_str(@typex.page_rainbow(-1, 10)), "1,2,3,4,5") // P5.rainbow|1,2,3,4,5
+  assert_eq(arr_str(@typex.page_rainbow(-1, 10)), "1,2,3,4,5,6,7,8,9,10") // P5.rainbow|1,2,3,4,5,6,7,8,9,10
   @typex.typex_set_first_page_no(0) // 档位先设后测（全局静态）
   assert_eq(@typex.page_get_start(3, 7), 21) // P6.start|21
   @typex.typex_set_first_page_no(0)
@@ -628,7 +628,7 @@ test "PageUtil 首末页号与总页数（firstPageNo = 0 档）" {
   @typex.typex_set_first_page_no(0)
   assert_eq(@typex.page_trans_to_start_end(3, 7), (21, 28)) // P6.pair|21,28
   @typex.typex_set_first_page_no(0)
-  assert_eq(arr_str(@typex.page_rainbow(3, 7)), "1,2,3,4,5") // P6.rainbow|1,2,3,4,5
+  assert_eq(arr_str(@typex.page_rainbow(3, 7)), "1,2,3,4,5,6,7") // P6.rainbow|1,2,3,4,5,6,7
   @typex.typex_set_first_page_no(0) // 档位先设后测（全局静态）
   assert_eq(@typex.page_get_start(100, 20), 2000) // P7.start|2000
   @typex.typex_set_first_page_no(0)
@@ -636,7 +636,10 @@ test "PageUtil 首末页号与总页数（firstPageNo = 0 档）" {
   @typex.typex_set_first_page_no(0)
   assert_eq(@typex.page_trans_to_start_end(100, 20), (2000, 2020)) // P7.pair|2000,2020
   @typex.typex_set_first_page_no(0)
-  assert_eq(arr_str(@typex.page_rainbow(100, 20)), "16,17,18,19,20") // P7.rainbow|16,17,18,19,20
+  assert_eq(
+    arr_str(@typex.page_rainbow(100, 20)),
+    "11,12,13,14,15,16,17,18,19,20",
+  ) // P7.rainbow|11,12,13,14,15,16,17,18,19,20
 }
 
 ///|
@@ -648,7 +651,7 @@ test "PageUtil 全局首尾页号改设 1 档（firstPageNo = 1）" {
   @typex.typex_set_first_page_no(1)
   assert_eq(@typex.page_trans_to_start_end(0, 10), (0, 10)) // P1000.pair|0,10
   @typex.typex_set_first_page_no(1)
-  assert_eq(arr_str(@typex.page_rainbow(0, 10)), "1,2,3,4,5") // P1000.rainbow|1,2,3,4,5
+  assert_eq(arr_str(@typex.page_rainbow(0, 10)), "1,2,3,4,5,6,7,8,9,10") // P1000.rainbow|1,2,3,4,5,6,7,8,9,10
   assert_eq(@typex.page_total_page(0, 10), 0) // P40000.total|0
   assert_eq(@typex.page_total_page(1, 10), 1) // P40001.total|1
   assert_eq(@typex.page_total_page(10, 10), 1) // P40002.total|1
