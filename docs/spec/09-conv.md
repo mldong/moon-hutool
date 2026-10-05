@@ -1,10 +1,11 @@
 # 契约 09 · conv（`Convert` 的无反射版·第一批：`Json` 宽松转换 + 字符串解析腿 + 取值腿）
 
-> 状态：**契约已冻结、实现未开工**（10-05）。17 条公开项 + 1 条类型别名 + 1 个错误变体，
+> 状态：**契约与实现都已交付**（10-05，两笔）。17 条公开项 + 1 条类型别名 + 1 个错误变体，
 > 见 `conv/pkg.generated.mbti`（`moon info` 后零漂移）；冻结期望值在 `conv/conv_test.mbt`
-> （23 块）与 `conv/README.mbt.md`（10 块），此刻 33 块全红是设计态——`abort` 之前没有人写实现。
-> 当场读数：`277 = 绿 244 / 红 33`，`wasm`/`js`/`wasm-gc` 三档一致。
-> 实现那一笔只许把红变绿，改任何期望串须单独一笔并给外部读数来源（门禁 G5）。
+> （23 块）与 `conv/README.mbt.md`（10 块）。当场读数：`277 = 绿 277 / 红 0`，
+> `wasm`/`js`/`wasm-gc` 三档一致，native 档由 CI 编译出证。
+> 实现把 33 块设计态红**一字未改**地转绿，只有两处期望值本身被更正过一笔（镜像腿自己的两个缺陷，
+> 外部读数来源见 §4 第 9~10 条腿）；其余改动全在实现体。
 >
 > 这批只做**一条主线**：动态值树（`Json`）→ 静态类型，以及它反方向的取值腿。
 > 全角/半角互转（`toSBC`/`toDBC`）与字节序族（`intToBytes`/`bytesToInt`/…）是 hutool
@@ -153,8 +154,21 @@ hutool 侧扫描口径：`dromara/hutool` HEAD 的 `hutool-core/src/main/java/cn
    这一支看着像死格，其实可达——`@json.parse("1e309")` 给的 `Double` 就是 `Infinity`（实测），
    所以它进的是 #9.6 的正值而不是 `None`；`"Infinity"` 字符串则走 #9.11 的 `None`。两条都有夹具。
 7. **优先序腿**：`isCustomFirst=true` 是 `ConverterRegistry.java:262` 那行的事实，`chain` 的语义照它定。
-8. **变异对照**：留到实现轮，按 `AGENTS.md` 的规矩——先 `assert` 变异真打上，再跑，看红；
-   契约期没有实现体可变异，所以这一条在这里只挂判据、不给读数。
+8. **变异对照**（实现轮做，先 `assert` 变异真打上再跑）：三条——
+   ① 关掉"去 D/L/F 尾"⇒ `parse_int_loose`/`to_int` 那两块红；② 把 `chain` 的优先序反过来 ⇒ `chain` 块红；
+   ③ 拆掉 `trunc_to_int64` 的界哨兵 ⇒ 越界那块红。三条都真红，说明这些规则有人看着。
+9. **core 严格解析件的接受面逐夹具实测**（wasm 档，`@string.parse_int`/`parse_int64`/`parse_double`）：
+   core 比 hutool 的十进制文法**更宽**——它收 `1_000`（下划线分隔，给 1000）、收 `NaN`/`Infinity` 字面量，
+   而**不做** trim（`" 123 "` 直接报错）。所以宽松腿的文法判定由本包自己扫一遍字符再决定，
+   core 只负责求值与当前位宽的界校验（越界报错 ⇒ 落成 `None`）。
+   同时实测：core 收 `0x1F`（31）、`.123`（0.123）、`123.`（123）、`-.5`（-0.5）、`1.2e3`（1200）、
+   `1e` 报错、`1e309` **报错**（不是 Infinity）、`0x1p3` 报错——`#9.11` 的"十进制子集"就是照这个面圈的。
+10. **`Number` 变体的 `(Double, repr)` 实测 19 条**（`wasm`/`js` 两档逐值一致）：只有 Double 回示不出原值时才带
+    `repr`——`9007199254740993` ⇒ `d=9007199254740992 repr=9007199254740993`、`1e309` ⇒ `d=Infinity repr=1e309`，
+    而 `1e5`/`1.0`/`0.1`/`2.5`/`1.0e18` 的 `repr=none`。`-0` ⇒ `d=0`（符号在字符串形态里就没了），
+    所以 `to_char("-0")` 是 `'0'` 而不是 `'-'`——这一条在实现轮把镜像腿的回落写法纠正过来
+    （旧写法在没有 repr 时拿源文本当形态，把 JSON 原文误当 Double 形态）。同轮 `to_big_int` 对带 repr 的
+    大整数改成直接吃整数字面（旧写法绕 `float` 会把 `9007199254740993` 折成 `…992`，正撞 0.3 要防的那个坑）。
 
 ## 5. 不跟随 hutool 的清单（31 条实测分岔 + 结构级取舍）
 
@@ -230,25 +244,25 @@ hutool 侧扫描口径：`dromara/hutool` HEAD 的 `hutool-core/src/main/java/cn
 
 | 公开项 | 用例块（`conv_test.mbt`） | 文档块（`README.mbt.md`） | 此刻读数 |
 |---|---|---|---|
-| #9.1 `to_str` | to_str 的字符串形态 | to_str：Number 有 repr 就用原文 | 红（设计态） |
-| #9.2 `to_bool` | Null/Bool/Number · TRUE_SET 全表 · FALSE_SET 与未命中 | to_bool 没有第三态 | 红 |
-| #9.3 `to_char` | 取首码点 · Bool 档不跟随 | —（在文档块的表格里） | 红 |
-| #9.4 `to_int` | Number 截断与字符串腿 | —（与 #9.9 同块） | 红 |
-| #9.5 `to_int64` | repr 优先 · 越界一律 None | to_int64：大整数走 repr | 红 |
-| #9.6 `to_double` | 原值、字符串腿与不跟随档 | — | 红 |
-| #9.7 `to_big_int` | 整数文法、小数 None、空串 0 | — | 红 |
-| #9.8 `parse_bool` | 三态与两处 trim 分岔 | parse_bool 才是三态 | 红 |
-| #9.9 `parse_int_loose` | 0x 与 D/L/F 去尾 | 同左 | 红 |
-| #9.10 `parse_int64_loose` | 与 int 腿的指数不对称 | 同左 | 红 |
-| #9.11 `parse_double_loose` | 十进制子集 | — | 红 |
-| #9.12 `field` | 只在 Object 上取值 | — | 红 |
-| #9.13 `get_by_path` | 命中 · 未命中 · 坏路径 raise | get_by_path 点段与下标段 | 红 |
-| #9.14 `get_ids` | ids 两形态 | 同左 | 红 |
-| #9.15 `to_array` | 数组逐项、逗号切分、坏元素跳过 | 同左 | 红 |
-| #9.16 `to_map` | Object 逐项、坏值不写入 | — | 红 |
-| #9.17 `chain` | 自定义闭包优先 | 同左 | 红 |
-| 合计 | 23 块 | 10 块 | **33 块全红**，与 §0~§5 的规则一一对得上 |
+| #9.1 `to_str` | to_str 的字符串形态 | to_str：Number 有 repr 就用原文 | 绿 |
+| #9.2 `to_bool` | Null/Bool/Number · TRUE_SET 全表 · FALSE_SET 与未命中 | to_bool 没有第三态 | 绿 |
+| #9.3 `to_char` | 取首码点 · Bool 档不跟随 | —（在文档块的表格里） | 绿 |
+| #9.4 `to_int` | Number 截断与字符串腿 | —（与 #9.9 同块） | 绿 |
+| #9.5 `to_int64` | repr 优先 · 越界一律 None | to_int64：大整数走 repr | 绿 |
+| #9.6 `to_double` | 原值、字符串腿与不跟随档 | — | 绿 |
+| #9.7 `to_big_int` | 整数文法、小数 None、空串 0 | — | 绿 |
+| #9.8 `parse_bool` | 三态与两处 trim 分岔 | parse_bool 才是三态 | 绿 |
+| #9.9 `parse_int_loose` | 0x 与 D/L/F 去尾 | 同左 | 绿 |
+| #9.10 `parse_int64_loose` | 与 int 腿的指数不对称 | 同左 | 绿 |
+| #9.11 `parse_double_loose` | 十进制子集 | — | 绿 |
+| #9.12 `field` | 只在 Object 上取值 | — | 绿 |
+| #9.13 `get_by_path` | 命中 · 未命中 · 坏路径 raise | get_by_path 点段与下标段 | 绿 |
+| #9.14 `get_ids` | ids 两形态 | 同左 | 绿 |
+| #9.15 `to_array` | 数组逐项、逗号切分、坏元素跳过 | 同左 | 绿 |
+| #9.16 `to_map` | Object 逐项、坏值不写入 | — | 绿 |
+| #9.17 `chain` | 自定义闭包优先 | 同左 | 绿 |
+| 合计 | 23 块 | 10 块 | **33 块全绿**，与 §0~§5 的规则一一对得上 |
 
-当场读数（`moon test --target wasm`，由 `scripts/sync_status.py` 生成，不手写）：**277 条 = 绿 244 / 红 33**，
-`wasm`/`js`/`wasm-gc` 三档一致；native 档由 CI 编译出证（骨架期 `abort` 会打死 native 测试进程，
-所以 native 计数走硬检查，见 `AGENTS.md`）。
+当场读数（`moon test --target wasm`，由 `scripts/sync_status.py` 生成，不手写）：**277 条 = 绿 277 / 红 0**，
+`wasm`/`js`/`wasm-gc` 三档一致；native 档编译出证（24 个 task 全过）。
+骨架期那条"native 测试进程会被 `abort` 打死"的例外随实现落地一起失效。

@@ -153,7 +153,7 @@ test "to_char 取字符串形态的首码点（#9.3）" {
   assert_eq(@conv.to_char(j("1e5")), Some('1'))
   assert_eq(@conv.to_char(j("123.456")), Some('1'))
   assert_eq(@conv.to_char(j("1")), Some('1'))
-  assert_eq(@conv.to_char(j("-0")), Some('-'))
+  assert_eq(@conv.to_char(j("-0")), Some('0'))
   assert_eq(@conv.to_char(j("[1,2,\"x\"]")), Some('['))
   assert_eq(
     @conv.to_char(j("{\"b\":1,\"a\":[true,null],\"n\":1.0}")),
@@ -294,7 +294,7 @@ test "to_big_int：整数文法、小数 None、空串 0（#9.7）" {
   assert_eq(bi(@conv.to_big_int(j("123.456"))), "None")
   assert_eq(bi(@conv.to_big_int(j("0"))), "0")
   assert_eq(bi(@conv.to_big_int(j("-0"))), "0")
-  assert_eq(bi(@conv.to_big_int(j("9007199254740993"))), "9007199254740992")
+  assert_eq(bi(@conv.to_big_int(j("9007199254740993"))), "9007199254740993")
   assert_eq(
     bi(@conv.to_big_int(j("18446744073709551616"))),
     "18446744073709551616",
@@ -992,6 +992,7 @@ test "get_ids：ids 键的字符串与数字两形态（#9.14）" {
 test "chain：自定义闭包优先、None 才落内置（#9.17）" {
   let always7 = fn(_ : Json) -> Int64? { Some((7 : Int64)) }
   assert_eq(@conv.chain(always7, @conv.to_int64)(j("[1]")), Some(7))
+  assert_eq(@conv.chain(always7, @conv.to_int64)(j("123")), Some(7))
   assert_eq(@conv.to_int64(j("[1]")), None)
   assert_eq(
     @conv.chain(fn(_ : Json) -> Int64? { None }, @conv.to_int64)(j("123")),
