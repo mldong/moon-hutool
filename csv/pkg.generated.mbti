@@ -2,11 +2,62 @@
 package "mldong/moon-hutool/csv"
 
 // Values
+pub fn csv_default_read_opts() -> CsvReadOpts
+
+pub fn csv_default_write_opts() -> CsvWriteOpts
+
+pub fn csv_parse(String) -> CsvData raise CsvError
+
+pub fn csv_parse_with_opts(String, CsvReadOpts) -> CsvData raise CsvError
+
+pub fn csv_write(Array[Array[String?]]) -> String
+
+pub fn csv_write_with_opts(Array[Array[String?]], CsvWriteOpts) -> String
 
 // Errors
+pub suberror CsvError {
+  UnevenFields(Int, Int, Int)
+}
 
 // Types and methods
+pub(all) struct CsvData {
+  header : Array[String]
+  rows : Array[CsvRow]
+}
+pub fn CsvData::get_row(Self, Int) -> CsvRow?
+pub fn CsvData::header_names(Self) -> Array[String]
+pub fn CsvData::row_count(Self) -> Int
+
+pub(all) struct CsvReadOpts {
+  delimiter : Char
+  quote : Char
+  comment : Char?
+  header_line_no : Int
+  begin_line_no : Int
+  end_line_no : Int
+  skip_empty_rows : Bool
+  trim_field : Bool
+  error_on_different_field_count : Bool
+  header_alias : Array[(String, String)]
+}
+
+pub(all) struct CsvRow {
+  line_no : Int
+  fields : Array[String]
+}
+pub fn CsvRow::field_count(Self) -> Int
+pub fn CsvRow::get(Self, Int) -> String?
+pub fn CsvRow::get_by_name(Self, String) -> String?
+
+pub(all) struct CsvWriteOpts {
+  delimiter : Char
+  quote : Char
+  always_delimit_text : Bool
+  line_delimiter : String
+  ending_line_break : Bool
+}
 
 // Type aliases
+pub type CsvLine = Array[String?]
 
 // Traits
