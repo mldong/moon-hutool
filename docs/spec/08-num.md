@@ -1,6 +1,6 @@
 # 契约 08 · num（数值计算件·第一批：数论 + 十进制舍入）
 
-> 状态：**两批都已交付**（10-05）。
+> 状态：**前两批已交付、第三批契约已冻结**（10-05，第三批见 §10）。
 > 25 条公开项见 `num/pkg.generated.mbti`25 条公开项见 `num/pkg.generated.mbti`（`moon info` 后零漂移）；冻结期望值在 `num/num_test.mbt`（17 块 205 条断言）与
 > `num/README.mbt.md`（10 块 45 条断言）。第二批的期望值在 `format_test.mbt`（5 块）、
 > `money_test.mbt`（8 块）与 README 的 4 个文档块。两批**都是镜像读数一字未改**地从红变绿：
@@ -240,3 +240,83 @@ hutool 侧口径：读 GitHub `dromara/hutool` HEAD 的
 `DecimalFormat` 那一列也是 hutool `decimalFormat`/`formatPercent` 实际会给出的值（源码：
 `NumberFormat.getNumberInstance()` / `getPercentInstance()`），所以这张表同时就是 §5 那两条"不跟随"的读数依据。
 
+## 10. 第三批契约：中文数字与英文 word（#8.26~#8.39）
+
+对位文件：`hutool-core/src/main/java/cn/hutool/core/convert/NumberChineseFormatter.java`（672 行）
+与 `NumberWordFormatter.java`（200 行）——**这两件住在 `core/convert/` 而不是 `core/math/`**，
+按包名找会找不到（第一批就找错过一次）。`Convert.java` 那边的入口共 6 条：
+`numberToWord` / `numberToSimple` / `numberToChinese` / `chineseToNumber` / `digitToChinese` /
+`chineseMoneyToNumber`（行号见 §3 的扫描口径）。
+
+### 10.1 三条贯穿这一批的规则
+
+| # | 规则 | 依据（都是本机实测读数，不是口味） |
+|---|---|---|
+| 10.1a | **正向入口一律收十进制原文串，不收 `Double`** | hutool 自己两条路对同一个数给两种答案：`1.105` ⇒ BigDecimal 路「一点一零五」、double 路「一点一一」；`0.10` ⇒ 「零点一零」/「零点一」；`1.00` ⇒ 「一点零零」/「一」；`0.0` ⇒ 「零点零」/「零」。收 `Double` 就等于把"先按两位舍一次"藏进入口，同一库里出现两个答案 |
+| 10.1b | **反向累加走 `Int64`，越界给 `OutOfRange`** | hutool 的 `chineseToNumber` 返回 `int`：实测「一千亿」⇒ `1215752192`、「九十九万九千九百九十九亿」⇒ `-826389968`（都是低位截断）。与第一批「增长型算术只在精确域」同一条规矩 |
+| 10.1c | **错误只带读数**（档名 + 那个字符/两字窗口 + 码点位置），hutool 的英文句子不进载荷 | 它那句 `Unknown unit '〇' at: 0` / `Bad number '壹贰' at: 1` 里的**位置与窗口**是有信息的读数，跟；`Unknown unit` 这段文案是英文散文，不跟。位置按码点算（本批夹具全在 BMP 内，UTF-16 下标与码点下标重合，这条已核对） |
+
+### 10.2 契约矩阵
+
+| # | 公开项 | hutool 对位 | 关键读数（参考腿） | 用例块 |
+|---|---|---|---|---|
+| 8.26 | `chinese_of(String) -> String raise` | `format(BigDecimal, false, false)` | `1000000 ⇒ 一百万`（节间不补零）、`1001 ⇒ 一千零一`、`1010 ⇒ 一千零一十`、`-12345.67 ⇒ 负一万二千三百四十五点六七` | 节权位与零的折叠 / 小数逐位与尾零 |
+| 8.27 | `chinese_upper_of(String) -> String raise` | `format(BigDecimal, true, false)` | `10000 ⇒ 壹万`、`11 ⇒ 壹拾壹`、`1.105 ⇒ 壹点壹零伍` | 繁体字表对照 |
+| 8.28 | `chinese_colloquial_of(String) -> String raise` | `format(BigDecimal, false, true)` | 只改「一十」前缀：`10 ⇒ 十`、`100000 ⇒ 十万`、`-11 ⇒ 负十一`，而 `115 ⇒ 一百一十五` 不动 | 只改「一十」这一处 |
+| 8.29 | `chinese_upper_colloquial_of(String) -> String raise` | `format(BigDecimal, true, true)` | `10 ⇒ 拾`、`-11 ⇒ 负拾壹` | 同上（同块内并测） |
+| 8.30 | `chinese_money_of(String) -> String raise` | `format(double, true, true)`（金额档） | `1 ⇒ 壹元整`、`0.05 ⇒ 伍分`、`0.5 ⇒ 伍角`、`1.105 ⇒ 壹元壹角壹分`（**先两位 HALF_UP**）、`-12345.67 ⇒ 负壹万贰仟叁佰肆拾伍元陆角柒分`、`99999999999999.99 ⇒ …元玖角玖分` | 元/角/分/整的档 + 舍入族分岔 |
+| 8.31 | `chinese_money_simple_of(String) -> String raise` | `format(double, false, true)` | `1 ⇒ 一元整`、`0.05 ⇒ 五分`、`1.105 ⇒ 一元一角一分` | 简写金额 |
+| 8.32 | `chinese_of_thousand(Int) -> String raise` | `formatThousand(int, false)`，界 ±999 | `10 ⇒ 十`、`11 ⇒ 十一`、`115 ⇒ 一百一十五`、`909 ⇒ 九百零九`、`1000 ⇒ OutOfRange` | 10~19 去「一」与 ±999 界 |
+| 8.33 | `chinese_upper_of_thousand(Int) -> String raise` | `formatThousand(int, true)` | `11 ⇒ 拾壹`、`110 ⇒ 壹佰壹拾` | 繁体千分位 |
+| 8.34 | `chinese_digit(Char, upper? : Bool) -> Char raise` | `numberCharToChinese(char, boolean)` | `'0'..'9'` 全表两侧读数；非数字字符 hutool 无校验（查表得 -1 继续走），本包给 `UnknownChineseUnit 十 0` | 单字符档与非数字 |
+| 8.35 | `int_of_chinese(String) -> Int64 raise` | `chineseToNumber(String)` 返 `int` | 值档 62 条（模型逐条对撞）、错误档 11 条、截断分岔 2 条；认「负」是本包补的（hutool 在此抛错，实测 4 条） | 基本档与裸单位 / 跨节与怪形状 / 认「负」/ 错误形状 / 界走 Int64 |
+| 8.36 | `money_of_chinese(String) -> Money raise` | `chineseMoneyToNumber(String)` 返 `BigDecimal` | 键位切分 24 条与 JDK 逐条相等（含「圆」别名、`壹分壹厘` 两边都忽略尾随垃圾）；「没有元键」3 条声明分岔 | 键位切分与「没有元」不丢值 / 错误形状 |
+| 8.37 | `chinese_abbrev(Int64) -> String` | `NumberChineseFormatter.formatSimple(long)` | 阈值 1e4/1e8/1e12 ⇒ `10000 ⇒ 1.00万`、`12345 ⇒ 1.23万`、`1000000000000 ⇒ 1.00万亿`（BigDecimal 两位 HALF_UP，与 locale 无关） | 万/亿/万亿 三档 |
+| 8.38 | `english_abbrev(Int64) -> String` | `NumberWordFormatter.formatSimple(long)` | 同阈值、单位 `w`、去尾零：`1000000 ⇒ 100w`；`1234567890123` 见 10.4 的 locale 分岔 | 同阈值但单位是 w |
+| 8.39 | `english_word_of(String) -> String raise` | `NumberWordFormatter.format(Object)` | `255 ⇒ TWO HUNDRED AND FIFTY FIVE ONLY`、`1234567 ⇒ ONE MILLION … ONLY`、`0.05 ⇒ ZERO AND CENTS FIVE ONLY` | 三位一节与 ONLY / 零分档与负数档 |
+
+错误面新增三条（都只带读数）：`OutOfRange(String)`、`UnknownChineseUnit(Char, Int)`、
+`BadChineseNumber(String, Int)`。`NotDecimal(String)` 复用第二批那条（正向的"不是十进制原文"）。
+
+### 10.3 参考腿与对撞统计（读数来源）
+
+1. **JDK 参考腿**：`NumberChineseFormatter.java` / `NumberWordFormatter.java` **逐字转写**（只删
+   `package`/`import`、把 `StrUtil`/`NumberUtil`/`ArrayUtil`/`Assert`/`CharUtil` 五个前缀换成本地
+   `H.`，helper 按 hutool 自己的源码写——含 `CharUtil.isBlankChar` 那张码点表），跑在本机
+   JDK 17.0.14；夹具 = 56 个金额串 × 7 档 + 24 个千分位整数 × 2 档 + 24 个 long × 3 档 +
+   60 余条反向串 + 20 条英文 word。
+2. **Python 复刻腿（只做反向）**：`chineseToNumber` 与 `chineseMoneyToNumber` 的算法复刻，
+   **逐条与 JDK 对撞**：反向整数 71 条一致 / 2 条截断分岔；金额 24 条一致 / 3 条声明分岔。
+   模型与 JDK 不符又不是声明过的类别 ⇒ 生成器直接 assert 失败，不会静默出期望值。
+3. **同输入双 locale 实跑**：`-Duser.language=de -Duser.country=DE` 与默认对跑，
+   **只有 2 条不同**，都在 `abbrev_en` 上：`1234567890123 ⇒ 123456789.01w` / `123456789,01w`。
+   这条件在 hutool 里走 `NumberUtil.decimalFormat("#.##", …)`，即 `new DecimalFormat(pattern)`
+   吃 JVM 默认 locale ⇒ 本包固定 `.`（10.4 表第 5 行）。
+4. **舍入族对撞**：`1.105` 同时进 #8.30（HALF_UP ⇒ 壹元壹角壹分）与第二批
+   `Money::from_yuan_str`（HALF_EVEN ⇒ cent=110）——两条读数并排钉住，不强行统一，
+   因为 hutool 自己 `NumberUtil.round` 与 `Money.DEFAULT_ROUNDING_MODE` 就分家。
+
+### 10.4 这一批的不跟随清单
+
+| # | 分岔 | hutool 实测 | 本包 | 理由 |
+|---|---|---|---|---|
+| 1 | `Double` 入口 | 同一数两种答案（1.105 ⇒ 一点一一 / 一点一零五） | 只收原文串 | 10.1a |
+| 2 | 反向「负」前缀 | `Unknown unit '负' at: 0`（4 条实测） | 认，取负 | 正向会产出「负」，反向认不了 ⇒ 往返不通 |
+| 3 | 反向累加位宽 | 「一千亿」⇒ 1215752192、「九十九万…」⇒ -826389968 | 真值（Int64），越 Int64 ⇒ `OutOfRange` | 低位截断不是语义 |
+| 4 | 金额反向「没有元键」 | `壹佰 ⇒ 0.00`、`壹亿 ⇒ 0.00`、`壹佰贰拾拾 ⇒ 0.00`（整段丢） | 按元段读：10000 分 / 1e10 分 / 12000 分 | 键缺失是输入不完整，不是值为零 |
+| 5 | 英文缩写的小数点 | `123456789,01w`（de locale） | 固定 `.` | 参照实现随环境变，见 10.3 第 3 条 |
+| 6 | 英文零分 | `ONE AND CENTS  ONLY`（两个空格） | `ONE ONLY` | 段拼接事故，两位空格没有消费方会要 |
+| 7 | 英文负数 | 内部 `Integer.parseInt("-")` 抛 `NumberFormatException: For input string: "-"` | `OutOfRange "-1234"` | 把内部异常当契约不成立 |
+| 8 | 空输入反向 | `"" ⇒ 0`、`"  " ⇒ 1`（它的 `CHINESE_NAME_VALUE` 第一项是值为 1 的空格单位） | `NotDecimal` | 哨兵行为；两个空格读出 1 尤其不可依赖 |
+| 9 | 千分位界外 | 抛 `Number support only: (-999 ~ 999)！` | `OutOfRange "1000"`（只带原串） | 错误只带读数 |
+| 10 | 多币种 `Currency.digit` 与「大写金额带币种」 | `Money` 支持任意币种小数位 | 不做，归第四批一起定 | 引币种就要引表，与本库"码表独立成数据件"的立场一致 |
+
+### 10.5 分批与状态
+
+| 批 | 内容 | 状态 |
+|---|---|---|
+| 第三批（本节） | #8.26~#8.39，14 条公开项 + 3 条错误档，22 块冻结期望值 | **契约已冻结**（10-05），实现未开工 |
+| 第四批 | `Calculator` 表达式求值 | 未开工；动手前先定"十进制精确算术用什么形状"（完整 `BigDecimal` 在不做清单里） |
+
+第三批的 22 块与包内其余块一起进当场读数（见 `docs/ROADMAP.md` 的生成块）；
+实现那一笔只许把红变绿，改任何期望串须单独一笔并给外部读数来源（门禁 G5）。

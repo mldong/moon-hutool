@@ -14,6 +14,10 @@ fn show(err : @num.NumError) -> String {
     @num.NegativeRatio(r) => "NegativeRatio \{r}"
     @num.RatioSumNotPositive(sum) => "RatioSumNotPositive \{sum}"
     @num.MoneyOverflow => "MoneyOverflow"
+    @num.OutOfRange(v) => "OutOfRange " + v
+    @num.UnknownChineseUnit(c, i) =>
+      "UnknownChineseUnit " + c.to_string() + " " + i.to_string()
+    @num.BadChineseNumber(s, i) => "BadChineseNumber " + s + " " + i.to_string()
   }
 }
 

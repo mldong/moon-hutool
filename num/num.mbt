@@ -51,6 +51,17 @@ pub suberror NumError {
   /// 分的加减或 `cent * ratio` 超出 `Int64` 可表范围。
   /// **不带载荷**：两个操作数调用方都有，"越界"这件事本身就是新信息（同 `mapx` 的不带载荷立场）
   MoneyOverflow
+  // ---- 第三批（中文数字与英文 word）新增三条：界与反向文法 ----
+  ///
+  /// 数值越出中文数字件支持的界（±99_9999_9999_9999.99，或千分位档的 ±999）。
+  /// 只带原始读数，不带 hutool 那句 `Number support only: …` 文案。
+  OutOfRange(String)
+  ///
+  /// 反向解析撞到不认的单位字，带那个字与它的位置（0 基码点下标）。
+  UnknownChineseUnit(Char, Int)
+  ///
+  /// 反向解析撞到"单位字后面又跟了个数字字"这类坏形状，带 hutool 同款的两字窗口与位置。
+  BadChineseNumber(String, Int)
 }
 
 ///|
@@ -1234,4 +1245,133 @@ fn shift_point_left(
     i += 1
   }
   (neg, out, pt - lead)
+}
+
+// ==================== 第三批：中文数字与英文 word（#8.26~#8.39）====================
+//
+// 对位 hutool `NumberChineseFormatter` / `NumberWordFormatter`（注意这两个件住在
+// `core/convert/` 而不是 `core/math/`）。规则与全部读数来源见 spec §10。
+// 这一批的入口一律收**十进制原文串**，不收 `Double`：hutool 的 double 路与 BigDecimal 路
+// 对同一个数给出两种答案（实测 `1.105` ⇒ "一点一一" / "一点一零五"，spec §10.1）。
+
+///|
+/// 十进制原文 → 中文数字（简写、非金额、非口语），对位 `NumberChineseFormatter.format(BigDecimal, false, false)`。
+///
+/// 小数点读作「点」，小数部分逐位读；负数前缀「负」。越出 ±99_9999_9999_9999.99 ⇒ `OutOfRange`。
+/// 整数部分的单位是十/百/千/万/亿，**万与亿之间不叠加"零"**（`1000000 ⇒ "一百万"`），
+/// 而千位段内的空位要补零（`1001 ⇒ "一千零一"`、`1010 ⇒ "一千零一十"`）。
+pub fn chinese_of(text : String) -> String raise NumError {
+  abort("moon-hutool 契约未实现：chinese_of")
+}
+
+///|
+/// 同上但用繁体（记账大写：壹贰叁…玖、拾佰仟万亿），对位 `format(BigDecimal, true, false)`。
+/// 单位表里「万/亿」简繁同形，所以 `10000` ⇒ "壹万"。
+pub fn chinese_upper_of(text : String) -> String raise NumError {
+  abort("moon-hutool 契约未实现：chinese_upper_of")
+}
+
+///|
+/// 简写 + 口语档：把「一十」读成「十」，对位 `format(BigDecimal, false, true)`。
+///
+/// hutool 的口语替换只有四条映射（`一十→十`、`一拾→拾`、`负一十→负十`、`负一拾→负拾`），
+/// 所以 `100000 ⇒ "十万"` 但 `115 ⇒ "一百一十五"`（那个"一十"在百位段之后，不在替换表里）。
+pub fn chinese_colloquial_of(text : String) -> String raise NumError {
+  abort("moon-hutool 契约未实现：chinese_colloquial_of")
+}
+
+///|
+/// 繁体 + 口语档，对位 `format(BigDecimal, true, true)`。
+pub fn chinese_upper_colloquial_of(text : String) -> String raise NumError {
+  abort("moon-hutool 契约未实现：chinese_upper_colloquial_of")
+}
+
+///|
+/// 十进制原文 → 金额大写（繁体 + 元/角/分/整），对位 `format(…, true, true)` 的金额档。
+///
+/// 先按两位**向零舍入到分**——注意这一档跟的是 `HalfUp`（hutool `NumberUtil.round` 默认），
+/// 与第二批 `Money::from_yuan_str` 的 `HalfEven` 不同一族，分岔夹具 `1.105` 两条都在（spec §10.3）。
+/// 不足一元时不写"零元"：`0.05 ⇒ "伍分"`、`0.5 ⇒ "伍角"`；整元才带「元整」。
+pub fn chinese_money_of(text : String) -> String raise NumError {
+  abort("moon-hutool 契约未实现：chinese_money_of")
+}
+
+///|
+/// 金额简写档（一/二/三 + 元角分整），对位 `format(…, false, true)`。
+pub fn chinese_money_simple_of(text : String) -> String raise NumError {
+  abort("moon-hutool 契约未实现：chinese_money_simple_of")
+}
+
+///|
+/// 千分位档：只收 `-999 ~ 999` 的整数，**10~19 去掉「一」**，对位 `formatThousand(int, false)`。
+///
+/// 这是与 #8.26 不同的一条档：`chinese_of("10") ⇒ "一十"`，而本件给 `"十"`；越界 ⇒ `OutOfRange`
+/// （hutool 那句 `Number support only: (-999 ~ 999)！` 只当读数证据，不进错误载荷）。
+pub fn chinese_of_thousand(n : Int) -> String raise NumError {
+  abort("moon-hutool 契约未实现：chinese_of_thousand")
+}
+
+///|
+/// 千分位档的繁体版，对位 `formatThousand(int, true)`：`11 ⇒ "拾壹"`、`110 ⇒ "壹佰壹拾"`。
+pub fn chinese_upper_of_thousand(n : Int) -> String raise NumError {
+  abort("moon-hutool 契约未实现：chinese_upper_of_thousand")
+}
+
+///|
+/// 单个阿拉伯数字字符 → 对应的中文数字字，对位 `numberCharToChinese(char, isUseTraditional)`。
+///
+/// 只收 `'0' ~ '9'`；其余字符 ⇒ `NotDecimal`（hutool 在此没有任何校验，本包不把"喂错字符"留成静默）。
+pub fn chinese_digit(d : Char, upper? : Bool) -> Char raise NumError {
+  abort("moon-hutool 契约未实现：chinese_digit")
+}
+
+///|
+/// 中文数字 → `Int64`，对位 `chineseToNumber(String)`。
+///
+/// 认简写与繁体两套字（可混排：`"壹拾贰" ⇒ 12`）、认「两/二」同值、认裸单位补一（`"十" ⇒ 10`、`"百" ⇒ 100`）、
+/// 认「拾万」这种跨节组合（⇒ 100000）。**不跟随 hutool 的两条**：
+/// ① 本包认「负」前缀（hutool 在此抛 `Unknown unit '负'`，而它自己的正向会产出带"负"的串 ⇒ 往返不通）；
+/// ② 累加走 `Int64`，越界给 `OutOfRange`（hutool 用 `int` 累加，超 2^31 静默回绕）。
+pub fn int_of_chinese(text : String) -> Int64 raise NumError {
+  abort("moon-hutool 契约未实现：int_of_chinese")
+}
+
+///|
+/// 中文金额 → 第二批的 `Money`（cent 为 `Int64`），对位 `chineseMoneyToNumber(String)`。
+///
+/// 「元/角/分」三段可省，整串没有「元」时**按元段处理**（hutool 此处把「壹佰」读成 0.00，
+/// 是丢值 bug，实测在读数表里）；不认「负」（金额串的负号本就不该出现在记账场景，
+/// 且 hutool 在此也抛）。空/全空白 ⇒ `NotDecimal`（hutool 给 null，本包不用哨兵）。
+pub fn money_of_chinese(text : String) -> Money raise NumError {
+  abort("moon-hutool 契约未实现：money_of_chinese")
+}
+
+///|
+/// 大数缩写（中文单位），对位 `NumberChineseFormatter.formatSimple(long)`。
+///
+/// 阈值固定：`>= 1e12` 走「万亿」、`>= 1e8` 走「亿」、`>= 1e4` 走「万」，其余原样十进制；
+/// 除数走 `BigDecimal` 两位 `HalfUp`，所以读数与 locale 无关（`10000 ⇒ "1.00万"`、`12345 ⇒ "1.23万"`）。
+pub fn chinese_abbrev(n : Int64) -> String {
+  abort("moon-hutool 契约未实现：chinese_abbrev")
+}
+
+///|
+/// 大数缩写（英文单位 w/y 那套），对位 `NumberWordFormatter.formatSimple(long)`。
+///
+/// 阈值与 #8.36 相同但单位是 `w`/`y` 且**不带尾随零**（`1000000 ⇒ "100w"`）。
+/// hutool 走 `NumberUtil.decimalFormat("#.##", …)` ⇒ 随 JVM 默认 locale 变，本包固定 `.`（spec §10.4）。
+pub fn english_abbrev(n : Int64) -> String {
+  abort("moon-hutool 契约未实现：english_abbrev")
+}
+
+///|
+/// 十进制原文 → 英文 word，对位 `NumberWordFormatter.format(Object)`。
+///
+/// 整数部分三位一节（`1234567 ⇒ "ONE MILLION TWO HUNDRED AND THIRTY FOUR THOUSAND FIVE HUNDRED AND
+/// SIXTY SEVEN"`），末尾统一带 `ONLY`；有小数时读作 `AND CENTS <逐位>`。
+/// 三条不跟随（读数都在 spec §10.4）：负数 hutool 直接炸在内部 `Integer.parseInt("-")` ⇒ 本包给 `OutOfRange`；
+/// 零小数（`1.0`）hutool 仍输出 `AND CENTS ` 带两个空格 ⇒ 本包不输出 cents 段；
+/// 千位段的百位为 0 但十位非 0 时 huto0l 不补 `AND`——本包按它的读数原样钉住，不改。
+pub fn english_word_of(text : String) -> String raise NumError {
+  abort("moon-hutool 契约未实现：english_word_of")
 }

@@ -16,3 +16,8 @@ import {
 } for "test"
 
 // 第二批实现已落地 ⇒ 骨架期那三条豁免整行删除（G12 盯着这一条：体里没有 abort 就不许再压豁免）。
+
+// 第三批骨架期豁免（体里全是 abort 的机械后果，实现落地那一笔整行删除——G12 盯着）：
+// unused_value（形参没人用）、unused_error_type（新三条 raise 档没人抛）、unused_constructor（新档位没人构造）
+
+warnings = "-unused_value-unused_error_type-unused_constructor"

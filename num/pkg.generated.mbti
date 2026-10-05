@@ -8,7 +8,31 @@ import {
 // Values
 pub fn arrangement_count(Int, Int) -> @bigint.BigInt raise NumError
 
+pub fn chinese_abbrev(Int64) -> String
+
+pub fn chinese_colloquial_of(String) -> String raise NumError
+
+pub fn chinese_digit(Char, upper? : Bool) -> Char raise NumError
+
+pub fn chinese_money_of(String) -> String raise NumError
+
+pub fn chinese_money_simple_of(String) -> String raise NumError
+
+pub fn chinese_of(String) -> String raise NumError
+
+pub fn chinese_of_thousand(Int) -> String raise NumError
+
+pub fn chinese_upper_colloquial_of(String) -> String raise NumError
+
+pub fn chinese_upper_of(String) -> String raise NumError
+
+pub fn chinese_upper_of_thousand(Int) -> String raise NumError
+
 pub fn combination_count(Int, Int) -> @bigint.BigInt raise NumError
+
+pub fn english_abbrev(Int64) -> String
+
+pub fn english_word_of(String) -> String raise NumError
 
 pub fn ext_gcd(Int, Int) -> (Int, Int, Int)
 
@@ -20,6 +44,8 @@ pub fn format_thousands(Double, Int, mode? : RoundingMode, sep? : Char, decimal_
 
 pub fn gcd(Int, Int) -> Int
 
+pub fn int_of_chinese(String) -> Int64 raise NumError
+
 pub fn is_prime(Int) -> Bool
 
 pub fn isqrt(Int) -> Int raise NumError
@@ -27,6 +53,8 @@ pub fn isqrt(Int) -> Int raise NumError
 pub fn lcm(@bigint.BigInt, @bigint.BigInt) -> @bigint.BigInt
 
 pub fn mod_inverse(Int, Int) -> Int raise NumError
+
+pub fn money_of_chinese(String) -> Money raise NumError
 
 pub fn round_to(Double, Int, mode? : RoundingMode) -> Double raise NumError
 
@@ -48,6 +76,9 @@ pub suberror NumError {
   NegativeRatio(Int)
   RatioSumNotPositive(Int64)
   MoneyOverflow
+  OutOfRange(String)
+  UnknownChineseUnit(Char, Int)
+  BadChineseNumber(String, Int)
 }
 
 // Types and methods
