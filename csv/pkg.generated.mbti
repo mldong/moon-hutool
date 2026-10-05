@@ -44,6 +44,7 @@ pub(all) struct CsvReadOpts {
 pub(all) struct CsvRow {
   line_no : Int
   fields : Array[String]
+  // private fields
 }
 pub fn CsvRow::field_count(Self) -> Int
 pub fn CsvRow::get(Self, Int) -> String?

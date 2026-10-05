@@ -184,13 +184,16 @@ test "csv 读：默认配置全表（32 个输入）" {
   ) // r.4.0|OK:hdr=<none>;[0]a/b/c/;[1]d/e/f/;nrows=2
   assert_eq(rd_tag("\"a\",\"b\"", rcfg(0)), "OK:hdr=<none>;[0]a/b/;nrows=1") // r.5.0|OK:hdr=<none>;[0]a/b/;nrows=1
   assert_eq(rd_tag("\"a,b\",c", rcfg(0)), "OK:hdr=<none>;[0]a,b/c/;nrows=1") // r.6.0|OK:hdr=<none>;[0]a,b/c/;nrows=1
-  assert_eq(rd_tag("\"a\"\"b\",c", rcfg(0)), "OK:hdr=<none>;[0]a\"b/c/;nrows=1") // r.7.0|OK:hdr=<none>;[0]a\"b/c/;nrows=1
-  assert_eq(rd_tag("\"a\nb\",c", rcfg(0)), "OK:hdr=<none>;[0]a\nb/c/;nrows=1") // r.8.0|OK:hdr=<none>;[0]a\nb/c/;nrows=1
+  assert_eq(
+    rd_tag("\"a\"\"b\",c", rcfg(0)),
+    "OK:hdr=<none>;[0]a\\\"b/c/;nrows=1",
+  ) // r.7.0|OK:hdr=<none>;[0]a\\\"b/c/;nrows=1
+  assert_eq(rd_tag("\"a\nb\",c", rcfg(0)), "OK:hdr=<none>;[0]a\\nb/c/;nrows=1") // r.8.0|OK:hdr=<none>;[0]a\\nb/c/;nrows=1
   assert_eq(
     rd_tag("\"a\r\nb\",c", rcfg(0)),
-    "OK:hdr=<none>;[0]a\r\nb/c/;nrows=1",
-  ) // r.9.0|OK:hdr=<none>;[0]a\r\nb/c/;nrows=1
-  assert_eq(rd_tag("a\"b,c", rcfg(0)), "OK:hdr=<none>;[0]a\"b/c/;nrows=1") // r.10.0|OK:hdr=<none>;[0]a\"b/c/;nrows=1
+    "OK:hdr=<none>;[0]a\\r\\nb/c/;nrows=1",
+  ) // r.9.0|OK:hdr=<none>;[0]a\\r\\nb/c/;nrows=1
+  assert_eq(rd_tag("a\"b,c", rcfg(0)), "OK:hdr=<none>;[0]a\\\"b/c/;nrows=1") // r.10.0|OK:hdr=<none>;[0]a\\\"b/c/;nrows=1
   assert_eq(rd_tag("\"\",c", rcfg(0)), "OK:hdr=<none>;[0]/c/;nrows=1") // r.11.0|OK:hdr=<none>;[0]/c/;nrows=1
   assert_eq(rd_tag("a,,c", rcfg(0)), "OK:hdr=<none>;[0]a//c/;nrows=1") // r.12.0|OK:hdr=<none>;[0]a//c/;nrows=1
   assert_eq(rd_tag(",,", rcfg(0)), "OK:hdr=<none>;[0]///;nrows=1") // r.13.0|OK:hdr=<none>;[0]///;nrows=1
@@ -207,9 +210,12 @@ test "csv 读：默认配置全表（32 个输入）" {
   ) // r.18.0|OK:hdr=<none>;[0]a/b/;[2]c/d/;nrows=2
   assert_eq(
     rd_tag("a, \"b\" ,c", rcfg(0)),
-    "OK:hdr=<none>;[0]a/ \"b\" /c/;nrows=1",
-  ) // r.19.0|OK:hdr=<none>;[0]a/ \"b\" /c/;nrows=1
-  assert_eq(rd_tag("\"a\"x,b", rcfg(0)), "OK:hdr=<none>;[0]\"a\"x/b/;nrows=1") // r.20.0|OK:hdr=<none>;[0]\"a\"x/b/;nrows=1
+    "OK:hdr=<none>;[0]a/ \\\"b\\\" /c/;nrows=1",
+  ) // r.19.0|OK:hdr=<none>;[0]a/ \\\"b\\\" /c/;nrows=1
+  assert_eq(
+    rd_tag("\"a\"x,b", rcfg(0)),
+    "OK:hdr=<none>;[0]\\\"a\\\"x/b/;nrows=1",
+  ) // r.20.0|OK:hdr=<none>;[0]\\\"a\\\"x/b/;nrows=1
   assert_eq(rd_tag(" a ,b", rcfg(0)), "OK:hdr=<none>;[0] a /b/;nrows=1") // r.21.0|OK:hdr=<none>;[0] a /b/;nrows=1
   assert_eq(rd_tag("a,b\nc", rcfg(0)), "OK:hdr=<none>;[0]a/b/;[1]c/;nrows=2") // r.22.0|OK:hdr=<none>;[0]a/b/;[1]c/;nrows=2
   assert_eq(
@@ -256,10 +262,10 @@ test "csv 读：表头三档（含表头别名与第 2 行当表头）" {
   ) // r.4.1|OK:hdr=a|b|c;[1]d/e/f/;nrows=1;byName=d
   assert_eq(rd_tag("\"a\",\"b\"", rcfg(1)), "OK:hdr=a|b;nrows=0") // r.5.1|OK:hdr=a|b;nrows=0
   assert_eq(rd_tag("\"a,b\",c", rcfg(1)), "OK:hdr=a,b|c;nrows=0") // r.6.1|OK:hdr=a,b|c;nrows=0
-  assert_eq(rd_tag("\"a\"\"b\",c", rcfg(1)), "OK:hdr=a\"b|c;nrows=0") // r.7.1|OK:hdr=a\"b|c;nrows=0
-  assert_eq(rd_tag("\"a\nb\",c", rcfg(1)), "OK:hdr=a\nb|c;nrows=0") // r.8.1|OK:hdr=a\nb|c;nrows=0
-  assert_eq(rd_tag("\"a\r\nb\",c", rcfg(1)), "OK:hdr=a\r\nb|c;nrows=0") // r.9.1|OK:hdr=a\r\nb|c;nrows=0
-  assert_eq(rd_tag("a\"b,c", rcfg(1)), "OK:hdr=a\"b|c;nrows=0") // r.10.1|OK:hdr=a\"b|c;nrows=0
+  assert_eq(rd_tag("\"a\"\"b\",c", rcfg(1)), "OK:hdr=a\\\"b|c;nrows=0") // r.7.1|OK:hdr=a\\\"b|c;nrows=0
+  assert_eq(rd_tag("\"a\nb\",c", rcfg(1)), "OK:hdr=a\\nb|c;nrows=0") // r.8.1|OK:hdr=a\\nb|c;nrows=0
+  assert_eq(rd_tag("\"a\r\nb\",c", rcfg(1)), "OK:hdr=a\\r\\nb|c;nrows=0") // r.9.1|OK:hdr=a\\r\\nb|c;nrows=0
+  assert_eq(rd_tag("a\"b,c", rcfg(1)), "OK:hdr=a\\\"b|c;nrows=0") // r.10.1|OK:hdr=a\\\"b|c;nrows=0
   assert_eq(rd_tag("\"\",c", rcfg(1)), "OK:hdr=|c;nrows=0") // r.11.1|OK:hdr=|c;nrows=0
   assert_eq(rd_tag("a,,c", rcfg(1)), "OK:hdr=a||c;nrows=0") // r.12.1|OK:hdr=a||c;nrows=0
   assert_eq(rd_tag(",,", rcfg(1)), "OK:hdr=||;nrows=0") // r.13.1|OK:hdr=||;nrows=0
@@ -271,8 +277,8 @@ test "csv 读：表头三档（含表头别名与第 2 行当表头）" {
     rd_tag("a,b\n#cmt\nc,d", rcfg(1)),
     "OK:hdr=a|b;[2]c/d/;nrows=1;byName=c",
   ) // r.18.1|OK:hdr=a|b;[2]c/d/;nrows=1;byName=c
-  assert_eq(rd_tag("a, \"b\" ,c", rcfg(1)), "OK:hdr=a| \"b\" |c;nrows=0") // r.19.1|OK:hdr=a| \"b\" |c;nrows=0
-  assert_eq(rd_tag("\"a\"x,b", rcfg(1)), "OK:hdr=\"a\"x|b;nrows=0") // r.20.1|OK:hdr=\"a\"x|b;nrows=0
+  assert_eq(rd_tag("a, \"b\" ,c", rcfg(1)), "OK:hdr=a| \\\"b\\\" |c;nrows=0") // r.19.1|OK:hdr=a| \\\"b\\\" |c;nrows=0
+  assert_eq(rd_tag("\"a\"x,b", rcfg(1)), "OK:hdr=\\\"a\\\"x|b;nrows=0") // r.20.1|OK:hdr=\\\"a\\\"x|b;nrows=0
   assert_eq(rd_tag(" a ,b", rcfg(1)), "OK:hdr= a |b;nrows=0") // r.21.1|OK:hdr= a |b;nrows=0
   assert_eq(rd_tag("a,b\nc", rcfg(1)), "OK:hdr=a|b;[1]c/;nrows=1;byName=c") // r.22.1|OK:hdr=a|b;[1]c/;nrows=1;byName=c
   assert_eq(
@@ -313,13 +319,16 @@ test "csv 读：空行、注释行与行号推进" {
   ) // r.4.2|OK:hdr=<none>;[0]a/b/c/;[1]d/e/f/;nrows=2
   assert_eq(rd_tag("\"a\",\"b\"", rcfg(2)), "OK:hdr=<none>;[0]a/b/;nrows=1") // r.5.2|OK:hdr=<none>;[0]a/b/;nrows=1
   assert_eq(rd_tag("\"a,b\",c", rcfg(2)), "OK:hdr=<none>;[0]a,b/c/;nrows=1") // r.6.2|OK:hdr=<none>;[0]a,b/c/;nrows=1
-  assert_eq(rd_tag("\"a\"\"b\",c", rcfg(2)), "OK:hdr=<none>;[0]a\"b/c/;nrows=1") // r.7.2|OK:hdr=<none>;[0]a\"b/c/;nrows=1
-  assert_eq(rd_tag("\"a\nb\",c", rcfg(2)), "OK:hdr=<none>;[0]a\nb/c/;nrows=1") // r.8.2|OK:hdr=<none>;[0]a\nb/c/;nrows=1
+  assert_eq(
+    rd_tag("\"a\"\"b\",c", rcfg(2)),
+    "OK:hdr=<none>;[0]a\\\"b/c/;nrows=1",
+  ) // r.7.2|OK:hdr=<none>;[0]a\\\"b/c/;nrows=1
+  assert_eq(rd_tag("\"a\nb\",c", rcfg(2)), "OK:hdr=<none>;[0]a\\nb/c/;nrows=1") // r.8.2|OK:hdr=<none>;[0]a\\nb/c/;nrows=1
   assert_eq(
     rd_tag("\"a\r\nb\",c", rcfg(2)),
-    "OK:hdr=<none>;[0]a\r\nb/c/;nrows=1",
-  ) // r.9.2|OK:hdr=<none>;[0]a\r\nb/c/;nrows=1
-  assert_eq(rd_tag("a\"b,c", rcfg(2)), "OK:hdr=<none>;[0]a\"b/c/;nrows=1") // r.10.2|OK:hdr=<none>;[0]a\"b/c/;nrows=1
+    "OK:hdr=<none>;[0]a\\r\\nb/c/;nrows=1",
+  ) // r.9.2|OK:hdr=<none>;[0]a\\r\\nb/c/;nrows=1
+  assert_eq(rd_tag("a\"b,c", rcfg(2)), "OK:hdr=<none>;[0]a\\\"b/c/;nrows=1") // r.10.2|OK:hdr=<none>;[0]a\\\"b/c/;nrows=1
   assert_eq(rd_tag("\"\",c", rcfg(2)), "OK:hdr=<none>;[0]/c/;nrows=1") // r.11.2|OK:hdr=<none>;[0]/c/;nrows=1
   assert_eq(rd_tag("a,,c", rcfg(2)), "OK:hdr=<none>;[0]a//c/;nrows=1") // r.12.2|OK:hdr=<none>;[0]a//c/;nrows=1
   assert_eq(rd_tag(",,", rcfg(2)), "OK:hdr=<none>;[0]///;nrows=1") // r.13.2|OK:hdr=<none>;[0]///;nrows=1
@@ -336,9 +345,12 @@ test "csv 读：空行、注释行与行号推进" {
   ) // r.18.2|OK:hdr=<none>;[0]a/b/;[2]c/d/;nrows=2
   assert_eq(
     rd_tag("a, \"b\" ,c", rcfg(2)),
-    "OK:hdr=<none>;[0]a/ \"b\" /c/;nrows=1",
-  ) // r.19.2|OK:hdr=<none>;[0]a/ \"b\" /c/;nrows=1
-  assert_eq(rd_tag("\"a\"x,b", rcfg(2)), "OK:hdr=<none>;[0]\"a\"x/b/;nrows=1") // r.20.2|OK:hdr=<none>;[0]\"a\"x/b/;nrows=1
+    "OK:hdr=<none>;[0]a/ \\\"b\\\" /c/;nrows=1",
+  ) // r.19.2|OK:hdr=<none>;[0]a/ \\\"b\\\" /c/;nrows=1
+  assert_eq(
+    rd_tag("\"a\"x,b", rcfg(2)),
+    "OK:hdr=<none>;[0]\\\"a\\\"x/b/;nrows=1",
+  ) // r.20.2|OK:hdr=<none>;[0]\\\"a\\\"x/b/;nrows=1
   assert_eq(rd_tag(" a ,b", rcfg(2)), "OK:hdr=<none>;[0] a /b/;nrows=1") // r.21.2|OK:hdr=<none>;[0] a /b/;nrows=1
   assert_eq(rd_tag("a,b\nc", rcfg(2)), "OK:hdr=<none>;[0]a/b/;[1]c/;nrows=2") // r.22.2|OK:hdr=<none>;[0]a/b/;[1]c/;nrows=2
   assert_eq(
@@ -385,13 +397,16 @@ test "csv 读：trim/自定义分隔符/自定义引号/行范围" {
   ) // r.4.3|OK:hdr=<none>;[0]a/b/c/;[1]d/e/f/;nrows=2
   assert_eq(rd_tag("\"a\",\"b\"", rcfg(3)), "OK:hdr=<none>;[0]a/b/;nrows=1") // r.5.3|OK:hdr=<none>;[0]a/b/;nrows=1
   assert_eq(rd_tag("\"a,b\",c", rcfg(3)), "OK:hdr=<none>;[0]a,b/c/;nrows=1") // r.6.3|OK:hdr=<none>;[0]a,b/c/;nrows=1
-  assert_eq(rd_tag("\"a\"\"b\",c", rcfg(3)), "OK:hdr=<none>;[0]a\"b/c/;nrows=1") // r.7.3|OK:hdr=<none>;[0]a\"b/c/;nrows=1
-  assert_eq(rd_tag("\"a\nb\",c", rcfg(3)), "OK:hdr=<none>;[0]a\nb/c/;nrows=1") // r.8.3|OK:hdr=<none>;[0]a\nb/c/;nrows=1
+  assert_eq(
+    rd_tag("\"a\"\"b\",c", rcfg(3)),
+    "OK:hdr=<none>;[0]a\\\"b/c/;nrows=1",
+  ) // r.7.3|OK:hdr=<none>;[0]a\\\"b/c/;nrows=1
+  assert_eq(rd_tag("\"a\nb\",c", rcfg(3)), "OK:hdr=<none>;[0]a\\nb/c/;nrows=1") // r.8.3|OK:hdr=<none>;[0]a\\nb/c/;nrows=1
   assert_eq(
     rd_tag("\"a\r\nb\",c", rcfg(3)),
-    "OK:hdr=<none>;[0]a\r\nb/c/;nrows=1",
-  ) // r.9.3|OK:hdr=<none>;[0]a\r\nb/c/;nrows=1
-  assert_eq(rd_tag("a\"b,c", rcfg(3)), "OK:hdr=<none>;[0]a\"b/c/;nrows=1") // r.10.3|OK:hdr=<none>;[0]a\"b/c/;nrows=1
+    "OK:hdr=<none>;[0]a\\r\\nb/c/;nrows=1",
+  ) // r.9.3|OK:hdr=<none>;[0]a\\r\\nb/c/;nrows=1
+  assert_eq(rd_tag("a\"b,c", rcfg(3)), "OK:hdr=<none>;[0]a\\\"b/c/;nrows=1") // r.10.3|OK:hdr=<none>;[0]a\\\"b/c/;nrows=1
   assert_eq(rd_tag("\"\",c", rcfg(3)), "OK:hdr=<none>;[0]/c/;nrows=1") // r.11.3|OK:hdr=<none>;[0]/c/;nrows=1
   assert_eq(rd_tag("a,,c", rcfg(3)), "OK:hdr=<none>;[0]a//c/;nrows=1") // r.12.3|OK:hdr=<none>;[0]a//c/;nrows=1
   assert_eq(rd_tag(",,", rcfg(3)), "OK:hdr=<none>;[0]///;nrows=1") // r.13.3|OK:hdr=<none>;[0]///;nrows=1
@@ -408,9 +423,12 @@ test "csv 读：trim/自定义分隔符/自定义引号/行范围" {
   ) // r.18.3|OK:hdr=<none>;[0]a/b/;[2]c/d/;nrows=2
   assert_eq(
     rd_tag("a, \"b\" ,c", rcfg(3)),
-    "OK:hdr=<none>;[0]a/\"b\"/c/;nrows=1",
-  ) // r.19.3|OK:hdr=<none>;[0]a/\"b\"/c/;nrows=1
-  assert_eq(rd_tag("\"a\"x,b", rcfg(3)), "OK:hdr=<none>;[0]\"a\"x/b/;nrows=1") // r.20.3|OK:hdr=<none>;[0]\"a\"x/b/;nrows=1
+    "OK:hdr=<none>;[0]a/\\\"b\\\"/c/;nrows=1",
+  ) // r.19.3|OK:hdr=<none>;[0]a/\\\"b\\\"/c/;nrows=1
+  assert_eq(
+    rd_tag("\"a\"x,b", rcfg(3)),
+    "OK:hdr=<none>;[0]\\\"a\\\"x/b/;nrows=1",
+  ) // r.20.3|OK:hdr=<none>;[0]\\\"a\\\"x/b/;nrows=1
   assert_eq(rd_tag(" a ,b", rcfg(3)), "OK:hdr=<none>;[0]a/b/;nrows=1") // r.21.3|OK:hdr=<none>;[0]a/b/;nrows=1
   assert_eq(rd_tag("a,b\nc", rcfg(3)), "OK:hdr=<none>;[0]a/b/;[1]c/;nrows=2") // r.22.3|OK:hdr=<none>;[0]a/b/;[1]c/;nrows=2
   assert_eq(
@@ -457,13 +475,16 @@ test "csv 读：列数不等开关与 UnevenFields 档" {
   ) // r.4.7|OK:hdr=<none>;[0]a/b/c/;[1]d/e/f/;nrows=2
   assert_eq(rd_tag("\"a\",\"b\"", rcfg(7)), "OK:hdr=<none>;[0]a/b/;nrows=1") // r.5.7|OK:hdr=<none>;[0]a/b/;nrows=1
   assert_eq(rd_tag("\"a,b\",c", rcfg(7)), "OK:hdr=<none>;[0]a,b/c/;nrows=1") // r.6.7|OK:hdr=<none>;[0]a,b/c/;nrows=1
-  assert_eq(rd_tag("\"a\"\"b\",c", rcfg(7)), "OK:hdr=<none>;[0]a\"b/c/;nrows=1") // r.7.7|OK:hdr=<none>;[0]a\"b/c/;nrows=1
-  assert_eq(rd_tag("\"a\nb\",c", rcfg(7)), "OK:hdr=<none>;[0]a\nb/c/;nrows=1") // r.8.7|OK:hdr=<none>;[0]a\nb/c/;nrows=1
+  assert_eq(
+    rd_tag("\"a\"\"b\",c", rcfg(7)),
+    "OK:hdr=<none>;[0]a\\\"b/c/;nrows=1",
+  ) // r.7.7|OK:hdr=<none>;[0]a\\\"b/c/;nrows=1
+  assert_eq(rd_tag("\"a\nb\",c", rcfg(7)), "OK:hdr=<none>;[0]a\\nb/c/;nrows=1") // r.8.7|OK:hdr=<none>;[0]a\\nb/c/;nrows=1
   assert_eq(
     rd_tag("\"a\r\nb\",c", rcfg(7)),
-    "OK:hdr=<none>;[0]a\r\nb/c/;nrows=1",
-  ) // r.9.7|OK:hdr=<none>;[0]a\r\nb/c/;nrows=1
-  assert_eq(rd_tag("a\"b,c", rcfg(7)), "OK:hdr=<none>;[0]a\"b/c/;nrows=1") // r.10.7|OK:hdr=<none>;[0]a\"b/c/;nrows=1
+    "OK:hdr=<none>;[0]a\\r\\nb/c/;nrows=1",
+  ) // r.9.7|OK:hdr=<none>;[0]a\\r\\nb/c/;nrows=1
+  assert_eq(rd_tag("a\"b,c", rcfg(7)), "OK:hdr=<none>;[0]a\\\"b/c/;nrows=1") // r.10.7|OK:hdr=<none>;[0]a\\\"b/c/;nrows=1
   assert_eq(rd_tag("\"\",c", rcfg(7)), "OK:hdr=<none>;[0]/c/;nrows=1") // r.11.7|OK:hdr=<none>;[0]/c/;nrows=1
   assert_eq(rd_tag("a,,c", rcfg(7)), "OK:hdr=<none>;[0]a//c/;nrows=1") // r.12.7|OK:hdr=<none>;[0]a//c/;nrows=1
   assert_eq(rd_tag(",,", rcfg(7)), "OK:hdr=<none>;[0]///;nrows=1") // r.13.7|OK:hdr=<none>;[0]///;nrows=1
@@ -480,9 +501,12 @@ test "csv 读：列数不等开关与 UnevenFields 档" {
   ) // r.18.7|OK:hdr=<none>;[0]a/b/;[2]c/d/;nrows=2
   assert_eq(
     rd_tag("a, \"b\" ,c", rcfg(7)),
-    "OK:hdr=<none>;[0]a/ \"b\" /c/;nrows=1",
-  ) // r.19.7|OK:hdr=<none>;[0]a/ \"b\" /c/;nrows=1
-  assert_eq(rd_tag("\"a\"x,b", rcfg(7)), "OK:hdr=<none>;[0]\"a\"x/b/;nrows=1") // r.20.7|OK:hdr=<none>;[0]\"a\"x/b/;nrows=1
+    "OK:hdr=<none>;[0]a/ \\\"b\\\" /c/;nrows=1",
+  ) // r.19.7|OK:hdr=<none>;[0]a/ \\\"b\\\" /c/;nrows=1
+  assert_eq(
+    rd_tag("\"a\"x,b", rcfg(7)),
+    "OK:hdr=<none>;[0]\\\"a\\\"x/b/;nrows=1",
+  ) // r.20.7|OK:hdr=<none>;[0]\\\"a\\\"x/b/;nrows=1
   assert_eq(rd_tag(" a ,b", rcfg(7)), "OK:hdr=<none>;[0] a /b/;nrows=1") // r.21.7|OK:hdr=<none>;[0] a /b/;nrows=1
   assert_eq(rd_tag("a,b\nc", rcfg(7)), "UnevenFields[1,1,2]") // r.22.7|IORuntimeException:Line 1 has 1 fields, but first line has 2 fields
   assert_eq(
@@ -559,13 +583,16 @@ test "csv 读：其余 7 档配置全表" {
   assert_eq(rd_tag("a,b,c\rd,e,f", rcfg(6)), "OK:hdr=<none>;[0]a/b/c/;nrows=1") // r.4.6|OK:hdr=<none>;[0]a/b/c/;nrows=1
   assert_eq(rd_tag("\"a\",\"b\"", rcfg(6)), "OK:hdr=<none>;[0]a/b/;nrows=1") // r.5.6|OK:hdr=<none>;[0]a/b/;nrows=1
   assert_eq(rd_tag("\"a,b\",c", rcfg(6)), "OK:hdr=<none>;[0]a,b/c/;nrows=1") // r.6.6|OK:hdr=<none>;[0]a,b/c/;nrows=1
-  assert_eq(rd_tag("\"a\"\"b\",c", rcfg(6)), "OK:hdr=<none>;[0]a\"b/c/;nrows=1") // r.7.6|OK:hdr=<none>;[0]a\"b/c/;nrows=1
-  assert_eq(rd_tag("\"a\nb\",c", rcfg(6)), "OK:hdr=<none>;[0]a\nb/c/;nrows=1") // r.8.6|OK:hdr=<none>;[0]a\nb/c/;nrows=1
+  assert_eq(
+    rd_tag("\"a\"\"b\",c", rcfg(6)),
+    "OK:hdr=<none>;[0]a\\\"b/c/;nrows=1",
+  ) // r.7.6|OK:hdr=<none>;[0]a\\\"b/c/;nrows=1
+  assert_eq(rd_tag("\"a\nb\",c", rcfg(6)), "OK:hdr=<none>;[0]a\\nb/c/;nrows=1") // r.8.6|OK:hdr=<none>;[0]a\\nb/c/;nrows=1
   assert_eq(
     rd_tag("\"a\r\nb\",c", rcfg(6)),
-    "OK:hdr=<none>;[0]a\r\nb/c/;nrows=1",
-  ) // r.9.6|OK:hdr=<none>;[0]a\r\nb/c/;nrows=1
-  assert_eq(rd_tag("a\"b,c", rcfg(6)), "OK:hdr=<none>;[0]a\"b/c/;nrows=1") // r.10.6|OK:hdr=<none>;[0]a\"b/c/;nrows=1
+    "OK:hdr=<none>;[0]a\\r\\nb/c/;nrows=1",
+  ) // r.9.6|OK:hdr=<none>;[0]a\\r\\nb/c/;nrows=1
+  assert_eq(rd_tag("a\"b,c", rcfg(6)), "OK:hdr=<none>;[0]a\\\"b/c/;nrows=1") // r.10.6|OK:hdr=<none>;[0]a\\\"b/c/;nrows=1
   assert_eq(rd_tag("\"\",c", rcfg(6)), "OK:hdr=<none>;[0]/c/;nrows=1") // r.11.6|OK:hdr=<none>;[0]/c/;nrows=1
   assert_eq(rd_tag("a,,c", rcfg(6)), "OK:hdr=<none>;[0]a//c/;nrows=1") // r.12.6|OK:hdr=<none>;[0]a//c/;nrows=1
   assert_eq(rd_tag(",,", rcfg(6)), "OK:hdr=<none>;[0]///;nrows=1") // r.13.6|OK:hdr=<none>;[0]///;nrows=1
@@ -576,9 +603,12 @@ test "csv 读：其余 7 档配置全表" {
   assert_eq(rd_tag("a,b\n#cmt\nc,d", rcfg(6)), "OK:hdr=<none>;[0]a/b/;nrows=1") // r.18.6|OK:hdr=<none>;[0]a/b/;nrows=1
   assert_eq(
     rd_tag("a, \"b\" ,c", rcfg(6)),
-    "OK:hdr=<none>;[0]a/ \"b\" /c/;nrows=1",
-  ) // r.19.6|OK:hdr=<none>;[0]a/ \"b\" /c/;nrows=1
-  assert_eq(rd_tag("\"a\"x,b", rcfg(6)), "OK:hdr=<none>;[0]\"a\"x/b/;nrows=1") // r.20.6|OK:hdr=<none>;[0]\"a\"x/b/;nrows=1
+    "OK:hdr=<none>;[0]a/ \\\"b\\\" /c/;nrows=1",
+  ) // r.19.6|OK:hdr=<none>;[0]a/ \\\"b\\\" /c/;nrows=1
+  assert_eq(
+    rd_tag("\"a\"x,b", rcfg(6)),
+    "OK:hdr=<none>;[0]\\\"a\\\"x/b/;nrows=1",
+  ) // r.20.6|OK:hdr=<none>;[0]\\\"a\\\"x/b/;nrows=1
   assert_eq(rd_tag(" a ,b", rcfg(6)), "OK:hdr=<none>;[0] a /b/;nrows=1") // r.21.6|OK:hdr=<none>;[0] a /b/;nrows=1
   assert_eq(rd_tag("a,b\nc", rcfg(6)), "OK:hdr=<none>;[0]a/b/;nrows=1") // r.22.6|OK:hdr=<none>;[0]a/b/;nrows=1
   assert_eq(
@@ -616,22 +646,28 @@ test "csv 读：其余 7 档配置全表" {
     rd_tag("a,b,c\rd,e,f", rcfg(8)),
     "OK:hdr=<none>;[0]a,b,c/;[1]d,e,f/;nrows=2",
   ) // r.4.8|OK:hdr=<none>;[0]a,b,c/;[1]d,e,f/;nrows=2
-  assert_eq(rd_tag("\"a\",\"b\"", rcfg(8)), "OK:hdr=<none>;[0]a\",\"b/;nrows=1") // r.5.8|OK:hdr=<none>;[0]a\",\"b/;nrows=1
-  assert_eq(rd_tag("\"a,b\",c", rcfg(8)), "OK:hdr=<none>;[0]\"a,b\",c/;nrows=1") // r.6.8|OK:hdr=<none>;[0]\"a,b\",c/;nrows=1
+  assert_eq(
+    rd_tag("\"a\",\"b\"", rcfg(8)),
+    "OK:hdr=<none>;[0]a\\\",\\\"b/;nrows=1",
+  ) // r.5.8|OK:hdr=<none>;[0]a\\\",\\\"b/;nrows=1
+  assert_eq(
+    rd_tag("\"a,b\",c", rcfg(8)),
+    "OK:hdr=<none>;[0]\\\"a,b\\\",c/;nrows=1",
+  ) // r.6.8|OK:hdr=<none>;[0]\\\"a,b\\\",c/;nrows=1
   assert_eq(
     rd_tag("\"a\"\"b\",c", rcfg(8)),
-    "OK:hdr=<none>;[0]\"a\"b\",c/;nrows=1",
-  ) // r.7.8|OK:hdr=<none>;[0]\"a\"b\",c/;nrows=1
+    "OK:hdr=<none>;[0]\\\"a\\\"b\\\",c/;nrows=1",
+  ) // r.7.8|OK:hdr=<none>;[0]\\\"a\\\"b\\\",c/;nrows=1
   assert_eq(
     rd_tag("\"a\nb\",c", rcfg(8)),
-    "OK:hdr=<none>;[0]\"a\nb\",c/;nrows=1",
-  ) // r.8.8|OK:hdr=<none>;[0]\"a\nb\",c/;nrows=1
+    "OK:hdr=<none>;[0]\\\"a\\nb\\\",c/;nrows=1",
+  ) // r.8.8|OK:hdr=<none>;[0]\\\"a\\nb\\\",c/;nrows=1
   assert_eq(
     rd_tag("\"a\r\nb\",c", rcfg(8)),
-    "OK:hdr=<none>;[0]\"a\r\nb\",c/;nrows=1",
-  ) // r.9.8|OK:hdr=<none>;[0]\"a\r\nb\",c/;nrows=1
-  assert_eq(rd_tag("a\"b,c", rcfg(8)), "OK:hdr=<none>;[0]a\"b,c/;nrows=1") // r.10.8|OK:hdr=<none>;[0]a\"b,c/;nrows=1
-  assert_eq(rd_tag("\"\",c", rcfg(8)), "OK:hdr=<none>;[0]\"\",c/;nrows=1") // r.11.8|OK:hdr=<none>;[0]\"\",c/;nrows=1
+    "OK:hdr=<none>;[0]\\\"a\\r\\nb\\\",c/;nrows=1",
+  ) // r.9.8|OK:hdr=<none>;[0]\\\"a\\r\\nb\\\",c/;nrows=1
+  assert_eq(rd_tag("a\"b,c", rcfg(8)), "OK:hdr=<none>;[0]a\\\"b,c/;nrows=1") // r.10.8|OK:hdr=<none>;[0]a\\\"b,c/;nrows=1
+  assert_eq(rd_tag("\"\",c", rcfg(8)), "OK:hdr=<none>;[0]\\\"\\\",c/;nrows=1") // r.11.8|OK:hdr=<none>;[0]\\\"\\\",c/;nrows=1
   assert_eq(rd_tag("a,,c", rcfg(8)), "OK:hdr=<none>;[0]a,,c/;nrows=1") // r.12.8|OK:hdr=<none>;[0]a,,c/;nrows=1
   assert_eq(rd_tag(",,", rcfg(8)), "OK:hdr=<none>;[0],,/;nrows=1") // r.13.8|OK:hdr=<none>;[0],,/;nrows=1
   assert_eq(rd_tag("", rcfg(8)), "OK:hdr=<none>;nrows=0") // r.14.8|OK:hdr=<none>;nrows=0
@@ -647,9 +683,12 @@ test "csv 读：其余 7 档配置全表" {
   ) // r.18.8|OK:hdr=<none>;[0]a,b/;[2]c,d/;nrows=2
   assert_eq(
     rd_tag("a, \"b\" ,c", rcfg(8)),
-    "OK:hdr=<none>;[0]a, \"b\" ,c/;nrows=1",
-  ) // r.19.8|OK:hdr=<none>;[0]a, \"b\" ,c/;nrows=1
-  assert_eq(rd_tag("\"a\"x,b", rcfg(8)), "OK:hdr=<none>;[0]\"a\"x,b/;nrows=1") // r.20.8|OK:hdr=<none>;[0]\"a\"x,b/;nrows=1
+    "OK:hdr=<none>;[0]a, \\\"b\\\" ,c/;nrows=1",
+  ) // r.19.8|OK:hdr=<none>;[0]a, \\\"b\\\" ,c/;nrows=1
+  assert_eq(
+    rd_tag("\"a\"x,b", rcfg(8)),
+    "OK:hdr=<none>;[0]\\\"a\\\"x,b/;nrows=1",
+  ) // r.20.8|OK:hdr=<none>;[0]\\\"a\\\"x,b/;nrows=1
   assert_eq(rd_tag(" a ,b", rcfg(8)), "OK:hdr=<none>;[0] a ,b/;nrows=1") // r.21.8|OK:hdr=<none>;[0] a ,b/;nrows=1
   assert_eq(rd_tag("a,b\nc", rcfg(8)), "OK:hdr=<none>;[0]a,b/;[1]c/;nrows=2") // r.22.8|OK:hdr=<none>;[0]a,b/;[1]c/;nrows=2
   assert_eq(
@@ -661,7 +700,10 @@ test "csv 读：其余 7 档配置全表" {
     "OK:hdr=<none>;[0]h1,h2/;[1]v1/;nrows=2",
   ) // r.24.8|OK:hdr=<none>;[0]h1,h2/;[1]v1/;nrows=2
   assert_eq(rd_tag("a;b,c", rcfg(8)), "OK:hdr=<none>;[0]a/b,c/;nrows=1") // r.25.8|OK:hdr=<none>;[0]a/b,c/;nrows=1
-  assert_eq(rd_tag("\"a\",\"\"", rcfg(8)), "OK:hdr=<none>;[0]a\",\"/;nrows=1") // r.26.8|OK:hdr=<none>;[0]a\",\"/;nrows=1
+  assert_eq(
+    rd_tag("\"a\",\"\"", rcfg(8)),
+    "OK:hdr=<none>;[0]a\\\",\\\"/;nrows=1",
+  ) // r.26.8|OK:hdr=<none>;[0]a\\\",\\\"/;nrows=1
   assert_eq(rd_tag("a,b,", rcfg(8)), "OK:hdr=<none>;[0]a,b,/;nrows=1") // r.27.8|OK:hdr=<none>;[0]a,b,/;nrows=1
   assert_eq(
     rd_tag("a,中文,c", rcfg(8)),
@@ -669,8 +711,8 @@ test "csv 读：其余 7 档配置全表" {
   ) // r.28.8|OK:hdr=<none>;[0]a,中文,c/;nrows=1
   assert_eq(
     rd_tag("\"a\u{0000}b\",c", rcfg(8)),
-    "OK:hdr=<none>;[0]\"a\u{0000}b\",c/;nrows=1",
-  ) // r.29.8|OK:hdr=<none>;[0]\"a\u{0000}b\",c/;nrows=1
+    "OK:hdr=<none>;[0]\\\"a\u{0000}b\\\",c/;nrows=1",
+  ) // r.29.8|OK:hdr=<none>;[0]\\\"a\u{0000}b\\\",c/;nrows=1
   assert_eq(rd_tag("a", rcfg(8)), "OK:hdr=<none>;[0]a/;nrows=1") // r.30.8|OK:hdr=<none>;[0]a/;nrows=1
   assert_eq(
     rd_tag("x,y\n\"unclosed,z", rcfg(8)),
@@ -692,23 +734,26 @@ test "csv 读：其余 7 档配置全表" {
   ) // r.4.9|OK:hdr=<none>;[0]a/b/c/;[1]d/e/f/;nrows=2
   assert_eq(
     rd_tag("\"a\",\"b\"", rcfg(9)),
-    "OK:hdr=<none>;[0]\"a\"/\"b\"/;nrows=1",
-  ) // r.5.9|OK:hdr=<none>;[0]\"a\"/\"b\"/;nrows=1
-  assert_eq(rd_tag("\"a,b\",c", rcfg(9)), "OK:hdr=<none>;[0]\"a/b\"/c/;nrows=1") // r.6.9|OK:hdr=<none>;[0]\"a/b\"/c/;nrows=1
+    "OK:hdr=<none>;[0]\\\"a\\\"/\\\"b\\\"/;nrows=1",
+  ) // r.5.9|OK:hdr=<none>;[0]\\\"a\\\"/\\\"b\\\"/;nrows=1
+  assert_eq(
+    rd_tag("\"a,b\",c", rcfg(9)),
+    "OK:hdr=<none>;[0]\\\"a/b\\\"/c/;nrows=1",
+  ) // r.6.9|OK:hdr=<none>;[0]\\\"a/b\\\"/c/;nrows=1
   assert_eq(
     rd_tag("\"a\"\"b\",c", rcfg(9)),
-    "OK:hdr=<none>;[0]\"a\"\"b\"/c/;nrows=1",
-  ) // r.7.9|OK:hdr=<none>;[0]\"a\"\"b\"/c/;nrows=1
+    "OK:hdr=<none>;[0]\\\"a\\\"\\\"b\\\"/c/;nrows=1",
+  ) // r.7.9|OK:hdr=<none>;[0]\\\"a\\\"\\\"b\\\"/c/;nrows=1
   assert_eq(
     rd_tag("\"a\nb\",c", rcfg(9)),
-    "OK:hdr=<none>;[0]\"a/;[1]b\"/c/;nrows=2",
-  ) // r.8.9|OK:hdr=<none>;[0]\"a/;[1]b\"/c/;nrows=2
+    "OK:hdr=<none>;[0]\\\"a/;[1]b\\\"/c/;nrows=2",
+  ) // r.8.9|OK:hdr=<none>;[0]\\\"a/;[1]b\\\"/c/;nrows=2
   assert_eq(
     rd_tag("\"a\r\nb\",c", rcfg(9)),
-    "OK:hdr=<none>;[0]\"a/;[1]b\"/c/;nrows=2",
-  ) // r.9.9|OK:hdr=<none>;[0]\"a/;[1]b\"/c/;nrows=2
-  assert_eq(rd_tag("a\"b,c", rcfg(9)), "OK:hdr=<none>;[0]a\"b/c/;nrows=1") // r.10.9|OK:hdr=<none>;[0]a\"b/c/;nrows=1
-  assert_eq(rd_tag("\"\",c", rcfg(9)), "OK:hdr=<none>;[0]\"\"/c/;nrows=1") // r.11.9|OK:hdr=<none>;[0]\"\"/c/;nrows=1
+    "OK:hdr=<none>;[0]\\\"a/;[1]b\\\"/c/;nrows=2",
+  ) // r.9.9|OK:hdr=<none>;[0]\\\"a/;[1]b\\\"/c/;nrows=2
+  assert_eq(rd_tag("a\"b,c", rcfg(9)), "OK:hdr=<none>;[0]a\\\"b/c/;nrows=1") // r.10.9|OK:hdr=<none>;[0]a\\\"b/c/;nrows=1
+  assert_eq(rd_tag("\"\",c", rcfg(9)), "OK:hdr=<none>;[0]\\\"\\\"/c/;nrows=1") // r.11.9|OK:hdr=<none>;[0]\\\"\\\"/c/;nrows=1
   assert_eq(rd_tag("a,,c", rcfg(9)), "OK:hdr=<none>;[0]a//c/;nrows=1") // r.12.9|OK:hdr=<none>;[0]a//c/;nrows=1
   assert_eq(rd_tag(",,", rcfg(9)), "OK:hdr=<none>;[0]///;nrows=1") // r.13.9|OK:hdr=<none>;[0]///;nrows=1
   assert_eq(rd_tag("", rcfg(9)), "OK:hdr=<none>;nrows=0") // r.14.9|OK:hdr=<none>;nrows=0
@@ -724,9 +769,12 @@ test "csv 读：其余 7 档配置全表" {
   ) // r.18.9|OK:hdr=<none>;[0]a/b/;[2]c/d/;nrows=2
   assert_eq(
     rd_tag("a, \"b\" ,c", rcfg(9)),
-    "OK:hdr=<none>;[0]a/ \"b\" /c/;nrows=1",
-  ) // r.19.9|OK:hdr=<none>;[0]a/ \"b\" /c/;nrows=1
-  assert_eq(rd_tag("\"a\"x,b", rcfg(9)), "OK:hdr=<none>;[0]\"a\"x/b/;nrows=1") // r.20.9|OK:hdr=<none>;[0]\"a\"x/b/;nrows=1
+    "OK:hdr=<none>;[0]a/ \\\"b\\\" /c/;nrows=1",
+  ) // r.19.9|OK:hdr=<none>;[0]a/ \\\"b\\\" /c/;nrows=1
+  assert_eq(
+    rd_tag("\"a\"x,b", rcfg(9)),
+    "OK:hdr=<none>;[0]\\\"a\\\"x/b/;nrows=1",
+  ) // r.20.9|OK:hdr=<none>;[0]\\\"a\\\"x/b/;nrows=1
   assert_eq(rd_tag(" a ,b", rcfg(9)), "OK:hdr=<none>;[0] a /b/;nrows=1") // r.21.9|OK:hdr=<none>;[0] a /b/;nrows=1
   assert_eq(rd_tag("a,b\nc", rcfg(9)), "OK:hdr=<none>;[0]a/b/;[1]c/;nrows=2") // r.22.9|OK:hdr=<none>;[0]a/b/;[1]c/;nrows=2
   assert_eq(
@@ -740,8 +788,8 @@ test "csv 读：其余 7 档配置全表" {
   assert_eq(rd_tag("a;b,c", rcfg(9)), "OK:hdr=<none>;[0]a;b/c/;nrows=1") // r.25.9|OK:hdr=<none>;[0]a;b/c/;nrows=1
   assert_eq(
     rd_tag("\"a\",\"\"", rcfg(9)),
-    "OK:hdr=<none>;[0]\"a\"/\"\"/;nrows=1",
-  ) // r.26.9|OK:hdr=<none>;[0]\"a\"/\"\"/;nrows=1
+    "OK:hdr=<none>;[0]\\\"a\\\"/\\\"\\\"/;nrows=1",
+  ) // r.26.9|OK:hdr=<none>;[0]\\\"a\\\"/\\\"\\\"/;nrows=1
   assert_eq(rd_tag("a,b,", rcfg(9)), "OK:hdr=<none>;[0]a/b//;nrows=1") // r.27.9|OK:hdr=<none>;[0]a/b//;nrows=1
   assert_eq(
     rd_tag("a,中文,c", rcfg(9)),
@@ -749,13 +797,13 @@ test "csv 读：其余 7 档配置全表" {
   ) // r.28.9|OK:hdr=<none>;[0]a/中文/c/;nrows=1
   assert_eq(
     rd_tag("\"a\u{0000}b\",c", rcfg(9)),
-    "OK:hdr=<none>;[0]\"a\u{0000}b\"/c/;nrows=1",
-  ) // r.29.9|OK:hdr=<none>;[0]\"a\u{0000}b\"/c/;nrows=1
+    "OK:hdr=<none>;[0]\\\"a\u{0000}b\\\"/c/;nrows=1",
+  ) // r.29.9|OK:hdr=<none>;[0]\\\"a\u{0000}b\\\"/c/;nrows=1
   assert_eq(rd_tag("a", rcfg(9)), "OK:hdr=<none>;[0]a/;nrows=1") // r.30.9|OK:hdr=<none>;[0]a/;nrows=1
   assert_eq(
     rd_tag("x,y\n\"unclosed,z", rcfg(9)),
-    "OK:hdr=<none>;[0]x/y/;[1]\"unclosed/z/;nrows=2",
-  ) // r.31.9|OK:hdr=<none>;[0]x/y/;[1]\"unclosed/z/;nrows=2
+    "OK:hdr=<none>;[0]x/y/;[1]\\\"unclosed/z/;nrows=2",
+  ) // r.31.9|OK:hdr=<none>;[0]x/y/;[1]\\\"unclosed/z/;nrows=2
   assert_eq(rd_tag("a,b,c", rcfg(10)), "OK:hdr=<none>;[0]a/b/c/;nrows=1") // r.0.10|OK:hdr=<none>;[0]a/b/c/;nrows=1
   assert_eq(rd_tag("a,b,c\n", rcfg(10)), "OK:hdr=<none>;[0]a/b/c/;nrows=1") // r.1.10|OK:hdr=<none>;[0]a/b/c/;nrows=1
   assert_eq(
@@ -774,14 +822,14 @@ test "csv 读：其余 7 档配置全表" {
   assert_eq(rd_tag("\"a,b\",c", rcfg(10)), "OK:hdr=<none>;[0]a,b/c/;nrows=1") // r.6.10|OK:hdr=<none>;[0]a,b/c/;nrows=1
   assert_eq(
     rd_tag("\"a\"\"b\",c", rcfg(10)),
-    "OK:hdr=<none>;[0]a\"b/c/;nrows=1",
-  ) // r.7.10|OK:hdr=<none>;[0]a\"b/c/;nrows=1
-  assert_eq(rd_tag("\"a\nb\",c", rcfg(10)), "OK:hdr=<none>;[0]a\nb/c/;nrows=1") // r.8.10|OK:hdr=<none>;[0]a\nb/c/;nrows=1
+    "OK:hdr=<none>;[0]a\\\"b/c/;nrows=1",
+  ) // r.7.10|OK:hdr=<none>;[0]a\\\"b/c/;nrows=1
+  assert_eq(rd_tag("\"a\nb\",c", rcfg(10)), "OK:hdr=<none>;[0]a\\nb/c/;nrows=1") // r.8.10|OK:hdr=<none>;[0]a\\nb/c/;nrows=1
   assert_eq(
     rd_tag("\"a\r\nb\",c", rcfg(10)),
-    "OK:hdr=<none>;[0]a\r\nb/c/;nrows=1",
-  ) // r.9.10|OK:hdr=<none>;[0]a\r\nb/c/;nrows=1
-  assert_eq(rd_tag("a\"b,c", rcfg(10)), "OK:hdr=<none>;[0]a\"b/c/;nrows=1") // r.10.10|OK:hdr=<none>;[0]a\"b/c/;nrows=1
+    "OK:hdr=<none>;[0]a\\r\\nb/c/;nrows=1",
+  ) // r.9.10|OK:hdr=<none>;[0]a\\r\\nb/c/;nrows=1
+  assert_eq(rd_tag("a\"b,c", rcfg(10)), "OK:hdr=<none>;[0]a\\\"b/c/;nrows=1") // r.10.10|OK:hdr=<none>;[0]a\\\"b/c/;nrows=1
   assert_eq(rd_tag("\"\",c", rcfg(10)), "OK:hdr=<none>;[0]/c/;nrows=1") // r.11.10|OK:hdr=<none>;[0]/c/;nrows=1
   assert_eq(rd_tag("a,,c", rcfg(10)), "OK:hdr=<none>;[0]a//c/;nrows=1") // r.12.10|OK:hdr=<none>;[0]a//c/;nrows=1
   assert_eq(rd_tag(",,", rcfg(10)), "OK:hdr=<none>;[0]///;nrows=1") // r.13.10|OK:hdr=<none>;[0]///;nrows=1
@@ -801,9 +849,12 @@ test "csv 读：其余 7 档配置全表" {
   ) // r.18.10|OK:hdr=<none>;[0]a/b/;[1]#cmt/;[2]c/d/;nrows=3
   assert_eq(
     rd_tag("a, \"b\" ,c", rcfg(10)),
-    "OK:hdr=<none>;[0]a/ \"b\" /c/;nrows=1",
-  ) // r.19.10|OK:hdr=<none>;[0]a/ \"b\" /c/;nrows=1
-  assert_eq(rd_tag("\"a\"x,b", rcfg(10)), "OK:hdr=<none>;[0]\"a\"x/b/;nrows=1") // r.20.10|OK:hdr=<none>;[0]\"a\"x/b/;nrows=1
+    "OK:hdr=<none>;[0]a/ \\\"b\\\" /c/;nrows=1",
+  ) // r.19.10|OK:hdr=<none>;[0]a/ \\\"b\\\" /c/;nrows=1
+  assert_eq(
+    rd_tag("\"a\"x,b", rcfg(10)),
+    "OK:hdr=<none>;[0]\\\"a\\\"x/b/;nrows=1",
+  ) // r.20.10|OK:hdr=<none>;[0]\\\"a\\\"x/b/;nrows=1
   assert_eq(rd_tag(" a ,b", rcfg(10)), "OK:hdr=<none>;[0] a /b/;nrows=1") // r.21.10|OK:hdr=<none>;[0] a /b/;nrows=1
   assert_eq(rd_tag("a,b\nc", rcfg(10)), "OK:hdr=<none>;[0]a/b/;[1]c/;nrows=2") // r.22.10|OK:hdr=<none>;[0]a/b/;[1]c/;nrows=2
   assert_eq(
@@ -846,10 +897,10 @@ test "csv 读：其余 7 档配置全表" {
   ) // r.4.11|OK:hdr=a|b|c;[1]d/e/f/;nrows=1;byName=d
   assert_eq(rd_tag("\"a\",\"b\"", rcfg(11)), "OK:hdr=a|b;nrows=0") // r.5.11|OK:hdr=a|b;nrows=0
   assert_eq(rd_tag("\"a,b\",c", rcfg(11)), "OK:hdr=a,b|c;nrows=0") // r.6.11|OK:hdr=a,b|c;nrows=0
-  assert_eq(rd_tag("\"a\"\"b\",c", rcfg(11)), "OK:hdr=a\"b|c;nrows=0") // r.7.11|OK:hdr=a\"b|c;nrows=0
-  assert_eq(rd_tag("\"a\nb\",c", rcfg(11)), "OK:hdr=a\nb|c;nrows=0") // r.8.11|OK:hdr=a\nb|c;nrows=0
-  assert_eq(rd_tag("\"a\r\nb\",c", rcfg(11)), "OK:hdr=a\r\nb|c;nrows=0") // r.9.11|OK:hdr=a\r\nb|c;nrows=0
-  assert_eq(rd_tag("a\"b,c", rcfg(11)), "OK:hdr=a\"b|c;nrows=0") // r.10.11|OK:hdr=a\"b|c;nrows=0
+  assert_eq(rd_tag("\"a\"\"b\",c", rcfg(11)), "OK:hdr=a\\\"b|c;nrows=0") // r.7.11|OK:hdr=a\\\"b|c;nrows=0
+  assert_eq(rd_tag("\"a\nb\",c", rcfg(11)), "OK:hdr=a\\nb|c;nrows=0") // r.8.11|OK:hdr=a\\nb|c;nrows=0
+  assert_eq(rd_tag("\"a\r\nb\",c", rcfg(11)), "OK:hdr=a\\r\\nb|c;nrows=0") // r.9.11|OK:hdr=a\\r\\nb|c;nrows=0
+  assert_eq(rd_tag("a\"b,c", rcfg(11)), "OK:hdr=a\\\"b|c;nrows=0") // r.10.11|OK:hdr=a\\\"b|c;nrows=0
   assert_eq(rd_tag("\"\",c", rcfg(11)), "OK:hdr=|c;nrows=0") // r.11.11|OK:hdr=|c;nrows=0
   assert_eq(rd_tag("a,,c", rcfg(11)), "OK:hdr=a||c;nrows=0") // r.12.11|OK:hdr=a||c;nrows=0
   assert_eq(rd_tag(",,", rcfg(11)), "OK:hdr=||;nrows=0") // r.13.11|OK:hdr=||;nrows=0
@@ -861,8 +912,8 @@ test "csv 读：其余 7 档配置全表" {
     rd_tag("a,b\n#cmt\nc,d", rcfg(11)),
     "OK:hdr=a|b;[2]c/d/;nrows=1;byName=c",
   ) // r.18.11|OK:hdr=a|b;[2]c/d/;nrows=1;byName=c
-  assert_eq(rd_tag("a, \"b\" ,c", rcfg(11)), "OK:hdr=a| \"b\" |c;nrows=0") // r.19.11|OK:hdr=a| \"b\" |c;nrows=0
-  assert_eq(rd_tag("\"a\"x,b", rcfg(11)), "OK:hdr=\"a\"x|b;nrows=0") // r.20.11|OK:hdr=\"a\"x|b;nrows=0
+  assert_eq(rd_tag("a, \"b\" ,c", rcfg(11)), "OK:hdr=a| \\\"b\\\" |c;nrows=0") // r.19.11|OK:hdr=a| \\\"b\\\" |c;nrows=0
+  assert_eq(rd_tag("\"a\"x,b", rcfg(11)), "OK:hdr=\\\"a\\\"x|b;nrows=0") // r.20.11|OK:hdr=\\\"a\\\"x|b;nrows=0
   assert_eq(rd_tag(" a ,b", rcfg(11)), "OK:hdr= a |b;nrows=0") // r.21.11|OK:hdr= a |b;nrows=0
   assert_eq(rd_tag("a,b\nc", rcfg(11)), "OK:hdr=a|b;[1]c/;nrows=1;byName=c") // r.22.11|OK:hdr=a|b;[1]c/;nrows=1;byName=c
   assert_eq(
@@ -887,91 +938,169 @@ test "csv 读：其余 7 档配置全表" {
 
 ///|
 test "csv 写：12 个行集 x 7 档配置" {
-  assert_eq(wr_tag(wrow(0), wopts(0)), "OK:a,b\r\nz1,z2") // w.0.0|OK:a,b\r\nz1,z2
-  assert_eq(wr_tag(wrow(1), wopts(0)), "OK:\"a,b\",c\r\nz1,z2") // w.1.0|OK:\"a,b\",c\r\nz1,z2
-  assert_eq(wr_tag(wrow(2), wopts(0)), "OK:\"a\"\"b\",c\r\nz1,z2") // w.2.0|OK:\"a\"\"b\",c\r\nz1,z2
-  assert_eq(wr_tag(wrow(3), wopts(0)), "OK:\"a\nb\",c\r\nz1,z2") // w.3.0|OK:\"a\nb\",c\r\nz1,z2
-  assert_eq(wr_tag(wrow(4), wopts(0)), "OK:\"a\r\nb\"\r\nz1,z2") // w.4.0|OK:\"a\r\nb\"\r\nz1,z2
-  assert_eq(wr_tag(wrow(5), wopts(0)), "OK:\r\nz1,z2") // w.5.0|OK:\r\nz1,z2
-  assert_eq(wr_tag(wrow(6), wopts(0)), "OK:,b\r\nz1,z2") // w.6.0|OK:,b\r\nz1,z2
-  assert_eq(wr_tag(wrow(7), wopts(0)), "OK: a ,b\r\nz1,z2") // w.7.0|OK: a ,b\r\nz1,z2
-  assert_eq(wr_tag(wrow(8), wopts(0)), "OK:a,\r\nz1,z2") // w.8.0|OK:a,\r\nz1,z2
-  assert_eq(wr_tag(wrow(9), wopts(0)), "OK:中文,x\r\nz1,z2") // w.9.0|OK:中文,x\r\nz1,z2
-  assert_eq(wr_tag(wrow(10), wopts(0)), "OK:a\r\nz1,z2") // w.10.0|OK:a\r\nz1,z2
-  assert_eq(wr_tag(wrow(11), wopts(0)), "OK:\"\"\"a\"\"\",b\r\nz1,z2") // w.11.0|OK:\"\"\"a\"\"\",b\r\nz1,z2
-  assert_eq(wr_tag(wrow(0), wopts(1)), "OK:\"a\",\"b\"\r\n\"z1\",\"z2\"") // w.0.1|OK:\"a\",\"b\"\r\n\"z1\",\"z2\"
-  assert_eq(wr_tag(wrow(1), wopts(1)), "OK:\"a,b\",\"c\"\r\n\"z1\",\"z2\"") // w.1.1|OK:\"a,b\",\"c\"\r\n\"z1\",\"z2\"
-  assert_eq(wr_tag(wrow(2), wopts(1)), "OK:\"a\"\"b\",\"c\"\r\n\"z1\",\"z2\"") // w.2.1|OK:\"a\"\"b\",\"c\"\r\n\"z1\",\"z2\"
-  assert_eq(wr_tag(wrow(3), wopts(1)), "OK:\"a\nb\",\"c\"\r\n\"z1\",\"z2\"") // w.3.1|OK:\"a\nb\",\"c\"\r\n\"z1\",\"z2\"
-  assert_eq(wr_tag(wrow(4), wopts(1)), "OK:\"a\r\nb\"\r\n\"z1\",\"z2\"") // w.4.1|OK:\"a\r\nb\"\r\n\"z1\",\"z2\"
-  assert_eq(wr_tag(wrow(5), wopts(1)), "OK:\"\"\r\n\"z1\",\"z2\"") // w.5.1|OK:\"\"\r\n\"z1\",\"z2\"
-  assert_eq(wr_tag(wrow(6), wopts(1)), "OK:\"\",\"b\"\r\n\"z1\",\"z2\"") // w.6.1|OK:\"\",\"b\"\r\n\"z1\",\"z2\"
-  assert_eq(wr_tag(wrow(7), wopts(1)), "OK:\" a \",\"b\"\r\n\"z1\",\"z2\"") // w.7.1|OK:\" a \",\"b\"\r\n\"z1\",\"z2\"
-  assert_eq(wr_tag(wrow(8), wopts(1)), "OK:\"a\",\"\"\r\n\"z1\",\"z2\"") // w.8.1|OK:\"a\",\"\"\r\n\"z1\",\"z2\"
-  assert_eq(wr_tag(wrow(9), wopts(1)), "OK:\"中文\",\"x\"\r\n\"z1\",\"z2\"") // w.9.1|OK:\"中文\",\"x\"\r\n\"z1\",\"z2\"
-  assert_eq(wr_tag(wrow(10), wopts(1)), "OK:\"a\"\r\n\"z1\",\"z2\"") // w.10.1|OK:\"a\"\r\n\"z1\",\"z2\"
+  assert_eq(wr_tag(wrow(0), wopts(0)), "OK:a,b\\r\\nz1,z2") // w.0.0|OK:a,b\\r\\nz1,z2
+  assert_eq(wr_tag(wrow(1), wopts(0)), "OK:\\\"a,b\\\",c\\r\\nz1,z2") // w.1.0|OK:\\\"a,b\\\",c\\r\\nz1,z2
+  assert_eq(wr_tag(wrow(2), wopts(0)), "OK:\\\"a\\\"\\\"b\\\",c\\r\\nz1,z2") // w.2.0|OK:\\\"a\\\"\\\"b\\\",c\\r\\nz1,z2
+  assert_eq(wr_tag(wrow(3), wopts(0)), "OK:\\\"a\\nb\\\",c\\r\\nz1,z2") // w.3.0|OK:\\\"a\\nb\\\",c\\r\\nz1,z2
+  assert_eq(wr_tag(wrow(4), wopts(0)), "OK:\\\"a\\r\\nb\\\"\\r\\nz1,z2") // w.4.0|OK:\\\"a\\r\\nb\\\"\\r\\nz1,z2
+  assert_eq(wr_tag(wrow(5), wopts(0)), "OK:\\r\\nz1,z2") // w.5.0|OK:\\r\\nz1,z2
+  assert_eq(wr_tag(wrow(6), wopts(0)), "OK:,b\\r\\nz1,z2") // w.6.0|OK:,b\\r\\nz1,z2
+  assert_eq(wr_tag(wrow(7), wopts(0)), "OK: a ,b\\r\\nz1,z2") // w.7.0|OK: a ,b\\r\\nz1,z2
+  assert_eq(wr_tag(wrow(8), wopts(0)), "OK:a,\\r\\nz1,z2") // w.8.0|OK:a,\\r\\nz1,z2
+  assert_eq(wr_tag(wrow(9), wopts(0)), "OK:中文,x\\r\\nz1,z2") // w.9.0|OK:中文,x\\r\\nz1,z2
+  assert_eq(wr_tag(wrow(10), wopts(0)), "OK:a\\r\\nz1,z2") // w.10.0|OK:a\\r\\nz1,z2
+  assert_eq(
+    wr_tag(wrow(11), wopts(0)),
+    "OK:\\\"\\\"\\\"a\\\"\\\"\\\",b\\r\\nz1,z2",
+  ) // w.11.0|OK:\\\"\\\"\\\"a\\\"\\\"\\\",b\\r\\nz1,z2
+  assert_eq(
+    wr_tag(wrow(0), wopts(1)),
+    "OK:\\\"a\\\",\\\"b\\\"\\r\\n\\\"z1\\\",\\\"z2\\\"",
+  ) // w.0.1|OK:\\\"a\\\",\\\"b\\\"\\r\\n\\\"z1\\\",\\\"z2\\\"
+  assert_eq(
+    wr_tag(wrow(1), wopts(1)),
+    "OK:\\\"a,b\\\",\\\"c\\\"\\r\\n\\\"z1\\\",\\\"z2\\\"",
+  ) // w.1.1|OK:\\\"a,b\\\",\\\"c\\\"\\r\\n\\\"z1\\\",\\\"z2\\\"
+  assert_eq(
+    wr_tag(wrow(2), wopts(1)),
+    "OK:\\\"a\\\"\\\"b\\\",\\\"c\\\"\\r\\n\\\"z1\\\",\\\"z2\\\"",
+  ) // w.2.1|OK:\\\"a\\\"\\\"b\\\",\\\"c\\\"\\r\\n\\\"z1\\\",\\\"z2\\\"
+  assert_eq(
+    wr_tag(wrow(3), wopts(1)),
+    "OK:\\\"a\\nb\\\",\\\"c\\\"\\r\\n\\\"z1\\\",\\\"z2\\\"",
+  ) // w.3.1|OK:\\\"a\\nb\\\",\\\"c\\\"\\r\\n\\\"z1\\\",\\\"z2\\\"
+  assert_eq(
+    wr_tag(wrow(4), wopts(1)),
+    "OK:\\\"a\\r\\nb\\\"\\r\\n\\\"z1\\\",\\\"z2\\\"",
+  ) // w.4.1|OK:\\\"a\\r\\nb\\\"\\r\\n\\\"z1\\\",\\\"z2\\\"
+  assert_eq(wr_tag(wrow(5), wopts(1)), "OK:\\\"\\\"\\r\\n\\\"z1\\\",\\\"z2\\\"") // w.5.1|OK:\\\"\\\"\\r\\n\\\"z1\\\",\\\"z2\\\"
+  assert_eq(
+    wr_tag(wrow(6), wopts(1)),
+    "OK:\\\"\\\",\\\"b\\\"\\r\\n\\\"z1\\\",\\\"z2\\\"",
+  ) // w.6.1|OK:\\\"\\\",\\\"b\\\"\\r\\n\\\"z1\\\",\\\"z2\\\"
+  assert_eq(
+    wr_tag(wrow(7), wopts(1)),
+    "OK:\\\" a \\\",\\\"b\\\"\\r\\n\\\"z1\\\",\\\"z2\\\"",
+  ) // w.7.1|OK:\\\" a \\\",\\\"b\\\"\\r\\n\\\"z1\\\",\\\"z2\\\"
+  assert_eq(
+    wr_tag(wrow(8), wopts(1)),
+    "OK:\\\"a\\\",\\\"\\\"\\r\\n\\\"z1\\\",\\\"z2\\\"",
+  ) // w.8.1|OK:\\\"a\\\",\\\"\\\"\\r\\n\\\"z1\\\",\\\"z2\\\"
+  assert_eq(
+    wr_tag(wrow(9), wopts(1)),
+    "OK:\\\"中文\\\",\\\"x\\\"\\r\\n\\\"z1\\\",\\\"z2\\\"",
+  ) // w.9.1|OK:\\\"中文\\\",\\\"x\\\"\\r\\n\\\"z1\\\",\\\"z2\\\"
+  assert_eq(
+    wr_tag(wrow(10), wopts(1)),
+    "OK:\\\"a\\\"\\r\\n\\\"z1\\\",\\\"z2\\\"",
+  ) // w.10.1|OK:\\\"a\\\"\\r\\n\\\"z1\\\",\\\"z2\\\"
   assert_eq(
     wr_tag(wrow(11), wopts(1)),
-    "OK:\"\"\"a\"\"\",\"b\"\r\n\"z1\",\"z2\"",
-  ) // w.11.1|OK:\"\"\"a\"\"\",\"b\"\r\n\"z1\",\"z2\"
-  assert_eq(wr_tag(wrow(0), wopts(2)), "OK:a,b\nz1,z2") // w.0.2|OK:a,b\nz1,z2
-  assert_eq(wr_tag(wrow(1), wopts(2)), "OK:\"a,b\",c\nz1,z2") // w.1.2|OK:\"a,b\",c\nz1,z2
-  assert_eq(wr_tag(wrow(2), wopts(2)), "OK:\"a\"\"b\",c\nz1,z2") // w.2.2|OK:\"a\"\"b\",c\nz1,z2
-  assert_eq(wr_tag(wrow(3), wopts(2)), "OK:\"a\nb\",c\nz1,z2") // w.3.2|OK:\"a\nb\",c\nz1,z2
-  assert_eq(wr_tag(wrow(4), wopts(2)), "OK:\"a\r\nb\"\nz1,z2") // w.4.2|OK:\"a\r\nb\"\nz1,z2
-  assert_eq(wr_tag(wrow(5), wopts(2)), "OK:\nz1,z2") // w.5.2|OK:\nz1,z2
-  assert_eq(wr_tag(wrow(6), wopts(2)), "OK:,b\nz1,z2") // w.6.2|OK:,b\nz1,z2
-  assert_eq(wr_tag(wrow(7), wopts(2)), "OK: a ,b\nz1,z2") // w.7.2|OK: a ,b\nz1,z2
-  assert_eq(wr_tag(wrow(8), wopts(2)), "OK:a,\nz1,z2") // w.8.2|OK:a,\nz1,z2
-  assert_eq(wr_tag(wrow(9), wopts(2)), "OK:中文,x\nz1,z2") // w.9.2|OK:中文,x\nz1,z2
-  assert_eq(wr_tag(wrow(10), wopts(2)), "OK:a\nz1,z2") // w.10.2|OK:a\nz1,z2
-  assert_eq(wr_tag(wrow(11), wopts(2)), "OK:\"\"\"a\"\"\",b\nz1,z2") // w.11.2|OK:\"\"\"a\"\"\",b\nz1,z2
-  assert_eq(wr_tag(wrow(0), wopts(3)), "OK:a,b\r\nz1,z2") // w.0.3|OK:a,b\r\nz1,z2
-  assert_eq(wr_tag(wrow(1), wopts(3)), "OK:\"a,b\",c\r\nz1,z2") // w.1.3|OK:\"a,b\",c\r\nz1,z2
-  assert_eq(wr_tag(wrow(2), wopts(3)), "OK:\"a\"\"b\",c\r\nz1,z2") // w.2.3|OK:\"a\"\"b\",c\r\nz1,z2
-  assert_eq(wr_tag(wrow(3), wopts(3)), "OK:\"a\nb\",c\r\nz1,z2") // w.3.3|OK:\"a\nb\",c\r\nz1,z2
-  assert_eq(wr_tag(wrow(4), wopts(3)), "OK:\"a\r\nb\"\r\nz1,z2") // w.4.3|OK:\"a\r\nb\"\r\nz1,z2
-  assert_eq(wr_tag(wrow(5), wopts(3)), "OK:\r\nz1,z2") // w.5.3|OK:\r\nz1,z2
-  assert_eq(wr_tag(wrow(6), wopts(3)), "OK:,b\r\nz1,z2") // w.6.3|OK:,b\r\nz1,z2
-  assert_eq(wr_tag(wrow(7), wopts(3)), "OK: a ,b\r\nz1,z2") // w.7.3|OK: a ,b\r\nz1,z2
-  assert_eq(wr_tag(wrow(8), wopts(3)), "OK:a,\r\nz1,z2") // w.8.3|OK:a,\r\nz1,z2
-  assert_eq(wr_tag(wrow(9), wopts(3)), "OK:中文,x\r\nz1,z2") // w.9.3|OK:中文,x\r\nz1,z2
-  assert_eq(wr_tag(wrow(10), wopts(3)), "OK:a\r\nz1,z2") // w.10.3|OK:a\r\nz1,z2
-  assert_eq(wr_tag(wrow(11), wopts(3)), "OK:\"\"\"a\"\"\",b\r\nz1,z2") // w.11.3|OK:\"\"\"a\"\"\",b\r\nz1,z2
-  assert_eq(wr_tag(wrow(0), wopts(4)), "OK:a;b\r\nz1;z2") // w.0.4|OK:a;b\r\nz1;z2
-  assert_eq(wr_tag(wrow(1), wopts(4)), "OK:a,b;c\r\nz1;z2") // w.1.4|OK:a,b;c\r\nz1;z2
-  assert_eq(wr_tag(wrow(2), wopts(4)), "OK:\"a\"\"b\";c\r\nz1;z2") // w.2.4|OK:\"a\"\"b\";c\r\nz1;z2
-  assert_eq(wr_tag(wrow(3), wopts(4)), "OK:\"a\nb\";c\r\nz1;z2") // w.3.4|OK:\"a\nb\";c\r\nz1;z2
-  assert_eq(wr_tag(wrow(4), wopts(4)), "OK:\"a\r\nb\"\r\nz1;z2") // w.4.4|OK:\"a\r\nb\"\r\nz1;z2
-  assert_eq(wr_tag(wrow(5), wopts(4)), "OK:\r\nz1;z2") // w.5.4|OK:\r\nz1;z2
-  assert_eq(wr_tag(wrow(6), wopts(4)), "OK:;b\r\nz1;z2") // w.6.4|OK:;b\r\nz1;z2
-  assert_eq(wr_tag(wrow(7), wopts(4)), "OK: a ;b\r\nz1;z2") // w.7.4|OK: a ;b\r\nz1;z2
-  assert_eq(wr_tag(wrow(8), wopts(4)), "OK:a;\r\nz1;z2") // w.8.4|OK:a;\r\nz1;z2
-  assert_eq(wr_tag(wrow(9), wopts(4)), "OK:中文;x\r\nz1;z2") // w.9.4|OK:中文;x\r\nz1;z2
-  assert_eq(wr_tag(wrow(10), wopts(4)), "OK:a\r\nz1;z2") // w.10.4|OK:a\r\nz1;z2
-  assert_eq(wr_tag(wrow(11), wopts(4)), "OK:\"\"\"a\"\"\";b\r\nz1;z2") // w.11.4|OK:\"\"\"a\"\"\";b\r\nz1;z2
-  assert_eq(wr_tag(wrow(0), wopts(5)), "OK:a,b\r\nz1,z2") // w.0.5|OK:a,b\r\nz1,z2
-  assert_eq(wr_tag(wrow(1), wopts(5)), "OK:'a,b',c\r\nz1,z2") // w.1.5|OK:'a,b',c\r\nz1,z2
-  assert_eq(wr_tag(wrow(2), wopts(5)), "OK:a\"b,c\r\nz1,z2") // w.2.5|OK:a\"b,c\r\nz1,z2
-  assert_eq(wr_tag(wrow(3), wopts(5)), "OK:'a\nb',c\r\nz1,z2") // w.3.5|OK:'a\nb',c\r\nz1,z2
-  assert_eq(wr_tag(wrow(4), wopts(5)), "OK:'a\r\nb'\r\nz1,z2") // w.4.5|OK:'a\r\nb'\r\nz1,z2
-  assert_eq(wr_tag(wrow(5), wopts(5)), "OK:\r\nz1,z2") // w.5.5|OK:\r\nz1,z2
-  assert_eq(wr_tag(wrow(6), wopts(5)), "OK:,b\r\nz1,z2") // w.6.5|OK:,b\r\nz1,z2
-  assert_eq(wr_tag(wrow(7), wopts(5)), "OK: a ,b\r\nz1,z2") // w.7.5|OK: a ,b\r\nz1,z2
-  assert_eq(wr_tag(wrow(8), wopts(5)), "OK:a,\r\nz1,z2") // w.8.5|OK:a,\r\nz1,z2
-  assert_eq(wr_tag(wrow(9), wopts(5)), "OK:中文,x\r\nz1,z2") // w.9.5|OK:中文,x\r\nz1,z2
-  assert_eq(wr_tag(wrow(10), wopts(5)), "OK:a\r\nz1,z2") // w.10.5|OK:a\r\nz1,z2
-  assert_eq(wr_tag(wrow(11), wopts(5)), "OK:\"a\",b\r\nz1,z2") // w.11.5|OK:\"a\",b\r\nz1,z2
-  assert_eq(wr_tag(wrow(0), wopts(6)), "OK:\"a\",\"b\"\n\"z1\",\"z2\"") // w.0.6|OK:\"a\",\"b\"\n\"z1\",\"z2\"
-  assert_eq(wr_tag(wrow(1), wopts(6)), "OK:\"a,b\",\"c\"\n\"z1\",\"z2\"") // w.1.6|OK:\"a,b\",\"c\"\n\"z1\",\"z2\"
-  assert_eq(wr_tag(wrow(2), wopts(6)), "OK:\"a\"\"b\",\"c\"\n\"z1\",\"z2\"") // w.2.6|OK:\"a\"\"b\",\"c\"\n\"z1\",\"z2\"
-  assert_eq(wr_tag(wrow(3), wopts(6)), "OK:\"a\nb\",\"c\"\n\"z1\",\"z2\"") // w.3.6|OK:\"a\nb\",\"c\"\n\"z1\",\"z2\"
-  assert_eq(wr_tag(wrow(4), wopts(6)), "OK:\"a\r\nb\"\n\"z1\",\"z2\"") // w.4.6|OK:\"a\r\nb\"\n\"z1\",\"z2\"
-  assert_eq(wr_tag(wrow(5), wopts(6)), "OK:\"\"\n\"z1\",\"z2\"") // w.5.6|OK:\"\"\n\"z1\",\"z2\"
-  assert_eq(wr_tag(wrow(6), wopts(6)), "OK:\"\",\"b\"\n\"z1\",\"z2\"") // w.6.6|OK:\"\",\"b\"\n\"z1\",\"z2\"
-  assert_eq(wr_tag(wrow(7), wopts(6)), "OK:\" a \",\"b\"\n\"z1\",\"z2\"") // w.7.6|OK:\" a \",\"b\"\n\"z1\",\"z2\"
-  assert_eq(wr_tag(wrow(8), wopts(6)), "OK:\"a\",\"\"\n\"z1\",\"z2\"") // w.8.6|OK:\"a\",\"\"\n\"z1\",\"z2\"
-  assert_eq(wr_tag(wrow(9), wopts(6)), "OK:\"中文\",\"x\"\n\"z1\",\"z2\"") // w.9.6|OK:\"中文\",\"x\"\n\"z1\",\"z2\"
-  assert_eq(wr_tag(wrow(10), wopts(6)), "OK:\"a\"\n\"z1\",\"z2\"") // w.10.6|OK:\"a\"\n\"z1\",\"z2\"
-  assert_eq(wr_tag(wrow(11), wopts(6)), "OK:\"\"\"a\"\"\",\"b\"\n\"z1\",\"z2\"") // w.11.6|OK:\"\"\"a\"\"\",\"b\"\n\"z1\",\"z2\"
+    "OK:\\\"\\\"\\\"a\\\"\\\"\\\",\\\"b\\\"\\r\\n\\\"z1\\\",\\\"z2\\\"",
+  ) // w.11.1|OK:\\\"\\\"\\\"a\\\"\\\"\\\",\\\"b\\\"\\r\\n\\\"z1\\\",\\\"z2\\\"
+  assert_eq(wr_tag(wrow(0), wopts(2)), "OK:a,b\\nz1,z2") // w.0.2|OK:a,b\\nz1,z2
+  assert_eq(wr_tag(wrow(1), wopts(2)), "OK:\\\"a,b\\\",c\\nz1,z2") // w.1.2|OK:\\\"a,b\\\",c\\nz1,z2
+  assert_eq(wr_tag(wrow(2), wopts(2)), "OK:\\\"a\\\"\\\"b\\\",c\\nz1,z2") // w.2.2|OK:\\\"a\\\"\\\"b\\\",c\\nz1,z2
+  assert_eq(wr_tag(wrow(3), wopts(2)), "OK:\\\"a\\nb\\\",c\\nz1,z2") // w.3.2|OK:\\\"a\\nb\\\",c\\nz1,z2
+  assert_eq(wr_tag(wrow(4), wopts(2)), "OK:\\\"a\\r\\nb\\\"\\nz1,z2") // w.4.2|OK:\\\"a\\r\\nb\\\"\\nz1,z2
+  assert_eq(wr_tag(wrow(5), wopts(2)), "OK:\\nz1,z2") // w.5.2|OK:\\nz1,z2
+  assert_eq(wr_tag(wrow(6), wopts(2)), "OK:,b\\nz1,z2") // w.6.2|OK:,b\\nz1,z2
+  assert_eq(wr_tag(wrow(7), wopts(2)), "OK: a ,b\\nz1,z2") // w.7.2|OK: a ,b\\nz1,z2
+  assert_eq(wr_tag(wrow(8), wopts(2)), "OK:a,\\nz1,z2") // w.8.2|OK:a,\\nz1,z2
+  assert_eq(wr_tag(wrow(9), wopts(2)), "OK:中文,x\\nz1,z2") // w.9.2|OK:中文,x\\nz1,z2
+  assert_eq(wr_tag(wrow(10), wopts(2)), "OK:a\\nz1,z2") // w.10.2|OK:a\\nz1,z2
+  assert_eq(
+    wr_tag(wrow(11), wopts(2)),
+    "OK:\\\"\\\"\\\"a\\\"\\\"\\\",b\\nz1,z2",
+  ) // w.11.2|OK:\\\"\\\"\\\"a\\\"\\\"\\\",b\\nz1,z2
+  assert_eq(wr_tag(wrow(0), wopts(3)), "OK:a,b\\r\\nz1,z2\\r\\n") // w.0.3|OK:a,b\\r\\nz1,z2\\r\\n
+  assert_eq(wr_tag(wrow(1), wopts(3)), "OK:\\\"a,b\\\",c\\r\\nz1,z2\\r\\n") // w.1.3|OK:\\\"a,b\\\",c\\r\\nz1,z2\\r\\n
+  assert_eq(
+    wr_tag(wrow(2), wopts(3)),
+    "OK:\\\"a\\\"\\\"b\\\",c\\r\\nz1,z2\\r\\n",
+  ) // w.2.3|OK:\\\"a\\\"\\\"b\\\",c\\r\\nz1,z2\\r\\n
+  assert_eq(wr_tag(wrow(3), wopts(3)), "OK:\\\"a\\nb\\\",c\\r\\nz1,z2\\r\\n") // w.3.3|OK:\\\"a\\nb\\\",c\\r\\nz1,z2\\r\\n
+  assert_eq(wr_tag(wrow(4), wopts(3)), "OK:\\\"a\\r\\nb\\\"\\r\\nz1,z2\\r\\n") // w.4.3|OK:\\\"a\\r\\nb\\\"\\r\\nz1,z2\\r\\n
+  assert_eq(wr_tag(wrow(5), wopts(3)), "OK:\\r\\nz1,z2\\r\\n") // w.5.3|OK:\\r\\nz1,z2\\r\\n
+  assert_eq(wr_tag(wrow(6), wopts(3)), "OK:,b\\r\\nz1,z2\\r\\n") // w.6.3|OK:,b\\r\\nz1,z2\\r\\n
+  assert_eq(wr_tag(wrow(7), wopts(3)), "OK: a ,b\\r\\nz1,z2\\r\\n") // w.7.3|OK: a ,b\\r\\nz1,z2\\r\\n
+  assert_eq(wr_tag(wrow(8), wopts(3)), "OK:a,\\r\\nz1,z2\\r\\n") // w.8.3|OK:a,\\r\\nz1,z2\\r\\n
+  assert_eq(wr_tag(wrow(9), wopts(3)), "OK:中文,x\\r\\nz1,z2\\r\\n") // w.9.3|OK:中文,x\\r\\nz1,z2\\r\\n
+  assert_eq(wr_tag(wrow(10), wopts(3)), "OK:a\\r\\nz1,z2\\r\\n") // w.10.3|OK:a\\r\\nz1,z2\\r\\n
+  assert_eq(
+    wr_tag(wrow(11), wopts(3)),
+    "OK:\\\"\\\"\\\"a\\\"\\\"\\\",b\\r\\nz1,z2\\r\\n",
+  ) // w.11.3|OK:\\\"\\\"\\\"a\\\"\\\"\\\",b\\r\\nz1,z2\\r\\n
+  assert_eq(wr_tag(wrow(0), wopts(4)), "OK:a;b\\r\\nz1;z2") // w.0.4|OK:a;b\\r\\nz1;z2
+  assert_eq(wr_tag(wrow(1), wopts(4)), "OK:a,b;c\\r\\nz1;z2") // w.1.4|OK:a,b;c\\r\\nz1;z2
+  assert_eq(wr_tag(wrow(2), wopts(4)), "OK:\\\"a\\\"\\\"b\\\";c\\r\\nz1;z2") // w.2.4|OK:\\\"a\\\"\\\"b\\\";c\\r\\nz1;z2
+  assert_eq(wr_tag(wrow(3), wopts(4)), "OK:\\\"a\\nb\\\";c\\r\\nz1;z2") // w.3.4|OK:\\\"a\\nb\\\";c\\r\\nz1;z2
+  assert_eq(wr_tag(wrow(4), wopts(4)), "OK:\\\"a\\r\\nb\\\"\\r\\nz1;z2") // w.4.4|OK:\\\"a\\r\\nb\\\"\\r\\nz1;z2
+  assert_eq(wr_tag(wrow(5), wopts(4)), "OK:\\r\\nz1;z2") // w.5.4|OK:\\r\\nz1;z2
+  assert_eq(wr_tag(wrow(6), wopts(4)), "OK:;b\\r\\nz1;z2") // w.6.4|OK:;b\\r\\nz1;z2
+  assert_eq(wr_tag(wrow(7), wopts(4)), "OK: a ;b\\r\\nz1;z2") // w.7.4|OK: a ;b\\r\\nz1;z2
+  assert_eq(wr_tag(wrow(8), wopts(4)), "OK:a;\\r\\nz1;z2") // w.8.4|OK:a;\\r\\nz1;z2
+  assert_eq(wr_tag(wrow(9), wopts(4)), "OK:中文;x\\r\\nz1;z2") // w.9.4|OK:中文;x\\r\\nz1;z2
+  assert_eq(wr_tag(wrow(10), wopts(4)), "OK:a\\r\\nz1;z2") // w.10.4|OK:a\\r\\nz1;z2
+  assert_eq(
+    wr_tag(wrow(11), wopts(4)),
+    "OK:\\\"\\\"\\\"a\\\"\\\"\\\";b\\r\\nz1;z2",
+  ) // w.11.4|OK:\\\"\\\"\\\"a\\\"\\\"\\\";b\\r\\nz1;z2
+  assert_eq(wr_tag(wrow(0), wopts(5)), "OK:a,b\\r\\nz1,z2") // w.0.5|OK:a,b\\r\\nz1,z2
+  assert_eq(wr_tag(wrow(1), wopts(5)), "OK:'a,b',c\\r\\nz1,z2") // w.1.5|OK:'a,b',c\\r\\nz1,z2
+  assert_eq(wr_tag(wrow(2), wopts(5)), "OK:a\\\"b,c\\r\\nz1,z2") // w.2.5|OK:a\\\"b,c\\r\\nz1,z2
+  assert_eq(wr_tag(wrow(3), wopts(5)), "OK:'a\\nb',c\\r\\nz1,z2") // w.3.5|OK:'a\\nb',c\\r\\nz1,z2
+  assert_eq(wr_tag(wrow(4), wopts(5)), "OK:'a\\r\\nb'\\r\\nz1,z2") // w.4.5|OK:'a\\r\\nb'\\r\\nz1,z2
+  assert_eq(wr_tag(wrow(5), wopts(5)), "OK:\\r\\nz1,z2") // w.5.5|OK:\\r\\nz1,z2
+  assert_eq(wr_tag(wrow(6), wopts(5)), "OK:,b\\r\\nz1,z2") // w.6.5|OK:,b\\r\\nz1,z2
+  assert_eq(wr_tag(wrow(7), wopts(5)), "OK: a ,b\\r\\nz1,z2") // w.7.5|OK: a ,b\\r\\nz1,z2
+  assert_eq(wr_tag(wrow(8), wopts(5)), "OK:a,\\r\\nz1,z2") // w.8.5|OK:a,\\r\\nz1,z2
+  assert_eq(wr_tag(wrow(9), wopts(5)), "OK:中文,x\\r\\nz1,z2") // w.9.5|OK:中文,x\\r\\nz1,z2
+  assert_eq(wr_tag(wrow(10), wopts(5)), "OK:a\\r\\nz1,z2") // w.10.5|OK:a\\r\\nz1,z2
+  assert_eq(wr_tag(wrow(11), wopts(5)), "OK:\\\"a\\\",b\\r\\nz1,z2") // w.11.5|OK:\\\"a\\\",b\\r\\nz1,z2
+  assert_eq(
+    wr_tag(wrow(0), wopts(6)),
+    "OK:\\\"a\\\",\\\"b\\\"\\n\\\"z1\\\",\\\"z2\\\"\\n",
+  ) // w.0.6|OK:\\\"a\\\",\\\"b\\\"\\n\\\"z1\\\",\\\"z2\\\"\\n
+  assert_eq(
+    wr_tag(wrow(1), wopts(6)),
+    "OK:\\\"a,b\\\",\\\"c\\\"\\n\\\"z1\\\",\\\"z2\\\"\\n",
+  ) // w.1.6|OK:\\\"a,b\\\",\\\"c\\\"\\n\\\"z1\\\",\\\"z2\\\"\\n
+  assert_eq(
+    wr_tag(wrow(2), wopts(6)),
+    "OK:\\\"a\\\"\\\"b\\\",\\\"c\\\"\\n\\\"z1\\\",\\\"z2\\\"\\n",
+  ) // w.2.6|OK:\\\"a\\\"\\\"b\\\",\\\"c\\\"\\n\\\"z1\\\",\\\"z2\\\"\\n
+  assert_eq(
+    wr_tag(wrow(3), wopts(6)),
+    "OK:\\\"a\\nb\\\",\\\"c\\\"\\n\\\"z1\\\",\\\"z2\\\"\\n",
+  ) // w.3.6|OK:\\\"a\\nb\\\",\\\"c\\\"\\n\\\"z1\\\",\\\"z2\\\"\\n
+  assert_eq(
+    wr_tag(wrow(4), wopts(6)),
+    "OK:\\\"a\\r\\nb\\\"\\n\\\"z1\\\",\\\"z2\\\"\\n",
+  ) // w.4.6|OK:\\\"a\\r\\nb\\\"\\n\\\"z1\\\",\\\"z2\\\"\\n
+  assert_eq(wr_tag(wrow(5), wopts(6)), "OK:\\\"\\\"\\n\\\"z1\\\",\\\"z2\\\"\\n") // w.5.6|OK:\\\"\\\"\\n\\\"z1\\\",\\\"z2\\\"\\n
+  assert_eq(
+    wr_tag(wrow(6), wopts(6)),
+    "OK:\\\"\\\",\\\"b\\\"\\n\\\"z1\\\",\\\"z2\\\"\\n",
+  ) // w.6.6|OK:\\\"\\\",\\\"b\\\"\\n\\\"z1\\\",\\\"z2\\\"\\n
+  assert_eq(
+    wr_tag(wrow(7), wopts(6)),
+    "OK:\\\" a \\\",\\\"b\\\"\\n\\\"z1\\\",\\\"z2\\\"\\n",
+  ) // w.7.6|OK:\\\" a \\\",\\\"b\\\"\\n\\\"z1\\\",\\\"z2\\\"\\n
+  assert_eq(
+    wr_tag(wrow(8), wopts(6)),
+    "OK:\\\"a\\\",\\\"\\\"\\n\\\"z1\\\",\\\"z2\\\"\\n",
+  ) // w.8.6|OK:\\\"a\\\",\\\"\\\"\\n\\\"z1\\\",\\\"z2\\\"\\n
+  assert_eq(
+    wr_tag(wrow(9), wopts(6)),
+    "OK:\\\"中文\\\",\\\"x\\\"\\n\\\"z1\\\",\\\"z2\\\"\\n",
+  ) // w.9.6|OK:\\\"中文\\\",\\\"x\\\"\\n\\\"z1\\\",\\\"z2\\\"\\n
+  assert_eq(
+    wr_tag(wrow(10), wopts(6)),
+    "OK:\\\"a\\\"\\n\\\"z1\\\",\\\"z2\\\"\\n",
+  ) // w.10.6|OK:\\\"a\\\"\\n\\\"z1\\\",\\\"z2\\\"\\n
+  assert_eq(
+    wr_tag(wrow(11), wopts(6)),
+    "OK:\\\"\\\"\\\"a\\\"\\\"\\\",\\\"b\\\"\\n\\\"z1\\\",\\\"z2\\\"\\n",
+  ) // w.11.6|OK:\\\"\\\"\\\"a\\\"\\\"\\\",\\\"b\\\"\\n\\\"z1\\\",\\\"z2\\\"\\n
 }
