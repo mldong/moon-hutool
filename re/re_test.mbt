@@ -1,6 +1,7 @@
 ///|
 // 第一批（re）的期望值由生成器从两条腿的读数文件灌入，手打零条：
-//   腿 A = 真 hutool-core 5.8.35 + 本机 JDK 17.0.14 跑 ReUtil（903 条；含 12 组模板降序与零宽计数两轮补测）
+//   腿 A = 真 hutool-core 5.8.35 + 本机 JDK 17.0.14 跑 ReUtil（923 条：主夹具 859 + 难料补测 58 + 未参与组/择路 6）
+//   腿 A′ = JDK `Pattern`/`Matcher` 直接跑（6 条，只在"参照实现自己崩了"的那些档当引擎侧对读）
 //   腿 B = core @string.Regex 探针（114 条，wasm/js/wasm-gc 三档逐字节相同）
 // 两条腿都有读数的夹具逐条交叉核对；不一致的在注释里给出两侧原读数，并在 spec §5 声明分岔。
 // 规则书与全部出处：docs/spec/10-re.md。改任何一条期望串须单独一笔并给外部读数来源（门禁 G5）。
@@ -346,4 +347,17 @@ test "re：模板替换与回调替换（#10.23~#10.24）" {
   )
   assert_eq(@re.replace_by("b", "bbb", _ => ""), "")
   // 回调返回值按字面写入：腿 B 实测 core 的 replace_by 把模板串留在输出里 = a$1<1>b$1<22>c333
+}
+
+///|
+/// 本轮补测两条：未参与组的模板档（契约没冻到的那一档，取值取引擎侧语义）与 `is_match` 的择路整串档。
+/// 腿 A（hutool）在前一条上直接 `NullPointerException`，在后一条上现读 `true`——两条都有读数在案。
+test "re：模板里的未参与组与整串择路（#10.4/#10.22~#10.23 补测）" {
+  assert_eq(@re.extract_with_template("(a)?b", "b", "[$1]"), Some("[]"))
+  assert_eq(@re.replace_with_template("(a)?b", "xb", "[$1]"), "x[]")
+  // 腿 A：(a)?b 的 1 组未参与时 extractMulti/replaceAll = ERR:NullPointerException（"replacement" is null）
+  // JDK 腿：replaceAll("[$1]") 于 "b" = []、appendReplacement 于 "xb" = x[]、"<$1|$2>" 于 "ac" = <a|> ⇒ 空串
+  assert_eq(@re.is_match("a|ab", "ab"), true)
+  assert_eq(@re.is_match("a|ab", "a"), true)
+  // 判别夹具：把 is_match 实现成"最左一段占满"会在第一条给 false，而腿 A 现读 true
 }

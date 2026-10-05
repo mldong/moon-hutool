@@ -34,11 +34,12 @@ jobs:
         run: moon version --all
 
       - name: Run contract gate G1-G13
-        # 基线 312 = text 23 + digest 16 + date 47 + id 32 + codec 38 + coll 16 + mapx 28 + num 67 + conv 33 + re 12（契约冻结态也计数：（契约冻结态也计数：
+        # 基线 313 = text 23 + digest 16 + date 47 + id 32 + codec 38 + coll 16 + mapx 28 + num 67 + conv 33 + re 13
+        #（契约冻结态也计数：
           # 骨架期红是设计态，但用例必须被收集到，收不到就是静默丢套件）。用例只许增不许减：
-          # 减到低于基线就是有用例被悄悄删掉（负向对照：本机把基线抬到 300 当场 RED）
+          # 减到低于基线就是有用例被悄悄删掉（负向对照：本机把基线抬到 314 当场 RED）
         env:
-          BASELINE_TESTS: "312"
+          BASELINE_TESTS: "313"
           GATE_TARGETS: "wasm js"
         run: bash scripts/contract_gate.sh
 
@@ -102,5 +103,5 @@ jobs:
         env:
           GATE_FREEZE_BASE: ${{ github.event.pull_request.base.sha }}
           GATE_TARGETS: "wasm"
-          BASELINE_TESTS: "227"
+          BASELINE_TESTS: "313"   # 与主门禁同一基线（曾滞后在 227 上，成了只走过场的弱判据）
         run: bash scripts/contract_gate.sh
