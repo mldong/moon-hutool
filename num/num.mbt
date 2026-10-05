@@ -6,9 +6,9 @@
 ///
 /// 第一批做**数论 + 十进制舍入**两格，外加只在精确域出的增长型算术。
 /// 第二批（#8.14~#8.25）是**输出形状不同的那一半**：千分位与百分比、`trim_trailing_zeros`、
-/// 薄 `Money`（"分"这个 `Int64` + 两种分配）。剩下两格各自是一整块，不混进来：
-/// 中文数字与英文 word（第三批）、`Calculator` 表达式求值（第四批）。
-/// 分界的理由与本批逐条读数来源见 spec §1、§4、§6。
+/// 薄 `Money`（"分"这个 `Int64` + 两种分配）。第三批（#8.26~#8.39）是中文数字与英文 word，
+/// 单独一批的理由是它引入整套码表与"零的折叠"规则；`Calculator` 表达式求值留第四批。
+/// 分界的理由与各批逐条读数来源见 spec §1、§4、§6、§10。
 ///
 /// 四条贯穿性规则（spec §0，这四条决定了本包哪些函数存在、哪些不存在）：
 /// 1. **Int 域只收「输出可证明不超过输入量级」的函数**。`Int` 的位宽随目标变（`wasm`/`js`/`wasm-gc` 是 32 位，
@@ -1261,14 +1261,14 @@ fn shift_point_left(
 /// 整数部分的单位是十/百/千/万/亿，**万与亿之间不叠加"零"**（`1000000 ⇒ "一百万"`），
 /// 而千位段内的空位要补零（`1001 ⇒ "一千零一"`、`1010 ⇒ "一千零一十"`）。
 pub fn chinese_of(text : String) -> String raise NumError {
-  abort("moon-hutool 契约未实现：chinese_of")
+  cn_plain_of(text, false)
 }
 
 ///|
 /// 同上但用繁体（记账大写：壹贰叁…玖、拾佰仟万亿），对位 `format(BigDecimal, true, false)`。
 /// 单位表里「万/亿」简繁同形，所以 `10000` ⇒ "壹万"。
 pub fn chinese_upper_of(text : String) -> String raise NumError {
-  abort("moon-hutool 契约未实现：chinese_upper_of")
+  cn_plain_of(text, true)
 }
 
 ///|
@@ -1277,13 +1277,13 @@ pub fn chinese_upper_of(text : String) -> String raise NumError {
 /// hutool 的口语替换只有四条映射（`一十→十`、`一拾→拾`、`负一十→负十`、`负一拾→负拾`），
 /// 所以 `100000 ⇒ "十万"` 但 `115 ⇒ "一百一十五"`（那个"一十"在百位段之后，不在替换表里）。
 pub fn chinese_colloquial_of(text : String) -> String raise NumError {
-  abort("moon-hutool 契约未实现：chinese_colloquial_of")
+  cn_colloquial(cn_plain_of(text, false))
 }
 
 ///|
 /// 繁体 + 口语档，对位 `format(BigDecimal, true, true)`。
 pub fn chinese_upper_colloquial_of(text : String) -> String raise NumError {
-  abort("moon-hutool 契约未实现：chinese_upper_colloquial_of")
+  cn_colloquial(cn_plain_of(text, true))
 }
 
 ///|
@@ -1293,13 +1293,13 @@ pub fn chinese_upper_colloquial_of(text : String) -> String raise NumError {
 /// 与第二批 `Money::from_yuan_str` 的 `HalfEven` 不同一族，分岔夹具 `1.105` 两条都在（spec §10.3）。
 /// 不足一元时不写"零元"：`0.05 ⇒ "伍分"`、`0.5 ⇒ "伍角"`；整元才带「元整」。
 pub fn chinese_money_of(text : String) -> String raise NumError {
-  abort("moon-hutool 契约未实现：chinese_money_of")
+  cn_money_of(text, true)
 }
 
 ///|
 /// 金额简写档（一/二/三 + 元角分整），对位 `format(…, false, true)`。
 pub fn chinese_money_simple_of(text : String) -> String raise NumError {
-  abort("moon-hutool 契约未实现：chinese_money_simple_of")
+  cn_money_of(text, false)
 }
 
 ///|
@@ -1308,13 +1308,13 @@ pub fn chinese_money_simple_of(text : String) -> String raise NumError {
 /// 这是与 #8.26 不同的一条档：`chinese_of("10") ⇒ "一十"`，而本件给 `"十"`；越界 ⇒ `OutOfRange`
 /// （hutool 那句 `Number support only: (-999 ~ 999)！` 只当读数证据，不进错误载荷）。
 pub fn chinese_of_thousand(n : Int) -> String raise NumError {
-  abort("moon-hutool 契约未实现：chinese_of_thousand")
+  cn_thousand(n, false)
 }
 
 ///|
 /// 千分位档的繁体版，对位 `formatThousand(int, true)`：`11 ⇒ "拾壹"`、`110 ⇒ "壹佰壹拾"`。
 pub fn chinese_upper_of_thousand(n : Int) -> String raise NumError {
-  abort("moon-hutool 契约未实现：chinese_upper_of_thousand")
+  cn_thousand(n, true)
 }
 
 ///|
@@ -1322,7 +1322,15 @@ pub fn chinese_upper_of_thousand(n : Int) -> String raise NumError {
 ///
 /// 只收 `'0' ~ '9'`；其余字符 ⇒ `UnknownChineseUnit(字符, 0)`（hutool 在此没有任何校验，查表得 -1 就继续往下走，本包不把"喂错字符"留成静默）。
 pub fn chinese_digit(d : Char, upper? : Bool) -> Char raise NumError {
-  abort("moon-hutool 契约未实现：chinese_digit")
+  if d < '0' || d > '9' {
+    // hutool 在这里没有校验（查表得 -1 就继续往下走），本包把喂错字符当错并带上字符与位置
+    raise UnknownChineseUnit(d, 0)
+  }
+  let up = match upper {
+    None => false
+    Some(b) => b
+  }
+  cn_num_char(d.to_int() - 48, up)
 }
 
 ///|
@@ -1333,7 +1341,19 @@ pub fn chinese_digit(d : Char, upper? : Bool) -> Char raise NumError {
 /// ① 本包认「负」前缀（hutool 在此抛 `Unknown unit '负'`，而它自己的正向会产出带"负"的串 ⇒ 往返不通）；
 /// ② 累加走 `Int64`，给真值而不是低位截断（hutool 用 `int` 累加，`一千亿` 读出 `1215752192`）。实现里带溢出防线，但这一档**没有夹具能为它变红**：节单位每次用完就把 `section` 清零，增量随输入长度线性增长，越出 `Int64` 需要 10^7 量级字符的串（spec §10.3 第 5 条）。
 pub fn int_of_chinese(text : String) -> Int64 raise NumError {
-  abort("moon-hutool 契约未实现：int_of_chinese")
+  let cs = text.to_array()
+  if cn_all_blank(cs) {
+    // hutool 对空串给 0、对全空白给 1（单位表第一项是值为 1 的空格）——两条都是哨兵，不跟随
+    raise NotDecimal(text)
+  }
+  // 本包补的「负」前缀（hutool 在此抛 Unknown unit '负'，而它自己的正向会产出「负」）
+  let from = if cs[0] == '负' { 1 } else { 0 }
+  let v = cn_back_parse(cs, from, cs.length(), text)
+  if from == 1 {
+    -v
+  } else {
+    v
+  }
 }
 
 ///|
@@ -1343,7 +1363,88 @@ pub fn int_of_chinese(text : String) -> Int64 raise NumError {
 /// 是丢值 bug，实测在读数表里）；不认「负」（金额串的负号本就不该出现在记账场景，
 /// 且 hutool 在此也抛）。空/全空白 ⇒ `NotDecimal`（hutool 给 null，本包不用哨兵）。
 pub fn money_of_chinese(text : String) -> Money raise NumError {
-  abort("moon-hutool 契约未实现：money_of_chinese")
+  let cs = text.to_array()
+  let n = cs.length()
+  if cn_all_blank(cs) {
+    raise NotDecimal(text)
+  }
+  // 键位切分逐条跟随 hutool（含「圆」当「元」的别名），下面三段 range 就是它那三次 substring
+  let mut yi = cn_index_key(cs, '元')
+  if yi < 0 {
+    yi = cn_index_key(cs, '圆')
+  }
+  let ji = cn_index_key(cs, '角')
+  let fi = cn_index_key(cs, '分')
+
+  let y_from = 0
+  let mut y_to = 0
+  let mut has_y = false
+  if yi > 0 {
+    has_y = true
+    y_to = yi
+  }
+  let mut j_from = 0
+  let mut j_to = 0
+  let mut has_j = false
+  if ji > 0 {
+    if yi >= 0 {
+      if ji > yi {
+        has_j = true
+        j_from = yi + 1
+        j_to = ji
+      }
+    } else {
+      has_j = true
+      j_to = ji
+    }
+  }
+  let mut f_from = 0
+  let mut f_to = 0
+  let mut has_f = false
+  if fi > 0 {
+    if ji >= 0 {
+      if fi > ji {
+        has_f = true
+        f_from = ji + 1
+        f_to = fi
+      }
+    } else if yi > 0 {
+      if fi > yi {
+        has_f = true
+        f_from = yi + 1
+        f_to = fi
+      }
+    } else {
+      has_f = true
+      f_to = fi
+    }
+  }
+  // 「三个键都不在串里」才整串按元段读（壹佰 ⇒ 10000 分）；键存在但落在 0 位（元整）不算，
+  // 那种输入是"没有内容"，走下面的 NotDecimal——hutool 两条都读 0.00
+  if yi < 0 && ji < 0 && fi < 0 {
+    has_y = true
+    y_to = n
+  }
+  let mut y : Int64 = 0
+  let mut j : Int64 = 0
+  let mut f : Int64 = 0
+  let mut content = false
+  if has_y && !cn_slice_blank(cs, y_from, y_to) {
+    content = true
+    y = cn_back_parse(cs, y_from, y_to, text)
+  }
+  if has_j && !cn_slice_blank(cs, j_from, j_to) {
+    content = true
+    j = cn_back_parse(cs, j_from, j_to, text)
+  }
+  if has_f && !cn_slice_blank(cs, f_from, f_to) {
+    content = true
+    f = cn_back_parse(cs, f_from, f_to, text)
+  }
+  if !content {
+    raise NotDecimal(text)
+  }
+  Money::new(cn_to_cent(y, j, f))
 }
 
 ///|
@@ -1352,7 +1453,15 @@ pub fn money_of_chinese(text : String) -> Money raise NumError {
 /// 阈值固定：`>= 1e12` 走「万亿」、`>= 1e8` 走「亿」、`>= 1e4` 走「万」，其余原样十进制；
 /// 除数走 `BigDecimal` 两位 `HalfUp`，所以读数与 locale 无关（`10000 ⇒ "1.00万"`、`12345 ⇒ "1.23万"`）。
 pub fn chinese_abbrev(n : Int64) -> String {
-  abort("moon-hutool 契约未实现：chinese_abbrev")
+  if n < 10000 && n > -10000 {
+    n.to_string()
+  } else if n < 100000000 && n > -100000000 {
+    cn_abbrev_cn_tier(n, 10000L, "万")
+  } else if n < 1000000000000 && n > -1000000000000 {
+    cn_abbrev_cn_tier(n, 100000000L, "亿")
+  } else {
+    cn_abbrev_cn_tier(n, 1000000000000L, "万亿")
+  }
 }
 
 ///|
@@ -1363,7 +1472,14 @@ pub fn chinese_abbrev(n : Int64) -> String {
 /// 两条不跟随（读数都在 spec §10.4）：hutool 走 `NumberUtil.decimalFormat("#.##", …)` ⇒ 分隔符随 JVM 默认 locale 变，本包固定 `.`；
 /// 它先 `value / 10000.0` 走 double ⇒ 19 位量级的尾数被并掉，本包与 #8.37 同族走精确十进制。
 pub fn english_abbrev(n : Int64) -> String {
-  abort("moon-hutool 契约未实现：english_abbrev")
+  if n < 1000 {
+    // 这一条早退把所有负数都留在原样十进制（实测 -10000 ⇒ "-10000"），与中文腿的绝对值判档不对称，照抄
+    n.to_string()
+  } else if n >= 10000 {
+    cn_abbrev_en_tier(n, 10000L, "w")
+  } else {
+    cn_abbrev_en_tier(n, 1000L, "k")
+  }
 }
 
 ///|
@@ -1376,5 +1492,634 @@ pub fn english_abbrev(n : Int64) -> String {
 /// 整数部分超过 `NUMBER_MORE` 表（15 位以上）hutool 是内部数组越界 ⇒ 本包给 `OutOfRange`。
 /// 「AND」只在百位段内部（`110 ⇒ ONE HUNDRED AND TEN`），节与节之间不补（`1001 ⇒ ONE THOUSAND ONE`）——照抄读数，不改。
 pub fn english_word_of(text : String) -> String raise NumError {
-  abort("moon-hutool 契约未实现：english_word_of")
+  let (neg, ip, fp) = match cn_decimal(text) {
+    None => raise NotDecimal(text)
+    Some(t) => t
+  }
+  let nonzero = ip.any(d => d != 0) || fp.any(d => d != 0)
+  if neg && nonzero {
+    // hutool 在这里炸内部 `Integer.parseInt("-")`，把内部异常当契约不成立
+    raise OutOfRange(text)
+  }
+  if ip.length() > 15 {
+    // `NUMBER_MORE` 只有 5 档（THOUSAND…TRILLION），16 位起 hutool 是数组越界
+    raise OutOfRange(text)
+  }
+  let groups = cn_word_groups(ip)
+  let mut lm = ""
+  let mut i = 0
+  while i < groups.length() {
+    let g = groups[i]
+    if !(g[0] == 0 && g[1] == 0 && g[2] == 0) {
+      let t = cn_word_three(g)
+      // i == 0 那一支不前插，否则个位段后面会多两个空格（hutool 注释里就写着这条）
+      lm = if i == 0 { t } else { t + " " + word_more[i] + " " + lm }
+    }
+    i += 1
+  }
+  let mut xs = if lm == "" { "ZERO " } else { " " }
+  if fp.length() > 0 && !cn_cents_zero(fp) {
+    xs = xs + "AND CENTS " + cn_word_two(fp) + " "
+  }
+  cn_rstrip(lm) + xs + "ONLY"
+}
+// ---- 私有件：码表与三条腿（读数出处逐条写在 docs/spec/08-num.md §10）----
+
+///|
+/// hutool `DIGITS`：0 位共用「零」，奇数位简体、偶数位记账繁体——两张字表挤一条数组是它的原样写法，
+/// 索引式 `n * 2 - (upper ? 0 : 1)` 一起跟，否则简体/繁体会各自漂成一份表。
+let cn_digits : Array[Char] = [
+  '零', '一', '壹', '二', '贰', '三', '叁', '四', '肆', '五', '伍', '六',
+  '陆', '七', '柒', '八', '捌', '九', '玖',
+]
+
+///|
+/// hutool `CHINESE_NAME_VALUE` 拆成三张平行表。第 0 项那个「值为 1 的空格单位」保留（不是笔误：
+/// 它是 `"  " => 1` 那条哨兵读数的来源，本包只在"整串空白"时拦掉它，串内空格仍按它的算法走）。
+let cn_unit_names : Array[Char] = [
+  ' ', '十', '拾', '百', '佰', '千', '仟', '万', '亿',
+]
+
+///|
+let cn_unit_values : Array[Int64] = [
+  1, 10, 10, 100, 100, 1000, 1000, 10000, 100000000,
+]
+
+///|
+let cn_unit_sec : Array[Bool] = [
+  false, false, false, false, false, false, false, true, true,
+]
+
+///|
+/// hutool 的正向界：`±99_9999_9999_9999.99`，落在**整数幅值**上就是 `99_9999_9999_9999`。
+/// 判界用未截断的幅值（spec §10.4 第 11 行）：`BigDecimal.longValue()` 先取低 64 位再比界，
+/// 实测 `2^64+5` 回绕成 5 就读出「五」。
+let cn_plain_bound : Int64 = 99_9999_9999_9999
+
+///|
+fn cn_num_char(n : Int, upper : Bool) -> Char {
+  if n == 0 {
+    cn_digits[0]
+  } else {
+    cn_digits[n * 2 - (if upper { 0 } else { 1 })]
+  }
+}
+
+///|
+fn cn_unit_name(index : Int, upper : Bool) -> String {
+  if index == 0 {
+    ""
+  } else {
+    cn_unit_names[index * 2 - (if upper { 0 } else { 1 })].to_string()
+  }
+}
+
+///|
+/// 单个汉字 → 数字值，`-1` 表示"不是数字"（hutool 拿 -1 当"该走单位分支"的哨兵，这里同义）。
+/// 「两」先折成「二」是它的口语纠正，跟。
+fn cn_char_num(c : Char) -> Int {
+  let c2 = if c == '两' { '二' } else { c }
+  let mut i = 0
+  while i < cn_digits.length() {
+    if cn_digits[i] == c2 {
+      // 索引 0 是「零」→ 值 0；其余 `(i + 1) / 2`：壹/一都算 1、贰/二都算 2……
+      return if i > 0 { (i + 1) / 2 } else { 0 }
+    }
+    i += 1
+  }
+  -1
+}
+
+///|
+fn cn_char_unit(c : Char) -> Int {
+  let mut i = 0
+  while i < cn_unit_names.length() {
+    if cn_unit_names[i] == c {
+      return i
+    }
+    i += 1
+  }
+  -1
+}
+
+///|
+/// 段内（0~9999）逐位拼字：0 位补一个「零」，连续 0 不叠。返回空串只发生在负数输入上
+/// （`formatThousand` 就是这么产出 `-1 => ""` 的，跟随）。
+fn cn_thousand_to_chinese(part : Int, upper : Bool) -> String {
+  if part == 0 {
+    return "零"
+  }
+  let mut temp = part
+  let mut out = ""
+  let mut last_is_zero = true
+  let mut i = 0
+  while temp > 0 {
+    let digit = temp % 10
+    if digit == 0 {
+      if !last_is_zero {
+        out = "零" + out
+      }
+      last_is_zero = true
+    } else {
+      out = cn_num_char(digit, upper).to_string() + cn_unit_name(i, upper) + out
+      last_is_zero = false
+    }
+    temp = temp / 10
+    i += 1
+  }
+  out
+}
+
+///|
+fn cn_add_pre_zero(s : String) -> String {
+  if s == "" || s.to_array()[0] == '零' {
+    s
+  } else {
+    "零" + s
+  }
+}
+
+///|
+/// 只收正数。按万切四节，节内用 `cn_thousand_to_chinese`，节间的补零规则是 hutool 最容易写错的一段：
+/// `1001 => 一千零一`（段内空位补零）、`1000000 => 一百万`（节间不补，靠"万节前导零被剥"实现）。
+fn cn_long_to_chinese(amount : Int64, upper : Bool) -> String {
+  if amount == 0 {
+    return "零"
+  }
+  let parts : Array[Int] = [0, 0, 0, 0]
+  let mut a = amount
+  let mut k = 0
+  while a != 0 && k < 4 {
+    parts[k] = (a % 10000).to_int()
+    a = a / 10000
+    k += 1
+  }
+  let mut s = ""
+  if parts[0] > 0 {
+    s = cn_thousand_to_chinese(parts[0], upper) + s
+    if parts[0] < 1000 {
+      s = cn_add_pre_zero(s)
+    }
+  }
+  if parts[1] > 0 {
+    if parts[1] % 10 == 0 && parts[0] > 0 {
+      s = cn_add_pre_zero(s)
+    }
+    s = cn_thousand_to_chinese(parts[1], upper) + "万" + s
+    if parts[1] < 1000 {
+      s = cn_add_pre_zero(s)
+    }
+  } else {
+    s = cn_add_pre_zero(s)
+  }
+  if parts[2] > 0 {
+    if parts[2] % 10 == 0 && parts[1] > 0 {
+      s = cn_add_pre_zero(s)
+    }
+    s = cn_thousand_to_chinese(parts[2], upper) + "亿" + s
+    if parts[2] < 1000 {
+      s = cn_add_pre_zero(s)
+    }
+  } else {
+    s = cn_add_pre_zero(s)
+  }
+  if parts[3] > 0 {
+    if parts[2] == 0 {
+      s = "亿" + s
+    }
+    s = cn_thousand_to_chinese(parts[3], upper) + "万" + s
+  }
+  if s != "" && s.to_array()[0] == '零' {
+    let cs = s.to_array()
+    String::from_array(cs[1:])
+  } else {
+    s
+  }
+}
+
+///|
+/// 本批文法（spec §10.4 第 13 行）：`-? D+ ('.' D*)?` 或 `-? '.' D+`。
+/// 不吃 `+` 前缀、指数、空白、分组符——hutool 那两条腿都吃得更宽（`+1 => 一`、`1e5 => 一十万`）。
+fn cn_decimal(text : String) -> (Bool, Array[Int], Array[Int])? {
+  let cs = text.to_array()
+  let n = cs.length()
+  if n == 0 {
+    return None
+  }
+  let neg = cs[0] == '-'
+  let mut i = if neg { 1 } else { 0 }
+  let ip : Array[Int] = []
+  while i < n && cs[i] >= '0' && cs[i] <= '9' {
+    ip.push(cs[i].to_int() - 48)
+    i += 1
+  }
+  let fp : Array[Int] = []
+  if i < n && cs[i] == '.' {
+    i += 1
+    while i < n && cs[i] >= '0' && cs[i] <= '9' {
+      fp.push(cs[i].to_int() - 48)
+      i += 1
+    }
+  }
+  if i != n || (ip.length() == 0 && fp.length() == 0) {
+    None
+  } else {
+    Some((neg, ip, fp))
+  }
+}
+
+///|
+/// #8.26/#8.27 的共同实现。两条腿合成一条：整数部分按 `longToChinese`，小数部分**逐位**读
+/// （`0.10 => 零点一零`、`1.00 => 一点零零`——尾零是要保住的读数）。
+/// 符号按原串保：hutool 在 `|x| < 1` 的负小数上把「负」弄丢（`-0.05 => 零点零五`，spec §10.4 第 12 行）。
+fn cn_plain_of(text : String, upper : Bool) -> String raise NumError {
+  let (neg, ip, fp) = match cn_decimal(text) {
+    None => raise NotDecimal(text)
+    Some(t) => t
+  }
+  let mut mag : Int64 = 0
+  let mut i = 0
+  while i < ip.length() {
+    mag = mag * 10 + ip[i].to_int64()
+    if mag > cn_plain_bound {
+      raise OutOfRange(text)
+    }
+    i += 1
+  }
+  let head = if mag == 0 { "零" } else { cn_long_to_chinese(mag, upper) }
+  let sign = if neg && (mag != 0 || fp.any(d => d != 0)) { "负" } else { "" }
+  let mut out = sign + head
+  if fp.length() > 0 {
+    out = out + "点"
+    let mut j = 0
+    while j < fp.length() {
+      out = out + cn_num_char(fp[j], upper).to_string()
+      j += 1
+    }
+  }
+  out
+}
+
+///|
+/// hutool 的口语映射只有四条（一十→十、一拾→拾、负一十→负十、负一拾→负拾），
+/// 且只在**串首**生效 ⇒ `115 => 一百一十五` 里那个「一十」不动。繁体档产出的是「壹拾」，
+/// 一条都不命中 ⇒ #8.29 与 #8.27 读数逐条相同（实测）。
+fn cn_colloquial(s : String) -> String {
+  let cs = s.to_array()
+  let n = cs.length()
+  if n >= 3 &&
+    cs[0] == '负' &&
+    cs[1] == '一' &&
+    (cs[2] == '十' || cs[2] == '拾') {
+    "负" + String::from_array(cs[2:])
+  } else if n >= 2 && cs[0] == '一' && (cs[1] == '十' || cs[1] == '拾') {
+    // replaceFirst(「一十」→「十」) 只吃掉那个「一」，后面的读数原样留着
+    String::from_array(cs[1:])
+  } else {
+    s
+  }
+}
+
+///|
+/// #8.30/#8.31 的共同实现。这一条腿**跟着 hutool 的 double 版**：`Math.round(double × 100)`
+/// （`spec §10.3 第 4 条`：`1.105 × 100` 的最近 double 恰是 110.5 ⇒ 111 分，
+/// 而 `99999999999999.99` 的最近 double 是 `…98.984375` ⇒ …998 分即「捌分」）。
+/// `v × 100 + 0.5` 再向零截断 = Java `Math.round`，且 `v ≥ 0` 时与 `floor` 同值。
+fn cn_money_of(text : String, upper : Bool) -> String raise NumError {
+  match cn_decimal(text) {
+    None => raise NotDecimal(text)
+    Some(_) => ()
+  }
+  let d = Some(@string.parse_double(text)) catch { _ => None }
+  let v0 = match d {
+    None => raise NotDecimal(text)
+    Some(x) => x
+  }
+  if v0 == 0.0 {
+    return "零元整"
+  }
+  let bound : Double = 99999999999999.99
+  if v0 > bound || v0 < 0.0 - bound {
+    raise OutOfRange(text)
+  }
+  let mut v = v0
+  let mut out = ""
+  if v < 0.0 {
+    out = "负"
+    v = 0.0 - v
+  }
+  let cents = (v * 100.0 + 0.5).to_int64()
+  let fen = (cents % 10L).to_int()
+  let mut t = cents / 10L
+  let jiao = (t % 10L).to_int()
+  t = t / 10L
+  let yuan = t
+  if yuan != 0 {
+    out = out + cn_long_to_chinese(yuan, upper) + "元"
+  }
+  if jiao == 0 && fen == 0 {
+    return out + "整"
+  }
+  if yuan != 0 || jiao != 0 {
+    out = out + cn_num_char(jiao, upper).to_string()
+    if jiao != 0 {
+      out = out + "角"
+    }
+  }
+  if fen != 0 {
+    out = out + cn_num_char(fen, upper).to_string() + "分"
+  }
+  out
+}
+
+///|
+/// `formatThousand`：界 ±999，且 10~19 切掉首个「一/壹」。负数那三支在 hutool 里是空串
+/// （`thousandToChinese` 的循环对负数一次都不跑），跟随。
+fn cn_thousand(n : Int, upper : Bool) -> String raise NumError {
+  if n < -999 || n > 999 {
+    raise OutOfRange(n.to_string())
+  }
+  let chinese = cn_thousand_to_chinese(n, upper)
+  if n < 20 && n >= 10 {
+    let cs = chinese.to_array()
+    String::from_array(cs[1:])
+  } else {
+    chinese
+  }
+}
+
+///|
+/// 空白判定用 ASCII（码点 `<= U+0020`）。hutool 的 `isBlankChar` 表还带若干不可见码点，
+/// 本包不抄那张表：它只会让 NotDecimal 多认几种输入，不改变任何一条读数。
+fn cn_all_blank(cs : Array[Char]) -> Bool {
+  cs.length() == 0 || cs.all(c => c <= ' ')
+}
+
+///|
+fn cn_slice_blank(cs : Array[Char], from : Int, to : Int) -> Bool {
+  let mut i = from
+  while i < to {
+    if cs[i] > ' ' {
+      return false
+    }
+    i += 1
+  }
+  true
+}
+
+///|
+fn cn_index_key(cs : Array[Char], k : Char) -> Int {
+  let mut i = 0
+  while i < cs.length() {
+    if cs[i] == k {
+      return i
+    }
+    i += 1
+  }
+  -1
+}
+
+///|
+fn cn_add64(a : Int64, b : Int64, text : String) -> Int64 raise NumError {
+  if b > 0 && a > @int64.MAX_VALUE - b {
+    raise OutOfRange(text)
+  }
+  a + b
+}
+
+///|
+fn cn_mul64(a : Int64, b : Int64, text : String) -> Int64 raise NumError {
+  if a != 0 && b > @int64.MAX_VALUE / a {
+    raise OutOfRange(text)
+  }
+  a * b
+}
+
+///|
+/// 反向累加，逐条跟随 hutool `chineseToNumber` 的状态机（`section`/`number`/`unit` 三个量）：
+/// - 「零」把当前节截断并让权位失效 ⇒ `一千零一百 => 1100`（零只当占位，不做减法）；
+/// - 节单位把 `(section + number)` 整体放大后再加进 `result` ⇒ `一千万亿 => 1e7`、`亿亿 => 0`；
+/// - 剥掉「负」之后串首就是单位时补一 ⇒ `十 => 10`、`百 => 100`（hutool 的 `0 == i` 判据换到这里）。
+/// 报错载荷 = 档位名 + 字符/两字窗口 + 码点位置，英文文案不进载荷。
+fn cn_back_parse(
+  cs : Array[Char],
+  from : Int,
+  to : Int,
+  text : String,
+) -> Int64 raise NumError {
+  let mut result : Int64 = 0
+  let mut section : Int64 = 0
+  let mut number : Int64 = 0
+  let mut unit = -1
+  let mut i = from
+  while i < to {
+    let c = cs[i]
+    let num = cn_char_num(c)
+    if num >= 0 {
+      if num == 0 {
+        if number > 0 && unit >= 0 {
+          section = cn_add64(
+            section,
+            number * (cn_unit_values[unit] / 10L),
+            text,
+          )
+        }
+        unit = -1
+      } else if number > 0 {
+        raise BadChineseNumber(String::from_array([cs[i - 1], c]), i)
+      }
+      number = num.to_int64()
+    } else {
+      let u = cn_char_unit(c)
+      if u < 0 {
+        raise UnknownChineseUnit(c, i)
+      }
+      unit = u
+      let v = cn_unit_values[u]
+      if cn_unit_sec[u] {
+        section = cn_mul64(cn_add64(section, number, text), v, text)
+        result = cn_add64(result, section, text)
+        section = 0
+      } else {
+        let unit_number : Int64 = if number == 0 && i == from {
+          1
+        } else {
+          number
+        }
+        section = cn_add64(section, unit_number * v, text)
+      }
+      number = 0
+    }
+    i += 1
+  }
+  if number > 0 && unit >= 0 {
+    number = number * (cn_unit_values[unit] / 10L)
+  }
+  cn_add64(cn_add64(result, section, text), number, text)
+}
+
+///|
+/// 元/角/分三段拼成"分"。三段值都非负且反向档的量级上限远在 `Int64` 内，
+/// 但乘法仍走带界的那两条（与 #8.22/#8.24 同一立场：越界只许 `raise`，不许静默回绕）
+fn cn_to_cent(y : Int64, j : Int64, f : Int64) -> Int64 raise NumError {
+  let a = cn_cent_mul(y, 100L)
+  let b = cn_cent_mul(j, 10L)
+  cn_cent_add(cn_cent_add(a, b), f)
+}
+
+///|
+fn cn_cent_mul(a : Int64, b : Int64) -> Int64 raise NumError {
+  if a != 0 && b > @int64.MAX_VALUE / a {
+    raise MoneyOverflow
+  }
+  a * b
+}
+
+///|
+fn cn_cent_add(a : Int64, b : Int64) -> Int64 raise NumError {
+  if b > @int64.MAX_VALUE - a {
+    raise MoneyOverflow
+  }
+  a + b
+}
+
+///|
+/// `formatSimple(long)` 的档：绝对值判档 + 两位 `HalfUp`（BigDecimal 语义，远离零）。
+/// 全程整数：`|n| = q * div + r`，值 = `q + r/div`，放大 100 倍后按 `2 * rem >= div` 进位。
+/// 取 q/r 的绝对值而不是取 `|n|`——`Int64::MIN` 的绝对值不可表（spec §0.1）。
+fn cn_abbrev_cn_tier(n : Int64, div : Int64, unit : String) -> String {
+  let neg = n < 0
+  let q = n / div
+  let r = n % div
+  let aq = if q < 0 { 0L - q } else { q }
+  let ar = if r < 0 { 0L - r } else { r }
+  let scaled = ar * 100L
+  let mut frac = scaled / div
+  if scaled % div * 2L >= div {
+    frac = frac + 1L
+  }
+  let hundredths = aq * 100L + frac
+  let ip = hundredths / 100
+  let fp = hundredths % 100
+  let sign = if neg && hundredths != 0 { "-" } else { "" }
+  let tail = if fp < 10 { "0" + fp.to_string() } else { fp.to_string() }
+  sign + ip.to_string() + "." + tail + unit
+}
+
+///|
+/// `NumberWordFormatter.formatSimple` 的档：最多两位小数且**去尾零**（`#.##` 的形状）。
+/// 舍入族声明见 spec §10.4 第 15 行：hutool 先 `value / 10000.0` 再 `DecimalFormat`，
+/// 本包与 #8.37 同一条精确十进制腿、同一个 `HalfUp`（`Int64::MAX` 两条读数都在那行里）。
+fn cn_abbrev_en_tier(n : Int64, div : Int64, suffix : String) -> String {
+  let q = n / div
+  let r = n % div
+  let scaled = r * 100L
+  let mut frac = scaled / div
+  if scaled % div * 2L >= div {
+    frac = frac + 1L
+  }
+  let hundredths = q * 100L + frac
+  let ip = hundredths / 100
+  let fp = hundredths % 100
+  if fp == 0 {
+    ip.to_string() + suffix
+  } else if fp % 10 == 0 {
+    ip.to_string() + "." + (fp / 10L).to_string() + suffix
+  } else if fp < 10L {
+    // fp = 1 是 `.01` 而不是 `.1`：小数是两位一档，前导零属于读数
+    ip.to_string() + ".0" + fp.to_string() + suffix
+  } else {
+    ip.to_string() + "." + fp.to_string() + suffix
+  }
+}
+
+///|
+let word_number : Array[String] = [
+  "", "ONE", "TWO", "THREE", "FOUR", "FIVE", "SIX", "SEVEN", "EIGHT", "NINE",
+]
+
+///|
+let word_teen : Array[String] = [
+  "TEN", "ELEVEN", "TWELVE", "THIRTEEN", "FOURTEEN", "FIFTEEN", "SIXTEEN", "SEVENTEEN",
+  "EIGHTEEN", "NINETEEN",
+]
+
+///|
+let word_ten : Array[String] = [
+  "TEN", "TWENTY", "THIRTY", "FORTY", "FIFTY", "SIXTY", "SEVENTY", "EIGHTY", "NINETY",
+]
+
+///|
+let word_more : Array[String] = [
+  "", "THOUSAND", "MILLION", "BILLION", "TRILLION",
+]
+
+///|
+/// 低位在前、每三位一组、高位侧补零到 3 的倍数——这是 hutool「reverse 后补零再切」的等价写法，
+/// 补零位置决定 `1001` 分成 `[001, 010]` 而不是别的形状，所以按它写而不是按直觉写。
+fn cn_word_groups(ip : Array[Int]) -> Array[Array[Int]] {
+  let rev : Array[Int] = []
+  let mut i = ip.length() - 1
+  while i >= 0 {
+    rev.push(ip[i])
+    i -= 1
+  }
+  let body = rev
+  while body.length() % 3 != 0 {
+    body.push(0)
+  }
+  let out : Array[Array[Int]] = []
+  let mut k = 0
+  while k < body.length() {
+    out.push([body[k + 2], body[k + 1], body[k]])
+    k += 3
+  }
+  out
+}
+
+///|
+/// 两位档：`0x → 单字`、`1x → TEEN`、`x0 → TEN`、其余 `TEN + 单字`。
+/// 输入是小数原文的前两位（不足两位右补 0，超两位截断），所以 `"0"`、`"00"` 都会读成空串——
+/// 那正是 `ONE AND CENTS  ONLY` 双空格的来源，本包在调用侧把这种零分档整段去掉。
+fn cn_word_two(src : Array[Int]) -> String {
+  let a = if src.length() > 0 { src[0] } else { 0 }
+  let b = if src.length() > 1 { src[1] } else { 0 }
+  if a == 0 {
+    word_number[b]
+  } else if a == 1 {
+    word_teen[a * 10 + b - 10]
+  } else if b == 0 {
+    word_ten[a - 1]
+  } else {
+    word_ten[a - 1] + " " + word_number[b]
+  }
+}
+
+///|
+/// 三位档。「AND」只在这里插（百位与后段之间），节与节之间不插 ⇒ `1001 => ONE THOUSAND ONE`。
+fn cn_word_three(g : Array[Int]) -> String {
+  if g[0] == 0 {
+    cn_word_two([g[1], g[2]])
+  } else if g[1] == 0 && g[2] == 0 {
+    word_number[g[0]] + " HUNDRED"
+  } else {
+    word_number[g[0]] + " HUNDRED AND " + cn_word_two([g[1], g[2]])
+  }
+}
+
+///|
+fn cn_cents_zero(fp : Array[Int]) -> Bool {
+  let a = if fp.length() > 0 { fp[0] } else { 0 }
+  let b = if fp.length() > 1 { fp[1] } else { 0 }
+  a == 0 && b == 0
+}
+
+///|
+fn cn_rstrip(s : String) -> String {
+  let cs = s.to_array()
+  let mut n = cs.length()
+  while n > 0 && cs[n - 1] == ' ' {
+    n -= 1
+  }
+  String::from_array(cs[:n])
 }

@@ -126,26 +126,26 @@ test "chinese_colloquial_of 只改「一十」这一处（#8.28/#8.29）" {
 test "正向界与非十进制输入（#8.26~#8.31）" {
   assert_eq(
     cn_err(() => @num.chinese_of("100000000000000000")),
-    "OutOfRange \"100000000000000000\"",
+    "OutOfRange 100000000000000000",
   )
   assert_eq(
     cn_err(() => @num.chinese_of("-100000000000000000")),
-    "OutOfRange \"-100000000000000000\"",
+    "OutOfRange -100000000000000000",
   )
   assert_eq(
     cn_err(() => @num.chinese_of("18446744073709551621")),
-    "OutOfRange \"18446744073709551621\"",
+    "OutOfRange 18446744073709551621",
   )
   assert_eq(
     cn_err(() => @num.chinese_money_of("100000000000000000")),
-    "OutOfRange \"100000000000000000\"",
+    "OutOfRange 100000000000000000",
   )
-  assert_eq(cn_err(() => @num.chinese_of("")), "NotDecimal \"\"")
-  assert_eq(cn_err(() => @num.chinese_of("abc")), "NotDecimal \"abc\"")
-  assert_eq(cn_err(() => @num.chinese_of("1.2.3")), "NotDecimal \"1.2.3\"")
-  assert_eq(cn_err(() => @num.chinese_of("12 ")), "NotDecimal \"12 \"")
-  assert_eq(cn_err(() => @num.chinese_of("+1")), "NotDecimal \"+1\"")
-  assert_eq(cn_err(() => @num.chinese_of("1e5")), "NotDecimal \"1e5\"")
+  assert_eq(cn_err(() => @num.chinese_of("")), "NotDecimal ")
+  assert_eq(cn_err(() => @num.chinese_of("abc")), "NotDecimal abc")
+  assert_eq(cn_err(() => @num.chinese_of("1.2.3")), "NotDecimal 1.2.3")
+  assert_eq(cn_err(() => @num.chinese_of("12 ")), "NotDecimal 12 ")
+  assert_eq(cn_err(() => @num.chinese_of("+1")), "NotDecimal +1")
+  assert_eq(cn_err(() => @num.chinese_of("1e5")), "NotDecimal 1e5")
 }
 
 ///|
@@ -289,11 +289,8 @@ test "chinese_of_thousand：10~19 去「一」与 ±999 界（#8.32）" {
   assert_eq(@num.chinese_of_thousand(-10), "")
   assert_eq(@num.chinese_of_thousand(-100), "")
   assert_eq(@num.chinese_of_thousand(-999), "")
-  assert_eq(cn_err(() => @num.chinese_of_thousand(1000)), "OutOfRange \"1000\"")
-  assert_eq(
-    cn_err(() => @num.chinese_of_thousand(-1000)),
-    "OutOfRange \"-1000\"",
-  )
+  assert_eq(cn_err(() => @num.chinese_of_thousand(1000)), "OutOfRange 1000")
+  assert_eq(cn_err(() => @num.chinese_of_thousand(-1000)), "OutOfRange -1000")
 }
 
 ///|
@@ -435,8 +432,8 @@ test "int_of_chinese 的错误形状带位置（#8.35）" {
     cn_err(() => @num.int_of_chinese("元")),
     "UnknownChineseUnit 元 0",
   )
-  assert_eq(cn_err(() => @num.int_of_chinese("")), "NotDecimal \"\"")
-  assert_eq(cn_err(() => @num.int_of_chinese("  ")), "NotDecimal \"  \"")
+  assert_eq(cn_err(() => @num.int_of_chinese("")), "NotDecimal ")
+  assert_eq(cn_err(() => @num.int_of_chinese("  ")), "NotDecimal   ")
 }
 
 ///|
@@ -500,22 +497,19 @@ test "money_of_chinese：键位切分与「没有元」不丢值（#8.36）" {
 ///|
 // hutool 对空/全空白返回 null（哨兵）、对「负」与阿拉伯数字抛 `Unknown unit`；本包统一成 NotDecimal（空与无内容）或 UnknownChineseUnit（带字符与位置），逐条对照的 JDK 原读数在 spec §10.5
 test "money_of_chinese 的错误形状（#8.36）" {
-  assert_eq(cn_err(() => @num.money_of_chinese("")), "NotDecimal \"\"")
-  assert_eq(cn_err(() => @num.money_of_chinese("  ")), "NotDecimal \"  \"")
+  assert_eq(cn_err(() => @num.money_of_chinese("")), "NotDecimal ")
+  assert_eq(cn_err(() => @num.money_of_chinese("  ")), "NotDecimal   ")
   assert_eq(
     cn_err(() => @num.money_of_chinese("123元")),
     "UnknownChineseUnit 1 0",
   )
-  assert_eq(
-    cn_err(() => @num.money_of_chinese("元整")),
-    "NotDecimal \"元整\"",
-  )
+  assert_eq(cn_err(() => @num.money_of_chinese("元整")), "NotDecimal 元整")
   assert_eq(
     cn_err(() => @num.money_of_chinese("负壹佰元整")),
     "UnknownChineseUnit 负 0",
   )
-  assert_eq(cn_err(() => @num.money_of_chinese("元")), "NotDecimal \"元\"")
-  assert_eq(cn_err(() => @num.money_of_chinese("分")), "NotDecimal \"分\"")
+  assert_eq(cn_err(() => @num.money_of_chinese("元")), "NotDecimal 元")
+  assert_eq(cn_err(() => @num.money_of_chinese("分")), "NotDecimal 分")
 }
 
 ///|
@@ -550,6 +544,12 @@ test "chinese_abbrev：万/亿/万亿 三档与两位 HALF_UP（#8.37）" {
   assert_eq(@num.chinese_abbrev(100000000000000), "100.00万亿")
   assert_eq(@num.chinese_abbrev(9223372036854775807), "9223372.04万亿")
   assert_eq(@num.chinese_abbrev(-9223372036854775807 - 1), "-9223372.04万亿")
+  // 平局档判别夹具（JDK 实测：BigDecimal 两位 HALF_UP = 远离零）。没有这四条，把判据里的
+  // `>=` 写成 `>` 也全绿——10-05 变异对照就是这么暴露出「档位没人看着」的
+  assert_eq(@num.chinese_abbrev(10050), "1.01万")
+  assert_eq(@num.chinese_abbrev(10150), "1.02万")
+  assert_eq(@num.chinese_abbrev(-10050), "-1.01万")
+  assert_eq(@num.chinese_abbrev(100000050), "1.00亿")
 }
 
 ///|
@@ -587,6 +587,12 @@ test "english_abbrev：同阈值但单位是 w 且去尾零（#8.38）" {
     "-9223372036854775808",
   )
   assert_eq(@num.english_abbrev(9223372036854775807), "922337203685477.58w")
+  // 平局档 + 舍入族分岔的现成对照（hutool 实测 `1005 ⇒ 1k`、`10050 ⇒ 1w`、`10150 ⇒ 1.01w`，
+  // 因为 `#.##` 吃的是 double：1.005 的最近 double 是 1.00499…）；本包走精确十进制 HALF_UP
+  // ⇒ 下面三条各差一分，两条读数都记在 spec §10.4 第 15 行。同时也是 `>=` 的判别夹具
+  assert_eq(@num.english_abbrev(1005), "1.01k")
+  assert_eq(@num.english_abbrev(10050), "1.01w")
+  assert_eq(@num.english_abbrev(10150), "1.02w")
 }
 
 ///|
@@ -645,13 +651,13 @@ test "english_word_of 的三处不跟随：零分档、负数档、表外位数�
   assert_eq(@num.english_word_of("0.00"), "ZERO ONLY")
   assert_eq(@num.english_word_of("1.005"), "ONE ONLY")
   assert_eq(@num.english_word_of("-0"), "ZERO ONLY")
-  assert_eq(cn_err(() => @num.english_word_of("-1234")), "OutOfRange \"-1234\"")
-  assert_eq(cn_err(() => @num.english_word_of("-0.5")), "OutOfRange \"-0.5\"")
+  assert_eq(cn_err(() => @num.english_word_of("-1234")), "OutOfRange -1234")
+  assert_eq(cn_err(() => @num.english_word_of("-0.5")), "OutOfRange -0.5")
   // 第三条不跟随：`NUMBER_MORE` 只有 5 档（…~TRILLION ⇒ 15 位），hutool 到 16 位是
   // 内部数组越界（实测 `ArrayIndexOutOfBoundsException: Index 5 out of bounds for length 5`），
   // 把内部越界当契约不成立 ⇒ 本包给 OutOfRange
   assert_eq(
     cn_err(() => @num.english_word_of("1234567890123456")),
-    "OutOfRange \"1234567890123456\"",
+    "OutOfRange 1234567890123456",
   )
 }

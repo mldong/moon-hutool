@@ -1,16 +1,18 @@
 # num
 
-hutool `NumberUtil` / `MathUtil` 的 MoonBit 对位·第一批：数论（`gcd` / `ext_gcd` / `mod_inverse` / `is_prime` / `isqrt`）、
+hutool `NumberUtil` / `MathUtil` / `NumberChineseFormatter` / `NumberWordFormatter` 的 MoonBit 对位：
+数论（`gcd` / `ext_gcd` / `mod_inverse` / `is_prime` / `isqrt`）、
 只在精确域出的增长型算术（`lcm` / `factorial` / `combination_count` / `arrangement_count`）、
-七档十进制舍入（`round_to_str` / `round_to` + `RoundingMode`）。
+七档十进制舍入（`round_to_str` / `round_to` + `RoundingMode`）、千分位与百分比、薄 `Money`、
+中文数字四模式与反向、大小写金额、大数缩写、英文 word。
 
 完整边界矩阵与逐条读数来源见 [`docs/spec/08-num.md`](https://github.com/mldong/moon-hutool/blob/master/docs/spec/08-num.md)。本页只放**典型用法**，每条都带期望值——这些 `test` 块会被 `moon test` 真编译真执行。
 
-> 状态：**两批都已交付**（10-05）。第一批 27 块、第二批 17 块（格式化三件 + 薄 `Money`）
-> 前两批 44 块此刻仍绿，第三批（中文数字与英文 word）23 块是设计态红；`wasm`/`js`/`wasm-gc` 三档读数一致。
-> 期望串与 `num_test.mbt` / `format_test.mbt` / `money_test.mbt` 同受"期望值冻结"约束：
-> 实现期只许把红变绿（门禁 G5）。
-> 期望串与 `num_test.mbt` 同受"期望值冻结"约束：实现期只许把红变绿（门禁 G5）。
+> 状态：**三批都已交付**（10-05）。第一批 27 块、第二批 17 块（格式化三件 + 薄 `Money`）、
+> 第三批 23 块（中文数字 + 反向 + 缩写 + 英文 word），合计 67 块在 `wasm`/`js`/`wasm-gc` 三档全绿。
+> 第三批的期望值另走了一轮复核（spec §10.3 第 5、6 条）：两处自相矛盾的冻结读数已改，
+> 补了 51 条实测断言。期望串与 `num_test.mbt` / `format_test.mbt` / `money_test.mbt` /
+> `chinese_test.mbt` 一起受"期望值冻结"约束：实现期只许把红变绿（门禁 G5）。
 
 ## 这一包的立身之本是"哪一类算术不许出现在 `Int` 域"
 
