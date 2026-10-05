@@ -253,7 +253,7 @@ hutool 侧口径：读 GitHub `dromara/hutool` HEAD 的
 | # | 规则 | 依据（都是本机实测读数，不是口味） |
 |---|---|---|
 | 10.1a | **正向入口一律收十进制原文串，不收 `Double`** | hutool 自己两条路对同一个数给两种答案：`1.105` ⇒ BigDecimal 路「一点一零五」、double 路「一点一一」；`0.10` ⇒ 「零点一零」/「零点一」；`1.00` ⇒ 「一点零零」/「一」；`0.0` ⇒ 「零点零」/「零」。收 `Double` 就等于把"先按两位舍一次"藏进入口，同一库里出现两个答案 |
-| 10.1b | **反向累加走 `Int64`，越界给 `OutOfRange`** | hutool 的 `chineseToNumber` 返回 `int`：实测「一千亿」⇒ `1215752192`、「九十九万九千九百九十九亿」⇒ `-826389968`（都是低位截断）。与第一批「增长型算术只在精确域」同一条规矩 |
+| 10.1b | **反向累加走 `Int64`，给真值而不是低位截断** | hutool 的 `chineseToNumber` 返回 `int`：实测「一千亿」⇒ `1215752192`、「九十九万九千九百九十九亿」⇒ `-826389968`（都是低位截断）。与第一批「增长型算术只在精确域」同一条规矩。实现里带溢出防线，但这条防线的可达性另算过一遍（§10.3 第 5 条）：节单位每次用完就清零，越出 `Int64` 需要 10^7 量级字符的输入，**没有夹具能为它变红**——这一点写在这里，不假装测过 |
 | 10.1c | **错误只带读数**（档名 + 那个字符/两字窗口 + 码点位置），hutool 的英文句子不进载荷 | 它那句 `Unknown unit '〇' at: 0` / `Bad number '壹贰' at: 1` 里的**位置与窗口**是有信息的读数，跟；`Unknown unit` 这段文案是英文散文，不跟。位置按码点算（本批夹具全在 BMP 内，UTF-16 下标与码点下标重合，这条已核对） |
 
 ### 10.2 契约矩阵
@@ -263,17 +263,17 @@ hutool 侧口径：读 GitHub `dromara/hutool` HEAD 的
 | 8.26 | `chinese_of(String) -> String raise` | `format(BigDecimal, false, false)` | `1000000 ⇒ 一百万`（节间不补零）、`1001 ⇒ 一千零一`、`1010 ⇒ 一千零一十`、`-12345.67 ⇒ 负一万二千三百四十五点六七` | 节权位与零的折叠 / 小数逐位与尾零 |
 | 8.27 | `chinese_upper_of(String) -> String raise` | `format(BigDecimal, true, false)` | `10000 ⇒ 壹万`、`11 ⇒ 壹拾壹`、`1.105 ⇒ 壹点壹零伍` | 繁体字表对照 |
 | 8.28 | `chinese_colloquial_of(String) -> String raise` | `format(BigDecimal, false, true)` | 只改「一十」前缀：`10 ⇒ 十`、`100000 ⇒ 十万`、`-11 ⇒ 负十一`，而 `115 ⇒ 一百一十五` 不动 | 只改「一十」这一处 |
-| 8.29 | `chinese_upper_colloquial_of(String) -> String raise` | `format(BigDecimal, true, true)` | `10 ⇒ 拾`、`-11 ⇒ 负拾壹` | 同上（同块内并测） |
-| 8.30 | `chinese_money_of(String) -> String raise` | `format(double, true, true)`（金额档） | `1 ⇒ 壹元整`、`0.05 ⇒ 伍分`、`0.5 ⇒ 伍角`、`1.105 ⇒ 壹元壹角壹分`（**先两位 HALF_UP**）、`-12345.67 ⇒ 负壹万贰仟叁佰肆拾伍元陆角柒分`、`99999999999999.99 ⇒ …元玖角玖分` | 元/角/分/整的档 + 舍入族分岔 |
-| 8.31 | `chinese_money_simple_of(String) -> String raise` | `format(double, false, true)` | `1 ⇒ 一元整`、`0.05 ⇒ 五分`、`1.105 ⇒ 一元一角一分` | 简写金额 |
+| 8.29 | `chinese_upper_colloquial_of(String) -> String raise` | `format(BigDecimal, true, true)` | **本包读数与繁体档逐条相等**：`10 ⇒ 壹拾`、`-11 ⇒ 负壹拾壹`、`115 ⇒ 壹佰壹拾伍`。hutool 的口语表只有 `一十/一拾/负一十/负一拾` 四条，而繁体档产出的是「壹拾」⇒ 一条都不命中（`f_bd_trad_coll` 腿逐条实测） | 口语表混排简繁，繁体档走不到 |
+| 8.30 | `chinese_money_of(String) -> String raise` | `format(double, true, true)`（金额档） | `1 ⇒ 壹元整`、`0.05 ⇒ 伍分`、`0.5 ⇒ 伍角`、`1.105 ⇒ 壹元壹角壹分`、`-12345.67 ⇒ 负壹万贰仟叁佰肆拾伍元陆角柒分`、`99999999999999.99 ⇒ …元玖角**捌**分`、`0.004 ⇒ 整`、`-0.004 ⇒ 负整` | 元/角/分/整的档 + **金额腿走 double**：`Math.round(double × 100)`，所以 `1.105` 落在 110.5 这条平局上给 111 分，而 `99999999999999.99` 的最近 double 是 `…99.984375` ⇒ 9999999999999998 分（捌分）。这不是"先按两位十进制 HALF_UP"那条腿，两条读数见 §10.3 第 4 条 |
+| 8.31 | `chinese_money_simple_of(String) -> String raise` | `format(double, false, true)` | `1 ⇒ 一元整`、`0.05 ⇒ 五分`、`1.105 ⇒ 一元一角一分`、`1.015 ⇒ 一元零一分`、`1000000.01 ⇒ 一百万元零一分` | 简写金额（与繁体档只差字表，段取舍逐条一致） |
 | 8.32 | `chinese_of_thousand(Int) -> String raise` | `formatThousand(int, false)`，界 ±999 | `10 ⇒ 十`、`11 ⇒ 十一`、`115 ⇒ 一百一十五`、`909 ⇒ 九百零九`、`1000 ⇒ OutOfRange` | 10~19 去「一」与 ±999 界 |
 | 8.33 | `chinese_upper_of_thousand(Int) -> String raise` | `formatThousand(int, true)` | `11 ⇒ 拾壹`、`110 ⇒ 壹佰壹拾` | 繁体千分位 |
 | 8.34 | `chinese_digit(Char, upper? : Bool) -> Char raise` | `numberCharToChinese(char, boolean)` | `'0'..'9'` 全表两侧读数；非数字字符 hutool 无校验（查表得 -1 继续走），本包给 `UnknownChineseUnit 十 0` | 单字符档与非数字 |
-| 8.35 | `int_of_chinese(String) -> Int64 raise` | `chineseToNumber(String)` 返 `int` | 值档 62 条（模型逐条对撞）、错误档 11 条、截断分岔 2 条；认「负」是本包补的（hutool 在此抛错，实测 4 条） | 基本档与裸单位 / 跨节与怪形状 / 认「负」/ 错误形状 / 界走 Int64 |
-| 8.36 | `money_of_chinese(String) -> Money raise` | `chineseMoneyToNumber(String)` 返 `BigDecimal` | 键位切分 24 条与 JDK 逐条相等（含「圆」别名、`壹分壹厘` 两边都忽略尾随垃圾）；「没有元键」3 条声明分岔 | 键位切分与「没有元」不丢值 / 错误形状 |
-| 8.37 | `chinese_abbrev(Int64) -> String` | `NumberChineseFormatter.formatSimple(long)` | 阈值 1e4/1e8/1e12 ⇒ `10000 ⇒ 1.00万`、`12345 ⇒ 1.23万`、`1000000000000 ⇒ 1.00万亿`（BigDecimal 两位 HALF_UP，与 locale 无关） | 万/亿/万亿 三档 |
-| 8.38 | `english_abbrev(Int64) -> String` | `NumberWordFormatter.formatSimple(long)` | 同阈值、单位 `w`、去尾零：`1000000 ⇒ 100w`；`1234567890123` 见 10.4 的 locale 分岔 | 同阈值但单位是 w |
-| 8.39 | `english_word_of(String) -> String raise` | `NumberWordFormatter.format(Object)` | `255 ⇒ TWO HUNDRED AND FIFTY FIVE ONLY`、`1234567 ⇒ ONE MILLION … ONLY`、`0.05 ⇒ ZERO AND CENTS FIVE ONLY` | 三位一节与 ONLY / 零分档与负数档 |
+| 8.35 | `int_of_chinese(String) -> Int64 raise` | `chineseToNumber(String)` 返 `int` | 值档 54 条（模型逐条对撞）、错误档 10 条、截断分岔 2 条；认「负」是本包补的（hutool 在此抛错，实测 4 条） | 基本档与裸单位 / 跨节与怪形状 / 认「负」/ 错误形状 / 界走 Int64 |
+| 8.36 | `money_of_chinese(String) -> Money raise` | `chineseMoneyToNumber(String)` 返 `BigDecimal` | 键位切分 32 条与 JDK 逐条相等（含「圆」别名两条、`壹分壹厘` 这种尾随垃圾两边都忽略、`壹角壹拾分 ⇒ 20` 分）；「没有元键」3 条声明分岔；「三个键都没内容」⇒ `NotDecimal`（hutool 给 0.00，实测 `元整`、`元`、`分` 三条，错误档共 7 条） | 键位切分与「没有元」不丢值 / 错误形状 |
+| 8.37 | `chinese_abbrev(Int64) -> String` | `NumberChineseFormatter.formatSimple(long)` | 阈值 1e4/1e8/1e12 ⇒ `10000 ⇒ 1.00万`、`12345 ⇒ 1.23万`、`1000000000000 ⇒ 1.00万亿`、`Int64::MAX ⇒ 9223372.04万亿`、`-10000 ⇒ -1.00万`（BigDecimal 两位 HALF_UP，与 locale 无关） | 万/亿/万亿 三档 + 绝对值判档 |
+| 8.38 | `english_abbrev(Int64) -> String` | `NumberWordFormatter.formatSimple(long)` | 阈值**更早**：`< 1000` 原样（**所有负数走这条**，`-10000 ⇒ -10000`）、`>= 10000` 才换 `w`，否则 `k`；小数最多两位且去尾零 ⇒ `1000 ⇒ 1k`、`9999 ⇒ 10k`、`1000000 ⇒ 100w`；locale 与 double 尾数两条分岔见 10.4 第 5、15 行 | 同后缀不同阈值 |
+| 8.39 | `english_word_of(String) -> String raise` | `NumberWordFormatter.format(Object)` | `255 ⇒ TWO HUNDRED AND FIFTY FIVE ONLY`、`1234567 ⇒ ONE MILLION … ONLY`、`0.05 ⇒ ZERO AND CENTS FIVE ONLY`、`1001 ⇒ ONE THOUSAND ONE ONLY`（节之间不补 AND）、`110 ⇒ ONE HUNDRED AND TEN ONLY`（段内才补）；整数上界 15 位（`NUMBER_MORE` 表长） | 三位一节与 ONLY / AND 的位置 / 零分档与负数档 |
 
 错误面新增三条（都只带读数）：`OutOfRange(String)`、`UnknownChineseUnit(Char, Int)`、
 `BadChineseNumber(String, Int)`。`NotDecimal(String)` 复用第二批那条（正向的"不是十进制原文"）。
@@ -295,6 +295,23 @@ hutool 侧口径：读 GitHub `dromara/hutool` HEAD 的
 4. **舍入族对撞**：`1.105` 同时进 #8.30（HALF_UP ⇒ 壹元壹角壹分）与第二批
    `Money::from_yuan_str`（HALF_EVEN ⇒ cent=110）——两条读数并排钉住，不强行统一，
    因为 hutool 自己 `NumberUtil.round` 与 `Money.DEFAULT_ROUNDING_MODE` 就分家。
+   **但 #8.30 这一腿本身走的是 double**（`format(double, …)` 里 `Math.round(amount * 100)`），
+   所以它的"两位 HALF_UP"是浮点意义上的：`1.105 × 100` 的最近 double 恰是 `110.5` ⇒ 111 分，
+   而 `99999999999999.99` 的最近 double 是 `99999999999999.984375` ⇒ 9999999999999998 分（捌分，不是玖分）。
+   本包照这条腿实现（`Double` 三档同宽、`floor(x + 0.5)` 语义一致），不换成十进制腿——换了那一档就对不上。
+5. **反向档 `OutOfRange` 的可达性核算**（10-05 复核轮补）：hutool 的算法每遇一个节单位就把
+   `section` 清零，实测「亿亿亿亿亿亿亿亿亿亿」⇒ **0**（十个节单位互相抵消，不是溢出），
+   「壹亿贰拾万」⇒ 100200000。所以增量只随输入长度**线性**增长：每 2~8 个字符最多贡献 1e8~1e12，
+   要越出 `Int64` 需要 10^7 量级字符的串——夹具放不下，也没有哪条真实输入会走到。
+   实现里保留溢出防线（宁可 `raise` 也不静默回绕，与 §0.1 一条），但**这一档没有夹具能为它变红**，
+   记在这儿而不是假装它被测过（原契约把「亿亿…」写成 OutOfRange 是模型错，不是 JDK 读数，已改回 0）。
+6. **补测轮（10-05，同一天）**：主腿 763 条之外另跑三轮探针，只为把"冻结夹具没覆盖的形状"从猜测
+   变成读数——超 Int64 的低位回绕（`2^64+5 ⇒ 五`、`2^64 ⇒ 零`）、丢号档（`-0.05 ⇒ 零点零五`）、
+   文法宽窄（`+1 ⇒ 一`、`1e5 ⇒ 一十万`）、word 的表长（16 位 ⇒ `ArrayIndexOutOfBoundsException`）、
+   「圆」别名与空键档（`壹圆贰分 ⇒ 1.02`、`元 ⇒ 0.00`）、空格单位（`" 一十" ⇒ 11`）、
+   `DecimalFormat("#.##")` 对大 double 的尾数并档（`Int64::MAX ⇒ 922337203685477.6w`）。
+   本包块数 22→23（新增一格「文法允许的怪形状」）、断言 336→387：新增的都是这几轮现取的数，
+   删掉的 4 条是同一输入既钉值又钉错的自相矛盾行（「负」前缀，见 10.4 第 2 行）。
 
 ### 10.4 这一批的不跟随清单
 
@@ -302,7 +319,7 @@ hutool 侧口径：读 GitHub `dromara/hutool` HEAD 的
 |---|---|---|---|---|
 | 1 | `Double` 入口 | 同一数两种答案（1.105 ⇒ 一点一一 / 一点一零五） | 只收原文串 | 10.1a |
 | 2 | 反向「负」前缀 | `Unknown unit '负' at: 0`（4 条实测） | 认，取负 | 正向会产出「负」，反向认不了 ⇒ 往返不通 |
-| 3 | 反向累加位宽 | 「一千亿」⇒ 1215752192、「九十九万…」⇒ -826389968 | 真值（Int64），越 Int64 ⇒ `OutOfRange` | 低位截断不是语义 |
+| 3 | 反向累加位宽 | 「一千亿」⇒ 1215752192、「九十九万…」⇒ -826389968 | 真值（Int64 累加，带溢出防线；可达性见 10.3 第 5 条） | 低位截断不是语义 |
 | 4 | 金额反向「没有元键」 | `壹佰 ⇒ 0.00`、`壹亿 ⇒ 0.00`、`壹佰贰拾拾 ⇒ 0.00`（整段丢） | 按元段读：10000 分 / 1e10 分 / 12000 分 | 键缺失是输入不完整，不是值为零 |
 | 5 | 英文缩写的小数点 | `123456789,01w`（de locale） | 固定 `.` | 参照实现随环境变，见 10.3 第 3 条 |
 | 6 | 英文零分 | `ONE AND CENTS  ONLY`（两个空格） | `ONE ONLY` | 段拼接事故，两位空格没有消费方会要 |
@@ -310,12 +327,17 @@ hutool 侧口径：读 GitHub `dromara/hutool` HEAD 的
 | 8 | 空输入反向 | `"" ⇒ 0`、`"  " ⇒ 1`（它的 `CHINESE_NAME_VALUE` 第一项是值为 1 的空格单位） | `NotDecimal` | 哨兵行为；两个空格读出 1 尤其不可依赖 |
 | 9 | 千分位界外 | 抛 `Number support only: (-999 ~ 999)！` | `OutOfRange "1000"`（只带原串） | 错误只带读数 |
 | 10 | 多币种 `Currency.digit` 与「大写金额带币种」 | `Money` 支持任意币种小数位 | 不做，归第四批一起定 | 引币种就要引表，与本库"码表独立成数据件"的立场一致 |
+| 11 | 正向的整数部分超 `Int64` | `BigDecimal.longValue()` 先取低 64 位再判界：实测 `2^64+5 ⇒ 五`、`2^64 ⇒ 零`（回绕落点决定读数是错是对） | 判界用**未截断**的整数幅值 ⇒ 一律 `OutOfRange` | 同一个库不能因为回绕而把 1.8×10^19 读成 5；10.1b 同一条规矩 |
+| 12 | `format(BigDecimal, …)` 在 `\|x\| < 1` 的负小数上丢符号 | 实测 `-0.05 ⇒ 零点零五`、`-.5 ⇒ 零点五`（整数部分截成 0 就走了「零」那条早退） | 按原串保号：`负零点零五`；真零（`-0`、`-0.00`）仍不带「负」 | 正向产出「负」而输入是负数却不读，是同一族缺陷的两个面；10.4 第 2 行的往返判据在这里同样成立 |
+| 13 | 原文串文法的宽窄 | 那两条腿都吃更多：`+1 ⇒ 一`、`1e5 ⇒ 一十万`、`007 ⇒ 七`、`1. ⇒ 一`、`.5 ⇒ 零点五` | 文法固定 `-? D+ ('.' D*)? \| -? '.' D+`：前导零与「1.」「.5」收，`+`、指数、空白、分组符一律 `NotDecimal` | 指数写法要把「e5」当有效数字流还是语法糖，两种读法在 hutool 里没区别；把文法写窄比让它吃下什么都强 |
+| 14 | 英文 word 的整数上界 | `NUMBER_MORE` 只有 5 档，16 位起内部数组越界：`ArrayIndexOutOfBoundsException: Index 5 out of bounds for length 5` | 15 位起界外给 `OutOfRange`（`123456789012345` 仍是读数） | 同第 7 行：内部越界不是契约 |
+| 15 | 英文缩写的尾数 | 先 `value / 10000.0` 再 `DecimalFormat("#.##")` ⇒ `Int64::MAX ⇒ 922337203685477.6w`（double 只有 17 位有效数字，末几位被并掉） | 与 #8.37 同族走精确十进制 ⇒ `922337203685477.58w` | 本库数值件只认一条精确腿；两条腿在 §9.1 已经对撞过一次，别再留第二个答案 |
 
 ### 10.5 分批与状态
 
 | 批 | 内容 | 状态 |
 |---|---|---|
-| 第三批（本节） | #8.26~#8.39，14 条公开项 + 3 条错误档，22 块冻结期望值 | **契约已冻结**（10-05），实现未开工 |
+| 第三批（本节） | #8.26~#8.39，14 条公开项 + 3 条错误档，23 块冻结期望值 | **契约已冻结并已复核一轮**（10-05：改掉两处自相矛盾/模型错的期望、补 51 条实测断言、不跟随清单从 10 行涨到 15 行），实现轮进行中 |
 | 第四批 | `Calculator` 表达式求值 | 未开工；动手前先定"十进制精确算术用什么形状"（完整 `BigDecimal` 在不做清单里） |
 
 第三批的 22 块与包内其余块一起进当场读数（见 `docs/ROADMAP.md` 的生成块）；

@@ -121,7 +121,8 @@ test "chinese_colloquial_of 只改「一十」这一处（#8.28/#8.29）" {
 }
 
 ///|
-// 界内上界是 ±99_9999_9999_9999.99（hutool `Assert.checkBetween` 那句 `Number support only: (-99999999999999.99 ~ 99999999999999.99)！` 只当证据，文案不进错误载荷）；原文串不做 trim、不接受 `+` 前缀（hutool 的 double 路收 +1，本包按整串文法判非十进制）
+// 界内上界是 ±99_9999_9999_9999.99（hutool `Assert.checkBetween` 那句 `Number support only: (-99999999999999.99 ~ 99999999999999.99)！` 只当证据，文案不进错误载荷）；原文串不做 trim、不接受 `+` 前缀与指数写法（hutool 的 `BigDecimal` 路两者都收：`+1` 读「一」、`1e5` 读「一十万」，实测），本包按整串文法判非十进制。
+// 「超 Int64」那一档本包给 OutOfRange 而不是回绕读数：实测 hutool 拿 `BigDecimal.longValue()` 的低 64 位再判界，`18446744073709551621`（2^64+5）回绕成 5 ⇒ 它读出「五」、`18446744073709551616` 回绕成 0 ⇒ 读出「零」——回绕落点决定读数是错是对，本包不赌。
 test "正向界与非十进制输入（#8.26~#8.31）" {
   assert_eq(
     cn_err(() => @num.chinese_of("100000000000000000")),
@@ -132,6 +133,10 @@ test "正向界与非十进制输入（#8.26~#8.31）" {
     "OutOfRange \"-100000000000000000\"",
   )
   assert_eq(
+    cn_err(() => @num.chinese_of("18446744073709551621")),
+    "OutOfRange \"18446744073709551621\"",
+  )
+  assert_eq(
     cn_err(() => @num.chinese_money_of("100000000000000000")),
     "OutOfRange \"100000000000000000\"",
   )
@@ -140,6 +145,20 @@ test "正向界与非十进制输入（#8.26~#8.31）" {
   assert_eq(cn_err(() => @num.chinese_of("1.2.3")), "NotDecimal \"1.2.3\"")
   assert_eq(cn_err(() => @num.chinese_of("12 ")), "NotDecimal \"12 \"")
   assert_eq(cn_err(() => @num.chinese_of("+1")), "NotDecimal \"+1\"")
+  assert_eq(cn_err(() => @num.chinese_of("1e5")), "NotDecimal \"1e5\"")
+}
+
+///|
+// 文法收的四条怪形状（JDK 逐条实测：`007 ⇒ 七`、`1. ⇒ 一`、`.5 ⇒ 零点五`、`0.000 ⇒ 零点零零零`），另有一条**不跟随**：hutool 的 BigDecimal 路在 `|x| < 1` 的负小数上把「负」弄丢了（实测 `-0.05 ⇒ 零点零五`、`-.5 ⇒ 零点五`），因为整数部分截断成 0 就走了「零」那条早退；本包按原串保号，`-0.05 ⇒ 负零点零五`，而真零（`-0`、`-0.00`）仍不带「负」（零没有符号）。
+test "文法允许的怪形状与丢号一档（#8.26）" {
+  assert_eq(@num.chinese_of("007"), "七")
+  assert_eq(@num.chinese_of("1."), "一")
+  assert_eq(@num.chinese_of(".5"), "零点五")
+  assert_eq(@num.chinese_of("0.000"), "零点零零零")
+  assert_eq(@num.chinese_of("-0.05"), "负零点零五")
+  assert_eq(@num.chinese_of("-0.00"), "零点零零")
+  assert_eq(@num.chinese_of("-0"), "零")
+  assert_eq(@num.chinese_of("-1.5"), "负一点五")
 }
 
 ///|
@@ -179,19 +198,18 @@ test "chinese_money_of：元/角/分/整的档（#8.30）" {
     @num.chinese_money_of("12345.678"),
     "壹万贰仟叁佰肆拾伍元陆角捌分",
   )
+  assert_eq(@num.chinese_money_of("0.999"), "壹元整")
+  assert_eq(@num.chinese_money_of("1.015"), "壹元零壹分")
+  assert_eq(@num.chinese_money_of("2.675"), "贰元陆角捌分")
+  assert_eq(@num.chinese_money_of("1000000.01"), "壹佰万元零壹分")
+  assert_eq(@num.chinese_money_of("-0.004"), "负整")
+  assert_eq(@num.chinese_money_of("-0.05"), "负伍分")
+  assert_eq(@num.chinese_money_of("-0"), "零元整")
+  assert_eq(@num.chinese_money_of("0.0"), "零元整")
 }
 
 ///|
-// hutool 自己两条路不同族：`NumberUtil.round` 默认 HALF_UP，而 `Money.DEFAULT_ROUNDING_MODE` 是 HALF_EVEN。本包不强行统一（两边都有权威读数），但把分岔钉成夹具：1.105 走金额中文 ⇒ 壹角壹分，走 Money ⇒ 110 分（= 1.10）
-test "金额档舍入族分岔：这里跟 HalfUp 而不是 Money 的 HalfEven（#8.30 与 #8.18）" {
-  assert_eq(@num.chinese_money_of("1.105"), "壹元壹角壹分")
-  assert_eq(@num.chinese_money_of("0.005"), "壹分")
-  assert_eq(@num.Money::from_yuan_str("1.105").cent(), 110)
-  assert_eq(@num.Money::from_yuan_str("0.005").cent(), 0)
-}
-
-///|
-// 与繁体档只差字表，段的取舍完全一致（0.05 ⇒ 五分、1.105 ⇒ 一元一角一分）
+// 与繁体档只差字表、段的取舍完全一致；`0.004 ⇒ 整` 与 `-0.004 ⇒ 负整` 是同一档的正负两面（元/角/分全为零时只留「整」）
 test "chinese_money_simple_of 简写金额（#8.31）" {
   assert_eq(@num.chinese_money_simple_of("0"), "零元整")
   assert_eq(@num.chinese_money_simple_of("1"), "一元整")
@@ -227,6 +245,20 @@ test "chinese_money_simple_of 简写金额（#8.31）" {
     @num.chinese_money_simple_of("12345.678"),
     "一万二千三百四十五元六角八分",
   )
+  assert_eq(@num.chinese_money_simple_of("1.015"), "一元零一分")
+  assert_eq(@num.chinese_money_simple_of("2.675"), "二元六角八分")
+  assert_eq(@num.chinese_money_simple_of("1000000.01"), "一百万元零一分")
+  assert_eq(@num.chinese_money_simple_of("-1.5"), "负一元五角")
+  assert_eq(@num.chinese_money_simple_of("-0.004"), "负整")
+}
+
+///|
+// hutool 自己两条路不同族：`NumberUtil.round` 默认 HALF_UP，而 `Money.DEFAULT_ROUNDING_MODE` 是 HALF_EVEN。本包不强行统一（两边都有权威读数），但把分岔钉成夹具：1.105 走金额中文 ⇒ 壹角壹分，走 Money ⇒ 110 分（= 1.10）
+test "金额档舍入族分岔：这里跟 HalfUp 而不是 Money 的 HalfEven（#8.30 与 #8.18）" {
+  assert_eq(@num.chinese_money_of("1.105"), "壹元壹角壹分")
+  assert_eq(@num.chinese_money_of("0.005"), "壹分")
+  assert_eq(@num.Money::from_yuan_str("1.105").cent(), 110)
+  assert_eq(@num.Money::from_yuan_str("0.005").cent(), 0)
 }
 
 ///|
@@ -256,6 +288,7 @@ test "chinese_of_thousand：10~19 去「一」与 ±999 界（#8.32）" {
   assert_eq(@num.chinese_of_thousand(-1), "")
   assert_eq(@num.chinese_of_thousand(-10), "")
   assert_eq(@num.chinese_of_thousand(-100), "")
+  assert_eq(@num.chinese_of_thousand(-999), "")
   assert_eq(cn_err(() => @num.chinese_of_thousand(1000)), "OutOfRange \"1000\"")
   assert_eq(
     cn_err(() => @num.chinese_of_thousand(-1000)),
@@ -323,6 +356,8 @@ test "int_of_chinese：基本档与裸单位（#8.35）" {
   assert_eq(@num.int_of_chinese("零壹拾"), 10)
   assert_eq(@num.int_of_chinese("壹"), 1)
   assert_eq(@num.int_of_chinese("壹佰"), 100)
+  assert_eq(@num.int_of_chinese("九万"), 90000)
+  assert_eq(@num.int_of_chinese("壹拾亿"), 1000000000)
 }
 
 ///|
@@ -353,6 +388,10 @@ test "int_of_chinese：跨节、零的折叠与怪形状（#8.35）" {
     @num.int_of_chinese("壹佰贰拾叁万肆仟伍佰陆拾柒"),
     1234567,
   )
+  // 空格在 hutool 的单位表里是一个值为 1 的单位（spec §10.4 第 8 条说的是"整串空白"那条哨兵）：
+  // 实测 `" 一十" ⇒ 11`、`"一十 一" ⇒ 10`（末尾那条是 `number * (unit.value / 10)` 的整数除把 1 削成 0）
+  assert_eq(@num.int_of_chinese(" 一十"), 11)
+  assert_eq(@num.int_of_chinese("一十 一"), 10)
 }
 
 ///|
@@ -365,7 +404,7 @@ test "int_of_chinese 认「负」：一处对 hutool 的修正（#8.35）" {
 }
 
 ///|
-// 位置与两字窗口跟随 JDK 实测文案（如 `Bad number '壹贰' at: 1`、`Unknown unit '〇' at: 0`），文案本身不进载荷——本包三档都只带读数：档位名 + 那个字符/两字窗口 + 码点位置。JDK 侧报 ERR 的夹具全部自动进这一块，不手挑
+// 位置与两字窗口跟随 JDK 实测文案（如 `Bad number '壹贰' at: 1`、`Unknown unit '〇' at: 0`），文案本身不进载荷——本包三档都只带读数：档位名 + 那个字符/两字窗口 + 码点位置。JDK 侧报 ERR 的夹具全部自动进这一块，**除 spec §10.4 第 2 条已声明分岔的「负」前缀四条**——本包认负，那四条读出的是值不是错，钉在「认负」块里；原先两个块并排钉同一个输入是自相矛盾（JDK 对 `负一十` 报 `Unknown unit '负' at: 0` 正是那四条）
 test "int_of_chinese 的错误形状带位置（#8.35）" {
   assert_eq(cn_err(() => @num.int_of_chinese("10")), "UnknownChineseUnit 1 0")
   assert_eq(
@@ -393,37 +432,24 @@ test "int_of_chinese 的错误形状带位置（#8.35）" {
     "UnknownChineseUnit 廿 0",
   )
   assert_eq(
-    cn_err(() => @num.int_of_chinese("负一万二千三百四十五")),
-    "UnknownChineseUnit 负 0",
-  )
-  assert_eq(
-    cn_err(() => @num.int_of_chinese("负一十")),
-    "UnknownChineseUnit 负 0",
-  )
-  assert_eq(
-    cn_err(() => @num.int_of_chinese("负一十一")),
-    "UnknownChineseUnit 负 0",
-  )
-  assert_eq(
-    cn_err(() => @num.int_of_chinese("负一百二十一")),
-    "UnknownChineseUnit 负 0",
+    cn_err(() => @num.int_of_chinese("元")),
+    "UnknownChineseUnit 元 0",
   )
   assert_eq(cn_err(() => @num.int_of_chinese("")), "NotDecimal \"\"")
   assert_eq(cn_err(() => @num.int_of_chinese("  ")), "NotDecimal \"  \"")
 }
 
 ///|
-// JDK 侧越 int 上界的实测截断读数：{"一千亿": ["1215752192", 100000000000], "九十九万九千九百九十九亿": ["-826389968", 999900990000]}——本包用 Int64 累加给真值，越出 Int64 才给 OutOfRange（与第一批「增长型算术只在精确域」一脉）
+// JDK 侧越 int 上界的实测截断读数：{"一千亿": ["1215752192", 100000000000], "九十九万九千九百九十九亿": ["-826389968", 999900990000]}——本包用 Int64 累加给真值（与第一批「增长型算术只在精确域」一脉）。
+// `OutOfRange` 这一档在反向腿**发不出来**，不是漏钉：hutool 的算法每遇一个节单位就把 `section` 清零（实测「亿亿亿亿亿亿亿亿亿亿」⇒ 0，十个节单位互相抵消），增量只随输入长度线性增长，要越出 Int64 需要 10^7 量级字符的串。实现里保留溢出防线（宁可报错也不静默回绕），但这一档没有夹具能为它变红。
 test "int_of_chinese 的界走 Int64：截断档不跟随（#8.35）" {
   assert_eq(@num.int_of_chinese("一千亿"), 100000000000)
   assert_eq(
     @num.int_of_chinese("九十九万九千九百九十九亿"),
     999900990000,
   )
-  assert_eq(
-    cn_err(() => @num.int_of_chinese("亿亿亿亿亿亿亿亿亿亿")),
-    "OutOfRange \"亿亿亿亿亿亿亿亿亿亿\"",
-  )
+  assert_eq(@num.int_of_chinese("亿亿亿亿亿亿亿亿亿亿"), 0)
+  assert_eq(@num.int_of_chinese("壹亿贰拾万"), 100200000)
 }
 
 ///|
@@ -464,6 +490,11 @@ test "money_of_chinese：键位切分与「没有元」不丢值（#8.36）" {
   assert_eq(@num.money_of_chinese("壹亿").cent(), 10000000000)
   assert_eq(@num.money_of_chinese("壹佰").cent(), 10000)
   assert_eq(@num.money_of_chinese("壹佰贰拾拾").cent(), 12000)
+  assert_eq(@num.money_of_chinese("壹圆贰分").cent(), 102)
+  assert_eq(@num.money_of_chinese("拾圆整").cent(), 1000)
+  assert_eq(@num.money_of_chinese("壹亿贰角").cent(), 1200000000)
+  assert_eq(@num.money_of_chinese("壹角壹拾分").cent(), 20)
+  assert_eq(@num.money_of_chinese("角壹分").cent(), 1)
 }
 
 ///|
@@ -483,6 +514,8 @@ test "money_of_chinese 的错误形状（#8.36）" {
     cn_err(() => @num.money_of_chinese("负壹佰元整")),
     "UnknownChineseUnit 负 0",
   )
+  assert_eq(cn_err(() => @num.money_of_chinese("元")), "NotDecimal \"元\"")
+  assert_eq(cn_err(() => @num.money_of_chinese("分")), "NotDecimal \"分\"")
 }
 
 ///|
@@ -512,10 +545,17 @@ test "chinese_abbrev：万/亿/万亿 三档与两位 HALF_UP（#8.37）" {
   assert_eq(@num.chinese_abbrev(9999999999999999), "10000.00万亿")
   assert_eq(@num.chinese_abbrev(-1), "-1")
   assert_eq(@num.chinese_abbrev(-12345), "-1.23万")
+  assert_eq(@num.chinese_abbrev(-10000), "-1.00万")
+  assert_eq(@num.chinese_abbrev(-9999), "-9999")
+  assert_eq(@num.chinese_abbrev(100000000000000), "100.00万亿")
+  assert_eq(@num.chinese_abbrev(9223372036854775807), "9223372.04万亿")
+  assert_eq(@num.chinese_abbrev(-9223372036854775807 - 1), "-9223372.04万亿")
 }
 
 ///|
-// hutool 这里走 `NumberUtil.decimalFormat("#.##", …)` ⇒ 随 JVM 默认 locale 变（de 档会给 `1,23w`）。本包固定 `.`，理由与 `conv` 轮那条 locale 判据同源：参照实现在自己运行时上给两种读数时，跟随就等于把环境写进语义
+// 阈值实测（含 hutool 那两处不对称）：`value < 1000` 一条早退把**所有负数**留在原样十进制（`-10000 ⇒ -10000`，中文腿同量级给 `-1.00万`），而 `>= 10000` 才换 `w`、否则 `k`。
+// locale：hutool 走 `NumberUtil.decimalFormat("#.##", …)` ⇒ 随 JVM 默认 locale 变（de 档实测 `1234567890123 ⇒ 123456789,01w`，本包固定 `.`，判据与 `conv` 轮同源——参照实现在自己运行时上给两种读数时，跟随就等于把环境写进语义）。
+// 舍入族声明：hutool 这腿先 `value / 10000.0` 走 double，再 `DecimalFormat("#.##")`——本机实测 `Int64::MAX ⇒ 922337203685477.6w`（double 装不下那 19 位，尾数被并成 …6），本包与 #8.37 同族走**精确十进制**，同输入给 `922337203685477.58w`；两条读数都在，分岔是明码的。
 test "english_abbrev：同阈值但单位是 w 且去尾零（#8.38）" {
   assert_eq(@num.english_abbrev(0), "0")
   assert_eq(@num.english_abbrev(1), "1")
@@ -541,6 +581,12 @@ test "english_abbrev：同阈值但单位是 w 且去尾零（#8.38）" {
   assert_eq(@num.english_abbrev(9999999999999999), "1000000000000w")
   assert_eq(@num.english_abbrev(-1), "-1")
   assert_eq(@num.english_abbrev(-12345), "-12345")
+  assert_eq(@num.english_abbrev(-10000), "-10000")
+  assert_eq(
+    @num.english_abbrev(-9223372036854775807 - 1),
+    "-9223372036854775808",
+  )
+  assert_eq(@num.english_abbrev(9223372036854775807), "922337203685477.58w")
 }
 
 ///|
@@ -575,13 +621,37 @@ test "english_word_of：三位一节与 ONLY（#8.39）" {
     @num.english_word_of("1234.56"),
     "ONE THOUSAND TWO HUNDRED AND THIRTY FOUR AND CENTS FIFTY SIX ONLY",
   )
+  // 「AND」只在**百位段内部**出现（transThree 那一支），节与节之间靠空格拼接：
+  // 实测 `1001 ⇒ ONE THOUSAND ONE ONLY`（没有 AND）、`10101 ⇒ TEN THOUSAND ONE HUNDRED AND ONE ONLY`
+  assert_eq(@num.english_word_of("110"), "ONE HUNDRED AND TEN ONLY")
+  assert_eq(@num.english_word_of("1001"), "ONE THOUSAND ONE ONLY")
+  assert_eq(
+    @num.english_word_of("10101"),
+    "TEN THOUSAND ONE HUNDRED AND ONE ONLY",
+  )
+  assert_eq(@num.english_word_of("100010"), "ONE HUNDRED THOUSAND TEN ONLY")
+  assert_eq(@num.english_word_of("1000000000000"), "ONE TRILLION ONLY")
+  assert_eq(
+    @num.english_word_of("123456789012345"),
+    "ONE HUNDRED AND TWENTY THREE TRILLION FOUR HUNDRED AND FIFTY SIX BILLION SEVEN HUNDRED AND EIGHTY NINE MILLION TWELVE THOUSAND THREE HUNDRED AND FORTY FIVE ONLY",
+  )
 }
 
 ///|
 // hutool 对 1.0 输出 `ONE AND CENTS  ONLY`（两个空格，实测读数）、对负数直接炸在内部 `Integer.parseInt("-")`（实测 `NumberFormatException: For input string: "-"`）：前者是段拼接事故、后者是把内部异常当契约，本包分别改成不输出 cents 段与 OutOfRange
-test "english_word_of 的零分档与负数档：两处不跟随（#8.39）" {
+test "english_word_of 的三处不跟随：零分档、负数档、表外位数（#8.39）" {
   assert_eq(@num.english_word_of("1.0"), "ONE ONLY")
   assert_eq(@num.english_word_of("1.00"), "ONE ONLY")
+  assert_eq(@num.english_word_of("0.00"), "ZERO ONLY")
+  assert_eq(@num.english_word_of("1.005"), "ONE ONLY")
+  assert_eq(@num.english_word_of("-0"), "ZERO ONLY")
   assert_eq(cn_err(() => @num.english_word_of("-1234")), "OutOfRange \"-1234\"")
   assert_eq(cn_err(() => @num.english_word_of("-0.5")), "OutOfRange \"-0.5\"")
+  // 第三条不跟随：`NUMBER_MORE` 只有 5 档（…~TRILLION ⇒ 15 位），hutool 到 16 位是
+  // 内部数组越界（实测 `ArrayIndexOutOfBoundsException: Index 5 out of bounds for length 5`），
+  // 把内部越界当契约不成立 ⇒ 本包给 OutOfRange
+  assert_eq(
+    cn_err(() => @num.english_word_of("1234567890123456")),
+    "OutOfRange \"1234567890123456\"",
+  )
 }

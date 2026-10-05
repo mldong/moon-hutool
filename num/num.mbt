@@ -1320,7 +1320,7 @@ pub fn chinese_upper_of_thousand(n : Int) -> String raise NumError {
 ///|
 /// 单个阿拉伯数字字符 → 对应的中文数字字，对位 `numberCharToChinese(char, isUseTraditional)`。
 ///
-/// 只收 `'0' ~ '9'`；其余字符 ⇒ `NotDecimal`（hutool 在此没有任何校验，本包不把"喂错字符"留成静默）。
+/// 只收 `'0' ~ '9'`；其余字符 ⇒ `UnknownChineseUnit(字符, 0)`（hutool 在此没有任何校验，查表得 -1 就继续往下走，本包不把"喂错字符"留成静默）。
 pub fn chinese_digit(d : Char, upper? : Bool) -> Char raise NumError {
   abort("moon-hutool 契约未实现：chinese_digit")
 }
@@ -1331,7 +1331,7 @@ pub fn chinese_digit(d : Char, upper? : Bool) -> Char raise NumError {
 /// 认简写与繁体两套字（可混排：`"壹拾贰" ⇒ 12`）、认「两/二」同值、认裸单位补一（`"十" ⇒ 10`、`"百" ⇒ 100`）、
 /// 认「拾万」这种跨节组合（⇒ 100000）。**不跟随 hutool 的两条**：
 /// ① 本包认「负」前缀（hutool 在此抛 `Unknown unit '负'`，而它自己的正向会产出带"负"的串 ⇒ 往返不通）；
-/// ② 累加走 `Int64`，越界给 `OutOfRange`（hutool 用 `int` 累加，超 2^31 静默回绕）。
+/// ② 累加走 `Int64`，给真值而不是低位截断（hutool 用 `int` 累加，`一千亿` 读出 `1215752192`）。实现里带溢出防线，但这一档**没有夹具能为它变红**：节单位每次用完就把 `section` 清零，增量随输入长度线性增长，越出 `Int64` 需要 10^7 量级字符的串（spec §10.3 第 5 条）。
 pub fn int_of_chinese(text : String) -> Int64 raise NumError {
   abort("moon-hutool 契约未实现：int_of_chinese")
 }
@@ -1356,10 +1356,12 @@ pub fn chinese_abbrev(n : Int64) -> String {
 }
 
 ///|
-/// 大数缩写（英文单位 w/y 那套），对位 `NumberWordFormatter.formatSimple(long)`。
+/// 大数缩写（英文单位 k/w），对位 `NumberWordFormatter.formatSimple(long)`。
 ///
-/// 阈值与 #8.36 相同但单位是 `w`/`y` 且**不带尾随零**（`1000000 ⇒ "100w"`）。
-/// hutool 走 `NumberUtil.decimalFormat("#.##", …)` ⇒ 随 JVM 默认 locale 变，本包固定 `.`（spec §10.4）。
+/// 阈值与 #8.37 同族但更早：`< 1000` 原样十进制（**负数全走这一条**），`>= 10000` 才换 `w`，否则 `k`；
+/// 小数位最多两位且去尾零（`1000000 ⇒ "100w"`）。
+/// 两条不跟随（读数都在 spec §10.4）：hutool 走 `NumberUtil.decimalFormat("#.##", …)` ⇒ 分隔符随 JVM 默认 locale 变，本包固定 `.`；
+/// 它先 `value / 10000.0` 走 double ⇒ 19 位量级的尾数被并掉，本包与 #8.37 同族走精确十进制。
 pub fn english_abbrev(n : Int64) -> String {
   abort("moon-hutool 契约未实现：english_abbrev")
 }
@@ -1370,8 +1372,9 @@ pub fn english_abbrev(n : Int64) -> String {
 /// 整数部分三位一节（`1234567 ⇒ "ONE MILLION TWO HUNDRED AND THIRTY FOUR THOUSAND FIVE HUNDRED AND
 /// SIXTY SEVEN"`），末尾统一带 `ONLY`；有小数时读作 `AND CENTS <逐位>`。
 /// 三条不跟随（读数都在 spec §10.4）：负数 hutool 直接炸在内部 `Integer.parseInt("-")` ⇒ 本包给 `OutOfRange`；
-/// 零小数（`1.0`）hutool 仍输出 `AND CENTS ` 带两个空格 ⇒ 本包不输出 cents 段；
-/// 千位段的百位为 0 但十位非 0 时 huto0l 不补 `AND`——本包按它的读数原样钉住，不改。
+/// 零小数（`1.0`、`1.005`）hutool 仍输出 `AND CENTS ` 带两个空格 ⇒ 本包不输出 cents 段；
+/// 整数部分超过 `NUMBER_MORE` 表（15 位以上）hutool 是内部数组越界 ⇒ 本包给 `OutOfRange`。
+/// 「AND」只在百位段内部（`110 ⇒ ONE HUNDRED AND TEN`），节与节之间不补（`1001 ⇒ ONE THOUSAND ONE`）——照抄读数，不改。
 pub fn english_word_of(text : String) -> String raise NumError {
   abort("moon-hutool 契约未实现：english_word_of")
 }
