@@ -1,9 +1,5 @@
-// 落地前的契约骨架期：体全是 `abort` ⇒ 公开项没人构造、raise 没人抛，这三类警告是"未实现"的
-// 机械后果，按 G12 压掉；PR-B 落地那一笔必须整行删除（G12 以"体里还有没有 abort"为唯一判据）。
-warnings = "-unused_value-struct_never_constructed-unused_constructor-unused_error_type-unused_trait_bound"
+// 落地轮：体子已是真实现，骨架期的 `warnings` 豁免按 G12 撤掉
 
-// 百分比那一步委托 `num`（#8.11 舍入 + #8.12 去尾零），本包不重造第二张嘴——
-// 且 `similar_percent` 的 raise 面就是 `num.NumError`，签名里就要引它
 import {
   "mldong/moon-hutool/num",
 }

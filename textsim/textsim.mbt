@@ -1,11 +1,21 @@
 ///|
 // moon-hutool/textsim —— 文本相似度，对位 hutool `cn.hutool.core.text.TextSimilarity`
 // （件在 **hutool-core** 一个 jar 里，`priv.names` 读数把该类 7 个方法逐个点名）。
-// 契约真相在 `docs/spec/20-textsim.md`；本文件是签名骨架——**体全是 `abort`，落地笔（PR-B）替换**。
+// 契约真相在 `docs/spec/20-textsim.md`；本文件是落地实现：签名与期望值由契约笔（PR-A）冻结，本笔只让红变绿。
 //
 // 一句话口径：`similar` 的分子是**剥离符号后的最长公共子序列长度**，分母是**剥离后的较大长度**，
 // 商按 10 位小数 `HALF_UP`；`longest_common_subsequence` 走的是**不剥离**的另一条路径（`nostrip.proof`）。
 // javadoc 自称"莱文斯坦距离"，与实现无关——本契约按实现钉，不按注释钉。
+
+///|
+// 四档区间的码位版（#20.1 的唯一判据源，参照侧 `isValidChar(char)` 逐码元走、本库逐码位走，
+// 区间全在 BMP 内，astral 码位两个码元都落在四档之外 ⇒ 两侧同值，读数 `valid.cp.1f34e|false,false`）
+fn is_valid_cp(cp : Int) -> Bool {
+  (cp >= 0x4e00 && cp <= 0x9fff) ||
+  (cp >= 97 && cp <= 122) ||
+  (cp >= 65 && cp <= 90) ||
+  (cp >= 48 && cp <= 57)
+}
 
 ///|
 /// 码位是否参与相似度计算：`0x4E00–0x9FFF`、`a–z`、`A–Z`、`0–9` 四档区间**含两端**，其余一律不算。
@@ -20,7 +30,7 @@
 ///   （理由见 spec §5 第 2 行：剥离集是本包唯一"改写输入"的地方，不可测就等于不可评审），
 ///   读数由反射腿出（`priv.names` 先证明方法真存在）
 pub fn is_valid_char(c : Char) -> Bool {
-  abort("moon-hutool textsim: 契约已冻结，实现待落地")
+  is_valid_cp(c.to_int())
 }
 
 ///|
@@ -33,7 +43,110 @@ pub fn is_valid_char(c : Char) -> Bool {
 /// - Raises: 无
 /// - Note: hutool 对位 `private static String removeSign(String)`，同上提到公开面
 pub fn remove_sign(s : String) -> String {
-  abort("moon-hutool textsim: 契约已冻结，实现待落地")
+  String::from_array(s.to_array().filter(c => is_valid_cp(c.to_int())))
+}
+
+///|
+// 最长公共子序列的长度：滚动一行 DP（参照侧 `generateMatrix` 是同一张表的完整版，长度只取右下角）。
+// 参照侧在**码元**上比、本库在**码位**上比；两侧同值由腿 C（Python 独立实现）逐格对撞过。
+fn lcs_length(a : Array[Char], b : Array[Char]) -> Int {
+  let n = b.length()
+  let mut prev = Array::make(n + 1, 0)
+  for x in a {
+    let cur = Array::make(n + 1, 0)
+    let mut j = 1
+    while j <= n {
+      cur[j] = if x == b[j - 1] {
+        prev[j - 1] + 1
+      } else {
+        let up = prev[j]
+        let left = cur[j - 1]
+        if up > left {
+          up
+        } else {
+          left
+        }
+      }
+      j += 1
+    }
+    prev = cur
+  }
+  prev[n]
+}
+
+///|
+// 完整矩阵 + 参照实现逐字同形的回溯：先比 `g[i][j] == g[i][j-1]` 左移，再比 `== g[i-1][j]` 上移，
+// 否则取 `a[i-1]` 并同时左移上移。择路顺序决定并列时取哪一条，所以 #20.3 不满足交换律
+// （`lcsu.15|BDAB` 对 `lcsu.rev.15|BCBA`）。
+fn lcs_string(a : Array[Char], b : Array[Char]) -> String {
+  let m = a.length()
+  let n = b.length()
+  // 逐行建表：`Array::make` 的共享内层数组在这里会被写成同一行，必须每行各造一份
+  let g = []
+  let mut gi = 0
+  while gi <= m {
+    g.push(Array::make(n + 1, 0))
+    gi += 1
+  }
+  let mut i = 1
+  while i <= m {
+    let mut j = 1
+    while j <= n {
+      if a[i - 1] == b[j - 1] {
+        g[i][j] = g[i - 1][j - 1] + 1
+      } else {
+        let up = g[i - 1][j]
+        let left = g[i][j - 1]
+        g[i][j] = if up > left { up } else { left }
+      }
+      j += 1
+    }
+    i += 1
+  }
+  let len = g[m][n]
+  let out = Array::make(len, '\u{0000}')
+  let mut mi = m
+  let mut nj = n
+  let mut k = len - 1
+  while g[mi][nj] != 0 {
+    if g[mi][nj] == g[mi][nj - 1] {
+      nj -= 1
+    } else if g[mi][nj] == g[mi - 1][nj] {
+      mi -= 1
+    } else {
+      out[k] = a[mi - 1]
+      k -= 1
+      nj -= 1
+      mi -= 1
+    }
+  }
+  String::from_array(out)
+}
+
+///|
+// `NumberUtil.div(v1, v2, 10)` 的十进制长除版：参照侧走
+// `div(Double.toString(v1), Double.toString(v2), 10, HALF_UP)`，即**先落最短十进制串再精确相除**，
+// 所以这里用整数长除取 10 位、第 11 位决定进位——浮点乘除那条路会在 tie 档抖到隔壁
+// （`sim.33|4.882813E-4` 对裸商 `div.tie.raw|4.8828125E-4` 就是这条的凭据）。
+// 溢出档：`rem < den ≤` 串长，`rem * 10` 要越过 `Int64` 需要一条 9×10^17 长的串——wasm32 档
+// 串长封顶 2^31，native 档也要先耗尽内存才够到，故本包不留这一档。
+fn div_half_up_10(num : Int, den : Int) -> Double {
+  let d = den.to_int64()
+  let whole = num.to_int64() / d
+  let mut rem = num.to_int64() % d
+  let mut scaled = whole
+  let mut i = 0
+  while i < 10 {
+    rem = rem * 10L
+    scaled = scaled * 10L + rem / d
+    rem = rem % d
+    i += 1
+  }
+  // 第 11 位 >= 5 就进位：这正是 `RoundingMode.HALF_UP` 的判据（余数是否非零它不看）
+  if rem * 10L / d >= 5L {
+    scaled += 1L
+  }
+  scaled.to_double() / 10000000000.0
 }
 
 ///|
@@ -53,7 +166,7 @@ pub fn remove_sign(s : String) -> String {
 ///   本件**不做 #20.2 的剥离**（`nostrip.proof.A|[32]`：`"  "` 与 `" "` 给一个空格），
 ///   而 #20.4 走的是剥离后的另一条路径——同一条夹具两侧读数 `nostrip.proof.B|1` 对 `strip.sim.B|1.0`
 pub fn longest_common_subsequence(str_a : String, str_b : String) -> String {
-  abort("moon-hutool textsim: 契约已冻结，实现待落地")
+  lcs_string(str_a.to_array(), str_b.to_array())
 }
 
 ///|
@@ -74,7 +187,15 @@ pub fn longest_common_subsequence(str_a : String, str_b : String) -> String {
 /// - Note: hutool 对位 `public static double similar(String, String)`，
 ///   分母 `Math.max`、分子用私有的**不剥离**版长度函数（分子分母两侧读数由反射腿逐条给出 `num.N`/`den.N`）
 pub fn similar(str_a : String, str_b : String) -> Double {
-  abort("moon-hutool textsim: 契约已冻结，实现待落地")
+  let ca = remove_sign(str_a).to_array()
+  let cb = remove_sign(str_b).to_array()
+  let den = if ca.length() > cb.length() { ca.length() } else { cb.length() }
+  if den == 0 {
+    // 参照源码：if (0 == temp) return 1 —— 两侧都剥空按"相同的串"处理
+    1.0
+  } else {
+    div_half_up_10(lcs_length(ca, cb), den)
+  }
 }
 
 ///|
@@ -101,5 +222,10 @@ pub fn similar_percent(
   str_b : String,
   scale : Int,
 ) -> String raise @num.NumError {
-  abort("moon-hutool textsim: 契约已冻结，实现待落地")
+  let sc = if scale < 0 { 0 } else { scale }
+  // 默认档是 HalfUp（#8.11），参照侧的 PercentInstance 默认档是 HALF_EVEN，所以 mode 必须显式传
+  let mode = @num.RoundingMode::HalfEven
+  let suffix = ""
+  let bare = @num.format_percent(similar(str_a, str_b), sc, mode~, suffix~)
+  @num.trim_trailing_zeros(bare) + "%"
 }
