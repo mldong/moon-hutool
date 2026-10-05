@@ -501,7 +501,21 @@ test "Version 比较：非数字段与前后缀、大小写档" {
 
 ///|
 test "Version 归一化形状：toString 的重建" {
+  assert_eq(
+    @typex.version_to_string(@typex.version_of("1.2.3-alpha-beta")),
+    "1.2.3-alpha-beta",
+  ) // V1000.to_string|1.2.3-alpha-beta
 
+  assert_eq(@typex.version_to_string(@typex.version_of("1.02.3")), "1.02.3") // V1001.to_string|1.02.3
+
+  assert_eq(
+    @typex.version_to_string(@typex.version_of("1.2.3.RELEASE")),
+    "1.2.3.RELEASE",
+  ) // V1002.to_string|1.2.3.RELEASE
+
+  assert_eq(@typex.version_to_string(@typex.version_of("0.0.0")), "0.0.0") // V1003.to_string|0.0.0
+
+  assert_eq(@typex.version_to_string(@typex.version_of("0")), "0") // V1004.to_string|0
 }
 
 ///|
