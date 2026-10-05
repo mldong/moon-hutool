@@ -1,11 +1,61 @@
 // Generated using `moon info`, DON'T EDIT IT
 package "mldong/moon-hutool/rand"
 
+import {
+  "moonbitlang/core/random",
+}
+
 // Values
+pub fn alphabet_all() -> String
+
+pub fn alphabet_lower() -> String
+
+pub fn alphabet_lower_number() -> String
+
+pub fn alphabet_number() -> String
+
+pub fn random_boolean(@random.Rand) -> Bool
+
+pub fn random_char(@random.Rand, String) -> String raise RandError
+
+pub fn[A] random_ele(@random.Rand, Array[A], limit? : Int) -> A raise RandError
+
+pub fn[A] random_ele_set(@random.Rand, Array[A], Int) -> Array[A] raise RandError
+
+pub fn[A] random_eles(@random.Rand, Array[A], Int) -> Array[A] raise RandError
+
+pub fn random_int(@random.Rand, Int, Int, incl_min? : Bool, incl_max? : Bool) -> Int raise RandError
+
+pub fn random_int_under(@random.Rand, Int) -> Int raise RandError
+
+pub fn random_numbers(@random.Rand, Int) -> String raise RandError
+
+pub fn random_string(@random.Rand, Int) -> String raise RandError
+
+pub fn random_string_from(@random.Rand, String, Int) -> String raise RandError
+
+pub fn random_string_lower(@random.Rand, Int) -> String raise RandError
+
+pub fn random_string_upper(@random.Rand, Int) -> String raise RandError
+
+pub fn random_string_without(@random.Rand, Int, String) -> String raise RandError
+
+pub fn[A] weight_random(Array[(A, Double)]) -> WeightRandom[A]
+
+pub fn[A] weight_random_next(WeightRandom[A], @random.Rand) -> A raise RandError
 
 // Errors
+pub suberror RandError {
+  EmptyDomain(String)
+  EmptyCollection(Int)
+  EmptyAlphabet(Int)
+  BadCount(String)
+}
 
 // Types and methods
+pub struct WeightRandom[A] {
+  entries : Array[(A, Double)]
+}
 
 // Type aliases
 

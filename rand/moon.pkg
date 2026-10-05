@@ -1,1 +1,16 @@
-// 依赖在此声明；占位期不 import 任何 core 包（未使用的 import 会吃 unused_package 警告并卡零警告门禁）
+// 随机源一律由调用方注入，本包只用 core 的 `Rand` 类型（零依赖契约允许 moonbitlang/core）。
+// 骨架期只 import 用得到的那一个：多一条就出 unused_package（G3 零警告当场拦）。
+import {
+  "moonbitlang/core/random",
+}
+
+import {
+  "moonbitlang/core/random",
+  "mldong/moon-hutool/rand",
+} for "test"
+
+// 契约冻结态（PR-A）：公开项的体全是 `abort`，机械后果是三类警告——
+// 形参没人用、新错误档没人抛、新档位没人构造、`WeightRandom` 还没被构造过（`weight_random` 的体是 abort）。
+// 实现落地那一笔整行删除（G12 盯着）。
+
+warnings = "-unused_value-unused_error_type-unused_constructor-struct_never_constructed"
