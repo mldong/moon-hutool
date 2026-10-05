@@ -127,7 +127,11 @@ test "cron 解析档：50 个表达式的接受/报错与原文本" {
   assert_eq(parse_text("abc * * * *"), "BadAlias[abc]") // ok.38|CronException:Invalid alias value: [abc]
   assert_eq(parse_text("* * * * FOO"), "BadAlias[FOO]") // ok.39|IllegalArgumentException:No enum constant cn.hutool.core.date.Week.FOO
   assert_eq(parse_text("* * * *"), "BadParts[* * * *]") // ok.40|CronException:Pattern [* * * *] is invalid, it must be 5-7 parts!
-  assert_eq(parse_text("* * * * * * *"), "OK:* * * * * * *") // ok.41|OK:* * * * * * *
+  // §6「段数判定改成 ≥5 即放行」那条等价变体的可达判据（腿新读：3/8/9 段全部 `CronException:Pattern [...] is invalid, it must be 5-7 parts!`）
+  assert_eq(parse_text("* * *"), "BadParts[* * *]") // 腿新读 3 段|CronException:Pattern [* * *] is invalid, it must be 5-7 parts!
+  assert_eq(parse_text("* * * * * * * *"), "BadParts[* * * * * * * *]") // 腿新读 8 段|CronException:Pattern [* * * * * * * *] is invalid, it must be 5-7 parts!
+  assert_eq(parse_text("* * * * * * * * *"), "BadParts[* * * * * * * * *]") // 腿新读 9 段|CronException:Pattern [* * * * * * * * *] is invalid, it must be 5-7 parts!
+  assert_eq(parse_text("0 12 * * * * * *"), "BadParts[0 12 * * * * * *]") // 腿新读 8 段（带值）|CronException:Pattern [0 12 * * * * * *] is invalid, it must be 5-7 parts!  assert_eq(parse_text("* * * * * * *"), "OK:* * * * * * *") // ok.41|OK:* * * * * * *
   assert_eq(parse_text(""), "BadParts[]") // ok.42|OK: —— 本库改判（参照侧接受该输入，读数原样留在标签里）
   assert_eq(parse_text("   "), "BadParts[   ]") // ok.43|OK:    —— 本库改判（参照侧接受该输入，读数原样留在标签里）
   assert_eq(parse_text("0 12 * * 1-7"), "OK:0 12 * * 1-7") // ok.44|OK:0 12 * * 1-7
