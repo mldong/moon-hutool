@@ -745,12 +745,8 @@ pub fn format_thousands(
   sep? : Char = ',',
   decimal_sep? : Char = '.',
 ) -> String raise NumError {
-  let _ = x
-  let _ = scale
-  let _ = mode
-  let _ = sep
-  let _ = decimal_sep
-  abort("moon-hutool: num.format_thousands 未实现（spec 08-num #8.14）")
+  // 这一件不是第二套舍入：先把 #8.11 那条腿的结果拿过来，再只对整数部分插分隔符
+  group_decimal(round_to_str(x, scale, mode~), sep, decimal_sep)
 }
 
 ///|
@@ -774,11 +770,15 @@ pub fn format_percent(
   mode? : RoundingMode = RoundingMode::HalfUp,
   suffix? : String = "%",
 ) -> String raise NumError {
-  let _ = x
-  let _ = scale
-  let _ = mode
-  let _ = suffix
-  abort("moon-hutool: num.format_percent 未实现（spec 08-num #8.15）")
+  if x.is_nan() || x.is_inf() {
+    raise NotFinite
+  }
+  if scale < -323 || scale > 308 {
+    raise ScaleOutOfRange(scale)
+  }
+  // 挪的是十进制小数点（point + 2），不是 x * 100.0——后者会让 0.145 变成 14.499999999999998
+  let (neg, digits, point) = shift_point_left(split_decimal(x), 2)
+  round_digits(neg, digits, point, scale, mode) + suffix
 }
 
 ///|
@@ -794,8 +794,10 @@ pub fn format_percent(
 ///   本库没有 `BigDecimal`，所以这一件的输入是**串**而不是数值。逐条读数由本机 JDK 17 的
 ///   `new BigDecimal(s).stripTrailingZeros().toPlainString()` 出（9 条与我草稿全等，但仍以 JDK 那一份为准）
 pub fn trim_trailing_zeros(s : String) -> String raise NumError {
-  let _ = s
-  abort("moon-hutool: num.trim_trailing_zeros 未实现（spec 08-num #8.16）")
+  match parse_decimal_str(s) {
+    None => raise NotDecimal(s)
+    Some((neg, digits, point)) => emit_shortest(neg, digits, point)
+  }
 }
 
 ///|
@@ -824,8 +826,7 @@ pub(all) struct Money {
 /// - Note: 这是唯一的构造入口以外的直通档——它不做任何舍入（分本来就是整数），
 ///   所以 `Money::new(5).to_string()` 就是 `"0.05"`
 pub fn Money::new(cent : Int64) -> Money {
-  let _ = cent
-  abort("moon-hutool: num.Money::new 未实现（spec 08-num #8.17）")
+  Money::{ cent, }
 }
 
 ///|
@@ -843,11 +844,13 @@ pub fn Money::from_yuan_str(
   s : String,
   mode? : RoundingMode = RoundingMode::HalfEven,
 ) -> Money raise NumError {
-  let _ = s
-  let _ = mode
-  abort(
-    "moon-hutool: num.Money::from_yuan_str 未实现（spec 08-num #8.18）",
-  )
+  let (neg, digits, point) = match parse_decimal_str(s) {
+    None => raise NotDecimal(s)
+    Some(t) => t
+  }
+  // 元 → 分：小数点右挪两位后舍到 0 位，与 #8.11 同一条十进制度量
+  let (neg2, digits2, point2) = shift_point_left((neg, digits, point), 2)
+  money_from_plain(round_digits(neg2, digits2, point2, 0, mode))
 }
 
 ///|
@@ -868,9 +871,11 @@ pub fn Money::from_yuan(
   yuan : Double,
   mode? : RoundingMode = RoundingMode::HalfEven,
 ) -> Money raise NumError {
-  let _ = yuan
-  let _ = mode
-  abort("moon-hutool: num.Money::from_yuan 未实现（spec 08-num #8.19）")
+  if yuan.is_nan() || yuan.is_inf() {
+    raise NotFinite
+  }
+  let (neg, digits, point) = shift_point_left(split_decimal(yuan), 2)
+  money_from_plain(round_digits(neg, digits, point, 0, mode))
 }
 
 ///|
@@ -891,8 +896,7 @@ pub fn Money::cent(self : Money) -> Int64 {
 ///   这一件存在的理由是"要和浮点接口对接"，不是"要一个可信的元值"
 /// - 恒不失败：`Int64` 的分转成 `Double` 元最多损失尾数，不会溢出
 pub fn Money::to_yuan(self : Money) -> Double {
-  let _ = self
-  abort("moon-hutool: num.Money::to_yuan 未实现（spec 08-num #8.20）")
+  self.cent.to_double() / 100.0
 }
 
 ///|
@@ -903,8 +907,19 @@ pub fn Money::to_yuan(self : Money) -> Double {
 /// - Note: hutool 对位 `Money.toString()`（= `getAmount().toString()`，`BigDecimal` 的 scale=2 读数），
 ///   本库自己按分拼串，逐条与 JDK 对撞过（含 `Int64::MAX` 分那一条）
 pub fn Money::to_string(self : Money) -> String {
-  let _ = self
-  abort("moon-hutool: num.Money::to_string 未实现（spec 08-num #8.21）")
+  let c = self.cent
+  // 全程不取 |cent|（Int64::MIN 的绝对值不可表）：`/` 与 `%` 都向零取整，符号单独处理
+  let ip = c / 100
+  let fp = c % 100
+  let ip_abs = if ip < 0 { ip.neg() } else { ip }
+  let fp_abs = if fp < 0 { fp.neg() } else { fp }
+  let tail = if fp_abs < 10 { "0" } else { "" }
+  let body = ip_abs.to_string() + "." + tail + fp_abs.to_string()
+  if c < 0 {
+    "-" + body
+  } else {
+    body
+  }
 }
 
 ///|
@@ -916,9 +931,7 @@ pub fn Money::to_string(self : Money) -> String {
 /// - Raises: `MoneyOverflow`：和越过 `Int64` 边界。**这里不静默回绕**——同族风险见 hutool
 ///   `Money.allocate` 里那句 `(cent * ratios[i]) / total`，它连溢出检查都没有
 pub fn Money::add(self : Money, other : Money) -> Money raise NumError {
-  let _ = self
-  let _ = other
-  abort("moon-hutool: num.Money::add 未实现（spec 08-num #8.22）")
+  Money::{ cent: add64(self.cent, other.cent), }
 }
 
 ///|
@@ -929,9 +942,7 @@ pub fn Money::add(self : Money, other : Money) -> Money raise NumError {
 /// - Returns: 差，可为负
 /// - Raises: `MoneyOverflow`（同 `add`）
 pub fn Money::sub(self : Money, other : Money) -> Money raise NumError {
-  let _ = self
-  let _ = other
-  abort("moon-hutool: num.Money::sub 未实现（spec 08-num #8.23）")
+  Money::{ cent: add64(self.cent, other.cent.neg()), }
 }
 
 ///|
@@ -951,11 +962,23 @@ pub fn Money::allocate_even(
   self : Money,
   targets : Int,
 ) -> Array[Money] raise NumError {
-  let _ = self
-  let _ = targets
-  abort(
-    "moon-hutool: num.Money::allocate_even 未实现（spec 08-num #8.24）",
-  )
+  if targets < 1 {
+    raise NonPositiveTargets(targets)
+  }
+  let t = targets.to_int64()
+  let low = self.cent / t
+  // 余数与 cent 同号（`%` 跟着被除数），所以「补给最前面几份」对负档同样成立，不需要取绝对值
+  let rem = self.cent - low * t
+  let step : Int64 = if rem < 0 { 0 - 1 } else { 1 }
+  let n = if rem < 0 { rem.neg() } else { rem }
+  let out : Array[Money] = []
+  let mut i : Int64 = 0
+  while i < t {
+    let extra : Int64 = if i < n { step } else { 0 }
+    out.push(Money::{ cent: low + extra, })
+    i += 1
+  }
+  out
 }
 
 ///|
@@ -973,9 +996,242 @@ pub fn Money::allocate_by_ratio(
   self : Money,
   ratios : Array[Int],
 ) -> Array[Money] raise NumError {
-  let _ = self
-  let _ = ratios
-  abort(
-    "moon-hutool: num.Money::allocate_by_ratio 未实现（spec 08-num #8.25）",
-  )
+  let mut sum : Int64 = 0
+  for r in ratios {
+    if r < 0 {
+      raise NegativeRatio(r)
+    }
+    sum = add64(sum, r.to_int64())
+  }
+  if sum <= 0 {
+    raise RatioSumNotPositive(sum)
+  }
+  // `cent * ratio` 这一步在 hutool 是 `long` 直接乘、静默回绕。本库走 BigInt 精确算，于是
+  // 这一档**不需要 MoneyOverflow**：`0 <= r_i <= sum` 保证每个结果都不超过 |cent|，
+  // `used` 的各项同号且和也不超过 |cent|——两条都在镜像里断言过（spec #8.24）
+  let sum_big = @bigint.BigInt::from_int64(sum)
+  let cent_big = @bigint.BigInt::from_int64(self.cent)
+  let out : Array[Money] = []
+  for r in ratios {
+    let p = cent_big.mul(@bigint.BigInt::from_int(r)).div(sum_big)
+    out.push(Money::{ cent: p.to_int64(), })
+  }
+  let mut used : Int64 = 0
+  for m in out {
+    used += m.cent
+  }
+  let rem = self.cent - used
+  let step : Int64 = if rem < 0 { 0 - 1 } else { 1 }
+  let n = if rem < 0 { rem.neg() } else { rem }
+  let mut i = 0
+  while i < out.length() && i.to_int64() < n {
+    out[i] = Money::{ cent: out[i].cent + step, }
+    i += 1
+  }
+  out
+}
+
+// num 第二批的私有线件：格式化与薄 Money 共用
+
+///|
+/// `Int64` 带界加法：hutool 的 `Money` 全程 `long` 裸加，本库越界必报错（spec #8.22）
+fn add64(a : Int64, b : Int64) -> Int64 raise NumError {
+  if b > 0 && a > @int64.MAX_VALUE - b {
+    raise MoneyOverflow
+  }
+  if b < 0 && a < @int64.MIN_VALUE - b {
+    raise MoneyOverflow
+  }
+  a + b
+}
+
+///|
+/// `BigInt` → `Int64` 带界换算（分配结果装不下就是真装不下，不回绕）
+fn big_to_i64(x : @bigint.BigInt) -> Int64 raise NumError {
+  let mx = @bigint.BigInt::from_int64(@int64.MAX_VALUE)
+  let mn = @bigint.BigInt::from_int64(@int64.MIN_VALUE)
+  if x.compare(mx) > 0 || x.compare(mn) < 0 {
+    raise MoneyOverflow
+  }
+  x.to_int64()
+}
+
+///|
+/// 把「已舍到 0 位小数」的平格式串读成分。走 BigInt 累加再判界——`Int64::MIN` 那一档的绝对值
+/// 装不进正侧，逐位乘加自己会先回绕
+fn money_from_plain(plain : String) -> Money raise NumError {
+  let cs = plain.to_array()
+  let mut i = 0
+  let neg = cs.length() > 0 && cs[0] == '-'
+  if cs.length() > 0 && (cs[0] == '-' || cs[0] == '+') {
+    i = 1
+  }
+  let mut acc = @bigint.BigInt::from_int(0)
+  let mut any = false
+  while i < cs.length() {
+    let c = cs[i]
+    if c == '.' {
+      i += 1
+      continue
+    }
+    if c < '0' || c > '9' {
+      abort(
+        "moon-hutool: num 内部把平格式串读回了非数字（不该发生）：" +
+        plain,
+      )
+    }
+    acc = acc
+      .mul(@bigint.BigInt::from_int(10))
+      .add(@bigint.BigInt::from_int(c.to_int() - 48))
+    any = true
+    i += 1
+  }
+  if !any {
+    raise MoneyOverflow
+  }
+  let v = if neg { acc.neg() } else { acc }
+  Money::{ cent: big_to_i64(v), }
+}
+
+///|
+/// 把十进制**串**拆成 `(是否负, 数字流, 小数点位置)`，约定同 `split_decimal`。
+/// `"+1.10"`、`".5"`、`"12."` 都认（这三条 JDK 的 `BigDecimal` 也认，23 条实测见 spec #8.16）；
+/// 认不出的形状一律 `None`，由调用方报 `NotDecimal`
+fn parse_decimal_str(text : String) -> (Bool, Array[Int], Int)? {
+  let cs = text.to_array()
+  let mut i = 0
+  let neg = cs.length() > 0 && cs[0] == '-'
+  if cs.length() > 0 && (cs[0] == '-' || cs[0] == '+') {
+    i = 1
+  }
+  let digits : Array[Int] = []
+  let mut point = -1
+  let mut any_digit = false
+  let mut ok = true
+  while i < cs.length() && ok {
+    let c = cs[i]
+    if c == '.' {
+      if point >= 0 {
+        ok = false
+      } else {
+        point = digits.length()
+      }
+    } else if c < '0' || c > '9' {
+      ok = false
+    } else {
+      digits.push(c.to_int() - 48)
+      any_digit = true
+    }
+    i += 1
+  }
+  if !ok || !any_digit {
+    None
+  } else {
+    let pt = if point < 0 { digits.length() } else { point }
+    Some((neg, digits, pt))
+  }
+}
+
+///|
+/// 最短平格式：去小数部分尾随零（清空就连点一起去掉）、去整数部分前导零、零不保留负号。
+/// 23 条夹具逐条与 JDK 的 `stripTrailingZeros().toPlainString()` 对撞
+fn emit_shortest(neg : Bool, digits : Array[Int], point : Int) -> String {
+  let d = digits.copy()
+  let pt = point
+  while d.length() > pt && d[d.length() - 1] == 0 {
+    let _ = d.pop()
+  }
+  // 前导零用起始索引跳过：本版 Array 没有 `remove_at`，从头上删要么换 API 要么整体搬一次
+  let mut lead = 0
+  while pt - lead > 1 && lead < d.length() && d[lead] == 0 {
+    lead += 1
+  }
+  let pt2 = pt - lead
+  let len = d.length() - lead
+  let all_zero = len <= 0 || all_zero(d, lead, d.length())
+  if all_zero {
+    return "0"
+  }
+  let mut out = ""
+  let mut i = 0
+  while i < pt2 {
+    out = out + digit_char(if i < len { d[lead + i] } else { 0 })
+    i += 1
+  }
+  if pt2 <= 0 {
+    out = out + "0"
+  }
+  if len > pt2 {
+    out = out + "."
+    let mut j = pt2
+    while j < len {
+      out = out + digit_char(d[lead + j])
+      j += 1
+    }
+  }
+  if neg {
+    "-" + out
+  } else {
+    out
+  }
+}
+
+///|
+/// 只对**整数部分**插分组符：`round_to_str` 的平格式输出在这里被二次加工，舍入一格都不重做
+fn group_decimal(plain : String, sep : Char, dec : Char) -> String {
+  let cs = plain.to_array()
+  let neg = cs.length() > 0 && cs[0] == '-'
+  let start = if neg { 1 } else { 0 }
+  let mut dot = -1
+  let mut i = start
+  while i < cs.length() {
+    if cs[i] == '.' {
+      dot = i
+      i = cs.length()
+    } else {
+      i += 1
+    }
+  }
+  let int_end = if dot < 0 { cs.length() } else { dot }
+  let mut out = if neg { "-" } else { "" }
+  let mut k = start
+  while k < int_end {
+    if k > start && (int_end - k) % 3 == 0 {
+      out = out + sep.to_string()
+    }
+    out = out + cs[k].to_string()
+    k += 1
+  }
+  if dot >= 0 {
+    out = out + dec.to_string()
+    let mut j = dot + 1
+    while j < cs.length() {
+      out = out + cs[j].to_string()
+      j += 1
+    }
+  }
+  out
+}
+
+///|
+/// 小数点左移 `k` 位（等价于乘 10^k），并把因此落进**整数区**的前导零跳掉。
+/// `split_decimal` 的位置约定下，挪点只是 `point + k`；但 `0.125` 挪两位会得到整数区读数 `012`，
+/// 所以这一步必须跳零——否则百分比与元→分会输出 `"012.50%"` 这种带前导零的形状
+fn shift_point_left(
+  parts : (Bool, Array[Int], Int),
+  k : Int,
+) -> (Bool, Array[Int], Int) {
+  let (neg, digits, point) = parts
+  let pt = point + k
+  let mut lead = 0
+  while pt - lead > 1 && lead < digits.length() && digits[lead] == 0 {
+    lead += 1
+  }
+  let out : Array[Int] = []
+  let mut i = lead
+  while i < digits.length() {
+    out.push(digits[i])
+    i += 1
+  }
+  (neg, out, pt - lead)
 }

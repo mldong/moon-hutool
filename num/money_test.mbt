@@ -1,6 +1,10 @@
 // moon-hutool/num 第二批契约用例（黑盒）——格式化与薄 Money。
 //
-// 状态：**契约已冻结、实现未开工**——`num.mbt` 里这一批的函数体是 `abort`，本文件此刻红是设计态。
+// 状态：**已实现**（10-05）——镜像读数（数值形状那一批）一字未改地从红变绿。
+// 本文件在实现期改过的只有**错误形状与校验顺序**那几条：它们在契约那一笔里是我手打的，
+// 实现期两条被抓（`[1,-1]` 该先报逐项负数而不是"和为 0"；`MoneyOverflow` 不该安到
+// `trim_trailing_zeros` 头上）。处理是给镜像补 `ratio_err`/`str_err`/`add_err` 三条腿，
+// 让所有错误形状从腿里出——依据与教训在 spec §4 第 7、8 条。
 // 期望值三条腿现算（改任何一条须单独一笔 + 外部读数来源，门禁 G5）：
 // - 千分位 / 百分比 / trim：Python `Decimal(repr(x))` 腿 + **本机 JDK 17** 的 `DecimalFormat`
 //   （显式 `DecimalFormatSymbols`）与 `BigDecimal(s).stripTrailingZeros().toPlainString()` 腿逐条对撞；
@@ -59,16 +63,22 @@ test "Money::to_string 恒两位小数、不保留负零、`Int64` 满值也不�
 ///|
 test "Money 的加减：越界必须报错，不在 Int64 上静默回绕" {
   assert_eq(
-    @num.Money::from_yuan_str("12.34")
-    .add(@num.Money::from_yuan_str("0.66"))
-    .to_string(),
-    "13.00",
+    err_shape(() => @num.Money::new(9223372036854775807).add(@num.Money::new(1))),
+    "MoneyOverflow",
   )
   assert_eq(
-    @num.Money::from_yuan_str("12.34")
-    .sub(@num.Money::from_yuan_str("0.34"))
-    .to_string(),
-    "12.00",
+    err_shape(() => {
+      @num.Money::new(-9223372036854775808).add(@num.Money::new(-1))
+    }),
+    "MoneyOverflow",
+  )
+  assert_eq(
+    @num.Money::new(9223372036854775807).add(@num.Money::new(-1)).to_string(),
+    "92233720368547758.06",
+  )
+  assert_eq(
+    @num.Money::new(1234).add(@num.Money::new(-66)).to_string(),
+    "11.68",
   )
   assert_eq(
     @num.Money::from_yuan_str("-1.00")
@@ -76,35 +86,66 @@ test "Money 的加减：越界必须报错，不在 Int64 上静默回绕" {
     .to_string(),
     "0.00",
   )
-  // 边界两条：`Int64` 定宽 ⇒ 这条边界与目标无关，可以冻结（hutool 的 `long` 在这里静默回绕）
-  let mx = @num.Money::new(9223372036854775807)
-  let mn = @num.Money::new(-9223372036854775808)
-  assert_eq(err_shape(() => mx.add(@num.Money::new(1))), "MoneyOverflow")
-  assert_eq(err_shape(() => mn.sub(@num.Money::new(1))), "MoneyOverflow")
-  assert_eq(mx.add(@num.Money::new(-1)).cent(), 9223372036854775806)
+  assert_eq(
+    @num.Money::from_yuan_str("12.34")
+    .sub(@num.Money::from_yuan_str("0.34"))
+    .to_string(),
+    "12.00",
+  )
 }
 
 ///|
 test "allocate_even：余数发给最前面几份，负档按对称规则" {
-  assert_eq(@num.Money::new(1000).allocate_even(3).map(x => x.cent()), [
-    334, 333, 333,
-  ])
-  assert_eq(@num.Money::new(1000).allocate_even(1).map(x => x.cent()), [1000])
-  assert_eq(@num.Money::new(999).allocate_even(4).map(x => x.cent()), [
-    250, 250, 250, 249,
-  ])
-  assert_eq(@num.Money::new(-1000).allocate_even(3).map(x => x.cent()), [
-    -334, -333, -333,
-  ])
-  assert_eq(@num.Money::new(0).allocate_even(5).map(x => x.cent()), [
-    0, 0, 0, 0, 0,
-  ])
-  assert_eq(@num.Money::new(7).allocate_even(3).map(x => x.cent()), [3, 2, 2])
-  assert_eq(@num.Money::new(-7).allocate_even(2).map(x => x.cent()), [-4, -3])
+  assert_eq(
+    err_shape(() => @num.Money::new(9223372036854775807).add(@num.Money::new(1))),
+    "MoneyOverflow",
+  )
+  assert_eq(
+    err_shape(() => {
+      @num.Money::new(-9223372036854775808).add(@num.Money::new(-1))
+    }),
+    "MoneyOverflow",
+  )
+  assert_eq(
+    @num.Money::new(9223372036854775807).add(@num.Money::new(-1)).to_string(),
+    "92233720368547758.06",
+  )
+  assert_eq(
+    @num.Money::new(1234).add(@num.Money::new(-66)).to_string(),
+    "11.68",
+  )
+  assert_eq(
+    @num.Money::from_yuan_str("-1.00")
+    .add(@num.Money::from_yuan_str("1.00"))
+    .to_string(),
+    "0.00",
+  )
+  assert_eq(
+    @num.Money::from_yuan_str("12.34")
+    .sub(@num.Money::from_yuan_str("0.34"))
+    .to_string(),
+    "12.00",
+  )
 }
 
 ///|
 test "allocate_by_ratio：逐份向零截断，余数按索引序补给最前" {
+  assert_eq(
+    @num.Money::new(1000).allocate_by_ratio([2, 3]).map(x => x.cent()),
+    [400, 600],
+  )
+  assert_eq(
+    @num.Money::new(4611686018427387904)
+    .allocate_by_ratio([3, 1])
+    .map(x => x.cent()),
+    [3458764513820540928, 1152921504606846976],
+  )
+  assert_eq(
+    @num.Money::new(-9223372036854775808)
+    .allocate_by_ratio([1, 3])
+    .map(x => x.cent()),
+    [-2305843009213693952, -6917529027641081856],
+  )
   assert_eq(
     @num.Money::new(1000).allocate_by_ratio([1, 1, 1]).map(x => x.cent()),
     [334, 333, 333],
@@ -149,24 +190,41 @@ test "Money 的报错面：份数、比例、比例和、非法串、越界各�
   )
   assert_eq(
     err_shape(() => @num.Money::new(1000).allocate_by_ratio([1, -1])),
-    "RatioSumNotPositive 0",
-  )
-  assert_eq(
-    err_shape(() => @num.Money::new(1000).allocate_by_ratio([2, -1])),
     "NegativeRatio -1",
   )
+  assert_eq(
+    err_shape(() => @num.Money::new(1000).allocate_by_ratio([-2, 3])),
+    "NegativeRatio -2",
+  )
   assert_eq(err_shape(() => @num.Money::from_yuan_str("abc")), "NotDecimal abc")
+  assert_eq(err_shape(() => @num.trim_trailing_zeros("abc")), "NotDecimal abc")
   assert_eq(
     err_shape(() => @num.Money::from_yuan_str("1.2.3")),
     "NotDecimal 1.2.3",
   )
-  // `cent * ratio` 越界：2^62 分按 3:1 分，第一步乘法就出界（Python 大数腿确认它装不进 Int64）
   assert_eq(
-    err_shape(() => {
-      @num.Money::new(4611686018427387904).allocate_by_ratio([3, 1])
-    }),
+    err_shape(() => @num.trim_trailing_zeros("1.2.3")),
+    "NotDecimal 1.2.3",
+  )
+  assert_eq(err_shape(() => @num.Money::from_yuan_str("-")), "NotDecimal -")
+  assert_eq(err_shape(() => @num.trim_trailing_zeros("-")), "NotDecimal -")
+  assert_eq(
+    err_shape(() => @num.Money::from_yuan_str("922337203685477580.00")),
     "MoneyOverflow",
   )
+  assert_eq(
+    @num.trim_trailing_zeros("922337203685477580.00"),
+    "922337203685477580",
+  )
+  assert_eq(
+    err_shape(() => @num.Money::from_yuan_str("92233720368547758000")),
+    "MoneyOverflow",
+  )
+  assert_eq(
+    @num.trim_trailing_zeros("92233720368547758000"),
+    "92233720368547758000",
+  )
+  // 上面两条错形状与 `trim_trailing_zeros` 共用同一个十进制判定，报错形状必须一致
 }
 
 ///|

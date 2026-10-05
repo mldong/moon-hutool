@@ -1,6 +1,10 @@
 // moon-hutool/num 第二批契约用例（黑盒）——格式化与薄 Money。
 //
-// 状态：**契约已冻结、实现未开工**——`num.mbt` 里这一批的函数体是 `abort`，本文件此刻红是设计态。
+// 状态：**已实现**（10-05）——镜像读数（数值形状那一批）一字未改地从红变绿。
+// 本文件在实现期改过的只有**错误形状与校验顺序**那几条：它们在契约那一笔里是我手打的，
+// 实现期两条被抓（`[1,-1]` 该先报逐项负数而不是"和为 0"；`MoneyOverflow` 不该安到
+// `trim_trailing_zeros` 头上）。处理是给镜像补 `ratio_err`/`str_err`/`add_err` 三条腿，
+// 让所有错误形状从腿里出——依据与教训在 spec §4 第 7、8 条。
 // 期望值三条腿现算（改任何一条须单独一笔 + 外部读数来源，门禁 G5）：
 // - 千分位 / 百分比 / trim：Python `Decimal(repr(x))` 腿 + **本机 JDK 17** 的 `DecimalFormat`
 //   （显式 `DecimalFormatSymbols`）与 `BigDecimal(s).stripTrailingZeros().toPlainString()` 腿逐条对撞；
@@ -35,6 +39,11 @@ test "format_thousands：从右往左三位一隔，负号与分隔符都是明�
   )
   assert_eq(@num.format_thousands(1000000.0, 0), "1,000,000")
   assert_eq(@num.format_thousands(-100.0, 0), "-100")
+  assert_eq(@num.format_thousands(-1234.5, -2), "-1,200")
+  assert_eq(
+    @num.format_thousands(1234567.5, 1, sep=' ', decimal_sep=','),
+    "1 234 567,5",
+  )
 }
 
 ///|
@@ -52,6 +61,7 @@ test "format_thousands 复用 #8.11：负 scale 与超过三位的 scale 一起�
   assert_eq(@num.format_thousands(-2.5, 0, mode=@num.HalfUp), "-3")
   assert_eq(@num.format_thousands(1000000.0, 0, mode=@num.HalfUp), "1,000,000")
   assert_eq(@num.format_thousands(-100.0, 0, mode=@num.HalfUp), "-100")
+  assert_eq(@num.format_thousands(-1234.5, -2, mode=@num.HalfUp), "-1,200")
 }
 
 ///|
@@ -90,15 +100,39 @@ test "format_percent 的后缀是显式参数，报错面与 #8.11 同源" {
 
 ///|
 test "trim_trailing_zeros 只动小数部分，整数的尾随零不碰（JDK 那一条路）" {
+  assert_eq(@num.trim_trailing_zeros("00.50"), "0.5")
+  assert_eq(@num.trim_trailing_zeros("007"), "7")
+  assert_eq(@num.trim_trailing_zeros("-0.0"), "0")
+  assert_eq(@num.trim_trailing_zeros("+1.10"), "1.1")
+  assert_eq(@num.trim_trailing_zeros(".5"), "0.5")
+  assert_eq(@num.trim_trailing_zeros("12."), "12")
+  assert_eq(@num.trim_trailing_zeros("+123"), "123")
+  assert_eq(@num.trim_trailing_zeros("0."), "0")
+  assert_eq(@num.trim_trailing_zeros("00"), "0")
+  assert_eq(@num.trim_trailing_zeros("0000.000"), "0")
   assert_eq(@num.trim_trailing_zeros("12.3400"), "12.34")
   assert_eq(@num.trim_trailing_zeros("12.00"), "12")
   assert_eq(@num.trim_trailing_zeros("-12.300"), "-12.3")
   assert_eq(@num.trim_trailing_zeros("0.000"), "0")
   assert_eq(@num.trim_trailing_zeros("100.10"), "100.1")
   assert_eq(@num.trim_trailing_zeros("12"), "12")
-  assert_eq(@num.trim_trailing_zeros("12."), "12")
   assert_eq(@num.trim_trailing_zeros("0.50"), "0.5")
   assert_eq(@num.trim_trailing_zeros("-0.00"), "0")
+  assert_eq(
+    @num.trim_trailing_zeros("922337203685477580.00"),
+    "922337203685477580",
+  )
+  assert_eq(
+    @num.trim_trailing_zeros("-92233720368547758.08"),
+    "-92233720368547758.08",
+  )
+  assert_eq(
+    @num.trim_trailing_zeros("92233720368547758000"),
+    "92233720368547758000",
+  )
+  assert_eq(err_shape(() => @num.trim_trailing_zeros("1_0")), "NotDecimal 1_0")
+  assert_eq(err_shape(() => @num.trim_trailing_zeros("1d")), "NotDecimal 1d")
+  assert_eq(err_shape(() => @num.trim_trailing_zeros("-")), "NotDecimal -")
   assert_eq(err_shape(() => @num.trim_trailing_zeros("abc")), "NotDecimal abc")
   assert_eq(
     err_shape(() => @num.trim_trailing_zeros("1.2.3")),

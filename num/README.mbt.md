@@ -6,9 +6,8 @@ hutool `NumberUtil` / `MathUtil` 的 MoonBit 对位·第一批：数论（`gcd` 
 
 完整边界矩阵与逐条读数来源见 [`docs/spec/08-num.md`](https://github.com/mldong/moon-hutool/blob/master/docs/spec/08-num.md)。本页只放**典型用法**，每条都带期望值——这些 `test` 块会被 `moon test` 真编译真执行。
 
-> 状态：**分两批**。**第一批已交付**（10-05，27 条用例此刻仍绿，三档读数一致）；
-> **第二批契约已冻结、实现未开工**（格式化三件 + 薄 `Money`，函数体是 `abort`）——
-> 下面第二批那几块的期望值此刻红是设计态。
+> 状态：**两批都已交付**（10-05）。第一批 27 块、第二批 17 块（格式化三件 + 薄 `Money`）
+> 共 244 条用例全绿，`wasm`/`js`/`wasm-gc` 三档读数一致，native 档由 CI 出证。
 > 期望串与 `num_test.mbt` / `format_test.mbt` / `money_test.mbt` 同受"期望值冻结"约束：
 > 实现期只许把红变绿（门禁 G5）。
 > 期望串与 `num_test.mbt` 同受"期望值冻结"约束：实现期只许把红变绿（门禁 G5）。

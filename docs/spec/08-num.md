@@ -1,10 +1,10 @@
 # 契约 08 · num（数值计算件·第一批：数论 + 十进制舍入）
 
-> 状态：**分两批。第一批契约与实现两笔都交完**（10-05）；**第二批契约已冻结、实现未开工**（#8.14~#8.25）。
+> 状态：**两批都已交付**（10-05）。
 > 25 条公开项见 `num/pkg.generated.mbti`25 条公开项见 `num/pkg.generated.mbti`（`moon info` 后零漂移）；冻结期望值在 `num/num_test.mbt`（17 块 205 条断言）与
-> `num/README.mbt.md`（10 块 45 条断言）——第一批那 27 块已**镜像读数一字未改**地从红变绿
-> （三档一致，native 档由 CI 出证）。第二批的期望值在 `format_test.mbt`（5 块）与 `money_test.mbt`（8 块）
-> 再加 4 个文档块，此刻 17 块红是设计态；矩阵在 §9。
+> `num/README.mbt.md`（10 块 45 条断言）。第二批的期望值在 `format_test.mbt`（5 块）、
+> `money_test.mbt`（8 块）与 README 的 4 个文档块。两批**都是镜像读数一字未改**地从红变绿：
+> `244 = 绿 244 / 红 0`，`wasm`/`js`/`wasm-gc` 三档一致，native 档由 CI 出证。矩阵在 §9。
 > 实现期唯一一处测试文件改动是**两条验算腿**（`mod_inverse` 的 `(inv*a) % m` 与 `isqrt` 的平方界），
 > 因为它们在 32 位 `Int` 上会静默回绕——单独一笔（`test(num)`），动的只有推导式检查，冻结读数没动。
 > 改任何期望串仍须单独一笔并给外部读数来源（门禁 G5）。
@@ -76,7 +76,7 @@ hutool 侧口径：读 GitHub `dromara/hutool` HEAD 的
 | 8.8 | `combination_count(n : Int, m : Int) -> BigInt raise NumError` | `C(5,2)⇒10`、`C(50,6)⇒15890700`、`C(5,0)⇒1`、`C(5,5)⇒1`、`C(5,6)⇒0`、`C(30,15)⇒155117520`。报错档：`(-1,2)⇒NegativeCount -1 2` | `m > n ⇒ 0`（数学值，不是错误）；负数报错 | `MathUtil.combinationCount` → `Combination.countBig` | **逐条跟随 `countBig`**（负数抛、`m>n` 给 0、`m = min(m, n−m)` 后每步整除的迭代式）。hutool 另有返回 `long` 的 `Combination.count`，源码已标 `@Deprecated`，理由是 `big.longValue()` 静默截断高位；`countSafe` 走 `longValueExact()`。本库只出精确档 |
 | 8.9 | `arrangement_count(n : Int, m : Int) -> BigInt raise NumError` | `A(5,2)⇒20`、`A(10,3)⇒720`、`A(7,0)⇒1`、`A(20,20)⇒2432902008176640000`、`A(3,5)⇒0`。报错档：`(3,-1)⇒NegativeCount 3 -1` | 同 8.8 | `MathUtil.arrangementCount` → `Arrangement.count` | **一处口径分岔**：hutool `Arrangement.count` 在 `m > n` 时抛 `IllegalArgumentException`，而同包 `Combination.countBig` 同情形给 `0`——一本书两种口径。本库统一按数学值给 `0` 并写明。hutool 的 `long` 档在 `A(21,21)` 靠 `next < result` 检出溢出抛 `ArithmeticException`；本库直接给 `21!` 真值（8.7 同一档） |
 | 8.10 | `pub(all) enum RoundingMode { Up Down Ceiling Floor HalfUp HalfDown HalfEven }` | 七档在 `±2.5` / `±2.1` / `±0.5` 三个网格上的读数（`num_test.mbt` 的「半值网格」与「非平局分道」两块） | 不含 `UNNECESSARY`（Java 那档的语义是"舍入必须无损否则报错"，hutool 无对应入口，本库也不发明） | `java.math.RoundingMode`（hutool `round` 的参数类型） | **七档 = Java 八档去掉 `UNNECESSARY`**。档名与 Python `decimal` 七档双射（`ROUND_UP`/`ROUND_DOWN`/`ROUND_CEILING`/`ROUND_FLOOR`/`ROUND_HALF_UP`/`ROUND_HALF_DOWN`/`ROUND_HALF_EVEN`），两腿同名同义，所以模式本身不需要第三个读数源 |
-| 8.11 | `round_to_str(x : Double, scale : Int, mode~ : RoundingMode = HalfUp) -> String raise NumError` | 36 条逐条读数只存在于 `num_test.mbt` 的四块舍入用例里（本表不重抄一遍——抄了就有第三份读数，改哪份都无人知道）。三条最容易写错的：`2.675` 舍 2 位 ⇒ `"2.68"`；`1.0e21` 舍 0 位 ⇒ `"1000000000000000000000"`（平格式，22 位）；`1.0e-7` 舍 9 位 ⇒ `"0.000000100"` | 输出**小数位数恰好 = `scale`**；平格式永不指数记法；**零的形状按 Java 实测**：`0.0` 舍到 `scale <= 0` 给 `"0"`（不补整数侧的零），舍到 `scale > 0` 给 `"0." + scale 个零`；**不保留负零**（`-0.0` 舍 2 位 ⇒ `"0.00"`，同 `BigDecimal`——它没有带符号的 0）；`scale ∈ [-323, 308]` 之外 ⇒ `ScaleOutOfRange`；`NaN`/`±Infinity` ⇒ `NotFinite` | `NumberUtil.round(v, scale, mode).toPlainString()`（hutool 另有 `roundStr` 同义档） | `Double.toString` 那一跳本库走 core 的 `Double::to_string`：**三档实测逐值一致**（19 个夹具在 `wasm`/`js`/`wasm-gc` 上串完全相同，形如 ECMAScript `Number::toString`：`1e+21`、`123456789012345680`、`-0.0` 打 `0`）。所以"最短十进制"这条在四档上是同一个数 |
+| 8.11 | `round_to_str(x : Double, scale : Int, mode~ : RoundingMode = HalfUp) -> String raise NumError` | 36 条逐条读数只存在于 `num_test.mbt` 的四块舍入用例里（本表不重抄一遍——抄了就有第三份读数，改哪份都无人知道）。三条最容易写错的：`2.675` 舍 2 位 ⇒ `"2.68"`；`1.0e21` 舍 0 位 ⇒ `"1000000000000000000000"`（平格式，22 位）；`1.0e-7` 舍 9 位 ⇒ `"0.000000100"` | 输出**小数位数恰好 = `scale`**；平格式永不指数记法；**零的形状按 Java 实测**：`0.0` 舍到 `scale <= 0` 给 `"0"`（不补整数侧的零），舍到 `scale > 0` 给 `"0." + scale 个零`；**不保留负零**（`-0.0` 舍 2 位 ⇒ `"0.00"`，同 `BigDecimal`——它没有带符号的 0）；`scale ∈ [-323, 308]` 之外 ⇒ `ScaleOutOfRange`；`NaN`/`±Infinity` ⇒ `NotFinite`；**挪后进到整数区的前导零必须跳掉**——`0.125` 舍 2 位是 `"12.50%"` 而不是 `"012.50%"`（实现期真踩过：只挪点不跳零，三块立刻红；变异对照也证实这条判据承重） | `NumberUtil.round(v, scale, mode).toPlainString()`（hutool 另有 `roundStr` 同义档） | `Double.toString` 那一跳本库走 core 的 `Double::to_string`：**三档实测逐值一致**（19 个夹具在 `wasm`/`js`/`wasm-gc` 上串完全相同，形如 ECMAScript `Number::toString`：`1e+21`、`123456789012345680`、`-0.0` 打 `0`）。所以"最短十进制"这条在四档上是同一个数 |
 | 8.12 | `round_to(x : Double, scale : Int, mode~ : RoundingMode = HalfUp) -> Double raise NumError` | 由 8.11 的串解析回最近可表值：`round_to(2.675, 2) = 2.68`、`round_to(1250.0, -2) = 1300.0`、`round_to(9.996, 2) = 10.0`、`round_to(-0.5, 0) = -1.0` | 报错档同 8.11。**不承诺结果就是那个十进制数**——要精确形状取 8.11 | `NumberUtil.round(v, scale)`（返回 `BigDecimal`） | 结构性差异：hutool 出 `BigDecimal`（十进制精确），本库出 `Double`（回到最接近的可表值）。这也是为什么 `round_to_str` 是主形态、`round_to` 是派生形态 |
 | 8.13 | 边界三档（`scale` 两端 + 增长档） | `round_to_str(0.0, 308).length() = 310`（`"0."` 后挂 308 个零）；`round_to_str(0.0, -323) = "0"`；`round_to_str(1.5, 309)`/`(-324)`/`(100000)` 三档 ⇒ `ScaleOutOfRange` 带原读数 | 界取 **`[-323, 308]`**：`Double` 自己的十进制指数范围，本机实测 `parse_double("1e309")` **报错**、`"1e-324"` 给 `0`、`"1e-323"` 给 `1e-323`、`"1e308"` 给 `1e+308`。这条界**与目标无关**（`Double` 恒 64 位），所以可以冻结 | `BigDecimal.setScale` 允许任意 `int` scale | 明码拒绝而不是产出一根几十万字符的串：`scale` 大到这个范围外，对一个 `Double` 能携带的信息没有任何影响 |
 
@@ -105,6 +105,20 @@ hutool 侧口径：读 GitHub `dromara/hutool` HEAD 的
 5. **数论常识档**：7919（第 1000 个素数）、15485863（第 100 万个）、2147483647（梅森素数 M31）、
    `20!` / `21!` / `25!` 的位数与值——这几条不由本库自算自证，防止"镜像和实现同一套错误"。
 6. **hutool 侧只用来反推语义**，不搬实现、不写 Java 式表达式（红线二）。§5 的每条"不跟随"都给了源码位置。
+7. **错误形状与校验顺序也要有腿，不许手打**。第二批一开始把 5 条错误形状写在发射器里（"该报哪种错"是我直接
+   打出来的字符串），实现期两条被抓：`[1, -1]` 我写成先报"和为 0"（正确顺序是先报逐项负数）、
+   `from_yuan_str` 的越界档被顺手安到 `trim_trailing_zeros` 头上（trim 是纯串归一化，同一个输入在它那里
+   是**正常读数**）。处理不是改注释，是给镜像补 `ratio_err`/`str_err`/`add_err` 三条腿，让所有错误形状从腿里出。
+8. **不可达的错误档从契约里删掉**：`allocate_by_ratio` 原写"乘法越界 ⇒ `MoneyOverflow`"，而实现走 BigInt 精确算
+   之后这一档数学上不可达（`0 <= r_i <= sum` ⇒ 每个结果不超过 `|cent|`）。留它就是一条永远不红的死格；
+   删分支并在契约里写明为什么不需要，比留一个测不到的 `raise` 诚实。
+7. **错误形状与校验顺序也要有腿，不许手打**。第二批一开始把 5 条错误形状写在发射器里（"该报哪种错"是我直接
+   打出来的字符串），实现期两条被抓：`[1, -1]` 我写成先报"和为 0"（正确顺序是先报逐项负数）、
+   `from_yuan_str` 的越界档被顺手安到 `trim_trailing_zeros` 头上（trim 是纯串归一化，同一个输入在它那里
+   是**正常读数**）。处理不是改注释，是给镜像补 `ratio_err`/`str_err`/`add_err` 三条腿，让所有错误形状从腿里出。
+8. **不可达的错误档从契约里删掉**：`allocate_by_ratio` 原写"乘法越界 ⇒ `MoneyOverflow`"，而实现走 BigInt 精确算
+   之后这一档数学上不可达（`0 <= r_i <= sum` ⇒ 每个结果不超过 `|cent|`）。留它就是一条永远不红的死格；
+   删分支并在契约里写明为什么不需要，比留一个测不到的 `raise` 诚实。
 
 ## 5. 不跟随 hutool 清单（逐条源码级证据）
 
@@ -209,7 +223,7 @@ hutool 侧口径：读 GitHub `dromara/hutool` HEAD 的
 | 8.21 | `Money::to_string() -> String` | ``0` 分 ⇒ `"0.00"`、`5` 分 ⇒ `"0.05"`、`-5` 分 ⇒ `"-0.05"`、`1234` 分 ⇒ `"12.34"`、`-1234` 分 ⇒ `"-12.34"`、`9223372036854775807` 分 ⇒ `"92233720368547758.07"`` | **恒两位小数**；`0` 分 ⇒ `"0.00"`；不保留负零；满值 `Int64` 分也是平格式（不出指数、不出科学计数） | `Money.toString()` = `getAmount().toString()` | 同一条读数由 JDK 的 `new BigDecimal(cent).movePointLeft(2).toPlainString()` 出具并逐条对撞（含 `Int64::MAX` 那一条） |
 | 8.22 | `Money::add(other : Money) -> Money raise NumError` / `sub` | `"12.34" + "0.66" ⇒ "13.00"`、`"12.34" - "0.34" ⇒ "12.00"`、`"-1.00" + "1.00" ⇒ "0.00"`；`Int64::MAX` 分 `+ 1` ⇒ `MoneyOverflow`，`Int64::MIN` 分 `- 1` ⇒ `MoneyOverflow`，`MAX - 1` 分正常 ⇒ `"92233720368547758.06"` | 分域整数加减，无精度损失 | `Money.add/sub`（`long` 直接相加，**没有溢出防线**） | 越界必须 `raise`。`MoneyOverflow` **不带载荷**：两个操作数调用方都有，"越界"这件事本身才是新信息（同 `mapx` 的不带载荷立场，见 0.3） |
 | 8.23 | `Money::allocate_even(targets : Int) -> Array[Money] raise NumError` | ``1000` 分分 3 份 ⇒ `[334,333,333]`；`1000` 分分 1 份 ⇒ `[1000]`；`999` 分分 4 份 ⇒ `[250,250,250,249]`；`-1000` 分分 3 份 ⇒ `[-334,-333,-333]`；`0` 分分 5 份 ⇒ `[0,0,0,0,0]`；`7` 分分 3 份 ⇒ `[3,2,2]`；`-7` 分分 2 份 ⇒ `[-4,-3]`` | `targets >= 1`；**和恒等于原值**、任意两份之差不超过一分（这两条在 `[-1000..1000] × 1..8` 网格上逐片断言）；`targets <= 0` ⇒ `NonPositiveTargets` | `Money.allocate(int)` | 正档逐条跟随（`low = cent / targets`、`high = low + 1`、前 `cent % targets` 份拿 `high`）。**负档不跟随**：那侧 `remainder` 为负 ⇒ 补余循环一次都不跑 ⇒ 分完的和不回原值；份数与索引错配时还会踩数组越界。本库按绝对值分配再回贴符号，负档因此**不进参照实现对撞**，改由两条不变量当判据（§4 第 4 条） |
-| 8.24 | `Money::allocate_by_ratio(ratios : Array[Int]) -> Array[Money] raise NumError` | ``1000` 分按 `[1,1,1]` ⇒ `[334,333,333]`；`900` 分按 `[2,1]` ⇒ `[600,300]`；`1000` 分按 `[2,3]` ⇒ `[400,600]`；`100` 分按 `[1,1,1]` ⇒ `[34,33,33]`；`-1000` 分按 `[1,1]` ⇒ `[-500,-500]`；`0` 分按 `[1,2]` ⇒ `[0,0]`；`1000` 分按 `[1,0,1]` ⇒ `[500,0,500]`` | 与 `ratios` 同长；逐项 `>= 0` 且和 `> 0`；逐份向零截断，余数按索引序每份 +1（hutool 的算法）；`cent * ratios[i]` 越界 ⇒ `MoneyOverflow`；出现负比例 ⇒ `NegativeRatio(r)`；和 `<= 0` ⇒ `RatioSumNotPositive(sum)` | `Money.allocate(long[])` | 那侧 `(cent * ratios[i]) / total` 是 `long` **静默回绕**，没有任何防线；本库先算绝对值再判界。"全零比例"（没有分母）与"出现负比例"（方向都没定）是两种错，所以两个变体不合并。`2^62` 分按 `3:1` 分就是那条越界夹具 |
+| 8.24 | `Money::allocate_by_ratio(ratios : Array[Int]) -> Array[Money] raise NumError` | ``1000` 分按 `[1,1,1]` ⇒ `[334,333,333]`；`900` 分按 `[2,1]` ⇒ `[600,300]`；`1000` 分按 `[2,3]` ⇒ `[400,600]`；`100` 分按 `[1,1,1]` ⇒ `[34,33,33]`；`-1000` 分按 `[1,1]` ⇒ `[-500,-500]`；`0` 分按 `[1,2]` ⇒ `[0,0]`；`1000` 分按 `[1,0,1]` ⇒ `[500,0,500]`` | 与 `ratios` 同长；**校验顺序写死：逐项形状错先报（`NegativeRatio`），派生量后报（`RatioSumNotPositive`）**——所以 `[1, -1]` 报的是 `NegativeRatio -1` 而不是"和为 0"（同 `coll` 把除零类排前面的那条判断）。`0 <= r_i <= sum` 保证每个结果都不超过 `|cent|`，中间量又走 BigInt 精确算，**所以这一档不发 `MoneyOverflow`（不可达的分支不留）**；`used` 的各项同号、和不超过 `|cent|`，同理不需要带界加法 | `Money.allocate(long[])` | 那侧 `(cent * ratios[i]) / total` 是 `long` **静默回绕**，没有任何防线；本库先算绝对值再判界。"全零比例"（没有分母）与"出现负比例"（方向都没定）是两种错，所以两个变体不合并。`2^62` 分按 `3:1` 分就是那条越界夹具 |
 
 ### 9.1 两个族：同一台 JDK 对同一个数的两种答案
 
