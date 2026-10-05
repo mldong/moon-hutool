@@ -2,11 +2,60 @@
 package "mldong/moon-hutool/bloom"
 
 // Values
+pub fn bloom_bits_for(Int) -> Int64
+
+pub fn new_bit_field(Int64, width? : WordWidth) -> BitField raise BloomError
+
+pub fn new_bloom(Int) -> Bloom raise BloomError
+
+pub fn new_bloom_with(Array[Filter]) -> Bloom
+
+pub fn new_filter(Int64, (String) -> Int64, width? : WordWidth) -> Filter raise BloomError
+
+pub fn word_width(Int) -> WordWidth raise BloomError
 
 // Errors
+pub suberror BloomError {
+  BadWidth(Int)
+  ZeroSize
+  BadBitCount(Int64)
+  IndexOutOfRange(Int64, Int)
+}
 
 // Types and methods
+pub struct BitField {
+  width : WordWidth
+  nbits : Int64
+  words : Array[Int64]
+}
+pub fn BitField::add(Self, Int64) -> Unit raise BloomError
+pub fn BitField::contains(Self, Int64) -> Bool raise BloomError
+pub fn BitField::remove(Self, Int64) -> Unit raise BloomError
+pub fn BitField::word_count(Self) -> Int
+pub fn BitField::words(Self) -> Array[Int64]
+
+pub struct Bloom {
+  filters : Array[Filter]
+}
+pub fn Bloom::add(Self, String) -> Bool raise BloomError
+pub fn Bloom::contains(Self, String) -> Bool raise BloomError
+
+pub struct Filter {
+  size : Int64
+  hash : (String) -> Int64
+  field : BitField
+}
+pub fn Filter::add(Self, String) -> Bool raise BloomError
+pub fn Filter::contains(Self, String) -> Bool raise BloomError
+pub fn Filter::position(Self, String) -> Int64 raise BloomError
+pub fn Filter::words(Self) -> Array[Int64]
+
+pub(all) enum WordWidth {
+  W32
+  W64
+}
 
 // Type aliases
+pub type HashFn = (String) -> Int64
 
 // Traits
