@@ -1,1 +1,7 @@
-// 依赖在此声明；占位期不 import 任何 core 包（未使用的 import 会吃 unused_package 警告并卡零警告门禁）
+// 契约骨架期：体全是 abort ⇒ 值没人构造、字段没人读，那两类警告是"未实现"的机械后果，
+// 按 G12 压掉（键只能出现一次、flag 连写不带空格/逗号）；落地笔整行删除。
+warnings = "-unused_value-struct_never_constructed-unused_constructor-unused_error_type-unused_trait_bound-unused_field"
+
+import {
+  "mldong/moon-hutool/typex",
+} for "test"

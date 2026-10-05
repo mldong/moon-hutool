@@ -2,10 +2,38 @@
 package "mldong/moon-hutool/typex"
 
 // Values
+pub fn page_get_end(Int, Int) -> Int
+
+pub fn page_get_start(Int, Int) -> Int
+
+pub fn page_rainbow(Int, Int) -> Array[Int]
+
+pub fn page_rainbow_count(Int, Int, Int) -> Array[Int]
+
+pub fn page_total_page(Int, Int) -> Int
+
+pub fn page_total_page_long(Int64, Int) -> Int
+
+pub fn page_trans_to_start_end(Int, Int) -> (Int, Int)
+
+pub fn typex_first_page_no() -> Int
+
+pub fn typex_set_first_page_no(Int) -> Unit
+
+pub fn version_compare(Version, Version) -> Int
+
+pub fn version_equals(Version, Version) -> Bool
+
+pub fn version_of(String) -> Version
+
+pub fn version_to_string(Version) -> String
 
 // Errors
 
 // Types and methods
+pub struct Version {
+  // private fields
+}
 
 // Type aliases
 
