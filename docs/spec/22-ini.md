@@ -241,3 +241,49 @@ PR-B 对契约的**两处更正**都记在案：
 
 **下一轮 PR-A 先拍三件**：① 畸形 `\u` 那档怎么映射（`raise` 还是丢行）；② 键序规则挑哪一条并声明参照无序；
 ③ `store` 要不要注释参数（参照有两个重载，时间戳一律不收）。签名从 `#22.26` 起续号。
+
+## 9. 第二批（`Props` 严格语义）契约冻结（10-06 PR-A）
+
+签名从 `#22.26` 起，公开面 15 件：`PropsError`（唯一变体 `BadUnicodeEscape`）+ `Props` + 13 个函数
+（`props_new`/`props_parse`/`props_get`/`props_get_or`/`props_set`/`props_remove`/`props_has_key`/
+`props_size`/`props_is_empty`/`props_keys`/`props_values`/`props_entries`/`props_store`）。
+**本格第一个 raise 面就在 `props_parse`**（畸形 `\u`）。
+
+### 9.1 已定死的三件（§8 末列的待拍项）
+
+1. **畸形 `\u` 映射成 `raise PropsError::BadUnicodeEscape`**——参照抛 `IllegalArgumentException`
+   （腿 4 条 `ERR` 读数：`bad_u_short`/`bad_u_hex`/`bad_u_in_key`/`bad_u_after_ok`，文案全是
+   `Malformed \uxxxx encoding.`）。不复制文案、不带位置（参照自己也没给位置）；`bad_u_after_ok` 说明
+   **一行里先解出合法 `\u0041` 再撞畸形 ⇒ 整条 load 失败**，本库同判（不留半表）。
+2. **键序自定为"首次出现位置"**（后写覆盖值不改位置）：参照是 `Hashtable` 无序，
+   内容对账用排序后的 `PAIR` 集，顺序另用腿的 `ORDER`（逐行喂入求得的**新键出现序**）作旁证 ⇒
+   顺序这一维是本库形状，spec 上声明清楚，不冒充参照。
+3. **`props_store` 不收注释参数、不出时间戳行**：参照 `store(w, null)` 也要写 `#<日期>`（宿主状态，
+   §5 的"宿主状态不进契约"直接排除）；腿的 STORE 读数按"切掉首行 + 整串切 `\r\n` 拼 `\n`"变换后作期望。
+
+### 9.2 语义行（每条挂 `props2` 腿读数标签；标签形如 `p.<夹具>.<档>` / `o.<脚本>.<步>.<档>`）
+
+| # | 判据 | 读数 |
+|---|---|---|
+| 1 | 分隔符三档：`=`/`:`/空白，且**分隔符前空白被吃掉**、分隔符后**只有第一个空格**被吸收（Tab 不吸） | `p.sep_space_multi`（`a   b   c` ⇒ 键 `a` 值 `b   c`）、`p.ws_before_sep`、`p.ws_after_sep_one`（`a=\ b` ⇒ 值 ` b`，空格是转义保住的）、`p.sep_colon_then_space` |
+| 2 | 裸键给空串值 | `p.bare_then_sep`、`Q.21`/`Q.22` |
+| 3 | 注释符 `#` 与 `!`，且**注释行的行尾 `\` 会吞掉下一行** | `p.comment_bang_cont`、`p.comment_hash_cont`（`a=1` 不在表里） |
+| 4 | 行尾 `\` 续行；续行吃掉下一行前导空白；EOF 孤立 `\` 不报错 | `p.cont_backslash`、`p.cont_lf_only`、`p.cont_trailing_eof`、`p.cont_crlf`、`p.trailing_cont_crlf` |
+| 5 | `\t`/`\n`/`\r`/`\f`/`\\` 各还原成真字符；**被转义的分隔符归进键名**（不再充当分隔符）；未知转义丢掉反斜杠 | `p.key_escaped_tab`（键 `a<TAB>b`）、`p.key_escaped_eq`、`p.key_escaped_colon`、`p.value_escaped_ff`、`p.value_double_bs`、`Q.16`（`\q` ⇒ `q`） |
+| 6 | `\uXXXX` 真解码，键位也解 | `p.value_unicode_esc`（值 `\u4e2d`）、`p.key_unicode_esc`（键 `Ab`）、`p.value_nul_esc`（值是真 NUL） |
+| 7 | BMP 外码位逐 UTF-16 码元往返 | `p.value_astral`（值 `\ud83d\ude00b`）、`p.o3` 的 `uni` 值 |
+| 8 | 空白表与第一批的 34 位表**不同**：`00a0`/`3000` 在这里不当事务空白 | `p.value_ideo_raw`（值两侧全角空格原样留）、`Q.*` 的 `nbsp` 档 |
+| 9 | 键/值都允许空串；重复键后写覆盖值（顺序见 9.1 第 2 条） | `p.empty_key_colon`、`p.only_separators`、`p.dup_order` |
+| 10 | 行分隔符是 `\n`/`\r`/`\r\n` 三种，`U+2028`/`U+0085` 不算 | `p.crlf_input`、`p.lone_cr`、`p.cr_only_values` |
+| 11 | `set` 返回旧值、`remove` 返回被删值、`getProperty` 两档；**参照存不了 null 值**（`put(k,null)` ⇒ `NullPointerException`） | `o.O1.1`–`o.O1.10`、`o.O2.1`–`o.O2.7`、`ERR` 行 `o.O2.3` ⇒ 本库值类型收成非空 `String`，该档在类型层排除 |
+| 12 | `store` 的转义表：键侧空格逐格写 `\ `，值侧只有**首个**空格写 `\ `；`\t`→`\t`、`\`→`\\`、非 Latin-1 与 BMP 外逐码元写 `\uXXXX`；条目行是 `键=值`（**没有空格**，与第一批的 `key = value` 相反） | `o.O3.6.dump`、`p.value_space`、`p.key_escaped_space`、`p.value_escaped_tab`、`p.value_astral` |
+
+### 9.3 本轮状态（诚实标注）
+
+**本轮只交腿读数与契约草案，代码骨架与冻结期望值尚未进仓**（`#22.26`–`#22.40` 的签名与测试在 Temp 起草，
+两次尝试都没过编译器：① **关键字是 `raise` 不是 `raises`**（`pub fn csv_parse(text : String) -> CsvData raise CsvError`，`csv/csv.mbt:121` 现读）——我先按 `-> Props raises PropsError` 写，本版判 `Parse error, unexpected token id (lowercase start), you may expect \`\{\`；下一轮把骨架里 15 处注解改成 `raise` 即可续上。原写作
+"Parse error, unexpected token id"；
+   （排查线索：`grep -rn "raises" csv/csv.mbt cron/cron.mbt` 零命中，而 `grep -rn "raise " csv/csv.mbt` 命中 121/130 两行。）② 生成器在"顺序旁证"一维上有夹具级 bug
+（`ORDER` 里的键在排序 `PAIR` 集取不到值），要改成缺值就跳过该条顺序断言）。
+所以 §9.1/§9.2 的三条已定与十二条判据**只有 spec 与腿读数作依据**，不能当已冻结的契约引用；
+`docs/ROADMAP.md` 第 22 行的 `已实现` 仍只覆盖第一批（INI 面 25 件）。
