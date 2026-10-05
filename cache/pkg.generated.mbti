@@ -10,42 +10,42 @@ pub struct Cache[K, V] {
   policy : CachePolicy
   capacity : Int
   timeout : Int64
-  order : Array[K]
-  entries : Map[K, CacheObj[K, V]]
-  hit : Int
-  miss : Int
-  listener : ((K, V) -> Unit)?
+  mut order : Array[K]
+  mut entries : Map[K, CacheObj[K, V]]
+  mut hit : Int
+  mut miss : Int
+  mut listener : ((K, V) -> Unit)?
 }
 pub fn[K : Hash + Eq, V] Cache::cache_objs(Self[K, V]) -> Array[CacheObj[K, V]]
-pub fn[K : Hash + Eq, V] Cache::capacity(Self[K, V]) -> Int
+pub fn[K, V] Cache::capacity(Self[K, V]) -> Int
 pub fn[K : Hash + Eq, V] Cache::clear(Self[K, V]) -> Unit
 pub fn[K : Hash + Eq, V] Cache::contains_key(Self[K, V], K, Int64) -> Bool
 pub fn[K : Hash + Eq, V] Cache::get(Self[K, V], K, Int64) -> V?
 pub fn[K : Hash + Eq, V] Cache::get_or_put(Self[K, V], K, Int64, () -> V) -> V
 pub fn[K : Hash + Eq, V] Cache::get_or_put_ttl(Self[K, V], K, Int64, Int64, () -> V) -> V
-pub fn[K : Hash + Eq, V] Cache::hit_count(Self[K, V]) -> Int
-pub fn[K : Hash + Eq, V] Cache::is_empty(Self[K, V]) -> Bool
-pub fn[K : Hash + Eq, V] Cache::is_full(Self[K, V]) -> Bool
-pub fn[K : Hash + Eq, V] Cache::keys(Self[K, V]) -> Array[K]
-pub fn[K : Hash + Eq, V] Cache::miss_count(Self[K, V]) -> Int
+pub fn[K, V] Cache::hit_count(Self[K, V]) -> Int
+pub fn[K, V] Cache::is_empty(Self[K, V]) -> Bool
+pub fn[K, V] Cache::is_full(Self[K, V]) -> Bool
+pub fn[K, V] Cache::keys(Self[K, V]) -> Array[K]
+pub fn[K, V] Cache::miss_count(Self[K, V]) -> Int
 pub fn[K : Hash + Eq, V] Cache::new_cache(CachePolicy, Int, Int64) -> Self[K, V]
 pub fn[K : Hash + Eq, V] Cache::peek(Self[K, V], K, Int64) -> V?
-pub fn[K : Hash + Eq, V] Cache::policy(Self[K, V]) -> CachePolicy
+pub fn[K, V] Cache::policy(Self[K, V]) -> CachePolicy
 pub fn[K : Hash + Eq, V] Cache::prune(Self[K, V], Int64) -> Int
 pub fn[K : Hash + Eq, V] Cache::put(Self[K, V], K, V, Int64) -> Unit
 pub fn[K : Hash + Eq, V] Cache::put_ttl(Self[K, V], K, V, Int64, Int64) -> Unit
 pub fn[K : Hash + Eq, V] Cache::remove(Self[K, V], K) -> Unit
-pub fn[K : Hash + Eq, V] Cache::set_listener(Self[K, V], (K, V) -> Unit) -> Unit
-pub fn[K : Hash + Eq, V] Cache::size(Self[K, V]) -> Int
-pub fn[K : Hash + Eq, V] Cache::timeout(Self[K, V]) -> Int64
+pub fn[K, V] Cache::set_listener(Self[K, V], (K, V) -> Unit) -> Unit
+pub fn[K, V] Cache::size(Self[K, V]) -> Int
+pub fn[K, V] Cache::timeout(Self[K, V]) -> Int64
 pub fn[K : Hash + Eq, V] Cache::values(Self[K, V]) -> Array[V]
 
 pub(all) struct CacheObj[K, V] {
   key : K
   value : V
   ttl : Int64
-  last_access : Int64
-  access_count : Int
+  mut last_access : Int64
+  mut access_count : Int
 }
 
 pub(all) enum CachePolicy {

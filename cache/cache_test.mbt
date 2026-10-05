@@ -3,7 +3,8 @@
 // 手打零条。参照腿：`hutool-cache-5.8.35.jar`（**hutool-core 的 jar 里没有 `cn/hutool/cache`**，
 // 与 `dfa` 轮同一条"先 unzip 现读再决定从哪取"）+ `hutool-core-5.8.35.jar` + 本机 JDK 17.0.14，
 // `javac -encoding UTF-8`。
-// 契约那一笔冻的是 10 块**设计态红**；落地那一笔只许把红变绿（门禁 G5）。
+// 这批 10 块落地后全绿，期望值一字未动：契约笔 `a0e49a` 冻的样子里每条 `assert_*` 的右侧都与参照腿读数同形，
+// 落地笔只把函数体从骨架换成实现（`.mbti` 只前进 `mut` 字段这一档形状，公开函数签名一字未改）。
 //
 // **本包一律显式传 `now`**（`Int64` 毫秒）：参照实现在 `CacheObj` 构造、判过期、`get` 刷新三处读
 // `System.currentTimeMillis()`，wasm / js 档没有读当前时间的入口。于是参照腿里所有靠
@@ -27,7 +28,7 @@ fn policy_tag(p : @cache.CachePolicy) -> String {
 fn dump(objs : Array[@cache.CacheObj[String, Int]]) -> Array[String] {
   let out : Array[String] = []
   for co in objs {
-    out.push("{co.key}={co.access_count}:{co.ttl}")
+    out.push("\{co.key}=\{co.access_count}:\{co.ttl}")
   }
   out
 }
@@ -76,7 +77,7 @@ test "cache fifo 覆盖已有键不淘汰、remove 回调、clear 不回调" {
     3,
     0L,
   )
-  c.set_listener((k, v) => log.push("{k}={v}"))
+  c.set_listener((k, v) => log.push("\{k}=\{v}"))
   c.put("a", 1, 1000L)
   c.put("b", 2, 1001L)
   c.put("c", 3, 1002L)
@@ -382,14 +383,14 @@ test "cache capacity==0 一律是不限容量（本库把 lru/lfu 那一档统�
     0L,
   )
   for i in 0..<5 {
-    f.put("k{i}", i, 1000L)
+    f.put("k\{i}", i, 1000L)
   }
   assert_eq(f.size(), 5)
   assert_false(f.is_full())
 
   let r : @cache.Cache[String, Int] = @cache.Cache::new_cache(@cache.Lru, 0, 0L)
   let log : Array[String] = []
-  r.set_listener((k, v) => log.push("{k}={v}"))
+  r.set_listener((k, v) => log.push("\{k}=\{v}"))
   r.put("a", 1, 1000L)
   assert_eq(r.size(), 1)
   assert_eq(r.keys(), ["a"])

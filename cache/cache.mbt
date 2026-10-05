@@ -1,8 +1,8 @@
 ///|
 /// moon-hutool 的 `cache` —— 有界/有过期时间的键值缓存（hutool `cn.hutool.cache` 的 MoonBit 对位·第一批）。
 ///
-/// 契约：`docs/spec/16-cache.md`；进度：`docs/ROADMAP.md`。这一批**只有签名与冻结期望值，函数体是 `abort`**
-/// （状态＝契约已冻结，用例预期红）；实现那一笔只许把红变绿（门禁 G5）。
+/// 契约：`docs/spec/16-cache.md`；进度：`docs/ROADMAP.md`。这一批 23 件公开面已落地（契约笔 `a0e49a` 冻期望值，
+/// 落地笔只换函数体；每条期望值都与参照腿 146 条读数同形，门禁 G5 对读落地笔）。
 ///
 /// 对位参照实现：`cn.hutool.cache.Cache` 接口 + `AbstractCache`/`FIFOCache`/`LRUCache`/
 /// `LFUCache`/`TimedCache`/`NoCache`——件在 **hutool-cache** 这个 artifact 里，hutool-core 的 jar 没有它。
@@ -42,8 +42,8 @@ pub(all) struct CacheObj[K, V] {
   key : K
   value : V
   ttl : Int64
-  last_access : Int64
-  access_count : Int
+  mut last_access : Int64
+  mut access_count : Int
 }
 
 ///|
@@ -55,11 +55,11 @@ pub struct Cache[K, V] {
   policy : CachePolicy
   capacity : Int
   timeout : Int64
-  order : Array[K]
-  entries : Map[K, CacheObj[K, V]]
-  hit : Int
-  miss : Int
-  listener : ((K, V) -> Unit)?
+  mut order : Array[K]
+  mut entries : Map[K, CacheObj[K, V]]
+  mut hit : Int
+  mut miss : Int
+  mut listener : ((K, V) -> Unit)?
 }
 
 ///|
@@ -80,7 +80,26 @@ pub fn[K : Hash + Eq, V] Cache::new_cache(
   capacity : Int,
   timeout : Int64,
 ) -> Cache[K, V] {
-  abort("moon-hutool cache: 契约已冻结，实现待落地")
+  let cap = match policy {
+    No => 0
+    Timed => 0
+    _ => capacity
+  }
+  // No 档连默认时长都不留：参照侧 NoCache.timeout() 恒 0
+  let t0 = match policy {
+    No => 0L
+    _ => timeout
+  }
+  {
+    policy,
+    capacity: cap,
+    timeout: t0,
+    order: [],
+    entries: Map([]),
+    hit: 0,
+    miss: 0,
+    listener: None,
+  }
 }
 
 ///|
@@ -95,7 +114,7 @@ pub fn[K : Hash + Eq, V] Cache::put(
   value : V,
   now : Int64,
 ) -> Unit {
-  abort("moon-hutool cache: 契约已冻结，实现待落地")
+  self.put_ttl(key, value, self.timeout, now)
 }
 
 ///|
@@ -111,7 +130,46 @@ pub fn[K : Hash + Eq, V] Cache::put_ttl(
   ttl : Int64,
   now : Int64,
 ) -> Unit {
-  abort("moon-hutool cache: 契约已冻结，实现待落地")
+  match self.policy {
+    No => ()
+    _ => {
+      let co : CacheObj[K, V] = {
+        key,
+        value,
+        ttl,
+        last_access: now,
+        access_count: 0,
+      }
+      if self.entries.contains(key) {
+        // 覆盖已有键：参照实现不做满判定（issue#3618 那一支），本库同
+        self.entries.set(key, co)
+        match self.policy {
+          Lru => self.touch(key)
+          _ => ()
+        }
+      } else {
+        match self.policy {
+          Lru => {
+            self.entries.set(key, co)
+            self.order.push(key)
+            self.trim_lru()
+          }
+          Timed => {
+            self.entries.set(key, co)
+            self.order.push(key)
+          }
+          _ => {
+            // Fifo / Lfu：只在"满着"的时候先跑一遍本档的 prune（含踢队首、公平减计）
+            if self.is_full() {
+              let _ = self.prune(now)
+            }
+            self.entries.set(key, co)
+            self.order.push(key)
+          }
+        }
+      }
+    }
+  }
 }
 
 ///|
@@ -126,7 +184,7 @@ pub fn[K : Hash + Eq, V] Cache::get(
   key : K,
   now : Int64,
 ) -> V? {
-  abort("moon-hutool cache: 契约已冻结，实现待落地")
+  self.get_at(key, now, true)
 }
 
 ///|
@@ -140,7 +198,7 @@ pub fn[K : Hash + Eq, V] Cache::peek(
   key : K,
   now : Int64,
 ) -> V? {
-  abort("moon-hutool cache: 契约已冻结，实现待落地")
+  self.get_at(key, now, false)
 }
 
 ///|
@@ -154,7 +212,19 @@ pub fn[K : Hash + Eq, V] Cache::get_or_put(
   now : Int64,
   supplier : () -> V,
 ) -> V {
-  abort("moon-hutool cache: 契约已冻结，实现待落地")
+  match self.get(key, now) {
+    Some(x) => x
+    None =>
+      // 参照实现的双重检查（那一笔 miss 就是这么来的），第二次仍无值才造
+      match self.get(key, now) {
+        Some(x) => x
+        None => {
+          let x = supplier()
+          self.put(key, x, now)
+          x
+        }
+      }
+  }
 }
 
 ///|
@@ -169,7 +239,18 @@ pub fn[K : Hash + Eq, V] Cache::get_or_put_ttl(
   ttl : Int64,
   supplier : () -> V,
 ) -> V {
-  abort("moon-hutool cache: 契约已冻结，实现待落地")
+  match self.get(key, now) {
+    Some(x) => x
+    None =>
+      match self.get(key, now) {
+        Some(x) => x
+        None => {
+          let x = supplier()
+          self.put_ttl(key, x, ttl, now)
+          x
+        }
+      }
+  }
 }
 
 ///|
@@ -182,7 +263,17 @@ pub fn[K : Hash + Eq, V] Cache::contains_key(
   key : K,
   now : Int64,
 ) -> Bool {
-  abort("moon-hutool cache: 契约已冻结，实现待落地")
+  match self.entries.get(key) {
+    None => false
+    Some(co) =>
+      if is_expired(co, now) {
+        self.drop(key, false)
+        false
+      } else {
+        // 不记命中/丢失，也不加访问数（spec §3 第 3 条）
+        true
+      }
+  }
 }
 
 ///|
@@ -190,7 +281,7 @@ pub fn[K : Hash + Eq, V] Cache::contains_key(
 ///
 /// 读数 `fifo.remove_listener|a=1`。
 pub fn[K : Hash + Eq, V] Cache::remove(self : Cache[K, V], key : K) -> Unit {
-  abort("moon-hutool cache: 契约已冻结，实现待落地")
+  self.drop(key, true)
 }
 
 ///|
@@ -198,7 +289,8 @@ pub fn[K : Hash + Eq, V] Cache::remove(self : Cache[K, V], key : K) -> Unit {
 ///
 /// 读数 `fifo.clear_listener|`（空串）。
 pub fn[K : Hash + Eq, V] Cache::clear(self : Cache[K, V]) -> Unit {
-  abort("moon-hutool cache: 契约已冻结，实现待落地")
+  self.entries = Map([])
+  self.order = []
 }
 
 ///|
@@ -213,13 +305,55 @@ pub fn[K : Hash + Eq, V] Cache::clear(self : Cache[K, V]) -> Unit {
 /// - `No`：恒 0
 /// - Note: 参照实现另有 `schedulePrune(delay)`（守护线程定时清），本库不建，理由见 spec §5。
 pub fn[K : Hash + Eq, V] Cache::prune(self : Cache[K, V], now : Int64) -> Int {
-  abort("moon-hutool cache: 契约已冻结，实现待落地")
+  match self.policy {
+    No => 0
+    Lru => self.sweep(now)
+    Timed => self.sweep(now)
+    Fifo => {
+      let n = self.sweep(now)
+      // 清理完仍是满的，再踢队首一条
+      if self.is_full() && self.order.length() > 0 {
+        self.drop(self.order[0], true)
+        n + 1
+      } else {
+        n
+      }
+    }
+    Lfu => {
+      let n = self.sweep(now)
+      if self.is_full() {
+        let min_count = self.min_access_count()
+        if min_count is Some(mc) {
+          // 公平减计：全体减去最小值，减完 <= 0 的一起删
+          let ks = self.keys()
+          let mut count = n
+          for k in ks {
+            match self.entries.get(k) {
+              None => ()
+              Some(co) => {
+                co.access_count = co.access_count - mc
+                if co.access_count <= 0 {
+                  self.drop(k, true)
+                  count = count + 1
+                }
+              }
+            }
+          }
+          count
+        } else {
+          n
+        }
+      } else {
+        n
+      }
+    }
+  }
 }
 
 ///|
 /// 当前条数。对位 `size()`。
-pub fn[K : Hash + Eq, V] Cache::size(self : Cache[K, V]) -> Int {
-  abort("moon-hutool cache: 契约已冻结，实现待落地")
+pub fn[K, V] Cache::size(self : Cache[K, V]) -> Int {
+  self.entries.length()
 }
 
 ///|
@@ -227,46 +361,46 @@ pub fn[K : Hash + Eq, V] Cache::size(self : Cache[K, V]) -> Int {
 ///
 /// - Note: 参照实现的 `NoCache.isEmpty()` 返回 **false**（而 `size()` 是 0），
 ///   这是它自相矛盾的一处，本库**不跟**，两侧读数记在 spec §5 分岔表。
-pub fn[K : Hash + Eq, V] Cache::is_empty(self : Cache[K, V]) -> Bool {
-  abort("moon-hutool cache: 契约已冻结，实现待落地")
+pub fn[K, V] Cache::is_empty(self : Cache[K, V]) -> Bool {
+  self.entries.length() == 0
 }
 
 ///|
 /// 是否已满：`capacity > 0 && size >= capacity`（读数 `fifo.is_full3|true`、
 /// `fifo.cap0_is_full|false`、`timed.is_full|false`）。
-pub fn[K : Hash + Eq, V] Cache::is_full(self : Cache[K, V]) -> Bool {
-  abort("moon-hutool cache: 契约已冻结，实现待落地")
+pub fn[K, V] Cache::is_full(self : Cache[K, V]) -> Bool {
+  self.capacity > 0 && self.entries.length() >= self.capacity
 }
 
 ///|
 /// 容量（`0` = 不限）。对位 `capacity()`。
-pub fn[K : Hash + Eq, V] Cache::capacity(self : Cache[K, V]) -> Int {
-  abort("moon-hutool cache: 契约已冻结，实现待落地")
+pub fn[K, V] Cache::capacity(self : Cache[K, V]) -> Int {
+  self.capacity
 }
 
 ///|
 /// 默认存活时长（毫秒）。对位 `timeout()`。
-pub fn[K : Hash + Eq, V] Cache::timeout(self : Cache[K, V]) -> Int64 {
-  abort("moon-hutool cache: 契约已冻结，实现待落地")
+pub fn[K, V] Cache::timeout(self : Cache[K, V]) -> Int64 {
+  self.timeout
 }
 
 ///|
 /// 本缓存的淘汰策略。参照实现没有这个 getter（靠具体类型区分），本库补一件，
 /// 因为五档收成了一个 `Cache` 类型。
-pub fn[K : Hash + Eq, V] Cache::policy(self : Cache[K, V]) -> CachePolicy {
-  abort("moon-hutool cache: 契约已冻结，实现待落地")
+pub fn[K, V] Cache::policy(self : Cache[K, V]) -> CachePolicy {
+  self.policy
 }
 
 ///|
 /// 命中次数（`get`/`peek` 计，`contains_key` 不计）。对位 `AbstractCache.getHitCount()`。
-pub fn[K : Hash + Eq, V] Cache::hit_count(self : Cache[K, V]) -> Int {
-  abort("moon-hutool cache: 契约已冻结，实现待落地")
+pub fn[K, V] Cache::hit_count(self : Cache[K, V]) -> Int {
+  self.hit
 }
 
 ///|
 /// 未命中次数。对位 `AbstractCache.getMissCount()`。
-pub fn[K : Hash + Eq, V] Cache::miss_count(self : Cache[K, V]) -> Int {
-  abort("moon-hutool cache: 契约已冻结，实现待落地")
+pub fn[K, V] Cache::miss_count(self : Cache[K, V]) -> Int {
+  self.miss
 }
 
 ///|
@@ -276,14 +410,25 @@ pub fn[K : Hash + Eq, V] Cache::miss_count(self : Cache[K, V]) -> Int {
 /// - `Lru`：**访问序**，最近被读到的在末尾（读数 `lru.iter_after_get_a|b,c,a`）
 /// - Note: 参照实现的 `LFUCache`/`TimedCache` 用的是 `HashMap`，根本没有稳定顺序；
 ///   本库给这两档承诺插入序，是一条**附加承诺**（不是从参照反推），见 spec §5。
-pub fn[K : Hash + Eq, V] Cache::keys(self : Cache[K, V]) -> Array[K] {
-  abort("moon-hutool cache: 契约已冻结，实现待落地")
+pub fn[K, V] Cache::keys(self : Cache[K, V]) -> Array[K] {
+  let out : Array[K] = []
+  for k in self.order {
+    out.push(k)
+  }
+  out
 }
 
 ///|
 /// 按 `keys()` 的同一顺序列出所有值。对位 `Cache` 的 `Iterable<V>`（读数 `fifo.values|1,2,3`）。
 pub fn[K : Hash + Eq, V] Cache::values(self : Cache[K, V]) -> Array[V] {
-  abort("moon-hutool cache: 契约已冻结，实现待落地")
+  let out : Array[V] = []
+  for k in self.order {
+    match self.entries.get(k) {
+      None => ()
+      Some(co) => out.push(co.value)
+    }
+  }
+  out
 }
 
 ///|
@@ -294,7 +439,14 @@ pub fn[K : Hash + Eq, V] Cache::values(self : Cache[K, V]) -> Array[V] {
 pub fn[K : Hash + Eq, V] Cache::cache_objs(
   self : Cache[K, V],
 ) -> Array[CacheObj[K, V]] {
-  abort("moon-hutool cache: 契约已冻结，实现待落地")
+  let out : Array[CacheObj[K, V]] = []
+  for k in self.order {
+    match self.entries.get(k) {
+      None => ()
+      Some(co) => out.push(co)
+    }
+  }
+  out
 }
 
 ///|
@@ -306,9 +458,127 @@ pub fn[K : Hash + Eq, V] Cache::cache_objs(
 /// - Note: 三条不进契约的触发时机与参照侧一致：`clear()` 不触发、`put` 覆盖不触发；
 ///   `Lru` 的 `capacity == 0` 那条参照是"放进去立刻被淘汰并回调"（读数 `lru.cap0_listener|a=1`），
 ///   本库按"0 = 不限容量"，故不会有这次回调——分岔记在 spec §5。
-pub fn[K : Hash + Eq, V] Cache::set_listener(
+pub fn[K, V] Cache::set_listener(
   self : Cache[K, V],
   listener : (K, V) -> Unit,
 ) -> Unit {
-  abort("moon-hutool cache: 契约已冻结，实现待落地")
+  self.listener = Some(listener)
+}
+
+///|
+/// 过期判据只有一条算式：`ttl > 0 && now - last_access > ttl`。
+/// 相等不算过期；`ttl <= 0`（含负数）永不过期——参照侧 `CacheObj.isExpired()` 就是这个形状。
+fn[K, V] is_expired(co : CacheObj[K, V], now : Int64) -> Bool {
+  co.ttl > 0L && now - co.last_access > co.ttl
+}
+
+///|
+/// `get`/`peek` 的共用体：`refresh` 只决定要不要挪过期窗口，**不**决定要不要改淘汰序
+/// （参照侧 `FixedLinkedHashMap` 的 `accessOrder=true` 让任何一次读都重排）。
+fn[K : Hash + Eq, V] Cache::get_at(
+  self : Cache[K, V],
+  key : K,
+  now : Int64,
+  refresh : Bool,
+) -> V? {
+  match self.entries.get(key) {
+    None => {
+      self.miss = self.miss + 1
+      None
+    }
+    Some(co) =>
+      if is_expired(co, now) {
+        // 顺手删掉这一条：参照侧走的是 `removeWithoutLock`，不触发回调
+        self.drop(key, false)
+        self.miss = self.miss + 1
+        None
+      } else {
+        self.hit = self.hit + 1
+        co.access_count = co.access_count + 1
+        if refresh {
+          co.last_access = now
+        }
+        match self.policy {
+          Lru => self.touch(key)
+          _ => ()
+        }
+        Some(co.value)
+      }
+  }
+}
+
+///|
+/// 删一条；`notify` 决定要不要走移除回调（淘汰/显式 remove 走，读到过期顺手删不走）。
+fn[K : Hash + Eq, V] Cache::drop(
+  self : Cache[K, V],
+  key : K,
+  notify : Bool,
+) -> Unit {
+  match self.entries.get(key) {
+    None => ()
+    Some(co) => {
+      let _ = self.entries.remove(key)
+      self.order = self.order.filter(k => k != key)
+      if notify {
+        match self.listener {
+          None => ()
+          Some(f) => f(co.key, co.value)
+        }
+      }
+    }
+  }
+}
+
+///|
+/// 扫全部过期条目并回调，返回删掉的条数。先把键抄一份再删——边遍历边删会跳条目。
+fn[K : Hash + Eq, V] Cache::sweep(self : Cache[K, V], now : Int64) -> Int {
+  let ks = self.keys()
+  let mut count = 0
+  for k in ks {
+    match self.entries.get(k) {
+      None => ()
+      Some(co) =>
+        if is_expired(co, now) {
+          self.drop(k, true)
+          count = count + 1
+        } else {
+          ()
+        }
+    }
+  }
+  count
+}
+
+///|
+/// 当前条目里的最小访问数；空表给 `None`。
+fn[K : Hash + Eq, V] Cache::min_access_count(self : Cache[K, V]) -> Int? {
+  let mut best : Int? = None
+  for k in self.order {
+    match self.entries.get(k) {
+      None => ()
+      Some(co) =>
+        best = match best {
+          None => Some(co.access_count)
+          Some(b) => Some(if co.access_count < b { co.access_count } else { b })
+        }
+    }
+  }
+  best
+}
+
+///|
+/// LRU 把键挪到"最近使用"那一端（本库顺序 = 最老在前）。
+fn[K : Eq, V] Cache::touch(self : Cache[K, V], key : K) -> Unit {
+  self.order = self.order.filter(k => k != key)
+  self.order.push(key)
+}
+
+///|
+/// LRU 的插入后淘汰：超出容量的从最老一端开始删，并走回调。`capacity == 0` 是不限容量。
+fn[K : Hash + Eq, V] Cache::trim_lru(self : Cache[K, V]) -> Unit {
+  while self.capacity > 0 &&
+        self.entries.length() > self.capacity &&
+        self.order.length() > 0 {
+    self.drop(self.order[0], true)
+  }
 }

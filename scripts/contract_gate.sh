@@ -16,7 +16,7 @@ ok()  { echo "  PASS $*"; }
 bad() { echo "  FAIL $*"; FAILS=$((FAILS+1)); }
 skip(){ echo "  SKIP $*"; SKIPS=$((SKIPS+1)); }
 GATE_TARGETS="${GATE_TARGETS:-wasm js}"
-BASELINE_TESTS="${BASELINE_TESTS:-379}"
+BASELINE_TESTS="${BASELINE_TESTS:-383}"
 
 echo "== G1 零依赖（moon tree 无第三方节点 + moon.mod 无 deps）=="
 if tree_json=$(moon tree --json 2>/dev/null) && [ -n "$tree_json" ]; then
