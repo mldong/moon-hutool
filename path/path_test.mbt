@@ -47,7 +47,8 @@ test "path is_pattern 与默认构造的三枚开关" {
   assert_eq(@path.is_pattern("**"), true)
   // 参照读数："const|DEFAULT_SEPARATOR=/"
   // 参照读数："default-ctor|exact=T|case_sensitive=T|trim=F|catchall_match=F"
-  inspect(@path.default_separator(), content="")
+  // 参照腿常量读数：DEFAULT_PATH_SEPARATOR = "/"
+  assert_eq(@path.default_separator(), "/")
 }
 
 ///|
@@ -645,29 +646,27 @@ test "path extract_within 与 combine" {
 ///|
 // 模式具体度排序（比较器）
 test "path 模式具体度排序（比较器）" {
-  // 同级必须给 0（移植时"相等"分支的凭据）："order-eq|against=/x|a=/x|b=/x|out=0"
+  // 比较器逐对直读（10条）：不从排序结果反推——并列时参照实现的稳定排序留下输入序，反推会造出一个不存在的严格序承诺
   assert_eq(@path.compare_patterns("/x", "/x", "/x"), 0)
-  // ord-1：against="/hotels/chicago" 参照腿排序结果="/hotels/*,/**/hotels/**,/hotels/**,/**,"
-  assert_true(
-    @path.compare_patterns("/hotels/chicago", "/hotels/*", "/**/hotels/**") < 0,
+  assert_eq(
+    @path.compare_patterns("/hotels/chicago", "/hotels/*", "/**/hotels/**"),
+    -1,
   )
-  assert_true(
-    @path.compare_patterns("/hotels/chicago", "/**/hotels/**", "/hotels/**") < 0,
+  assert_eq(
+    @path.compare_patterns("/hotels/chicago", "/**/hotels/**", "/hotels/**"),
+    -3,
   )
-  assert_true(
-    @path.compare_patterns("/hotels/chicago", "/hotels/**", "/**") < 0,
+  assert_eq(@path.compare_patterns("/hotels/chicago", "/hotels/**", "/**"), -1)
+  assert_eq(@path.compare_patterns("/a/b", "/a/b", "/**/b"), -1)
+  assert_eq(@path.compare_patterns("/a/b", "/**/b", "/a/**"), 0)
+  assert_eq(@path.compare_patterns("/a/b", "/a/**", "/**"), -1)
+  assert_eq(@path.compare_patterns("/x", "/x", "/**"), -1)
+  assert_eq(
+    @path.compare_patterns("/WEB-INF/a.jsp", "/WEB-INF/*", "/WEB-INF/**"),
+    -1,
   )
-  // ord-2：against="/a/b" 参照腿排序结果="/a/b,/**/b,/a/**,/**,"
-  assert_true(@path.compare_patterns("/a/b", "/a/b", "/**/b") < 0)
-  assert_true(@path.compare_patterns("/a/b", "/**/b", "/a/**") < 0)
-  assert_true(@path.compare_patterns("/a/b", "/a/**", "/**") < 0)
-  // ord-3：against="/x" 参照腿排序结果="/x,/**,"
-  assert_true(@path.compare_patterns("/x", "/x", "/**") < 0)
-  // ord-4：against="/WEB-INF/a.jsp" 参照腿排序结果="/WEB-INF/*,/WEB-INF/**,/**/*.jsp,"
-  assert_true(
-    @path.compare_patterns("/WEB-INF/a.jsp", "/WEB-INF/*", "/WEB-INF/**") < 0,
-  )
-  assert_true(
-    @path.compare_patterns("/WEB-INF/a.jsp", "/WEB-INF/**", "/**/*.jsp") < 0,
+  assert_eq(
+    @path.compare_patterns("/WEB-INF/a.jsp", "/WEB-INF/**", "/**/*.jsp"),
+    -1,
   )
 }
