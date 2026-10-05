@@ -19,6 +19,16 @@
 ///    具体出哪个字符由注入的生成器决定——契约里没有"第 N 次调用等于某个固定串"这种期望。
 
 ///|
+// 本包唯一的取数口：`n` 必须是正域大小。core 的 `Rand::int` 对 `limit=0` 是"取 [0,2^31) 全域"
+// 而不是报错、对负值直接 `abort`（`try` 抓不到 panic，实测探针在那一行终止），所以域一律在本包判死。
+fn take_under(rng : @random.Rand, n : Int) -> Int raise RandError {
+  if n <= 0 {
+    raise EmptyDomain("n=" + n.to_string())
+  }
+  rng.int(limit=n)
+}
+
+///|
 /// 本包唯一错误面。每个变体对应**一个** `raise` 点，载荷只放调用方拿不到的读数
 pub suberror RandError {
   /// 定义域为空（`min == max` 的半开/双开区间，或 `min > max`）。载荷 = 四个界值参数的读数
@@ -34,26 +44,26 @@ pub suberror RandError {
 ///|
 /// 数字表 `0123456789`。对位 `RandomUtil.BASE_NUMBER`（实测内容长度 10，逐字符照抄）
 pub fn alphabet_number() -> String {
-  abort("moon-hutool 契约未实现：alphabet_number")
+  "0123456789"
 }
 
 ///|
 /// 小写字母表 `a`~`z`。对位 `RandomUtil.BASE_CHAR`（实测长度 26）
 pub fn alphabet_lower() -> String {
-  abort("moon-hutool 契约未实现：alphabet_lower")
+  "abcdefghijklmnopqrstuvwxyz"
 }
 
 ///|
 /// 小写 + 数字共 36 字符。对位 `RandomUtil.BASE_CHAR_NUMBER_LOWER`（实测长度 36）
 pub fn alphabet_lower_number() -> String {
-  abort("moon-hutool 契约未实现：alphabet_lower_number")
+  "abcdefghijklmnopqrstuvwxyz0123456789"
 }
 
 ///|
 /// 全表：大写段 + 小写段 + 数字段共 62 字符。对位 `RandomUtil.BASE_CHAR_NUMBER`
 /// - Note: **顺序是大写在前**（实测原样），所以 `random_string_upper` 的结果集只有 36 个字符——表里本来就带数字
 pub fn alphabet_all() -> String {
-  abort("moon-hutool 契约未实现：alphabet_all")
+  "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 }
 
 ///|
@@ -71,20 +81,45 @@ pub fn random_int(
   incl_min? : Bool,
   incl_max? : Bool,
 ) -> Int raise RandError {
-  abort("moon-hutool 契约未实现：random_int")
+  let im = match incl_min {
+    None => true
+    Some(b) => b
+  }
+  let ix = match incl_max {
+    None => false
+    Some(b) => b
+  }
+  // 折算成半开域 [lo, hi)：含哪端就把那一端往里/外挪一格，域大小算不出来就是空域
+  let lo = if im { min } else { min + 1 }
+  let hi = if ix { max + 1 } else { max }
+  let n = hi - lo
+  if n <= 0 {
+    raise EmptyDomain(
+      "min=" +
+      min.to_string() +
+      ",max=" +
+      max.to_string() +
+      ",incl_min=" +
+      im.to_string() +
+      ",incl_max=" +
+      ix.to_string(),
+    )
+  }
+  lo + take_under(rng, n)
 }
 
 ///|
 /// `[0, n)` 档的整数。对位 `RandomUtil.randomInt(n)`（`n` 必须为正）。
 /// - Raises: `RandError.EmptyDomain("n=0")` / `RandError.EmptyDomain("n=-1")`：非正没有定义域
 pub fn random_int_under(rng : @random.Rand, n : Int) -> Int raise RandError {
-  abort("moon-hutool 契约未实现：random_int_under")
+  take_under(rng, n)
 }
 
 ///|
 /// 掷硬币。对位 `RandomUtil.randomBoolean()`（参照实现是 `0 == randomInt(2)`，同一档）
 pub fn random_boolean(rng : @random.Rand) -> Bool {
-  abort("moon-hutool 契约未实现：random_boolean")
+  // 参照实现就是 `0 == randomInt(2)`：同一档，不多要一次取数
+  rng.int(limit=2) == 0
 }
 
 ///|
@@ -94,7 +129,11 @@ pub fn random_char(
   rng : @random.Rand,
   table : String,
 ) -> String raise RandError {
-  abort("moon-hutool 契约未实现：random_char")
+  let cs = table.to_array()
+  if cs.length() == 0 {
+    raise EmptyAlphabet(0)
+  }
+  cs[take_under(rng, cs.length())].to_string()
 }
 
 ///|
@@ -106,7 +145,22 @@ pub fn random_string_from(
   table : String,
   length : Int,
 ) -> String raise RandError {
-  abort("moon-hutool 契约未实现：random_string_from")
+  if length <= 0 {
+    // 要求 0 个字符就是空串——参照实现实测给长度 1 的串（§5 第 1 行），本包不跟随
+    ""
+  } else {
+    let cs = table.to_array()
+    if cs.length() == 0 {
+      raise EmptyAlphabet(0)
+    }
+    let out : Array[Char] = []
+    let mut k = 0
+    while k < length {
+      out.push(cs[take_under(rng, cs.length())])
+      k += 1
+    }
+    String::from_array(out)
+  }
 }
 
 ///|
@@ -115,7 +169,7 @@ pub fn random_string(
   rng : @random.Rand,
   length : Int,
 ) -> String raise RandError {
-  abort("moon-hutool 契约未实现：random_string")
+  random_string_from(rng, alphabet_all(), length)
 }
 
 ///|
@@ -124,7 +178,7 @@ pub fn random_string_lower(
   rng : @random.Rand,
   length : Int,
 ) -> String raise RandError {
-  abort("moon-hutool 契约未实现：random_string_lower")
+  random_string_from(rng, alphabet_lower(), length)
 }
 
 ///|
@@ -133,7 +187,7 @@ pub fn random_numbers(
   rng : @random.Rand,
   length : Int,
 ) -> String raise RandError {
-  abort("moon-hutool 契约未实现：random_numbers")
+  random_string_from(rng, alphabet_number(), length)
 }
 
 ///|
@@ -143,7 +197,19 @@ pub fn random_string_upper(
   rng : @random.Rand,
   length : Int,
 ) -> String raise RandError {
-  abort("moon-hutool 契约未实现：random_string_upper")
+  // ASCII 档转大写：62 表里的小写段抬上去，数字段原样留在结果里（实测结果集 36 字符）
+  let cs = random_string(rng, length).to_array()
+  let out : Array[Char] = []
+  for c in cs {
+    out.push(
+      if c >= 'a' && c <= 'z' {
+        (c.to_int() - 32).unsafe_to_char()
+      } else {
+        c
+      },
+    )
+  }
+  String::from_array(out)
 }
 
 ///|
@@ -155,7 +221,21 @@ pub fn random_string_without(
   length : Int,
   filter : String,
 ) -> String raise RandError {
-  abort("moon-hutool 契约未实现：random_string_without")
+  let keep : Array[Char] = []
+  let drop = filter.to_array()
+  for c in alphabet_all().to_array() {
+    let mut hit = false
+    for d in drop {
+      if d == c {
+        hit = true
+      }
+    }
+    if hit == false {
+      keep.push(c)
+    }
+  }
+  // 过滤按字符集算、大小写分开算（实测 `aA1` 三个都消失）
+  random_string_from(rng, String::from_array(keep), length)
 }
 
 ///|
@@ -169,7 +249,15 @@ pub fn[A] random_ele(
   items : Array[A],
   limit? : Int,
 ) -> A raise RandError {
-  abort("moon-hutool 契约未实现：random_ele")
+  let n = match limit {
+    None => items.length()
+    Some(k) => if k > items.length() { items.length() } else { k }
+  }
+  if n <= 0 {
+    // 载荷是**有效域大小**：空表是 0，`limit=0` 也收敛成 0（两条同读数）
+    raise EmptyCollection(n)
+  }
+  items[take_under(rng, n)]
 }
 
 ///|
@@ -181,7 +269,17 @@ pub fn[A] random_eles(
   items : Array[A],
   count : Int,
 ) -> Array[A] raise RandError {
-  abort("moon-hutool 契约未实现：random_eles")
+  if items.length() == 0 {
+    raise EmptyCollection(0)
+  }
+  // 允许重复、条数就是 count（实测 count > size 仍给 count 条）
+  let out : Array[A] = []
+  let mut k = 0
+  while k < count {
+    out.push(items[take_under(rng, items.length())])
+    k += 1
+  }
+  out
 }
 
 ///|
@@ -190,12 +288,47 @@ pub fn[A] random_eles(
 ///   `unused_trait_bound` 警告，而 G3 是零警告门禁；签名带界与否以 `.mbti` 为准）
 /// - Raises: `EmptyCollection(0)`；`BadCount("count=4,available=3")`：条数超过去重后的可用数
 ///   （参照实现这里也是 `IllegalArgumentException`，但它的消息没给可用数——本包把两个数都带上）
-pub fn[A] random_ele_set(
+pub fn[A : Eq] random_ele_set(
   rng : @random.Rand,
   items : Array[A],
   count : Int,
 ) -> Array[A] raise RandError {
-  abort("moon-hutool 契约未实现：random_ele_set")
+  let uniq : Array[A] = []
+  for x in items {
+    if uniq.contains(x) == false {
+      uniq.push(x)
+    }
+  }
+  if uniq.length() == 0 {
+    raise EmptyCollection(0)
+  }
+  if count > uniq.length() {
+    raise BadCount(
+      "count=" + count.to_string() + ",available=" + uniq.length().to_string(),
+    )
+  }
+  // 索引域洗牌再取前 count 个：互不相同由构造保证，顺序不保证
+  let idx : Array[Int] = []
+  let mut k = 0
+  while k < uniq.length() {
+    idx.push(k)
+    k += 1
+  }
+  let mut i = uniq.length()
+  while i > 1 {
+    i -= 1
+    let j = take_under(rng, i + 1)
+    let t = idx[i]
+    idx[i] = idx[j]
+    idx[j] = t
+  }
+  let out : Array[A] = []
+  let mut m = 0
+  while m < count {
+    out.push(uniq[idx[m]])
+    m += 1
+  }
+  out
 }
 
 ///|
@@ -210,7 +343,7 @@ pub struct WeightRandom[A] {
 /// 实测参照实现**构造时不校验权重**（负权重、全零权重都能构造成功），本包同档但把"定义域为空"
 /// 留到 `next` 时报——理由与判据见 spec §3 #12.15
 pub fn[A] weight_random(items : Array[(A, Double)]) -> WeightRandom[A] {
-  abort("moon-hutool 契约未实现：weight_random")
+  { entries: items, }
 }
 
 ///|
@@ -221,5 +354,28 @@ pub fn[A] weight_random_next(
   table : WeightRandom[A],
   rng : @random.Rand,
 ) -> A raise RandError {
-  abort("moon-hutool 契约未实现：weight_random_next")
+  if table.entries.is_empty() {
+    raise EmptyCollection(0)
+  }
+  let mut total = 0.0
+  for (_, w) in table.entries {
+    total += w
+  }
+  if total <= 0.0 {
+    // 本包自定档：参照实现在这里透传底下引擎的 `bound must be positive`。全零/负和权重没有可取的域
+    raise EmptyDomain("weight_total=" + total.to_string())
+  }
+  let target = total * rng.double(min=0.0, max=1.0)
+  let mut cum = 0.0
+  let mut picked : A = table.entries[0].0
+  let mut done = false
+  for (obj, w) in table.entries {
+    cum += w
+    if done == false && target < cum {
+      picked = obj
+      done = true
+    }
+  }
+  // 零权重的桶宽度为 0，`target < cum` 在它这里不会比前一个正权重桶先成立 ⇒ 永不中选（实测同档）
+  picked
 }

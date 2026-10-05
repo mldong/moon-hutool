@@ -20,7 +20,7 @@ pub fn random_char(@random.Rand, String) -> String raise RandError
 
 pub fn[A] random_ele(@random.Rand, Array[A], limit? : Int) -> A raise RandError
 
-pub fn[A] random_ele_set(@random.Rand, Array[A], Int) -> Array[A] raise RandError
+pub fn[A : Eq] random_ele_set(@random.Rand, Array[A], Int) -> Array[A] raise RandError
 
 pub fn[A] random_eles(@random.Rand, Array[A], Int) -> Array[A] raise RandError
 

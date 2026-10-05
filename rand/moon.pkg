@@ -8,9 +8,3 @@ import {
   "moonbitlang/core/random",
   "mldong/moon-hutool/rand",
 } for "test"
-
-// 契约冻结态（PR-A）：公开项的体全是 `abort`，机械后果是三类警告——
-// 形参没人用、新错误档没人抛、新档位没人构造、`WeightRandom` 还没被构造过（`weight_random` 的体是 abort）。
-// 实现落地那一笔整行删除（G12 盯着）。
-
-warnings = "-unused_value-unused_error_type-unused_constructor-struct_never_constructed"
