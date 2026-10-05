@@ -1,1 +1,16 @@
-// 依赖在此声明；占位期不 import 任何 core 包（未使用的 import 会吃 unused_package 警告并卡零警告门禁）
+// `re` 的底座是 core 的 `@string.Regex`（零依赖契约只允许 `moonbitlang/core`，这一条在内）。
+// 本包不 import `text`/`num`：正则与它们没有依赖关系，串与视图的胶水在本包内自写。
+import {
+  "moonbitlang/core/string",
+}
+
+// 测试侧只 import 本包：这一批的夹具全是 `String`/`Bool` 与 `@re.ReError`，core 的类型没在测试里
+// 直接出现——多写一条 `"moonbitlang/core/string"` 会被判 `unused_package`（实测，G3 零警告当场拦）。
+import {
+  "mldong/moon-hutool/re",
+} for "test"
+
+// 契约冻结态（PR-A）：公开项的体全是 `abort`，机械后果是三类警告——
+// 形参没人用、新错误档没人抛、新档位没人构造。实现落地那一笔整行删除（G12 盯着）。
+
+warnings = "-unused_value-unused_error_type-unused_constructor"

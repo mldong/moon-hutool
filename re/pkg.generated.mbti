@@ -1,9 +1,64 @@
 // Generated using `moon info`, DON'T EDIT IT
 package "mldong/moon-hutool/re"
 
+import {
+  "moonbitlang/core/string",
+}
+
 // Values
+pub fn compile(String) -> @string.Regex raise ReError
+
+pub fn contains(String, String) -> Bool raise ReError
+
+pub fn count(String, String) -> Int raise ReError
+
+pub fn del_all(String, String) -> String raise ReError
+
+pub fn del_first(String, String) -> String raise ReError
+
+pub fn del_last(String, String) -> String raise ReError
+
+pub fn del_pre(String, String) -> String raise ReError
+
+pub fn extract_with_template(String, String, String) -> String? raise ReError
+
+pub fn find_all(String, String) -> Array[String] raise ReError
+
+pub fn find_all_group(String, String, Int) -> Array[String?] raise ReError
+
+pub fn find_first(String, String) -> String? raise ReError
+
+pub fn find_first_group(String, String, Int) -> String? raise ReError
+
+pub fn find_first_named(String, String, String) -> String? raise ReError
+
+pub fn first_position(String, String) -> (Int, Int)? raise ReError
+
+pub fn group_names(String) -> Array[String] raise ReError
+
+pub fn groups_of_first(String, String, with_group0? : Bool) -> Array[String?] raise ReError
+
+pub fn is_match(String, String) -> Bool raise ReError
+
+pub fn is_valid_pattern(String) -> Bool
+
+pub fn last_position(String, String) -> (Int, Int)? raise ReError
+
+pub fn named_groups(String, String) -> Map[String, String] raise ReError
+
+pub fn quote(String) -> String
+
+pub fn replace_by(String, String, (@string.MatchResult) -> String) -> String raise ReError
+
+pub fn replace_with_template(String, String, String) -> String raise ReError
+
+pub fn split(String, String) -> Array[String] raise ReError
 
 // Errors
+pub suberror ReError {
+  BadPattern(String)
+  BadReference(String)
+}
 
 // Types and methods
 
