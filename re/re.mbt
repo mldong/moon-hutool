@@ -43,7 +43,7 @@ pub suberror ReError {
 /// - Note: `.` 在本引擎里**含换行**（实测 `find` 于 `"a\nb"` 给 3 条：`a`、`\n`、`b`），
 ///   相当于 hutool 全线带 `Pattern.DOTALL`——这一点与参照实现一致，不必再声明分岔
 pub fn compile(pattern : String) -> @string.Regex raise ReError {
-  abort("moon-hutool 契约未实现：compile")
+  must_compile(pattern)
 }
 
 ///|
@@ -54,7 +54,12 @@ pub fn compile(pattern : String) -> @string.Regex raise ReError {
 /// - Returns: 可编译 ⇒ `true`；任何编译失败 ⇒ `false`（不抛错，本件是唯一"吞掉错误"的那一件）
 /// - Note: 存在的理由是**校验场景不该被迫处理异常**；判定与 `compile` 用同一张嘴，二者不会给相反答案
 pub fn is_valid_pattern(pattern : String) -> Bool {
-  abort("moon-hutool 契约未实现：is_valid_pattern")
+  try {
+    let _ = @string.Regex(pattern.to_string_view())
+    true
+  } catch {
+    _ => false
+  }
 }
 
 ///|
@@ -67,7 +72,14 @@ pub fn is_valid_pattern(pattern : String) -> Bool {
 /// - Note: 转义表**逐字跟随** hutool，不扩到 core 的全部元字符——本件的对位是那张表，不是"绝对安全"。
 ///   要绝对安全的字面匹配用 `@string.Regex::string(原文)`
 pub fn quote(text : String) -> String {
-  abort("moon-hutool 契约未实现：quote")
+  let out : Array[Char] = []
+  for c in text.to_array() {
+    if is_re_key(c) {
+      out.push('\\')
+    }
+    out.push(c)
+  }
+  String::from_array(out)
 }
 
 ///|
@@ -82,7 +94,12 @@ pub fn quote(text : String) -> String {
 ///   （实测 `isMatch("", "abc") ⇒ true`，而 Java 自己的 `matches()` 在同一输入上是 `false`），
 ///   本包走引擎语义（空模式只匹配空串）。这一条改的是参照实现，不是参照实现下面的引擎
 pub fn is_match(pattern : String, text : String) -> Bool raise ReError {
-  abort("moon-hutool 契约未实现：is_match")
+  // 整串语义用锚定包装表达：锚在最左一段上判"占满"会给错答案（判别夹具见 re_test.mbt 第 13 块，
+  // 腿 A 现读 isMatch("a|ab","ab") = true）
+  match must_compile_whole(pattern).execute(text.to_string_view()) {
+    Some(_) => true
+    None => false
+  }
 }
 
 ///|
@@ -94,7 +111,10 @@ pub fn is_match(pattern : String, text : String) -> Bool raise ReError {
 /// - Returns: 至少有一处匹配 ⇒ `true`
 /// - Raises: `ReError.BadPattern(pattern)`
 pub fn contains(pattern : String, text : String) -> Bool raise ReError {
-  abort("moon-hutool 契约未实现：contains")
+  match must_compile(pattern).execute(text.to_string_view()) {
+    Some(_) => true
+    None => false
+  }
 }
 
 ///|
@@ -106,7 +126,12 @@ pub fn contains(pattern : String, text : String) -> Bool raise ReError {
 /// - Returns: 非重叠匹配的条数；零宽模式会数到"每个位置"那一档（实测 `x*` 于 `"abab"` ⇒ 5，两腿一致）
 /// - Raises: `ReError.BadPattern(pattern)`
 pub fn count(pattern : String, text : String) -> Int raise ReError {
-  abort("moon-hutool 契约未实现：count")
+  let re = must_compile(pattern)
+  let mut n = 0
+  for _ in re.find(text.to_string_view()) {
+    n = n + 1
+  }
+  n
 }
 
 ///|
@@ -118,7 +143,10 @@ pub fn count(pattern : String, text : String) -> Int raise ReError {
 /// - Returns: 命中的整段；没有命中 ⇒ `None`（hutool 在此给 `null`，同一档）
 /// - Raises: `ReError.BadPattern(pattern)`
 pub fn find_first(pattern : String, text : String) -> String? raise ReError {
-  abort("moon-hutool 契约未实现：find_first")
+  match must_compile(pattern).execute(text.to_string_view()) {
+    Some(m) => Some(m.content().to_owned())
+    None => None
+  }
 }
 
 ///|
@@ -138,7 +166,10 @@ pub fn find_first_group(
   text : String,
   group : Int,
 ) -> String? raise ReError {
-  abort("moon-hutool 契约未实现：find_first_group")
+  match must_compile(pattern).execute(text.to_string_view()) {
+    Some(m) => group_text(m, group)
+    None => None
+  }
 }
 
 ///|
@@ -157,7 +188,14 @@ pub fn find_first_named(
   text : String,
   name : String,
 ) -> String? raise ReError {
-  abort("moon-hutool 契约未实现：find_first_named")
+  match must_compile(pattern).execute(text.to_string_view()) {
+    Some(m) =>
+      match m.named_group(name) {
+        Some(v) => Some(v.to_owned())
+        None => None
+      }
+    None => None
+  }
 }
 
 ///|
@@ -169,7 +207,11 @@ pub fn find_first_named(
 /// - Returns: 按出现顺序的整段列表；没有命中 ⇒ 空数组（不是 `None`，hutool 同档）
 /// - Raises: `ReError.BadPattern(pattern)`
 pub fn find_all(pattern : String, text : String) -> Array[String] raise ReError {
-  abort("moon-hutool 契约未实现：find_all")
+  let out : Array[String] = []
+  for m in must_compile(pattern).find(text.to_string_view()) {
+    out.push(m.content().to_owned())
+  }
+  out
 }
 
 ///|
@@ -186,7 +228,12 @@ pub fn find_all_group(
   text : String,
   group : Int,
 ) -> Array[String?] raise ReError {
-  abort("moon-hutool 契约未实现：find_all_group")
+  let re = must_compile(pattern)
+  let out : Array[String?] = []
+  for m in re.find(text.to_string_view()) {
+    out.push(group_text(m, group))
+  }
+  out
 }
 
 ///|
@@ -204,7 +251,27 @@ pub fn groups_of_first(
   text : String,
   with_group0? : Bool,
 ) -> Array[String?] raise ReError {
-  abort("moon-hutool 契约未实现：groups_of_first")
+  let re = must_compile(pattern)
+  let (cnt, _) = scan_groups(pattern)
+  let want0 = match with_group0 {
+    None => true
+    Some(b) => b
+  }
+  match re.execute(text.to_string_view()) {
+    None => []
+    Some(m) => {
+      let out : Array[String?] = []
+      if want0 {
+        out.push(Some(m.content().to_owned()))
+      }
+      let mut g = 1
+      while g <= cnt {
+        out.push(group_text(m, g))
+        g = g + 1
+      }
+      out
+    }
+  }
 }
 
 ///|
@@ -215,11 +282,15 @@ pub fn groups_of_first(
 /// - Parameters:
 ///   - `pattern`：模式串
 /// - Returns: 组名数组，**按声明顺序**；没有命名组 ⇒ 空数组
-/// - Raises: `ReError.BadPattern(pattern)`：先过编译这一关（`(?<a>x)(?<a>y)` 这种重名同样报错，
-///   与 Java 的 `Named capturing group <a> is already defined` 同一判断）
+/// - Raises: `ReError.BadPattern(pattern)`：先过编译这一关，再查命名组重名——
+///   `(?<a>x)(?<a>y)` 实测 **core 接受**、Java 拒绝（`Named capturing group <a> is already defined`），
+///   本包按参照实现拦下来（改判过程见 spec §5 第 13 行）
 /// - Note: Java 侧那份是 `HashMap`，键序不可依赖；本包给声明序，稳定且可复跑
 pub fn group_names(pattern : String) -> Array[String] raise ReError {
-  abort("moon-hutool 契约未实现：group_names")
+  // 先过编译这一关，再查重名：实测 core **接受** `(?<a>x)(?<a>y)`，而参照实现（Java）拒绝 ⇒ 拦在这里
+  let _ = must_compile(pattern)
+  let (_, names) = scan_groups(pattern)
+  names
 }
 
 ///|
@@ -236,7 +307,22 @@ pub fn named_groups(
   pattern : String,
   text : String,
 ) -> Map[String, String] raise ReError {
-  abort("moon-hutool 契约未实现：named_groups")
+  let re = must_compile(pattern)
+  let (_, names) = scan_groups(pattern)
+  let out : Map[String, String] = Map([])
+  match re.execute(text.to_string_view()) {
+    None => out
+    Some(m) => {
+      for name in names {
+        match m.named_group(name) {
+          Some(v) => out[name] = v.to_owned()
+          // 名字在但这一条匹配里没参与 ⇒ 键不出现（§5 第 11 行）
+          None => ()
+        }
+      }
+      out
+    }
+  }
 }
 
 ///|
@@ -252,7 +338,12 @@ pub fn first_position(
   pattern : String,
   text : String,
 ) -> (Int, Int)? raise ReError {
-  abort("moon-hutool 契约未实现：first_position")
+  let re = must_compile(pattern)
+  let v = text.to_string_view()
+  match re.execute(v) {
+    Some(m) => Some(match_range(m, v))
+    None => None
+  }
 }
 
 ///|
@@ -267,7 +358,13 @@ pub fn last_position(
   pattern : String,
   text : String,
 ) -> (Int, Int)? raise ReError {
-  abort("moon-hutool 契约未实现：last_position")
+  let re = must_compile(pattern)
+  let v = text.to_string_view()
+  let mut last : (Int, Int)? = None
+  for m in re.find(v) {
+    last = Some(match_range(m, v))
+  }
+  last
 }
 
 ///|
@@ -280,7 +377,11 @@ pub fn last_position(
 ///   与 Java 同，而 Java 在**空模式**上不吐首部空段、core 吐 ⇒ 那一档见 spec §5 分岔表）
 /// - Raises: `ReError.BadPattern(pattern)`
 pub fn split(pattern : String, text : String) -> Array[String] raise ReError {
-  abort("moon-hutool 契约未实现：split")
+  let out : Array[String] = []
+  for part in must_compile(pattern).split(text.to_string_view()) {
+    out.push(part.to_owned())
+  }
+  out
 }
 
 ///|
@@ -292,7 +393,15 @@ pub fn split(pattern : String, text : String) -> Array[String] raise ReError {
 /// - Returns: 删掉第一处后的内容；没命中 ⇒ 原文
 /// - Raises: `ReError.BadPattern(pattern)`
 pub fn del_first(pattern : String, text : String) -> String raise ReError {
-  abort("moon-hutool 契约未实现：del_first")
+  let re = must_compile(pattern)
+  let v = text.to_string_view()
+  match re.execute(v) {
+    None => text
+    Some(m) => {
+      let (start, end) = match_range(m, v)
+      splice(v, start, end)
+    }
+  }
 }
 
 ///|
@@ -304,7 +413,16 @@ pub fn del_first(pattern : String, text : String) -> String raise ReError {
 /// - Returns: 删掉最后一处后的内容；没命中 ⇒ 原文
 /// - Raises: `ReError.BadPattern(pattern)`
 pub fn del_last(pattern : String, text : String) -> String raise ReError {
-  abort("moon-hutool 契约未实现：del_last")
+  let re = must_compile(pattern)
+  let v = text.to_string_view()
+  let mut hole : (Int, Int)? = None
+  for m in re.find(v) {
+    hole = Some(match_range(m, v))
+  }
+  match hole {
+    None => text
+    Some((start, end)) => splice(v, start, end)
+  }
 }
 
 ///|
@@ -316,7 +434,8 @@ pub fn del_last(pattern : String, text : String) -> String raise ReError {
 /// - Returns: 全部删掉后的内容；没命中 ⇒ 原文（零宽模式同样什么都不删，实测 `x*` 于 `"abab"` ⇒ `"abab"`）
 /// - Raises: `ReError.BadPattern(pattern)`
 pub fn del_all(pattern : String, text : String) -> String raise ReError {
-  abort("moon-hutool 契约未实现：del_all")
+  // 交给引擎的"全部替换成空串"：零宽命中替换成空串等于什么都不动（实测 `x*` 于 `abab` 原样返回）
+  must_compile(pattern).replace_by(text.to_string_view(), _ => "").to_owned()
 }
 
 ///|
@@ -328,7 +447,15 @@ pub fn del_all(pattern : String, text : String) -> String raise ReError {
 /// - Returns: 从第一处匹配的**结束位置**往后的内容；没命中 ⇒ 原文
 /// - Raises: `ReError.BadPattern(pattern)`
 pub fn del_pre(pattern : String, text : String) -> String raise ReError {
-  abort("moon-hutool 契约未实现：del_pre")
+  let re = must_compile(pattern)
+  let v = text.to_string_view()
+  match re.execute(v) {
+    None => text
+    Some(m) => {
+      let (_, end) = match_range(m, v)
+      v[end:v.length()].to_owned()
+    }
+  }
 }
 
 ///|
@@ -351,7 +478,13 @@ pub fn extract_with_template(
   text : String,
   template : String,
 ) -> String? raise ReError {
-  abort("moon-hutool 契约未实现：extract_with_template")
+  let re = must_compile(pattern)
+  let (cnt, _) = scan_groups(pattern)
+  let v = text.to_string_view()
+  match re.execute(v) {
+    None => None
+    Some(m) => Some(subst_template(template, cnt, m))
+  }
 }
 
 ///|
@@ -373,7 +506,24 @@ pub fn replace_with_template(
   text : String,
   template : String,
 ) -> String raise ReError {
-  abort("moon-hutool 契约未实现：replace_with_template")
+  let re = must_compile(pattern)
+  let (cnt, _) = scan_groups(pattern)
+  let v = text.to_string_view()
+  let mut out = ""
+  let mut cursor = 0
+  let mut hit = false
+  for m in re.find(v) {
+    let (start, end) = match_range(m, v)
+    out = out + v[cursor:start].to_owned() + subst_template(template, cnt, m)
+    cursor = end
+    hit = true
+  }
+  if hit {
+    out + v[cursor:v.length()].to_owned()
+  } else {
+    // 一处都没命中 ⇒ 原文（模板里的引用也不校验：没代入就没有"引用不存在"这回事）
+    text
+  }
 }
 
 ///|
@@ -394,5 +544,258 @@ pub fn replace_by(
   text : String,
   replacer : (@string.MatchResult) -> String,
 ) -> String raise ReError {
-  abort("moon-hutool 契约未实现：replace_by")
+  // 回调返回值按字面写入：core 的 replace_by 不二次解释替换文本（实测 `$1` 留在输出里）
+  must_compile(pattern)
+  .replace_by(text.to_string_view(), m => replacer(m).to_string_view())
+  .to_owned()
+}
+
+///|
+// 本包内部件：编译并把 core 的编译异常换成带原模式串的读数（spec §0.5：core 的 ParserError 未导出）
+fn must_compile(pattern : String) -> @string.Regex raise ReError {
+  @string.Regex(pattern.to_string_view()) catch {
+    _ => raise BadPattern(pattern)
+  }
+}
+
+///|
+// 整串匹配用的锚定包装：`^(?:…)$` 不新增捕获组，所以组号与位置口径与裸模式一致；
+// 报错载荷仍报**原模式串**，不把包装串漏给调用方
+fn must_compile_whole(pattern : String) -> @string.Regex raise ReError {
+  @string.Regex(("^(?:" + pattern + ")$").to_string_view()) catch {
+    _ => raise BadPattern(pattern)
+  }
+}
+
+///|
+// hutool `ReUtil.RE_KEYS` 那 15 个字符，逐字跟随（不扩到 core 的全部元字符，也不含 `-`/`=`/空格）
+fn is_re_key(c : Char) -> Bool {
+  match c {
+    '$'
+    | '('
+    | ')'
+    | '*'
+    | '+'
+    | '.'
+    | '['
+    | ']'
+    | '?'
+    | '\\'
+    | '^'
+    | '{'
+    | '}'
+    | '|' => true
+    _ => false
+  }
+}
+
+///|
+// 扫模式串取 (捕获组数, 命名组声明序)。只在**已编译通过**的模式上调用，所以不必处理非法写法。
+// 需要它是因为 core 的 `MatchResult` 不公开组数，也不给"越界"和"没参与"的区分
+fn scan_groups(pattern : String) -> (Int, Array[String]) raise ReError {
+  let cs = pattern.to_array()
+  let n = cs.length()
+  let mut count = 0
+  let names : Array[String] = []
+  let mut in_class = false
+  let mut i = 0
+  while i < n {
+    let c = cs[i]
+    if in_class {
+      // 字符类里 ( ) 都是普通字符，只有反斜杠能转义
+      if c == '\\' {
+        i = i + 2
+      } else {
+        if c == ']' {
+          in_class = false
+        }
+        i = i + 1
+      }
+    } else if c == '\\' {
+      i = i + 2
+    } else if c == '[' {
+      in_class = true
+      i = i + 1
+    } else if c == '(' {
+      if i + 1 < n && cs[i + 1] == '?' {
+        if i + 3 < n && cs[i + 2] == '<' && cs[i + 3] != '=' && cs[i + 3] != '!' {
+          // (?<name>…：本方言唯一支持的命名写法（(?'x'…) 与 (?P<x>…) 实测编译期报错）
+          let mut j = i + 3
+          while j < n && cs[j] != '>' {
+            j = j + 1
+          }
+          let nm = String::from_array(cs[i + 3:j])
+          for e in names {
+            if e == nm {
+              // 重名：core 实测**接受**（编译通过），Java 拒绝 ⇒ 本包按参照实现那条判断自己预检
+              // （契约 #10.13 冻的是 `BadPattern`；留着两个同名组，`named_groups` 的键就只有一个能读到值）
+              raise BadPattern(pattern)
+            }
+          }
+          names.push(nm)
+          count = count + 1
+          i = j + 1
+        } else {
+          // (?:… 一类非捕获前缀：不产生组
+          i = i + 1
+        }
+      } else {
+        count = count + 1
+        i = i + 1
+      }
+    } else {
+      i = i + 1
+    }
+  }
+  (count, names)
+}
+
+///|
+// core 没给位置出口：起点取 `before()` 的长度，终点用"全长减 `after()` 长度"反推（同 §0.4 的 UTF-16 码元口径）
+fn match_range(m : @string.MatchResult, v : StringView) -> (Int, Int) {
+  let start = m.before().length()
+  (start, v.length() - m.after().length())
+}
+
+///|
+// 组值取文本：0 组是整段，1 起是括号组；没参与与越界同档给 `None`（§5 第 4 行）
+fn group_text(m : @string.MatchResult, g : Int) -> String? {
+  if g == 0 {
+    Some(m.content().to_owned())
+  } else {
+    match m.group(g) {
+      Some(v) => Some(v.to_owned())
+      None => None
+    }
+  }
+}
+
+///|
+fn splice(v : StringView, start : Int, end : Int) -> String {
+  v[0:start].to_owned() + v[end:v.length()].to_owned()
+}
+
+///|
+// 模板代入：引用按**数字位数从长到短**替换（参照实现那侧是长度降序的有序集）。
+// 同长度的引用互不为前缀，谁先谁后不影响结果；跨长度才分先后——`$1-$11` 于 12 组模式 ⇒ `a-k`
+fn subst_template(
+  template : String,
+  cnt : Int,
+  m : @string.MatchResult,
+) -> String raise ReError {
+  let vars = template_refs(template)
+  let mut out = template
+  for v in vars {
+    let idx = digits_to_int(v)
+    if idx > cnt {
+      raise BadReference("$" + v)
+    }
+    let val = match group_text(m, idx) {
+      // "存在但没参与"代入空串：参照实现在这档是崩（NPE），崩底下那层 JDK 的替换语义是空串（§5 第 12 行）
+      Some(s) => s
+      None => ""
+    }
+    out = str_replace_all(out, "$" + v, val)
+  }
+  out
+}
+
+///|
+// 取模板里所有 `$数字` 引用，去重后按位数降序
+fn template_refs(template : String) -> Array[String] {
+  let cs = template.to_array()
+  let n = cs.length()
+  let vars : Array[String] = []
+  let mut i = 0
+  while i < n {
+    if cs[i] == '$' {
+      let mut j = i + 1
+      while j < n && cs[j] >= '0' && cs[j] <= '9' {
+        j = j + 1
+      }
+      if j > i + 1 {
+        let name = String::from_array(cs[i + 1:j])
+        let mut seen = false
+        for e in vars {
+          if e == name {
+            seen = true
+          }
+        }
+        if seen == false {
+          vars.push(name)
+        }
+      }
+      i = j
+    } else {
+      i = i + 1
+    }
+  }
+  // 位数长的在前：`$1-$11` 先替 `$11` 才不会把 `$11` 拆成 `$1` + `1`。
+  // 按位数分桶挑出来，不依赖排序件的签名形状
+  let by_len : Array[String] = []
+  let mut maxlen = 1
+  for e in vars {
+    let l = e.to_array().length()
+    if l > maxlen {
+      maxlen = l
+    }
+  }
+  while maxlen >= 1 {
+    for e in vars {
+      if e.to_array().length() == maxlen {
+        by_len.push(e)
+      }
+    }
+    maxlen = maxlen - 1
+  }
+  by_len
+}
+
+///|
+fn digits_to_int(digits : String) -> Int {
+  let mut n = 0
+  for c in digits.to_array() {
+    n = n * 10 + (c.to_int() - '0'.to_int())
+  }
+  n
+}
+
+///|
+// 自己写的整串替换：core 的 `replace_all` 会把替换文本再解释一遍，而这里必须按字面落下
+// （判别夹具：模式 `([$\\])`、内容 `$\`、模板 `($1)` ⇒ `($)(\)`）
+fn str_replace_all(text : String, from : String, into : String) -> String {
+  let src = text.to_array()
+  let pat = from.to_array()
+  let plen = pat.length()
+  if plen == 0 {
+    text
+  } else {
+    let out : Array[Char] = []
+    let mut i = 0
+    while i < src.length() {
+      if i + plen <= src.length() && starts_at(src, i, pat) {
+        for c in into.to_array() {
+          out.push(c)
+        }
+        i = i + plen
+      } else {
+        out.push(src[i])
+        i = i + 1
+      }
+    }
+    String::from_array(out)
+  }
+}
+
+///|
+fn starts_at(src : Array[Char], at : Int, pat : Array[Char]) -> Bool {
+  let mut ok = true
+  let mut i = 0
+  while i < pat.length() && ok {
+    if src[at + i] != pat[i] {
+      ok = false
+    }
+    i = i + 1
+  }
+  ok
 }
