@@ -528,3 +528,28 @@ core 数值语义侧（全部当场实测，三档 `wasm`/`js`/`wasm-gc` 读数�
   写进 spec 当**待补强**，不写成覆盖完备。
 - **措辞换代要复跑判据而不是背串**：`NOT_DONE` 匹配的是整串（`实现未开工`／`预期全红`／`预期红`／
   ``函数体是 `abort` ``／``函数体 `abort` ``），改写完跑一遍 `python scripts/sync_status.py --check` 才算数。
+
+## cache 契约轮（10-05）：对位类名要现读，挂起可以是读数，编译器裁决再来三条
+
+- **计划里写的对位类名，立约前逐个 `unzip -l | grep` 过一遍**。`cache` 那行原写
+  `CacheUtil / SimpleCache（LRU / LFU / TTL）`，实测三处不符：`cn/hutool/cache` 在 hutool-core 的 jar 里 **0 条**（件在
+  hutool-cache 这个 artifact），`SimpleCache` 反倒**在 core** 的 `cn/hutool/core/lang/`，而 `MRUCache`/`SoftCache`/`FCFSCache`
+  在 5.8.35 **根本不存在**（4.x 旧件）。"不存在"也是结论，要写进 spec 的来源节。
+- **一个说不清的挂起，先把它变成可打印的读数再决定怎么办**。`CacheUtil.newTimedCache(100, 50)` 之后 JVM 不退出、
+  工装跑到超时；把 `Thread.getAllStackTraces()` 里的非守护线程名打出来，就拿到 `Pure-Timer-1`——
+  这条正好是"`schedulePrune`/`GlobalPruneTimer` 不进契约"的证据（守护线程语义不是缓存语义）。
+- **本版编译器的三条泛型/枚举形状裁决**（都别靠记忆）：① `pub struct Cache[K : Hash + Eq, V]` **解析错**——
+  泛型约束只能写在 `fn` 上；② 约束写在 fn 上而体子是 `abort` ⇒ 逐件 `unused_trait_bound` 警告 ⇒
+  骨架豁免要带上这一类，落地那一笔按 G12 撤掉；③ 调用点**不支持** `f[T]` 显式类型实参（会连外层函数的参数个数一起算花），
+  类型靠 `let x : T[K, V] = …` 的注解；`pub enum` 的构造子跨包不可构造（`Cannot create values of the read-only type`），
+  与"黑盒构造记录要 `pub(all)`"是同一条机制——枚举写作 `pub(all) enum`。
+- **别为了断言去 `derive`**：`assert_eq` 比数组要求元素同时有 `Eq` 与 `Debug`，而本仓 `date/extends.mbt` 已写明
+  `derive(Eq, …)` 带来的 `implicit_impl_as_method` 提升是废弃路径（零警告是门禁）。改把记录**归化成字符串数组**再比
+  （本轮是 `键=访问数:ttl`），顺带让参照腿的计数形状原样出现在断言里。
+- **计时依赖只留在参照腿，用例一律换成显式传进来的 `now`**。参照侧造过期只能 `Thread.sleep`；本库把时钟做成参数之后，
+  `ttl > 0 && now - last_access > ttl` 这条判据用 `1100`/`1101` 两个整数就把**相等边界**钉死了，还顺手拿到一条读源码才看见的
+  反直觉结论：`ttl <= 0`（**含负数**）是"永不过期"，不是"立即过期"（读数 `fifo.neg_ttl_alive|1`）。
+- **参照实现自相矛盾时，取可推导那一侧，但两侧读数都要落盘**。本轮两处：`capacity == 0` 在
+  `AbstractCache.isFull` 眼里是"不限"（实测 `fifo.cap0_size|5`），在 `FixedLinkedHashMap.removeEldestEntry` 眼里是
+  "放进即淘汰"（实测 `lru.cap0_size|0` + 一次回调）；`NoCache.size()==0` 却 `isEmpty()==false`、`cacheObjIterator()` 返回 null。
+  本库统一成"`0` = 不限容量"、"`is_empty` 恒等于 `size() == 0`"、空数组代 null，四条分岔连同读数记在 spec §5。
