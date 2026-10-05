@@ -60,6 +60,15 @@
 待 §3 的读数核对后逐条写（哪些跟随、哪些因形状不可产出而分岔，两侧读数都要在）。已定的一条：
 `toSegment` / `Segment` 面不收（迭代器形状与"零依赖、可序列化"的包定位不符，分页算式一侧已由 23.8–23.12 覆盖）。
 
+3. **（10-06 追加，PR-B 开工前必须先修的契约缺陷）#23.13 `page_rainbow`（两参档）的冻结期望串来源错档**：
+   腿的 `pprobe` 里那一行实际调的是**三参** `rainbow(page, size, 5)`，而参照的两参重载是
+   `rainbow(currentPage, pageCount)` = **`rainbow(current, total, 10)`**（`PageUtil.java` 现读，注释也写着"默认展示 10 页"）
+   ——所以 `P*.rainbow` 那 11 条期望钉的是 displayCount=5 的行为，不是 #23.13 承诺的档；
+   骨架里"`page_rainbow` 展示数固定 5"的注释同样错。修法：腿补跑两参档（`rainbow(page,size)`）→
+   用新读数替换这 11 条期望并改注释，再进 PR-B；在替换前 #23.13 不算已冻结的契约，别照它实现。
+   顺带记两条参照事实：`rainbow` 的 `displayCount` 为偶数时 `right++`（左右不对称）、`totalPage < displayCount` 时长度取 `totalPage`；
+   `getEnd = getStart + (pageSize < 1 ? 0 : pageSize)`；`totalPage(long,int)` 用 `Math.toIntExact` ⇒ 超 int 会抛（腿未跑到那一档）。
+
 ## 6. 变异对照（PR-B 填读数）
 
 计划：分隔符只认点号、非数字段按大小写敏感比、`totalPage` 不向上取整、`getEnd` 少 1、
