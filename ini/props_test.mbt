@@ -48,14 +48,6 @@ fn pesc(s : String) -> String {
 }
 
 ///|
-fn pesc_opt(s : String?) -> String {
-  match s {
-    None => "<null>"
-    Some(v) => pesc(v)
-  }
-}
-
-///|
 fn pjoin(a : Array[String], sep : String) -> String {
   let mut out = ""
   let mut first = true
@@ -100,15 +92,6 @@ fn parse_tag(text : String) -> String {
   } catch {
     e => "ERR:" + ptag(e)
   }
-}
-
-///|
-fn pesc_keys(a : Array[String]) -> Array[String] {
-  let r : Array[String] = []
-  for x in a {
-    r.push(pesc(x))
-  }
-  r
 }
 
 ///|
@@ -215,8 +198,8 @@ test "props 解析：转义表与被转义的分隔符归进键名" {
 
   let pp_key_escaped_tab = @ini.props_parse("a\\tb=1\n")
   assert_eq(@ini.props_size(pp_key_escaped_tab), 1) // p.key_escaped_tab.size|1
-  assert_eq(get_or_tag(pp_key_escaped_tab, "a\\tb"), "1") // p.key_escaped_tab.content|a\tb=1
-  assert_eq(@ini.props_has_key(pp_key_escaped_tab, "a\\tb"), true) // p.key_escaped_tab.has|a\tb
+  assert_eq(get_or_tag(pp_key_escaped_tab, "a\tb"), "1") // p.key_escaped_tab.content|a\tb=1
+  assert_eq(@ini.props_has_key(pp_key_escaped_tab, "a\tb"), true) // p.key_escaped_tab.has|a\tb
   assert_eq(ordered_str(pp_key_escaped_tab), "a\\tb=1") // p.key_escaped_tab.ordered|a\tb=1
   assert_eq(pesc(@ini.props_store(pp_key_escaped_tab)), "a\\\\tb=1\\n") // p.key_escaped_tab.store|a\\tb=1\n
 
@@ -411,7 +394,7 @@ test "props 写侧：set 返回旧值、remove 返回被删值、getProperty 两
 }
 
 ///|
-test "props 畸形 u  的 raise 档（整条 load 失败，不留半表）" {
+test "props 畸形 u 的 raise 档（整条 load 失败，不留半表）" {
   assert_eq(parse_tag("a=\\u0041\\uZZ\n"), "ERR:BadUnicodeEscape") // p.bad_u_after_ok.err|java.lang.IllegalArgumentException:Malformed \\uxxxx encoding.
   assert_eq(@ini.props_size(@ini.props_new()), 0) // p.bad_u_after_ok.empty_seed|0
   assert_eq(parse_tag("a=\\u00zz\n"), "ERR:BadUnicodeEscape") // p.bad_u_hex.err|java.lang.IllegalArgumentException:Malformed \\uxxxx encoding.

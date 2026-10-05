@@ -1,6 +1,5 @@
 // 契约骨架期：体全是 abort ⇒ 错误变体没人构造、raise 没人抛、结构体字段没人读，那三类警告是"未实现"的机械后果，
 // 按 G12 压掉（键只能出现一次、flag 连写不带空格/逗号）；落地笔整行删除。
-warnings = "-unused_value-struct_never_constructed-unused_constructor-unused_error_type-unused_trait_bound-unused_field"
 
 import {
   "mldong/moon-hutool/ini",

@@ -749,29 +749,256 @@ pub fn ini_store_with_opts(gm : GroupedMap, opts : IniParseOpts) -> String {
 }
 
 ///|
+
+///|
+
+///|
+
+///|
+
+///|
 // —— 第二批：`Props` 的 java.util.Properties 严格语义（`#22.26` 起，权威参照是 JDK 不是 hutool）——
 // 参照 `cn.hutool.setting.dialect.Props` 的解析全部转手 `super.load(reader)`，所以这一半的真相在
-// `java.util.Properties`（本机 JDK 17.0.14 现读）；与第一批的 INI 面**同名不同语义**：
-// 分隔符是 `=`/`:`/空白三档、裸键给空值、注释符 `#` 与 `!` 两个、反斜杠参与语法（续行 + `\t\n\f\r\\` + `\uXXXX`）、
-// 空白表是 JDK 的 `Character.isWhitespace` 族而不是 §3-1 的 34 位表（`00a0`/`3000` 在这里原样保留）。
-// 两批共用一个包但**不共用任何函数**：容器不同（`Props` 是扁平有序表，`GroupedMap` 带分组与陈旧缓存）、
-// trim 不同、行形状不同。
+// `java.util.Properties`（本机 JDK 17.0.14，`java.base/java/util/Properties.java` 的
+// `load0` / `LineReader.readLine` / `loadConvert` / `saveConvert` 四段原文已就地读出照抄语义）。
+// 与第一批的 INI 面**同名不同语义**：分隔符是 `=`/`:`/空格三档、裸键给空值、注释符 `#` 与 `!` 两个、
+// 反斜杠参与语法（续行 + `\t\n\f\r\\` + `\uXXXX`）、"空白"只认 `' '`/`'\t'`/`'\f'` 三个
+// （`00a0`/`3000` 在这里原样保留，与 §3-1 的 34 位表逐字符相反）。
 
 ///|
 /// #22.26 解析错误面。参照唯一实测可复现的失败：畸形的 `\uXXXX`（长度不足或含非十六进制字符）⇒
-/// `java.lang.IllegalArgumentException: Malformed \uxxxx encoding.`（腿 4 条 ERR 读数全在这一族）。
-/// 本库只映射"哪一档"，不复制 Java 文案；不携带位置（参照的异常文案里也没有位置信息）。
+/// `java.lang.IllegalArgumentException: Malformed \uxxxx encoding.`（腿 4 条 `ERR` 读数全在这一族）。
+/// 本库只映射"哪一档"，不复制文案、不带位置；一行里先解出合法 `\u0041` 再撞畸形 ⇒ 整条 load 失败（不留半表）。
 pub suberror PropsError {
   BadUnicodeEscape
 }
 
 ///|
-/// #22.27 扁平属性表。对位 `java.util.Properties`（本质是 `Hashtable<Object,Object>`，
-/// 但 `load`/`setProperty` 只写 String，且 null 键或 null 值直接 `NullPointerException` ⇒ 本库两侧都收非空 `String`）。
-/// 参照无序，本库把顺序定成"首次出现位置"（后写覆盖值不改位置）——这条是本库自定，声明在 spec §8 第 8 条。
+/// #22.27 扁平属性表。对位 `java.util.Properties`（`Hashtable`，但 `load`/`setProperty` 只写 String，
+/// null 键或 null 值直接 `NullPointerException` ⇒ 本库两侧都收非空 `String`）。
+/// 参照无序，本库把顺序定成"首次出现位置"（后写覆盖值不改位置）——这条是本库自定，声明在 spec §9.1 第 2 条。
 pub struct Props {
-  priv order : Array[String]
-  priv values : Array[String]
+  priv mut order : Array[String]
+  priv mut values : Array[String]
+}
+
+///|
+// `LineReader` 认的三个空白（不是 `Character.isWhitespace`，也不是第一批的 34 位表）
+fn is_ws3(cp : Int) -> Bool {
+  cp == 0x20 || cp == 0x09 || cp == 0x0c
+}
+
+///|
+// `\r\n` 算一个终止符
+fn eol_len(cs : Array[Char], i : Int, n : Int) -> Int {
+  if cs[i].to_int() == 0x0d && i + 1 < n && cs[i + 1].to_int() == 0x0a {
+    2
+  } else {
+    1
+  }
+}
+
+///|
+// 参照 `LineReader.readLine` 的单趟扫描：行首空白吸收 → 注释整行吞（注释行尾的反斜杠不续行）→
+// 自然行尾若是奇数个反斜杠则去掉该反斜杠接下一自然行（`skipWhiteSpace` 重新打开）。
+// EOF 收尾按参照的 `precedingBackslash ? len - 1 : len`。
+fn logical_lines(text : String) -> Array[String] {
+  let cs = text.to_array()
+  let n = cs.length()
+  let out : Array[String] = []
+  let mut buf : Array[Char] = []
+  let mut skip_ws = true
+  let mut appended_begin = false
+  let mut preceding_bs = false
+  let mut in_comment = false
+  let mut i = 0
+  while i < n {
+    let c = cs[i].to_int()
+    if in_comment {
+      if c == 0x0a || c == 0x0d {
+        in_comment = false
+        skip_ws = true
+      }
+      i = i + eol_len(cs, i, n)
+      continue
+    }
+    if skip_ws {
+      if is_ws3(c) {
+        i += 1
+        continue
+      }
+      if !appended_begin && (c == 0x0a || c == 0x0d) {
+        i = i + eol_len(cs, i, n)
+        continue
+      }
+      skip_ws = false
+      appended_begin = false
+    }
+    if buf.length() == 0 && (c == 0x23 || c == 0x21) {
+      in_comment = true
+      i += 1
+      continue
+    }
+    if c == 0x0a || c == 0x0d {
+      if buf.length() == 0 {
+        skip_ws = true
+        i = i + eol_len(cs, i, n)
+        continue
+      }
+      if preceding_bs {
+        buf = String::from_array(buf[0:buf.length() - 1]).to_array()
+        preceding_bs = false
+        skip_ws = true
+        appended_begin = true
+        i = i + eol_len(cs, i, n)
+        continue
+      }
+      out.push(String::from_array(buf))
+      buf = []
+      preceding_bs = false
+      skip_ws = true
+      appended_begin = false
+      i = i + eol_len(cs, i, n)
+      continue
+    }
+    buf.push(cs[i])
+    preceding_bs = if c == 0x5c { !preceding_bs } else { false }
+    i += 1
+  }
+  if buf.length() > 0 {
+    if preceding_bs {
+      out.push(String::from_array(buf[0:buf.length() - 1]))
+    } else {
+      out.push(String::from_array(buf))
+    }
+  }
+  out
+}
+
+///|
+fn is_hex(cp : Int) -> Bool {
+  (cp >= 0x30 && cp <= 0x39) ||
+  (cp >= 0x61 && cp <= 0x66) ||
+  (cp >= 0x41 && cp <= 0x46)
+}
+
+///|
+fn hex_val(cp : Int) -> Int {
+  if cp >= 0x30 && cp <= 0x39 {
+    cp - 0x30
+  } else if cp >= 0x61 && cp <= 0x66 {
+    cp - 0x61 + 10
+  } else {
+    cp - 0x41 + 10
+  }
+}
+
+///|
+fn ff_char() -> Char {
+  let v : Int = 12
+  v.unsafe_to_char()
+}
+
+///|
+// 参照 `loadConvert`：`\t\n\f\r` 各还原、`uXXXX` 解码（畸形 ⇒ raise）、其余转义直接取下一字符
+fn load_convert(seg : String) -> Result[String, PropsError] {
+  let cs = seg.to_array()
+  let n = cs.length()
+  let out : Array[Char] = []
+  let mut i = 0
+  while i < n {
+    let c = cs[i].to_int()
+    if c != 0x5c {
+      out.push(cs[i])
+      i += 1
+    } else if i + 1 >= n {
+      out.push(cs[i])
+      i += 1
+    } else {
+      let d = cs[i + 1].to_int()
+      if d == 0x74 {
+        out.push('\t')
+        i += 2
+      } else if d == 0x6e {
+        out.push('\n')
+        i += 2
+      } else if d == 0x66 {
+        out.push(ff_char())
+        i += 2
+      } else if d == 0x72 {
+        out.push('\r')
+        i += 2
+      } else if d == 0x5c {
+        out.push('\\')
+        i += 2
+      } else if d == 0x75 {
+        if i + 6 > n {
+          return Err(BadUnicodeEscape)
+        }
+        let mut v = 0
+        let mut q = i + 2
+        let mut bad = false
+        while q < i + 6 {
+          if !is_hex(cs[q].to_int()) {
+            bad = true
+            q = i + 6
+          } else {
+            v = v * 16 + hex_val(cs[q].to_int())
+            q += 1
+          }
+        }
+        if bad {
+          return Err(BadUnicodeEscape)
+        }
+        out.push(v.unsafe_to_char())
+        i += 6
+      } else {
+        out.push(cs[i + 1])
+        i += 2
+      }
+    }
+  }
+  Ok(String::from_array(out))
+}
+
+///|
+// 参照 `load0` 的两段循环：键扫到第一个未转义的 `=`/`:`/空白，再从 valueStart 吸收空白并认分隔符
+fn split_kv(line : String) -> (String, String) {
+  let cs = line.to_array()
+  let n = cs.length()
+  let mut key_len = 0
+  let mut value_start = n
+  let mut has_sep = false
+  let mut preceding_bs = false
+  let mut found = false
+  while key_len < n && !found {
+    let c = cs[key_len].to_int()
+    if (c == 0x3d || c == 0x3a) && !preceding_bs {
+      value_start = key_len + 1
+      has_sep = true
+      found = true
+    } else if is_ws3(c) && !preceding_bs {
+      value_start = key_len + 1
+      found = true
+    } else {
+      preceding_bs = if c == 0x5c { !preceding_bs } else { false }
+      key_len += 1
+    }
+  }
+  let mut vs = value_start
+  let mut stop = false
+  while vs < n && !stop {
+    let c = cs[vs].to_int()
+    if is_ws3(c) {
+      vs += 1
+    } else if !has_sep && (c == 0x3d || c == 0x3a) {
+      has_sep = true
+      vs += 1
+    } else {
+      stop = true
+    }
+  }
+  (String::from_array(cs[0:key_len]), String::from_array(cs[vs:n]))
 }
 
 ///|
@@ -779,43 +1006,90 @@ pub struct Props {
 /// - Raises: 无
 /// - Note: hutool 对位 `Props.create()`（转手 `new Properties()` 的形状）
 pub fn props_new() -> Props {
-  abort("moon-hutool PR-B：契约骨架，见 docs/spec/22-ini.md #22.28")
+  Props::{ order: [], values: [], }
+}
+
+///|
+fn find_pair(p : Props, key : String) -> Int {
+  let n = p.order.length()
+  let mut i = 0
+  let mut hit = -1
+  while i < n {
+    if p.order[i] == key {
+      hit = i
+      i = n
+    } else {
+      i += 1
+    }
+  }
+  hit
+}
+
+///|
+fn put_pair(p : Props, key : String, value : String) -> String? {
+  let hit = find_pair(p, key)
+  if hit < 0 {
+    p.order.push(key)
+    p.values.push(value)
+    None
+  } else {
+    let old = p.values[hit]
+    p.values[hit] = value
+    Some(old)
+  }
 }
 
 ///|
 /// #22.29 严格按 `java.util.Properties.load` 解析
 /// - Raises: `PropsError::BadUnicodeEscape`——畸形 `\u` 序列（参照在这一档抛 `IllegalArgumentException`）
-/// - Note: hutool 对位 `Props` 转手的 `super.load(reader)`；分隔符三档、裸键空值、`#`/`!` 注释、
-///   行尾 `\` 续行（注释行也一样续行，会把下一行整行吞掉）
+/// - Note: hutool 对位 `Props` 转手的 `super.load(reader)`
 pub fn props_parse(text : String) -> Props raise PropsError {
-  abort("moon-hutool PR-B：契约骨架，见 docs/spec/22-ini.md #22.29")
+  let p = props_new()
+  for line in logical_lines(text) {
+    let kv = split_kv(line)
+    let key = match load_convert(kv.0) {
+      Ok(v) => v
+      Err(e) => raise e
+    }
+    let value = match load_convert(kv.1) {
+      Ok(v) => v
+      Err(e) => raise e
+    }
+    let _ = put_pair(p, key, value)
+  }
+  p
 }
 
 ///|
 /// #22.30 取值
 /// - Raises: 无
-/// - Note: hutool 对位 `Properties.getProperty(String)`（键不存在给 `None`）
+/// - Note: hutool 对位 `Properties.getProperty(String)`
 pub fn props_get(p : Props, key : String) -> String? {
-  abort("moon-hutool PR-B：契约骨架，见 docs/spec/22-ini.md #22.30")
+  let i = find_pair(p, key)
+  if i < 0 {
+    None
+  } else {
+    Some(p.values[i])
+  }
 }
 
 ///|
 /// #22.31 取值带缺省
-/// - Returns: 键不存在（或值为 `null`，参照的 `Properties` 存不了 `null`）时给 `default`
 /// - Raises: 无
 /// - Note: hutool 对位 `Properties.getProperty(String key, String defaultValue)`
 pub fn props_get_or(p : Props, key : String, default : String) -> String {
-  abort("moon-hutool PR-B：契约骨架，见 docs/spec/22-ini.md #22.31")
+  match props_get(p, key) {
+    None => default
+    Some(v) => v
+  }
 }
 
 ///|
 /// #22.32 写一条，返回旧值
-/// - Returns: 该键旧值；首次写入给 `None`
 /// - Raises: 无
 /// - Note: hutool 对位 `Object setProperty(String key, String value)` 的返回值
-///   （参照另有一条 `put(k, null)` ⇒ `NullPointerException` 的档，本库类型层面排除，见 spec §8 第 11 条）
 pub fn props_set(p : Props, key : String, value : String) -> String? {
-  abort("moon-hutool PR-B：契约骨架，见 docs/spec/22-ini.md #22.32")
+  put_pair(p, key, value)
 }
 
 ///|
@@ -823,7 +1097,26 @@ pub fn props_set(p : Props, key : String, value : String) -> String? {
 /// - Raises: 无
 /// - Note: hutool 对位 `Object remove(Object key)`
 pub fn props_remove(p : Props, key : String) -> String? {
-  abort("moon-hutool PR-B：契约骨架，见 docs/spec/22-ini.md #22.33")
+  let i = find_pair(p, key)
+  if i < 0 {
+    None
+  } else {
+    let old = p.values[i]
+    let no : Array[String] = []
+    let nv : Array[String] = []
+    let n = p.order.length()
+    let mut q = 0
+    while q < n {
+      if q != i {
+        no.push(p.order[q])
+        nv.push(p.values[q])
+      }
+      q += 1
+    }
+    p.order = no
+    p.values = nv
+    Some(old)
+  }
 }
 
 ///|
@@ -831,15 +1124,15 @@ pub fn props_remove(p : Props, key : String) -> String? {
 /// - Raises: 无
 /// - Note: hutool 对位 `boolean containsKey(Object key)`
 pub fn props_has_key(p : Props, key : String) -> Bool {
-  abort("moon-hutool PR-B：契约骨架，见 docs/spec/22-ini.md #22.34")
+  find_pair(p, key) >= 0
 }
 
 ///|
 /// #22.35 条数
 /// - Raises: 无
-/// - Note: hutool 对位 `int size()`（参照无缓存，本库也无——与第一批 `grouped_map_size` 的陈旧档不同）
+/// - Note: hutool 对位 `int size()`（参照无缓存，本库也无）
 pub fn props_size(p : Props) -> Int {
-  abort("moon-hutool PR-B：契约骨架，见 docs/spec/22-ini.md #22.35")
+  p.order.length()
 }
 
 ///|
@@ -847,15 +1140,15 @@ pub fn props_size(p : Props) -> Int {
 /// - Raises: 无
 /// - Note: hutool 对位 `boolean isEmpty()`
 pub fn props_is_empty(p : Props) -> Bool {
-  abort("moon-hutool PR-B：契约骨架，见 docs/spec/22-ini.md #22.36")
+  p.order.length() == 0
 }
 
 ///|
 /// #22.37 键列表（本库自定的首次出现序）
 /// - Raises: 无
-/// - Note: hutool 对位 `Set<String> stringPropertyNames()`（参照无序，故对账用排序集，见 spec §8 第 8 条）
+/// - Note: hutool 对位 `Set<String> stringPropertyNames()`（参照无序）
 pub fn props_keys(p : Props) -> Array[String] {
-  abort("moon-hutool PR-B：契约骨架，见 docs/spec/22-ini.md #22.37")
+  p.order.copy()
 }
 
 ///|
@@ -863,7 +1156,7 @@ pub fn props_keys(p : Props) -> Array[String] {
 /// - Raises: 无
 /// - Note: hutool 对位 `Collection<Object> values()` 的 String 档
 pub fn props_values(p : Props) -> Array[String] {
-  abort("moon-hutool PR-B：契约骨架，见 docs/spec/22-ini.md #22.38")
+  p.values.copy()
 }
 
 ///|
@@ -871,16 +1164,82 @@ pub fn props_values(p : Props) -> Array[String] {
 /// - Raises: 无
 /// - Note: hutool 对位 `entrySet()` 的 String 档
 pub fn props_entries(p : Props) -> Array[(String, String)] {
-  abort("moon-hutool PR-B：契约骨架，见 docs/spec/22-ini.md #22.39")
+  let out : Array[(String, String)] = []
+  let mut i = 0
+  while i < p.order.length() {
+    out.push((p.order[i], p.values[i]))
+    i += 1
+  }
+  out
+}
+
+///|
+// 参照 JDK 17 `saveConvert`：`62 < ch < 127` 原样、`\` 出两写、空格只在串首或键侧加反斜杠、
+// `\t\n\r\f` 出字母转义、`=` `:` `#` `!` 四个字符键侧与值侧都加反斜杠、
+// 其余一律原样（`escapeUnicode = false` ⇒ 中文与 BMP 外字符不写 `\uXXXX`——
+// 腿的 `p.value_unicode_esc.store` 与 `p.value_astral.store` 就是这一条的判据）
+fn bs_char() -> Char {
+  let v : Int = 92
+  v.unsafe_to_char()
+}
+
+///|
+fn save_convert(s : String, is_key : Bool) -> String {
+  let bs = bs_char()
+  let cs = s.to_array()
+  let n = cs.length()
+  let out : Array[Char] = []
+  let mut x = 0
+  while x < n {
+    let cp = cs[x].to_int()
+    if cp == 0x5c {
+      out.push(bs)
+      out.push(bs)
+    } else if cp > 61 && cp < 127 {
+      out.push(cs[x])
+    } else if cp == 0x20 {
+      if x == 0 || is_key {
+        out.push(bs)
+      }
+      out.push(' ')
+    } else if cp == 0x09 {
+      out.push(bs)
+      out.push('t')
+    } else if cp == 0x0a {
+      out.push(bs)
+      out.push('n')
+    } else if cp == 0x0c {
+      out.push(bs)
+      out.push('f')
+    } else if cp == 0x0d {
+      out.push(bs)
+      out.push('r')
+    } else if cp == 0x3d || cp == 0x3a || cp == 0x23 || cp == 0x21 {
+      out.push(bs)
+      out.push(cs[x])
+    } else {
+      out.push(cs[x])
+    }
+    x += 1
+  }
+  String::from_array(out)
 }
 
 ///|
 /// #22.40 序列化成 `.properties` 文本
-/// - Returns: 每条形如 `键=值`，键侧空格写 `\ `、值侧只有**首个**空格写 `\ `；
-///   `\t`/`\n`/`\r`/`\f`/`\\` 与非 Latin-1 字符（含 BMP 外，逐 UTF-16 码元出 `\uXXXX`）都转义；
-///   **不出参照首行的时间戳注释**（宿主状态），行分隔符固定 `\n`（参照是平台量，本机现读 `\r\n`）
+/// - Returns: 每条 `键=值` 一行、行分隔符 `\n`、末尾也带换行；不出参照首行的时间戳注释（宿主状态）
 /// - Raises: 无
-/// - Note: hutool 对位 `Properties.store(Writer, null)` 去掉注释头那一档
+/// - Note: hutool 对位 `Properties.store(Writer, null)` 去掉注释头那一档；写出序是本库的首次出现序（参照无序）
 pub fn props_store(p : Props) -> String {
-  abort("moon-hutool PR-B：契约骨架，见 docs/spec/22-ini.md #22.40")
+  let mut out = ""
+  let mut i = 0
+  while i < p.order.length() {
+    out = out +
+      save_convert(p.order[i], true) +
+      "=" +
+      save_convert(p.values[i], false) +
+      "\n"
+    i += 1
+  }
+  out
 }
