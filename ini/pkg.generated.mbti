@@ -2,10 +2,61 @@
 package "mldong/moon-hutool/ini"
 
 // Values
+pub fn grouped_map_clear_group(GroupedMap, String?) -> Unit
+
+pub fn grouped_map_contains_key(GroupedMap, String?, String) -> Bool
+
+pub fn grouped_map_contains_value(GroupedMap, String?, String?) -> Bool
+
+pub fn grouped_map_entries(GroupedMap, String?) -> Array[(String, String?)]
+
+pub fn grouped_map_flatten(GroupedMap) -> Array[(String, String?)]
+
+pub fn grouped_map_get(GroupedMap, String?, String) -> String?
+
+pub fn grouped_map_groups(GroupedMap) -> Array[String]
+
+pub fn grouped_map_is_empty(GroupedMap) -> Bool
+
+pub fn grouped_map_is_group_empty(GroupedMap, String?) -> Bool
+
+pub fn grouped_map_keys(GroupedMap, String?) -> Array[String]
+
+pub fn grouped_map_new() -> GroupedMap
+
+pub fn grouped_map_put(GroupedMap, String?, String, String?) -> String?
+
+pub fn grouped_map_put_all(GroupedMap, String?, Array[(String, String?)]) -> Unit
+
+pub fn grouped_map_remove(GroupedMap, String?, String) -> String?
+
+pub fn grouped_map_size(GroupedMap) -> Int
+
+pub fn grouped_map_values(GroupedMap, String?) -> Array[String?]
+
+pub fn ini_default_parse_opts() -> IniParseOpts
+
+pub fn ini_get_str(GroupedMap, String, String?, String?) -> String?
+
+pub fn ini_get_str_not_empty(GroupedMap, String, String?, String?) -> String?
+
+pub fn ini_parse(String) -> GroupedMap
+
+pub fn ini_parse_with_opts(String, IniParseOpts) -> GroupedMap
+
+pub fn ini_store(GroupedMap) -> String
 
 // Errors
 
 // Types and methods
+pub struct GroupedMap {
+  // private fields
+}
+
+pub(all) struct IniParseOpts {
+  use_variable : Bool
+  assign_flag : Char
+}
 
 // Type aliases
 

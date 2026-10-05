@@ -715,3 +715,24 @@ core 数值语义侧（全部当场实测，三档 `wasm`/`js`/`wasm-gc` 读数�
   默认 `skipEmptyRows=true` 但**行号照推**、注释符只在行首生效、引号必须整包裹才剥（`a"b`、`"a"x` 原样留引号）、
   引号内两写 `""` 只出一个 `"`、字段只剥首尾 CR/LF 不剥空白、null 默认写空串而 `always_delimit_text` 下写 `""`、
   **5.8.35 的写方法名是 `writeLine`，没有 `writeRow`**（那是 hutool 6 的命名，照 6 的 API 写契约会整面错）。
+
+## ini（第 22 行）第一批 PR-A 的六则（10-06）
+
+- **本格要另拉 artifact，且腿的类初始化依赖藏在另一个件里**：`unzip -l hutool-core.jar | grep -ciE "props|grouped"` 现读
+  **0**——`Props`/`GroupedMap`/`SettingLoader` 全在 `hutool-setting`；而 `SettingLoader` 有
+  `private static final Log log = Log.get()`，缺 `hutool-log` 时是 `ExceptionInInitializerError`，第一次跑出 60 行"读数"
+  全是 `ERR` 行（**若把 `ERR` 当数据读，就会冻结一批错误期望值**）。跑腿之后先 `grep -c ERR` 再往下走。
+- **语义表的权威是逐位扫出来的，不是抄 Java 规范**：hutool 的空白判定比 `Character.isWhitespace` 宽——对 BMP 全量扫
+  `trim(c+"x"+c)` 与 `isBlank(c)` 两档，得到 34 位表（多 `00`/`a0`/`180e`/`202a`/`2800`/`3164`/`feff`，不含 `0085`、
+  不含 `200b-200f`）。`i.bom_line` 就是这条的可见后果：BOM 开头的行键名是干净的。
+- **两条"参照的形状不是笔误"**：`size()` 的缓存在 `remove`/`clear` 时**不失效**（先读后删 ⇒ 读数停在旧值，`is_empty`
+  跟着错），双参 `get` **不剥组名**而其余方法剥（`put(" x ")` 后 `get(" x ")` 读不到）。都照搬，spec §5 两侧读数都写。
+- **平台量与宿主状态都不许进契约**：`store` 走 `PrintWriter.println` ⇒ 分隔符是平台量（本机腿现读 `\r\n`），本库写死
+  `\n`，期望值由脚本做"整串切 `\r\n` 再拼 `\n`"的机械变换，值尾带 CR 紧贴分隔符的夹具就地标注为不可对拍；
+  变量替换的最后一档查系统属性（腿给 `${java.version}` ⇒ `17.0.14`）是**这台机器的 JDK 版本**，写进契约就换台机器必红
+  ⇒ 该夹具直接从表里摘掉，只在 spec §5 记分岔。
+- **本版编译器另三则**：记录构造是 `Type::{ field: value }`——`Type({...})` 判"没有自定义构造器"、`Type{...}` 直接语法错；
+  `Array.map(x -> ...)` 的箭头写法不接（`Parse error, unexpected token ->`）⇒ 测试里的形状渲染全走显式 `for` 循环；
+  骨架期 `priv` 字段必然"没人读"⇒ G12 豁免串本轮起要多带一个 `-unused_field`。
+- **G12 的判据取的是 `abort("moon-hutool` 这个字面串**（不是"用例红没红"）：骨架体的 abort 文案必须带这个前缀，
+  否则 G12 判"实现已落地却还压着骨架豁免"。本轮第一次跑 gate 就栽在这条上。

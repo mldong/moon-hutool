@@ -1,0 +1,178 @@
+# 22 · ini —— INI 分组文本的读与写 + `GroupedMap`
+
+对位 hutool：`cn.hutool.setting.GroupedMap`、`cn.hutool.setting.SettingLoader`（逐行解析主体 + `private store(PrintWriter)`）、
+`cn.hutool.setting.Setting` 的分组读取面（`getByGroup` / `getStr(key, group, default)` / `getStrNotEmpty` / `toProperties` / `getGroups`）、
+`cn.hutool.setting.dialect.Props` 的**非 IO** 部分。参照版本 5.8.35。
+
+## 1. 边界
+
+**件在 hutool-setting，不在 core**：`unzip -l hutool-core.jar | grep -ciE "props|grouped"` 现读 **0**
+（core 的 `cn/hutool/core/map/` 里只有 `BiMap`/`TableMap`/`ForestMap` 等，没有 `GroupedMap`；`cn/hutool/core/util/` 只有
+`SystemPropsUtil`）。本格因此**另拉 artifact**（与 `dfa`/`cache`/`bloom`/`cron` 同性质，与 `hash`/`csv` 相反）：
+`hutool-setting-5.8.35.jar` 现读 `cn/hutool/setting/GroupedMap.class` + `dialect/Props.class` + `SettingLoader.class` 三件齐；
+运行期还要 `hutool-log-5.8.35.jar`——`SettingLoader` 的 `private static final Log log = Log.get()` 是类初始化依赖，
+缺它腿直接 `NoClassDefFoundError`（本轮实踩，第一次跑出的 60 条"读数"全是 `ERR` 行）。
+
+**零 IO**：参照 `Props` 的 12 个构造重载 + `getProp` 三档 + `load(URL|Resource|File|String path)`、`Setting` 的
+`SettingUtil`/`SettingLoader(Resource)`、`autoLoad(boolean)`（`WatchMonitor` 文件监听）、`store(String|File)` 全部不收；
+`toBean`/`fillBean`/`getAndRemoveStr` 走反射或别名语义，不收；`YamlUtil`/`Profile` 与本格无关。
+变量的最后一档查找 `SystemPropsUtil.get(key)`（系统属性 → 环境变量）是**宿主状态**，跨机器不可复现，
+本库不收（§5 第 4 行给出两侧读数）。
+
+**分批**：行 22 的第二半——`java.util.Properties` 的严格语义（`\` 续行、`!` 也当注释、键值分隔符是
+`=`/`:`/空格三档、`\uXXXX` 解码、ISO-8859-1、`store` 的转义表）落在 `dialect/Props` 转手的 `super.load(reader)` 上，
+权威参照是 JDK 而不是 hutool，形状与本格的"剥边 + 单分隔符 + 无转义"几乎处处相反 ⇒ **另立第二批**（同一 `ini/` 包、
+`#22.25` 起续号），不混进本批的语义表里。
+
+## 2. 公开面（24 件）
+
+| # | 项 | 参照 |
+|---|---|---|
+| 22.1 | `pub struct GroupedMap`（`priv order`/`priv buckets`/`priv cached_size`） | `cn.hutool.setting.GroupedMap` |
+| 22.2 | `pub(all) struct IniParseOpts { use_variable : Bool, assign_flag : Char }` | `SettingLoader` 构造参数 + `setAssignFlag(char)` |
+| 22.3 | `ini_default_parse_opts()` | `new SettingLoader(groupedMap)`（转手 `this(gm, UTF_8, false)`）＋字段初值 `assignFlag = '='` |
+| 22.4 | `grouped_map_new()` | `new GroupedMap()` |
+| 22.5 | `grouped_map_put(gm, group?, key, value?) -> String?` | `String put(String group, String key, String value)` |
+| 22.6 | `grouped_map_get(gm, group?, key) -> String?` | `String get(String group, String key)`（**双参档不剥边**） |
+| 22.7 | `grouped_map_remove(gm, group?, key) -> String?` | `String remove(String group, String key)` |
+| 22.8 | `grouped_map_clear_group(gm, group?) -> Unit` | `GroupedMap clear(String group)` |
+| 22.9 | `grouped_map_size(gm) -> Int` | `int size()`（带缓存） |
+| 22.10 | `grouped_map_is_empty(gm) -> Bool` | `boolean isEmpty()`（`size() == 0`） |
+| 22.11 | `grouped_map_is_group_empty(gm, group?) -> Bool` | `boolean isEmpty(String group)` |
+| 22.12 | `grouped_map_contains_key(gm, group?, key) -> Bool` | `boolean containsKey(String group, String key)` |
+| 22.13 | `grouped_map_contains_value(gm, group?, value?) -> Bool` | `boolean containsValue(String group, String value)` |
+| 22.14 | `grouped_map_groups(gm) -> Array[String]` | `keySet()` / `Setting.getGroups()` |
+| 22.15 | `grouped_map_keys(gm, group?) -> Array[String]` | `Set<String> keySet(String group)` |
+| 22.16 | `grouped_map_values(gm, group?) -> Array[String?]` | `Collection<String> values(String group)` |
+| 22.17 | `grouped_map_entries(gm, group?) -> Array[(String, String?)]` | `entrySet(String group)` / `Setting.getMap(group)` |
+| 22.18 | `grouped_map_put_all(gm, group?, entries) -> Unit` | `GroupedMap putAll(String group, Map<..> m)` |
+| 22.19 | `grouped_map_flatten(gm) -> Array[(String, String?)]` | `Setting.toProperties()` 的键拼接规则 |
+| 22.20 | `ini_parse(text) -> GroupedMap` | `SettingLoader.load(InputStream)` 主体 |
+| 22.21 | `ini_parse_with_opts(text, opts) -> GroupedMap` | 同上 + `setAssignFlag` |
+| 22.22 | `ini_store(gm) -> String` | `private store(PrintWriter)` |
+| 22.23 | `ini_get_str(gm, key, group?, default?) -> String?` | `AbsSetting.getStr(key, group, default)` |
+| 22.24 | `ini_get_str_not_empty(gm, key, group?, default?) -> String?` | `AbsSetting.getStrNotEmpty(key, group, default)` |
+
+**无 raise 面**：参照在这条文本路径上不报错——不合规的行是**丢弃**（`keyValue.length < 2 ⇒ continue`），
+`load(InputStream)` 只 `return true`；`SettingRuntimeException` 属 `SettingUtil` 的 IO 路径，不进本库。
+公开项一律 `String?` 表达"读不到"，参照的 null 全部映射成 `None`。
+**键的 null 档不进契约**：参照 Java 签名收 `String key`，`LinkedHashMap` 也容得下 null 键，
+腿有一档读数（`o.S14.8`：`get(null, null)` ⇒ `null`），本库键类型是 `String` ⇒ 该档在测试里就地标注、不写断言。
+
+## 3. 语义（每条挂读数标签；读数由 §4 的腿灌入）
+
+1. **剥边用的空白码位表不是 `Character.isWhitespace`**：腿对**整个 BMP 逐位扫**（`trim(c+"x"+c)=="x"` 与
+   `isBlank(c)` 两档），命中集完全一致，共 34 位：
+   `00 09 0a 0b 0c 0d 1c 1d 1e 1f 20 a0 1680 180e 2000-200a 2028 2029 202a 202f 205f 2800 3000 3164 feff`。
+   比 Java 多出 `00`、`a0`、`180e`、`202a`、`2800`、`3164`、`feff`；`0085`（NEL）与 `200b-200f`（ZW 系列）**不在表内**。
+   两侧同表 ⇒ 本库只需一个 `is_blank_char`。BMP 外未扫（`Character.isWhitespace` 在 Unicode 里没有星平面真值），
+   实现按"码位 > 0xffff 一律非空白"处理，`i.emoji_key`/`i.emoji_value` 是这条的现读旁证（键 `\U0001f600k` 原样保留）。
+   `i.form_feed`（`a=\f b` ⇒ 值 `b`）、`i.nbsp`（⇒ `b`）、`i.bom_line`（`\ufeffa=1` ⇒ 键 `a`）、
+   `i.u2028_in_value`（`\u2028` 在**值中间**原样留着——它是剥边字符，不是行分隔符）、
+   `i.u0085_in_value`（NEL 完全不参与，既不作行分隔也不剥）。
+2. **整行先剥边，再判注释/空行/分组**：`i.comment_indented`（`   # c` 也是注释）、`i.blank_lines`（纯空白行跳过、
+   `\u00a0` 行也算空白行——两档同表）。注释符只有 `#`：`i.comment_semi` 的 `; c` 不是注释，但因不含 `=` 而被丢弃，
+   读数是"这一行什么都没进"而不是"进了一个键 `; c`"——两档都在表里，别把 `;` 当注释符。
+3. **分组行必须是整行被 `[` `]` 包住**（参照 `StrUtil.isSurround`）：`p.surround` 现读 `"[]"→true`、`"["→false`、
+   `"a]"→false`、`"[a]]"→true`、`"[a]=[b]"→true`。于是 `i.group_spaces`（`[ g ]` ⇒ 组 `g`）、
+   `i.group_open_only`（`[` 单独一行不算分组，且它不含 `=` ⇒ 整行丢弃）、`i.value_brackets`（`[a]=b` 不是分组行 ⇒ 键 `[a]`）、
+   `i.both_brackets`（`[a]=[b]` **算分组行**，组名成了 `a]=[b`，但分组行不建组 ⇒ 容器仍是空）、
+   `i.group_bracket_inner`（`[a[b]]` ⇒ 组名 `a[b]`）、`i.group_with_eq`（`[a=b]` ⇒ 组名 `a=b`）、
+   `i.group_chinese`（`[分组]内=k` 不是分组行 ⇒ 键带方括号原样进）。
+4. **分组行本身不进数据，组在首次写入时才出现**：`i.only_group`（`[g]` 一行 ⇒ 0 条、`groups` 空）、
+   `i.group_reopen`（`[g] a=1 / [h] b=2 / [g] c=3` ⇒ 组顺序仍是 `g|h`，`c` 追加进已有的 `g`）。
+5. **键值只切第一刀**（`StrUtil.splitToArray(line, assign, 2)`；`p.split2` 现读 `"a=b=c"→["a","b=c"]`、
+   `"=="→["","="]`、`"a"→["a"]` 长度 1、`""→[""]`）：`i.multi_eq`（`a=b=c=d` ⇒ 值 `b=c=d`）、
+   `i.line_only_assigns`（`===` ⇒ 键空串、值 `==`）。
+6. **切不开就整行丢弃，裸键不成空值**：`i.no_assign`（`onlykey` ⇒ 0 条）——这是与 `java.util.Properties`
+   最扎眼的分岔（§5 第 1 行给两侧读数）。
+7. **键与值各自再剥边，空串两侧都合法**：`i.empty_key`（`=v` ⇒ 键空串）、`i.key_ws_only`（`   =   ` ⇒ 键空串、值空串）、
+   `i.val_blank_only`/`i.val_nbsp_only`/`i.value_only_space`（值一律空串 `""`，**不是 `None`**）、
+   `i.tab_around`、`i.key_inner_space`（键内空格保留）。
+8. **同组重复键：值后写覆盖，位置保持首次**：`i.dup_key`（⇒ `a=2`）、`i.dup_three`（键序 `a,b,c` 而 `a` 的值是 `5`）、
+   `o.S1.3`（`put` 返回旧值 `1`）、`o.S1.10`（`values` 跟着键位走 ⇒ `9,2`）。
+9. **无分组 = 空串组**（参照 `group = null` 进 `put` 后 `nullToEmpty`）：`i.ws_group`（`[  ]` ⇒ 空串组）、
+   `i.merge_default`（`x=1` 与 `[  ]` 后的 `y=2` 落进**同一个**空串组，顺序 `x,y`）、
+   `o.S5.2`/`o.S5.5`/`o.S6.2`（`None` 组、`""` 组、`"  "` 组三者互相可见）。
+10. **容器对组名"兜底 + 剥边"，但对键名不剥边**：`o.S11.2`（键 `" k "` 原样进 `keys`）、`o.S11.3`（`get(g,"k")` 读不到）、
+    `o.S11.4`（`get(g," k ")` 才读到）。
+11. **双参 `get` 不剥边，与其余方法不对称**：`o.S2.1` 用组名 `" x "` 写入 ⇒ `o.S2.2` 组表是 `x`，
+    而 `o.S2.3` 的 `get(" x ")` 给 `None`、`o.S2.4` 的 `get("x")` 给 `Some("v")`；
+    `has_key`/`has_value`/`keys`/`values`/`remove`/`clear`/`is_group_empty` 都剥边（`o.S2.5`–`o.S2.9`、`o.S2.10`）。
+12. **总条数是带缓存的，且 `remove`/`clear` 不失效它**：`o.S3.3` 读 `2` → `o.S3.4` 删一条 → `o.S3.5` **仍读 2**，
+    `o.S3.7` 的 `is_empty` 跟着错；`o.S8.1`–`o.S8.9` 是同一条链的更长读数（删空后 `size` 停在 2、`put` 一条新的才复活）；
+    `o.S13.3`/`o.S4.5` 是反面：缓存从未填过时删完再读 ⇒ **正确**的 0。
+    ⇒ 本库照搬（同名同值是本包的存在理由），但这是"逻辑计数会骗人"的一档，§5 第 5 行两侧都写。
+13. **`clear(group)` 只清条目、不摘组**：`o.S4.2`–`o.S4.4`（组 `g` 仍在组表里、`keys` 空）、`o.S4.6` `is_group_empty` true；
+    `o.S2.13` 同理（键删空后组名仍留着）。
+14. **`putAll` 是逐条转手**（不是整组合并）：`o.S9`（S9.1 之后的 `keys` ⇒ `a,b`，条目序按传入序）。
+15. **缺组缺键一律静默**：`o.S14.1`（删不存在的键 ⇒ `None`）、`o.S14.4`–`o.S14.6`（不存在组的 `groups`/`keys`/`values` ⇒ 空数组）、
+    `o.S14.7`（`is_group_empty(None)` ⇒ true）、`o.S12`（值为 `None` 的条目：`get` ⇒ `None`、`has_value(g, None)` ⇒ **true**、
+    `values` ⇒ `<null>`，即"键存在但值是 null"与"键不存在"在 `get` 档不可分辨，只在 `has_value`/`values` 档可分辨）。
+16. **变量替换只在 `use_variable` 打开时做，且只看本行之前已写入的值**：正则 `\$\{(.*?)\}`（参照 `varRegex` 字段初值），
+    `i.var_basic` ⇒ `b=1`；`i.var_forward_ref` ⇒ **原样 `${a}`**（写在前面才可见）；`i.var_same_group` 同组命中；
+    `i.var_cross_group` 按**第一个点**切成组+键命中；`i.var_multi_dot`（`${g.a.b}` ⇒ 切成 `g` + `a.b` ⇒ 读不到 ⇒ 原样留着）；
+    `i.var_in_group_name`（组名本身带点 ⇒ 跨组查找必然落空）；`i.var_dotted_key`（同组优先：键就叫 `g.a` 时同组直接命中）；
+    `i.var_missing`/`i.var_undefined_keeps`/`i.var_self_ref`/`i.var_empty_inner`（`${}` 内层是空白 ⇒ 整档跳过）；
+    `i.var_twice`/`i.var_spaced`/`i.var_partial`（按字面串整串替换，出现几次换几次）；
+    `i.var_prefix_collide`（`${a}-${ab}` 各自独立解析，不串）；`i.var_blank_value`（变量解析成空串 ⇒ **仍然替换**，
+    因为参照判的是 `null != varValue`）；`i.nested_brace`/`i.brace_only`/`i.var_blank_after_trim`（`${ a }` 内层带空格 ⇒
+    当作键 `" a "` 查，查不到就原样留着）；`i.var_no_flag`（开关关掉时同一段文本整档不替换）。
+17. **写侧格式固定、一律不转义**：`[组名]` 单独一行（空串组写 `[]`），条目行是 `键 + 空格 + assign + 空格 + 值`，
+    **每行都以分隔符结尾**，空容器给空串；`i.assign_is_space` 的 store 因此出现三个连续空格（`a␣␣␣b c`），
+    `w.S15.store` 是坏形状总集合（值含 `\n` 就写出多行、`None` 写成字面 `null`、组名含 `]` 写成 `[a]b]`）；
+    `w.S16.store` 是"清空组后仍写组头"那一档（`[g]\n` 之后什么都没有）。
+18. **读取面的分界：`get_str` 只在读不到时兜底，`not_empty` 连空值一起兜底**：
+    `s.b/g/D.str3` ⇒ 空串（值真的是空串，不兜底）、`s.b/g/D.not_empty` ⇒ `D`；
+    `s.missing/g/D` 两档都给 `D`；`s.n//D`、`s.n/null/D` ⇒ 组名换成空串/`None` 后读不到 ⇒ `D`（组 `g` 的东西看不见）；
+    `s.n/g/D.by_group` ⇒ `1`（#22.6 的裸读档与 #22.23 在同一条腿路上）。
+
+## 4. 参照腿
+
+| 腿 | 内容 |
+|---|---|
+| 件 | `hutool-setting-5.8.35.jar`（`GroupedMap`/`SettingLoader`/`Setting`/`dialect/Props`）+ `hutool-core-5.8.35.jar` + `hutool-log-5.8.35.jar`，本机 JDK 17.0.14，`javac -encoding UTF-8` |
+| 解析路 | `new SettingLoader(gm, UTF_8, isUseVariable)` + `setAssignFlag(c)` + `load(new ByteArrayInputStream(text.getBytes(UTF_8)))`——就是参照自己 `Setting.load` 的下游 |
+| 写侧路 | 反射取 `SettingLoader` 的 `private store(PrintWriter)`（`setAccessible`），`StringWriter` 收字节；`File`/`InputStream` 那批入口只在腿里出现，不在本库公开面 |
+| 摊平规则 | `Setting.create()` → 逐条 `putByGroup` → `toProperties()`，把 `Hashtable` 的键**排序后**对账：本库按"组顺序 × 键顺序"给出的扁平集，必须与腿的键集逐字相同 ⇒ 生成脚本内断言（82 个输入逐条核，`i.group_reopen` 给 `g.a/g.c/h.b`，空串组给裸键） |
+| 空白表 | `IniRef3` 对 BMP 全量扫（`0x0000-0xD7FF` + `0xE000-0xFFFF`），`trim(c+"x"+c)` 与 `isBlank(c)` 两档一致 ⇒ 34 位表 |
+| 夹具 | `gen_cases.py`/`gen_cases2.py`/`gen_cases3.py`/`gen_ops_final.py` 生成 `cases*.tsv`（文本 base64 承载，杜绝转义层歧义）+ `opsF.tsv`（113 步操作脚本），腿输出与 MoonBit 测试都由同一批 JSON 灌入 |
+| 读数 | 612 + 366 + 139（本轮补跑）+ BMP 扫描行；测试文件 14 块 634 条断言，逐条挂 `i.<夹具>.<档>` / `o.<脚本>.<步>.<档>` / `s.<探针>` / `w.<脚本>.<步>.store` |
+| 分隔符口径 | 参照的 `store` 走 `PrintWriter.println` ⇒ **平台量**，本机腿现读 `lineSep=\r\n`。本库钉死 `\n`：期望值由腿读数做"整串按 `\r\n` 切、用 `\n` 拼回"的变换（切分是机械的、非手打）。腿读数里出现 `\r\r\n`（值尾带 CR 紧贴分隔符）的夹具**不做对拍**，在测试里就地标注——本轮实际命中的是 `w.S15.store` 那一条（值 `x\ry` 后跟分隔符） |
+
+## 5. 与参照的分岔（两侧读数都写）
+
+1. **裸键**：`java.util.Properties.load` 里 `onlykey` ⇒ 键 `onlykey` 值空串；本格的 `SettingLoader` ⇒ **整行丢弃**
+   （`i.no_assign` 读数 0 条）。第二批（`Props` 严格语义）要给的是相反的那一档，别在这里跟随。
+2. **反斜杠**：`java.util.Properties` 认 `\` 续行与 `\uXXXX`；本格两者都不参与（`i.backslash` ⇒ 值 `c:\d`、
+   `i.unicode_escape` ⇒ 值字面 `\u4e2d`、`i.esc_seq_value` ⇒ 值 `\nb` 四字符）。
+3. **注释符**：`java.util.Properties` 认 `#` 与 `!`；本格只认 `#`（`i.comment_semi` 的 `;` 档不是注释；`!` 档本批未开夹具，
+   留第二批一并给）。
+4. **变量的宿主档**：腿 `i.var_system_prop` 现读 `${java.version}` ⇒ `17.0.14`（走 `SystemPropsUtil`），
+   `i.var_system_prop_missing` ⇒ 原样留着。本库**没有宿主那一档** ⇒ 同夹具在本库只可能得到"原样留着"。
+   这是有意分岔，且**宿主读数根本不进测试**：`17.0.14` 是这台机器的 JDK 版本，写进契约就是一条换台机器必红的期望值——
+   生成脚本里已把 `var_system_prop` 从夹具表摘掉（`var_system_prop_missing` 保留，它的期望与宿主无关）。
+   记在这里只是为了说明"参照多做了一档查找"，两侧读数都不需要可对拍。
+5. **`size` 的陈旧读数**：参照删完仍报旧数（`o.S3.5` = 2，逻辑值 1）。本库跟随。判据：`grouped_map_size`
+   的契约不是"当前条数"，而是"最后一次 `put` 之后、首次读取时冻结的条数"。
+6. **双参 `get` 不剥边**（`o.S2.3` vs `o.S2.4`）：本库跟随——不对称是参照的形状，不是笔误可以顺手修。
+7. **行分隔符**：参照 `println` ⇒ 平台量（本机 `\r\n`）；本库固定 `\n`（§4 末行口径）。wasm/js/native 四档里
+   "平台"没有唯一答案，写死才可对拍。
+8. **键的 null 档**：参照签名容 `null` 键（`o.S14.8` 读数 `null`），本库键类型 `String` ⇒ 该档不进契约。
+9. **并发面**：参照 `GroupedMap` 内部是 `ReentrantReadWriteLock`；本库全单线程，锁不进契约（无共享状态可保护）。
+
+## 6. 变异对照（PR-B 填读数）
+
+计划 12 条，每条都要能指出"哪一块因此红"：
+M1 注释符加 `;`；M2 分组判定改成"行首 `[` 即可"；M3 切分改成"切最后一刀"；M4 裸键不丢弃（当空值收）；
+M5 键/值不剥边；M6 重复键按后写位置；M7 `get` 也剥边（修掉不对称）；M8 `size` 在 `remove`/`clear` 后也失效；
+M9 `clear` 连组一起摘；M10 变量替换跨组优先于同组；M11 变量查不到时替换成空串；M12 `store` 的值做转义。
+第二批落地时另补空白码位表的两条（把 `00a0` 移出表、把 `0085` 移进表）。
+
+## 7. 状态
+
+`契约已冻结`（10-06 PR-A：spec + 24 件签名骨架 + 14 块 634 条冻结期望值，全部由腿灌入；`moon check` 0 警告 0 错误，
+`moon test --target wasm` 读数为 **Total 14 / passed 0 / failed 14** 的设计态红）。
+骨架期 `ini/moon.pkg` 带 G12 豁免行（压掉 `unused_value`/`struct_never_constructed`/`unused_constructor`/
+`unused_error_type`/`unused_trait_bound`，本轮**新增 `unused_field`**——三个 `priv` 字段在体全是 abort 时必然没人读）；
+落地笔整行删除。下一笔＝PR-B 实现（替换 24 个 abort 体）＋§6 变异读数回填。
