@@ -78,9 +78,7 @@ pub(all) enum RoundingMode {
 ///   外恒在 `Int` 内；那一档按 core 同类件的立场交给 `abort`，本包不为其发明错误码（spec §0.1）
 /// - 复杂度：欧几里得辗转，O(log min(|a|,|b|))
 pub fn gcd(a : Int, b : Int) -> Int {
-  let _ = a
-  let _ = b
-  abort("moon-hutool: num.gcd 未实现（spec 08-num #8.1）")
+  i64_to_int(gcd64(a.to_int64(), b.to_int64()))
 }
 
 ///|
@@ -97,9 +95,8 @@ pub fn gcd(a : Int, b : Int) -> Int {
 /// - Note: hutool 无对位件（`NumberUtil` 只有 `divisor`）；这一件是为 RSA/模逆而补的，
 ///   与 `mod_inverse` 同族但**独立公开**，因为调用方要的是系数本身
 pub fn ext_gcd(a : Int, b : Int) -> (Int, Int, Int) {
-  let _ = a
-  let _ = b
-  abort("moon-hutool: num.ext_gcd 未实现（spec 08-num #8.2）")
+  let (s, t, g) = ext_gcd64(a.to_int64(), b.to_int64())
+  (i64_to_int(s), i64_to_int(t), i64_to_int(g))
 }
 
 ///|
@@ -116,9 +113,17 @@ pub fn ext_gcd(a : Int, b : Int) -> (Int, Int, Int) {
 ///   与本库一致）。本库在 `Int` 域给出同一档，中间量走 `Int64`（64 位定宽，不随目标变）
 /// - 复杂度：扩展欧几里得，O(log m)
 pub fn mod_inverse(a : Int, m : Int) -> Int raise NumError {
-  let _ = a
-  let _ = m
-  abort("moon-hutool: num.mod_inverse 未实现（spec 08-num #8.3）")
+  if m < 2 {
+    raise InvalidModulus(m)
+  }
+  let a64 = a.to_int64()
+  let m64 = m.to_int64()
+  if gcd64(a64, m64) != 1 {
+    raise NonCoprime(a, m)
+  }
+  let (s, _, _) = ext_gcd64(a64, m64)
+  // 归到最小非负剩余：MoonBit 的 `%` 与 Java 同号（实测 -7 % 2 = -1），所以要补一次模数
+  i64_to_int((s % m64 + m64) % m64)
 }
 
 ///|
@@ -134,8 +139,26 @@ pub fn mod_inverse(a : Int, m : Int) -> Int raise NumError {
 ///   "1 是不是素数"这种问题无法回答（逐条差异声明见 spec §5）
 /// - 复杂度：试除到 `sqrt(n)` 的 6k±1 档，O(√n)；`Int` 域最坏 2^31 档约 46340 次迭代，够用
 pub fn is_prime(n : Int) -> Bool {
-  let _ = n
-  abort("moon-hutool: num.is_prime 未实现（spec 08-num #8.4）")
+  let v = n.to_int64()
+  if v < 2 {
+    false
+  } else if v % 2 == 0 {
+    v == 2
+  } else if v % 3 == 0 {
+    v == 3
+  } else {
+    // 6k±1 试除；写 `i <= v / i` 而不是 `i * i <= v`，后者在 native 档的大 Int 上会自己先溢出
+    let mut i : Int64 = 5
+    let mut prime = true
+    while i <= v / i {
+      if v % i == 0 || v % (i + 2) == 0 {
+        prime = false
+        break
+      }
+      i += 6
+    }
+    prime
+  }
 }
 
 ///|
@@ -149,8 +172,26 @@ pub fn is_prime(n : Int) -> Bool {
 ///   `sqrt(-1)` 静默给一个正数读数。本库把这一档改成 `raise`
 /// - Note: 读数来源 = Python `math.isqrt`（同为精确整数开方，独立实现）
 pub fn isqrt(n : Int) -> Int raise NumError {
-  let _ = n
-  abort("moon-hutool: num.isqrt 未实现（spec 08-num #8.5）")
+  if n < 0 {
+    raise NegativeRadicand(n)
+  }
+  // 逐位开方（hutool `sqrt(long)` 同族算法），全程 Int64 定宽、不经浮点
+  let mut num = n.to_int64()
+  let mut res : Int64 = 0
+  let mut bit : Int64 = 4611686018427387904 // 2^62：Int64 范围内最大的 4 的幂
+  while bit > num {
+    bit = bit >> 2
+  }
+  while bit != 0 {
+    if num >= res + bit {
+      num -= res + bit
+      res = (res >> 1) + bit
+    } else {
+      res = res >> 1
+    }
+    bit = bit >> 2
+  }
+  i64_to_int(res)
 }
 
 ///|
@@ -166,9 +207,13 @@ pub fn isqrt(n : Int) -> Int raise NumError {
 /// - Note: 小整数用着不别扭：`lcm(BigInt::from_int(12), BigInt::from_int(18))`，
 ///   取回 `Int` 由调用方自己决定（`.to_int()` 会静默回绕，见 spec §0.1 的三条实测）
 pub fn lcm(a : @bigint.BigInt, b : @bigint.BigInt) -> @bigint.BigInt {
-  let _ = a
-  let _ = b
-  abort("moon-hutool: num.lcm 未实现（spec 08-num #8.6）")
+  if a.is_zero() || b.is_zero() {
+    // 0 是每个整数的倍数 ⇒ lcm(0, x) = 0，这是定义而不是特例补丁
+    @bigint.BigInt::from_int(0)
+  } else {
+    let g = big_gcd(a, b)
+    big_abs(a).div(g).mul(big_abs(b))
+  }
 }
 
 ///|
@@ -182,8 +227,16 @@ pub fn lcm(a : @bigint.BigInt, b : @bigint.BigInt) -> @bigint.BigInt {
 ///   `n > 20` 直接抛 `IllegalArgumentException`。**本库不设上界**：`25!` 与 `100!` 都是可回答的
 ///   问题，只是回答的形状是 `BigInt`（`BigInteger` 版 hutool 也有，本库把它当唯一一档）
 pub fn factorial(n : Int) -> @bigint.BigInt raise NumError {
-  let _ = n
-  abort("moon-hutool: num.factorial 未实现（spec 08-num #8.7）")
+  if n < 0 {
+    raise NegativeFactorial(n)
+  }
+  let mut acc = @bigint.BigInt::from_int(1)
+  let mut i = 2
+  while i <= n {
+    acc = acc.mul(@bigint.BigInt::from_int(i))
+    i += 1
+  }
+  acc
 }
 
 ///|
@@ -200,9 +253,24 @@ pub fn factorial(n : Int) -> @bigint.BigInt raise NumError {
 ///   原因是 `big.longValue()` 会静默截断高位；`countSafe` 用 `longValueExact()` 抛异常。
 ///   本库只出精确那一档，截断与判界都不做
 pub fn combination_count(n : Int, m : Int) -> @bigint.BigInt raise NumError {
-  let _ = n
-  let _ = m
-  abort("moon-hutool: num.combination_count 未实现（spec 08-num #8.8）")
+  if n < 0 || m < 0 {
+    raise NegativeCount(n, m)
+  }
+  if m > n {
+    @bigint.BigInt::from_int(0)
+  } else {
+    let k = if m > n - m { n - m } else { m }
+    let mut result = @bigint.BigInt::from_int(1)
+    let mut i = 1
+    while i <= k {
+      // 每步都整除（前缀积性质），所以全程不落分数
+      result = result
+        .mul(@bigint.BigInt::from_int(n - k + i))
+        .div(@bigint.BigInt::from_int(i))
+      i += 1
+    }
+    result
+  }
 }
 
 ///|
@@ -218,9 +286,21 @@ pub fn combination_count(n : Int, m : Int) -> @bigint.BigInt raise NumError {
 /// - Note: 溢出档：hutool 的 `long` 版在 `A(21, 21)` 这一档靠 `next < result` 检出并抛
 ///   `ArithmeticException`；本库 `BigInt` 直接给 `21!` 的真值（用例钉的就是这一档）
 pub fn arrangement_count(n : Int, m : Int) -> @bigint.BigInt raise NumError {
-  let _ = n
-  let _ = m
-  abort("moon-hutool: num.arrangement_count 未实现（spec 08-num #8.9）")
+  if n < 0 || m < 0 {
+    raise NegativeCount(n, m)
+  }
+  if m > n {
+    // 与 hutool 的唯一分岔：那侧 `Arrangement.count` 抛，同包组合数却给 0；本库统一按数学值
+    @bigint.BigInt::from_int(0)
+  } else {
+    let mut result = @bigint.BigInt::from_int(1)
+    let mut i = 0
+    while i < m {
+      result = result.mul(@bigint.BigInt::from_int(n - i))
+      i += 1
+    }
+    result
+  }
 }
 
 ///|
@@ -247,10 +327,14 @@ pub fn round_to_str(
   scale : Int,
   mode? : RoundingMode = RoundingMode::HalfUp,
 ) -> String raise NumError {
-  let _ = x
-  let _ = scale
-  let _ = mode
-  abort("moon-hutool: num.round_to_str 未实现（spec 08-num #8.11）")
+  if x.is_nan() || x.is_inf() {
+    raise NotFinite
+  }
+  if scale < -323 || scale > 308 {
+    raise ScaleOutOfRange(scale)
+  }
+  let (neg, digits, point) = split_decimal(x)
+  round_digits(neg, digits, point, scale, mode)
 }
 
 ///|
@@ -272,8 +356,352 @@ pub fn round_to(
   scale : Int,
   mode? : RoundingMode = RoundingMode::HalfUp,
 ) -> Double raise NumError {
-  let _ = x
-  let _ = scale
-  let _ = mode
-  abort("moon-hutool: num.round_to 未实现（spec 08-num #8.12）")
+  let s = round_to_str(x, scale, mode~)
+  // 自家产出的平格式十进制串必然可解析；解析不动就是这条实现被改坏了，不静默兜住
+  @string.parse_double(s) catch {
+    _ =>
+      abort(
+        "moon-hutool: num.round_to 解析自家平格式串失败（不该发生）：" +
+        s,
+      )
+  }
+}
+
+///|
+/// `Int64` 最小值。写 `-9223372036854775807 - 1` 而不是裸的 `-9223372036854775808`——
+/// 后者是 `Int` 字面量，wasm 档直接判 out of range
+let int64_min : Int64 = -9223372036854775807 - 1
+
+///|
+/// `Int64` 绝对值。`Int64::MIN` 的绝对值不可表 ⇒ 按 spec §0.1 明码 `abort`，绝不静默回绕
+fn i64_abs(v : Int64) -> Int64 {
+  if v == int64_min {
+    abort(
+      "moon-hutool: num 的 Int 域结果/输入落在本目标不可表的一档（spec 08-num §0.1）",
+    )
+  } else if v < 0 {
+    0 - v
+  } else {
+    v
+  }
+}
+
+///|
+/// `Int64` 取负，同样防 `Int64::MIN` 那一档
+fn i64_neg(v : Int64) -> Int64 {
+  if v == int64_min {
+    abort(
+      "moon-hutool: num 的 Int 域结果/输入落在本目标不可表的一档（spec 08-num §0.1）",
+    )
+  } else {
+    0 - v
+  }
+}
+
+///|
+/// `Int64` → `Int` 的**带界**转换。core 的 `Int64::to_int` 越界是静默回绕（本机实测 2^40 给 `0`），
+/// 所以先比界再转；越界只可能是 `Int::MIN` 自反那一档，属契约外读数（spec §0.1）
+fn i64_to_int(v : Int64) -> Int {
+  if v > @int.MAX_VALUE.to_int64() || v < @int.MIN_VALUE.to_int64() {
+    abort(
+      "moon-hutool: num 的 Int 域结果/输入落在本目标不可表的一档（spec 08-num §0.1）",
+    )
+  } else {
+    v.to_int()
+  }
+}
+
+///|
+/// 欧几里得辗转，全程非负
+fn gcd64(a : Int64, b : Int64) -> Int64 {
+  let mut x : Int64 = i64_abs(a)
+  let mut y : Int64 = i64_abs(b)
+  while y != 0 {
+    let t = x % y
+    x = y
+    y = t
+  }
+  x
+}
+
+///|
+/// 扩展欧几里得（**向零取整**除法版）：返回 `(s, t, g)` 使 `s * a + t * b == g`，`g` 非负
+fn ext_gcd64(a : Int64, b : Int64) -> (Int64, Int64, Int64) {
+  if a == int64_min || b == int64_min {
+    abort(
+      "moon-hutool: num 的 Int 域结果/输入落在本目标不可表的一档（spec 08-num §0.1）",
+    )
+  }
+  let mut old_r = a
+  let mut r = b
+  let mut old_s : Int64 = 1
+  let mut s : Int64 = 0
+  let mut old_t : Int64 = 0
+  let mut t : Int64 = 1
+  while r != 0 {
+    let q = old_r / r
+    let nr = old_r - q * r
+    old_r = r
+    r = nr
+    let ns = old_s - q * s
+    old_s = s
+    s = ns
+    let nt = old_t - q * t
+    old_t = t
+    t = nt
+  }
+  if old_r < 0 {
+    (i64_neg(old_s), i64_neg(old_t), i64_neg(old_r))
+  } else {
+    (old_s, old_t, old_r)
+  }
+}
+
+///|
+/// `BigInt` 绝对值（core 没给 `abs`，只给 `neg`/`compare_int`/`is_zero`）
+fn big_abs(x : @bigint.BigInt) -> @bigint.BigInt {
+  if x.compare_int(0) < 0 {
+    x.neg()
+  } else {
+    x
+  }
+}
+
+///|
+/// `BigInt` 辗转版 gcd
+fn big_gcd(x : @bigint.BigInt, y : @bigint.BigInt) -> @bigint.BigInt {
+  let mut a = big_abs(x)
+  let mut b = big_abs(y)
+  while b.compare_int(0) != 0 {
+    let t = a.mod(b)
+    a = b
+    b = t
+  }
+  a
+}
+
+///|
+/// 把 `Double` 拆成 `(是否负, 十进制数字流, 小数点位置)`，约定 **`digits[i]` 落在 `10^(point-1-i)`
+/// 这一位**——所以数字流允许前导零（`"0.5"` ⇒ `[0,5]` + point `1`），位置语义不必再折一遍。
+/// 数字流取自 core 的 `Double::to_string`：本机实测三档逐值一致（spec #8.11 的依据），
+/// 且形如 ECMAScript `Number::toString`（绝对值大到 1e21 走 `1e+21`，极小走 `1e-7`）
+fn split_decimal(x : Double) -> (Bool, Array[Int], Int) {
+  let text = x.to_string()
+  let tc = text.to_array()
+  let has_sign = tc.length() > 0 && (tc[0] == '-' || tc[0] == '+')
+  let neg = tc.length() > 0 && tc[0] == '-'
+  let start = if has_sign { 1 } else { 0 }
+  let mut eidx = -1
+  let mut i = start
+  while i < tc.length() {
+    if tc[i] == 'e' || tc[i] == 'E' {
+      eidx = i
+      i = tc.length()
+    } else {
+      i += 1
+    }
+  }
+  let mant_end = if eidx < 0 { tc.length() } else { eidx }
+  let exp = if eidx < 0 {
+    0
+  } else {
+    read_signed_int(tc, eidx + 1, tc.length())
+  }
+  let digits : Array[Int] = []
+  let mut int_len = -1
+  let mut j = start
+  while j < mant_end {
+    let c = tc[j]
+    if c == '.' {
+      int_len = digits.length()
+    } else {
+      digits.push(c.to_int() - 48)
+    }
+    j += 1
+  }
+  let point = (if int_len < 0 { digits.length() } else { int_len }) + exp
+  (neg, digits, point)
+}
+
+///|
+/// 读 `tc[from:to]` 这段带符号十进制整数（只服务指数位）
+fn read_signed_int(tc : Array[Char], from : Int, to : Int) -> Int {
+  let head = if from < to && (tc[from] == '-' || tc[from] == '+') {
+    from + 1
+  } else {
+    from
+  }
+  let neg = from < to && tc[from] == '-'
+  let mut i = head
+  let mut acc = 0
+  while i < to {
+    acc = acc * 10 + (tc[i].to_int() - 48)
+    i += 1
+  }
+  if neg {
+    0 - acc
+  } else {
+    acc
+  }
+}
+
+///|
+/// 舍入核心：按七档模式舍到 `scale` 位小数，再平格式打印。
+/// `keep` 是保留几位有效数字；`keep <= 0` 时先补前导零（补零同时抬 `point`，值不变）
+fn round_digits(
+  neg : Bool,
+  digits : Array[Int],
+  point : Int,
+  scale : Int,
+  mode : RoundingMode,
+) -> String {
+  let mut pt = point
+  let mut keep = pt + scale
+  let stream = digits.copy()
+  while keep <= 0 {
+    stream.insert(0, 0)
+    pt += 1
+    keep += 1
+  }
+  while stream.length() < keep {
+    stream.push(0)
+  }
+  let has_discard = stream.length() > keep
+  let first = if has_discard { stream[keep] } else { 0 }
+  let mut tail_nonzero = false
+  let mut i = keep + 1
+  while has_discard && i < stream.length() {
+    if stream[i] != 0 {
+      tail_nonzero = true
+      i = stream.length()
+    } else {
+      i += 1
+    }
+  }
+  let exact = if has_discard { first == 0 && !tail_nonzero } else { true }
+  // cmp：-1 = 不足一半，0 = 正好一半，1 = 超过一半（exact 档单独走一条，七档都不动）
+  let cmp = if first > 5 || (first == 5 && tail_nonzero) {
+    1
+  } else if first < 5 {
+    -1
+  } else {
+    0
+  }
+  let away = if exact {
+    false
+  } else {
+    match mode {
+      RoundingMode::Up => true
+      RoundingMode::Down => false
+      // Ceiling/Floor 看数轴方向，与符号无关；Up/Down 看绝对值方向
+      RoundingMode::Ceiling => if neg { false } else { true }
+      RoundingMode::Floor => if neg { true } else { false }
+      // HalfUp 的平局按绝对值增大走——core 的 `Double::round` 是 floor(x+0.5)，
+      // 在 -0.5 / -3.5 这一档与本件分岔，那条分岔钉在 `num_test.mbt` 第 17 块
+      RoundingMode::HalfUp => cmp >= 0
+      RoundingMode::HalfDown => cmp > 0
+      RoundingMode::HalfEven =>
+        if cmp > 0 {
+          true
+        } else if cmp < 0 {
+          false
+        } else {
+          stream[keep - 1] % 2 == 1
+        }
+    }
+  }
+  let kept = if away {
+    add_one(stream[0:keep].to_owned())
+  } else {
+    stream[0:keep].to_owned()
+  }
+  if kept.length() > keep {
+    pt += 1 // 进位顶出最高位（`9.996` 舍两位 ⇒ `10.00`、`95` 舍到十位 ⇒ `100`）
+  }
+  // 「结果是不是零」要在**没进位**的前提下看保留位——`&&` 的右边不接受 `if` 这种复杂表达式，所以拆写
+  let is_zero = if away { false } else { all_zero(stream, 0, keep) }
+  emit_plain(neg, kept, pt, scale, is_zero)
+}
+
+///|
+fn all_zero(digits : Array[Int], from : Int, to : Int) -> Bool {
+  let mut i = from
+  while i < to {
+    if digits[i] != 0 {
+      return false
+    }
+    i += 1
+  }
+  true
+}
+
+///|
+/// 十进制 +1（可能多出一位）
+fn add_one(digits : Array[Int]) -> Array[Int] {
+  let out = digits.copy()
+  let mut i = out.length() - 1
+  let mut carry = 1
+  while i >= 0 && carry > 0 {
+    let v = out[i] + carry
+    out[i] = v % 10
+    carry = v / 10
+    i -= 1
+  }
+  if carry > 0 {
+    out.insert(0, 1)
+  }
+  out
+}
+
+///|
+/// 平格式打印：永不指数记法，小数位数恰好 = `scale`（负 scale 就在整数侧补零）。
+/// 零的形状照 Java 实测：`scale <= 0` 就是 `"0"`，`scale > 0` 才保留小数位（spec #8.11）
+fn emit_plain(
+  neg : Bool,
+  kept : Array[Int],
+  point : Int,
+  scale : Int,
+  zero : Bool,
+) -> String {
+  if zero {
+    return if scale > 0 { "0." + zero_run(scale) } else { "0" }
+  }
+  // `point <= 0` 只可能出现在 scale > 0 的档（前面补过前导零），所以整数部分恒为单个 0
+  let ip = if point > 0 { point } else { 0 }
+  let mut out = if neg { "-" } else { "" }
+  let mut i = 0
+  while i < ip {
+    out = out + digit_char(if i < kept.length() { kept[i] } else { 0 })
+    i += 1
+  }
+  if ip == 0 {
+    out = out + "0"
+  }
+  if scale > 0 {
+    out = out + "."
+    let mut k = 0
+    while k < scale {
+      let idx = point + k
+      out = out +
+        digit_char(if idx >= 0 && idx < kept.length() { kept[idx] } else { 0 })
+      k += 1
+    }
+  }
+  out
+}
+
+///|
+fn digit_char(d : Int) -> String {
+  (d + 48).to_char().unwrap().to_string()
+}
+
+///|
+fn zero_run(n : Int) -> String {
+  let mut s = ""
+  let mut i = 0
+  while i < n {
+    s = s + "0"
+    i += 1
+  }
+  s
 }

@@ -1,9 +1,12 @@
 # 契约 08 · num（数值计算件·第一批：数论 + 十进制舍入）
 
-> 状态：**契约已冻结、实现未开工**（10-05）。签名骨架与 13 条公开项见 `num/pkg.generated.mbti`
-> （`moon info` 后零漂移），函数体是 `abort`；冻结期望值在 `num/num_test.mbt`（17 块 205 条断言）与
-> `num/README.mbt.md`（10 块 45 条断言），此刻红是设计态。
-> 改任何期望串须单独一笔并给外部读数来源（门禁 G5）。
+> 状态：**契约与实现两笔都交完（第一批）**（10-05）。13 条公开项见 `num/pkg.generated.mbti`
+> （`moon info` 后零漂移）；冻结期望值在 `num/num_test.mbt`（17 块 205 条断言）与
+> `num/README.mbt.md`（10 块 45 条断言），**镜像读数一字未改**地从红变绿（227 = 绿 227 / 红 0，
+> `wasm`/`js`/`wasm-gc` 三档一致，native 档由 CI 出证）。
+> 实现期唯一一处测试文件改动是**两条验算腿**（`mod_inverse` 的 `(inv*a) % m` 与 `isqrt` 的平方界），
+> 因为它们在 32 位 `Int` 上会静默回绕——单独一笔（`test(num)`），动的只有推导式检查，冻结读数没动。
+> 改任何期望串仍须单独一笔并给外部读数来源（门禁 G5）。
 >
 > 本批只做两格：**数论**（`gcd` / `ext_gcd` / `mod_inverse` / `is_prime` / `isqrt`）与
 > **十进制舍入**（`RoundingMode` 七档 + `round_to_str` / `round_to`），外加只在精确域出的四件增长型算术
@@ -162,5 +165,9 @@ hutool 侧口径：读 GitHub `dromara/hutool` HEAD 的
 
 `num/README.mbt.md` 10 块：每条都是对外文档的一部分，同时被 `moon test` 真编译真执行。
 
-**此刻读数**：`moon test --target wasm` 收集 **227** 条（本包 27 条），`passed 200 / failed 27`——
-红的就是本包全部 27 块，属设计态。基线 `BASELINE_TESTS` 同步抬到 **227**（负向对照：抬到 228 当场 RED）。
+**此刻读数**：`moon test --target wasm` 收集 **227** 条，`passed 227 / failed 0`，`js` 与 `wasm-gc` 同读数；
+基线 `BASELINE_TESTS` 同步抬到 **227**（负向对照：本机抬到 228 当场两档 RED）。
+两条变异对照真打过：把 `HalfUp` 的平局档改成"不进位" ⇒ **6 块**立刻红
+（`2.675` 那档也红，因为它平局）；拆掉 `lcm` 的 0 档分支 ⇒ `lcm(0, 0)` 那一条红。
+第一次打变异时我用 8 空格缩进匹配 `moon fmt` 已改成 6 空格的行，**替换静默没打上而测试仍全绿**——
+这种"变异对照自己失效"比没有对照更危险，所以第二条规矩是：**变异必须 assert 打上再跑**（已进 AGENTS）。

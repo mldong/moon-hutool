@@ -3,6 +3,8 @@
 // bigint——零依赖契约只允许 `moonbitlang/core`，这一条在内。
 import {
   "moonbitlang/core/bigint",
+  "moonbitlang/core/int",
+  "moonbitlang/core/string",
 }
 
 // 测试侧：BigInt 造夹具与判等、`@double` 的 NaN/±Infinity 喂报错面（对拍腿走 core 现成件，见 G8）
@@ -12,9 +14,6 @@ import {
   "mldong/moon-hutool/num",
 } for "test"
 
-// 骨架期豁免（全是"未实现"的机械后果，不是代码缺陷）：
-// - `unused_constructor`：`RoundingMode` 的七档与 `NumError` 的七个变体还没人构造
-// - `unused_error_type`：签名写了 `raise NumError` 而体里没有 `raise`
-// 实现落地那一笔必须整行删掉——门禁 G12 拦着不让忘。
-
-warnings = "-unused_constructor-unused_error_type"
+// 实现已落地 ⇒ 骨架期那两条豁免（`unused_constructor` / `unused_error_type`）整行删掉：
+// 七档模式与七个错误变体现在都有人构造，每个 `raise` 点也真的 raise 了。
+// 本轮 G12 真抓到过一次：实现体落地了、豁免行却因为一笔脚本中断没删——这条不是空转门禁。
