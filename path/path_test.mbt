@@ -5,6 +5,7 @@ fn err_tag(e : @path.PathError) -> String {
     @path.NoMatch(_, _) => "NoMatch"
     @path.CapturingVar(_) => "CapturingVar"
     @path.CaptureGroupRegex(_) => "CaptureGroupRegex"
+    @path.ExtensionConflict(_, _) => "ExtensionConflict"
   }
 }
 
@@ -18,7 +19,7 @@ fn err_tag(e : @path.PathError) -> String {
 
 ///|
 // 把预期抛错的调用归一成错误档名；没抛就返回 `OK`（那样这条断言一定红，不会静默放过）
-fn err_of(g : () -> Map[String, String] raise @path.PathError) -> String {
+fn[A] err_of(g : () -> A raise @path.PathError) -> String {
   try {
     let _ = g()
     "OK"
@@ -595,23 +596,57 @@ test "path extract_within 与 combine" {
   let m = @path.extract_variables("/**", "/a/b")
   assert_eq(m.length(), 0)
   assert_eq(@path.extract_within("/**", "/a/b"), "a/b")
-  // combine c-normal：a="com/**" b="*.jsp"
+  // combine c-normal：a="com/**" b="*.jsp" 参照读数="com/**/*.jsp"
   assert_eq(@path.combine("com/**", "*.jsp"), "com/**/*.jsp")
-  // combine c-slash1：a="/test/" b="//hotels.html"
+  // combine c-slash1：a="/test/" b="//hotels.html" 参照读数="/test//hotels.html"
   assert_eq(@path.combine("/test/", "//hotels.html"), "/test//hotels.html")
-  // combine c-empty-a：a="" b="/a"
+  // combine c-empty-a：a="" b="/a" 参照读数="/a"
   assert_eq(@path.combine("", "/a"), "/a")
-  // combine c-empty-b：a="/a" b=""
+  // combine c-empty-b：a="/a" b="" 参照读数="/a"
   assert_eq(@path.combine("/a", ""), "/a")
-  // combine c-both-empty：a="" b=""
+  // combine c-both-empty：a="" b="" 参照读数=""
   assert_eq(@path.combine("", ""), "")
   // c-null-a：参照腿对 null 参数直接退化，本库入参是 String 不存在该档（spec §5 第 5 行）
   // c-null-b：参照腿对 null 参数直接退化，本库入参是 String 不存在该档（spec §5 第 5 行）
+  // combine c2-jsp-exact：a="/*.jsp" b="/hotels.jsp" 参照读数="/hotels.jsp"
+  assert_eq(@path.combine("/*.jsp", "/hotels.jsp"), "/hotels.jsp")
+  // combine c2-jsp-noext：a="/*.jsp" b="/hotels" 参照读数="/hotels.jsp"
+  assert_eq(@path.combine("/*.jsp", "/hotels"), "/hotels.jsp")
+  // combine c2-ext-clash：a="/*.jsp" b="/*.txt" 参照读数="EX:IllegalArgumentException"
+  assert_true(
+    err_of(() => @path.combine("/*.jsp", "/*.txt")).has_prefix(
+      "ExtensionConflict",
+    ),
+  )
+  // combine c2-plain：a="/hotels" b="/bookings" 参照读数="/hotels/bookings"
+  assert_eq(@path.combine("/hotels", "/bookings"), "/hotels/bookings")
+  // combine c2-nolead：a="/hotels" b="bookings" 参照读数="/hotels/bookings"
+  assert_eq(@path.combine("/hotels", "bookings"), "/hotels/bookings")
+  // combine c2-star-tail：a="/hotels/*" b="/bookings" 参照读数="/hotels/bookings"
+  assert_eq(@path.combine("/hotels/*", "/bookings"), "/hotels/bookings")
+  // combine c2-dstar-tail：a="/hotels/**" b="/bookings" 参照读数="/hotels/**/bookings"
+  assert_eq(@path.combine("/hotels/**", "/bookings"), "/hotels/**/bookings")
+  // combine c2-var：a="/hotels" b="{hotel}" 参照读数="/hotels/{hotel}"
+  assert_eq(@path.combine("/hotels", "{hotel}"), "/hotels/{hotel}")
+  // combine c2-star-var：a="/hotels/*" b="{hotel}" 参照读数="/hotels/{hotel}"
+  assert_eq(@path.combine("/hotels/*", "{hotel}"), "/hotels/{hotel}")
+  // combine c2-same：a="/hotels" b="/hotels" 参照读数="/hotels/hotels"
+  assert_eq(@path.combine("/hotels", "/hotels"), "/hotels/hotels")
+  // combine c2-all-ext：a="/hotels/.*" b="/a/b" 参照读数="/hotels/.*/a/b"
+  assert_eq(@path.combine("/hotels/.*", "/a/b"), "/hotels/.*/a/b")
+  // combine c2-match-p2：a="/*.jsp" b="/WEB-INF/x.jsp" 参照读数="EX:IllegalArgumentException"
+  assert_true(
+    err_of(() => @path.combine("/*.jsp", "/WEB-INF/x.jsp")).has_prefix(
+      "ExtensionConflict",
+    ),
+  )
 }
 
 ///|
 // 模式具体度排序（比较器）
 test "path 模式具体度排序（比较器）" {
+  // 同级必须给 0（移植时"相等"分支的凭据）："order-eq|against=/x|a=/x|b=/x|out=0"
+  assert_eq(@path.compare_patterns("/x", "/x", "/x"), 0)
   // ord-1：against="/hotels/chicago" 参照腿排序结果="/hotels/*,/**/hotels/**,/hotels/**,/**,"
   assert_true(
     @path.compare_patterns("/hotels/chicago", "/hotels/*", "/**/hotels/**") < 0,

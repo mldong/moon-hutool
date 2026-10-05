@@ -59,6 +59,10 @@ pub suberror PathError {
   CapturingVar(String)
   /// 子表达式里带捕获组（如 `{n:(a)(b)}`）。载荷 = 该段子表达式原文
   CaptureGroupRegex(String)
+  /// `combine` 的后缀冲突档：两侧都带**非全能**后缀（如 `/*.jsp` 与 `/*.txt`）时抛。
+  /// 参照实现抛 `IllegalArgumentException("Cannot combine patterns: ...")`（源码 596~598 行），
+  /// 本档是契约补充笔补进来的——PR-A 把 combine 写成无 raise，把这一档提到了源码里才发现
+  ExtensionConflict(String, String)
 }
 
 ///|
@@ -134,11 +138,18 @@ pub fn extract_within(pattern : String, path : String) -> String {
 }
 
 ///|
-/// 拼两个模式。实测：`combine("com/**", "*.jsp")` 给 `com/**/*.jsp`；
-/// 空串与 `None` 侧都退化（`combine("", "/a")` 给 `/a`、`combine("/a", "")` 给 `/a`、两边都空给空串）；
-/// 分隔符**不去重也不补齐**：`combine("/test/", "//hotels.html")` 给 `/test//hotels.html`（照抄读数的原样形状）。
-/// - Raises: 无
-pub fn combine(prefix : String, suffix : String) -> String {
+/// 拼两个模式。**不是纯拼接**——前置分支也是契约，全部来自源码 565~600 行与本包读数：
+/// 1. 某一侧为空串 → 取另一侧；两边都空 → 空串。
+/// 2. `prefix` 不含 `{`、与 `suffix` 不相等、且 `match_path(prefix, suffix)` 成立 → **直接返回 `suffix`**
+///    （实测 `combine("/*.jsp", "/hotels.jsp")` 给 `/hotels.jsp`）。
+/// 3. `prefix` 以 `<sep>*` 结尾 → 先截掉末尾两个字符再拼（`/hotels/*` + `/bookings` 给 `/hotels/bookings`）；
+///    以 `<sep>**` 结尾 → 直接拼（`/hotels/**` + `/bookings` 给 `/hotels/**/bookings`）。
+/// 4. 含 `*.` 且两侧后缀**都不全能** → `ExtensionConflict`（`/*.jsp` + `/*.txt`、`/*.jsp` + `/WEB-INF/x.jsp` 均抛）；
+///    一侧全能（后缀为 `.*` 或空）则取另一侧的后缀（`/*.jsp` + `/hotels` 给 `/hotels.jsp`）。
+/// 5. 其余情况才是拼接，且分隔符**不去重也不补齐**：`combine("/test/", "//hotels.html")` 给 `/test//hotels.html`；
+///    两边相等也拼：`combine("/hotels", "/hotels")` 给 `/hotels/hotels`。
+/// - Raises: `PathError.ExtensionConflict(prefix, suffix)`
+pub fn combine(prefix : String, suffix : String) -> String raise PathError {
   abort("moon-hutool/path 第一批未实现（契约 docs/spec/15-path.md）")
 }
 

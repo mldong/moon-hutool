@@ -25,7 +25,7 @@
    `match` **恒假**，`extract` 抛 `IllegalArgumentException("Capturing patterns (*path) are not supported by the
    AntPathMatcher. Use the PathPatternParser instead.")`（源码里那句 `name.startsWith("*")` 分支）。
    本库同档判**明确不支持**，错误面摆出来；不照 Spring 新文档去补 `PathPatternParser` 那套。
-4. **`extract_*` 有真实错误面，不是"空表"表达式**（实测三条抛点，见 §3.3）。
+4. **抽取与拼接都有真实错误面，不是「给个空表」那种表达式**：`extract_variables` 三条抛点 + `combine` 一条后缀冲突抛点，共四档（§3.3、§3.4）。
 5. **默认档跟"所对位的那个实现"，不跟祖上文档**：源码字段是 `caseSensitive = true`、**`trimTokens = false`**，
    而 Spring 原版默认 `trimTokens = true`——hutool 改过。默认档由"源码字段 + 默认构造实测"双证钉住。
 
@@ -42,9 +42,9 @@
 | `match_start_with` | `(pattern, path, opts) -> Bool` | `matchStart` |
 | `extract_variables` / `extract_variables_with` | `(pattern, path[, opts]) -> Map[String, String] raise PathError` | `extractUriTemplateVariables` |
 | `extract_within` | `(pattern, path) -> String` | `extractPathWithinPattern` |
-| `combine` | `(prefix, suffix) -> String` | `combine` |
+| `combine` | `(prefix, suffix) -> String raise PathError` | `combine` |
 | `compare_patterns` | `(against, a, b) -> Int` | `getPatternComparator` |
-| `PathError` | `suberror`：`NoMatch` / `CapturingVar` / `CaptureGroupRegex` | 实测三种抛点 |
+| `PathError` | `suberror`：`NoMatch` / `CapturingVar` / `CaptureGroupRegex` / `ExtensionConflict` | 实测四种抛点（前三条在 `extract_variables`，第四条在 `combine`） |
 
 **为什么没有 `match` 这个名字**：`match` 是 MoonBit 保留字（骨架期编译器直接判词法错，`dfa` 轮撞过同一处），
 所以整段匹配叫 `match_path`。**为什么比较器给 `Int` 不给 `Ordering`**：本仓没有 `Ordering` 的现成先例，
@@ -76,7 +76,7 @@
 | `is_pattern` | `/hotels` 假、`/hotels/*` 真、`/*.jsp` 真、`/{name}` 真、`""` 假、`**` 真、`/a:b` 假（**冒号不算模式字符**） |
 | `matchStart` | `/WEB-INF/**` vs `/WEB-INF/classes/x/y` 真；`/WEB-INF/*` vs `/WEB-INF/classes/x` 假（`*` 不跨段）；`/com/*` vs `/co` 假（半段不算） |
 
-### 3.3 `extract_variables` 的三档错误（本包唯一 raise 面）
+### 3.3 `extract_variables` 的三档错误（第四档在 `combine`，见 §3.4）
 
 | 档 | 参照腿抛点（原样） | 本库 |
 |---|---|---|
@@ -91,9 +91,16 @@
 
 - `extract_within`：`/WEB-INF/**` 对 `/WEB-INF/web.xml` 给 `web.xml`；`/**` 对 `/a/b` 给 `a/b`；
   精确模式给**空串**；不匹配也给**空串**（这一件参照实现**不抛**，与 `extract_variables` 不同，照抄）。
-- `combine`：`("com/**", "*.jsp")` → `com/**/*.jsp`；一侧为空则取另一侧；两边都空给空串；
-  **不补齐也不去重分隔符**：`("/test/", "//hotels.html")` → `/test//hotels.html`（读数原样）。
-  参照实现另有"参数为 `null` 时退化"的两档——本库入参是 `String`，那一档**结构上不存在**（不是遗漏）。
+- `combine`：**五条前置分支，不是纯拼接**（源码 565~600 行 + 本包 12 条读数）：
+  ① 某侧为空取另一侧、两边空给空串；② `prefix` 不含 `{`、与 `suffix` 不等、且 `match_path(prefix, suffix)` 成立
+  → **直接给 `suffix`**（`/*.jsp` + `/hotels.jsp` → `/hotels.jsp`）；③ `prefix` 以 `<sep>*` 结尾 → 先截末尾两个字符再拼
+  （`/hotels/*` + `/bookings` → `/hotels/bookings`），以 `<sep>**` 结尾 → 直接拼（`/hotels/**` + `/bookings` → `/hotels/**/bookings`）；
+  ④ 含 `*.` 且两侧后缀都非全能 → **`PathError.ExtensionConflict`**（`/*.jsp` + `/*.txt`、`/*.jsp` + `/WEB-INF/x.jsp` 均抛），
+  一侧全能（后缀为 `.*` 或空）则取另一侧（`/*.jsp` + `/hotels` → `/hotels.jsp`）；⑤ 其余才拼，且**不补齐也不去重分隔符**
+  （`/test/` + `//hotels.html` → `/test//hotels.html`；两边相等也拼：`/hotels` + `/hotels` → `/hotels/hotels`）。
+  参照实现另有「参数为 `null` 时退化」的两档——本库入参是 `String`，那一档**结构上不存在**（不是遗漏）。
+  **这一族是本包 raise 面的第四档，是 PR-A 之后继续读源码才撞上的**，所以走单独一笔契约补充
+  （签名 `-> String` 改成 `-> String raise PathError`），不在实现那一笔顺手改（G5 禁的就是那个）。
 - `compare_patterns`（模式具体度排序，实测四条）：对 `/hotels/chicago`，
   `/hotels/*` < `/**/hotels/**` < `/hotels/**` < `/**`；对 `/a/b`，`/a/b` < `/**/b` < `/a/**` < `/**`；
   对 `/WEB-INF/a.jsp`，`/WEB-INF/*` < `/WEB-INF/**` < `/**/*.jsp`。
@@ -102,7 +109,7 @@
 
 | 腿 | 来源 | 条数 | 说明 |
 |---|---|---|---|
-| A | `hutool-core-5.8.35.jar` 的 `AntPathMatcher` + 本机 JDK 17.0.14 | **87 行读数**（33 条 `match`/`matchStart`、11 条 `extract`+`within`、9 条 `combine`、4 条排序、7 条 `is_pattern`、3 条抛点、默认构造与常量） | `javac -encoding UTF-8`（`digest` 轮那条编码教训开局就带）；每条都带 `sep/trim/case/start` 四个参数列，读数可复算 |
+| A | `hutool-core-5.8.35.jar` 的 `AntPathMatcher` + 本机 JDK 17.0.14 | **101 行读数**（33 条 `match`/`matchStart`、11 条 `extract`+`within`、12 条 `combine`（含两条抛点）、4 条排序 + 2 条同级给 0、7 条 `is_pattern`、3 条抛点、默认构造与常量） | `javac -encoding UTF-8`（`digest` 轮那条编码教训开局就带）；每条都带 `sep/trim/case/start` 四个参数列，读数可复算 |
 | B | **参照实现源码**（`hutool-core-5.8.35-sources.jar`，`AntPathMatcher.java` 945 行） | 4 条机制判定 | 只能由源码给：默认字段值（`caseSensitive=true`、`trimTokens=false`）、`{*name}` 抛点的 `startsWith("*")` 分支、`startsWith(sep)` 那条前导斜杠判据、`**` 只在整段 token 上生效的位置 |
 
 **普查阶段自己踩的坑记在这儿**（避免下一包再踩）：分隔符档位初版写成 `a:**/c` 对 `a:x:y:c`（混用两种分隔符，恒假），

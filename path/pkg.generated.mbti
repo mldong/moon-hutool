@@ -2,7 +2,7 @@
 package "mldong/moon-hutool/path"
 
 // Values
-pub fn combine(String, String) -> String
+pub fn combine(String, String) -> String raise PathError
 
 pub fn compare_patterns(String, String, String) -> Int
 
@@ -29,6 +29,7 @@ pub suberror PathError {
   NoMatch(String, String)
   CapturingVar(String)
   CaptureGroupRegex(String)
+  ExtensionConflict(String, String)
 }
 
 // Types and methods
