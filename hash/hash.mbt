@@ -153,7 +153,7 @@ pub fn Crc16::crc16_hex_value(self : Crc16, padding : Bool) -> String {
 }
 
 ///|
-/// 加法哈希：逐字符累乘后 `(h & 0x7FFFFFFF) % prime`。
+/// 加法哈希：初值是**串长**，逐字符相加，末尾直接 `% prime`（参照侧没有 `& 0x7FFFFFFF` 这一步）。
 ///
 /// - Parameters: `prime` 是模数。`prime == 0` 时 `raise HashError::ZeroPrime`
 ///   （参照侧是 `ArithmeticException: / by zero`）；负数照常算，Java 的 `%` 保留符号。
@@ -162,7 +162,7 @@ pub fn additive_hash(text : String, prime : Int) -> Int raise HashError {
 }
 
 ///|
-/// 旋转哈希：`h = (h ^ c) + (h << 3)` 逐字符，末尾同样 `% prime`。
+/// 旋转哈希：初值是**串长**，逐字符 `h = (h << 4) ^ (h >> 28) ^ c`，末尾同样 `% prime`。
 ///
 /// - Parameters: `prime` 是模数，`0` 那档 `raise HashError::ZeroPrime`。
 pub fn rotating_hash(text : String, prime : Int) -> Int raise HashError {
@@ -170,19 +170,19 @@ pub fn rotating_hash(text : String, prime : Int) -> Int raise HashError {
 }
 
 ///|
-/// 逐字符 `h = h * 65599 + c`。
+/// 逐字符三拍：`h += c; h += h << 10; h ^= h >> 6`，收尾再来 `h += h << 3; h ^= h >> 11; h += h << 15`。
 pub fn one_by_one_hash(text : String) -> Int {
   abort("moon-hutool hash: 契约已冻结，实现待落地")
 }
 
 ///|
-/// Bernstein（`h = 5381 * h + c`，初值 5381）。
+/// Bernstein（`h = 33 * h + c`，初值 **0**——5381 那档是 `djb_hash`，两件别混）。
 pub fn bernstein(text : String) -> Int {
   abort("moon-hutool hash: 契约已冻结，实现待落地")
 }
 
 ///|
-/// 改进的 32 位 FNV，**按 UTF-16 码元**遍历（参照侧用 `charAt`）。
+/// 改进的 32 位 FNV，**按 UTF-16 码元**遍历（参照侧用 `charAt`），基底 `(int)2166136261`、乘子 `16777619`。
 ///
 /// - Note: 末尾有一段 `<<13 / >>7 / <<3 / >>17 / <<5` 的搅拌，再取 `Math.abs`；
 ///   而 `abs(Integer.MIN_VALUE)` 仍是负数 ⇒ **返回值可以为负**（spec §3 第 4 条）。
@@ -192,7 +192,8 @@ pub fn fnv_hash(text : String) -> Int {
 }
 
 ///|
-/// 同上，但**按字节**遍历，且对每个字节做符号扩展 XOR（参照侧 `hash ^ b`，`b` 是 Java 有符号 `byte`）。
+/// 同上，但**按字节**遍历，且对每个字节做符号扩展 XOR（参照侧 `hash ^ b`，`b` 是 Java 有符号 `byte`）；
+/// 两档的末尾搅拌完全一致：`h += h<<13; h ^= h>>7; h += h<<3; h ^= h>>17; h += h<<5` 再取 `Math.abs`。
 pub fn fnv_hash_bytes(data : Bytes) -> Int {
   abort("moon-hutool hash: 契约已冻结，实现待落地")
 }
@@ -204,61 +205,63 @@ pub fn int_hash(key : Int) -> Int {
 }
 
 ///|
-/// RS 算法：`h = (h << 5) - h + c`，并维护一个递增的 `a`。
+/// RS 算法：`h = h * a + c`，同时 `a = a * 378551`（`a` 初值 63689），出口 `& 0x7FFFFFFF`。
 pub fn rs_hash(text : String) -> Int {
   abort("moon-hutool hash: 契约已冻结，实现待落地")
 }
 
 ///|
-/// JS 算法：`h ^= h << 5; h += c; h ^= h >> 2`（这里的 `>>` 是参照侧的移位方向，逐字照搬）。
+/// JS 算法：`h ^= (h << 5) + c + (h >> 2)`（`>>` 是算术右移，逐字照搬），出口 `Math.abs(h) & 0x7FFFFFFF`。
 pub fn js_hash(text : String) -> Int {
   abort("moon-hutool hash: 契约已冻结，实现待落地")
 }
 
 ///|
-/// PJW 算法（各 4 位分组移位异或，末尾按溢出位补异或）。
+/// PJW 算法：`h = (h << 4) + c`，命中高 4 位（`0xF0000000`）时折回 `test >> 24` 并清掉高位，出口 `& 0x7FFFFFFF`。
 pub fn pjw_hash(text : String) -> Int {
   abort("moon-hutool hash: 契约已冻结，实现待落地")
 }
 
 ///|
-/// ELF 算法（`h = (h << 4) + c`，高位溢出那 24 位折回来）。
+/// ELF 算法：`h = (h << 4) + c`，`x = h & 0xF0000000` 非零时 `h ^= x >> 24; h &= ~x`，出口 `& 0x7FFFFFFF`。
 pub fn elf_hash(text : String) -> Int {
   abort("moon-hutool hash: 契约已冻结，实现待落地")
 }
 
 ///|
-/// BKDR 算法（种子 131，末尾 `hash & 0x7FFFFFFF`）。
+/// BKDR 算法：`h = h * 131 + c`，出口 `& 0x7FFFFFFF`。
 pub fn bkdr_hash(text : String) -> Int {
   abort("moon-hutool hash: 契约已冻结，实现待落地")
 }
 
 ///|
-/// SDBM 算法：`h = c + (h << 6) + (h << 16) - h`。
+/// SDBM 算法：`h = c + (h << 6) + (h << 16) - h`，出口 `& 0x7FFFFFFF`（参照侧这条**有**掩码）。
 pub fn sdbm_hash(text : String) -> Int {
   abort("moon-hutool hash: 契约已冻结，实现待落地")
 }
 
 ///|
-/// DJB 算法（初值 5381，`h = (h << 5) + h + c`）。
+/// DJB 算法：初值 5381，`h = (h << 5) + h + c`，出口 `& 0x7FFFFFFF`。
 pub fn djb_hash(text : String) -> Int {
   abort("moon-hutool hash: 契约已冻结，实现待落地")
 }
 
 ///|
-/// DEK 算法（`h = (h << 5) ^ (h >> 2) ^ c`）。
+/// DEK 算法：初值是**串长**，`h = (h << 5) ^ (h >> 27) ^ c`，出口 `& 0x7FFFFFFF`。
 pub fn dek_hash(text : String) -> Int {
   abort("moon-hutool hash: 契约已冻结，实现待落地")
 }
 
 ///|
-/// AP 算法：偶数位与奇数位走两套异或/移位。
+/// AP 算法：偶数下标 `h ^= (h << 7) ^ c ^ (h >> 3)`，奇数下标 `h ^= ~((h << 11) ^ c ^ (h >> 5))`，出口**不掩码**。
 pub fn ap_hash(text : String) -> Int {
   abort("moon-hutool hash: 契约已冻结，实现待落地")
 }
 
 ///|
-/// 田磊算法：长度 `<= 256` 与 `> 256` 是两条分支，空串直接给 0。
+/// 田磊算法：空串给 0；基底按长度 `<= 256` 与 `> 256` 分两档；**字符扫描只看最多 96 个**——
+/// 串长 `<= 96` 从头扫，`> 96` 只扫**尾部** 96 个（参照侧 `str.charAt(i + iLength - 96 - 1)`），
+/// 期间把 `A`–`Z` 折成小写，每步按 `(3*i*c*c + 5*i*c + 7*i + 11*c) % 16777216` 累加，末了负数取绝对值。
 pub fn tianl_hash(text : String) -> Int64 {
   abort("moon-hutool hash: 契约已冻结，实现待落地")
 }
