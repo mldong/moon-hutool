@@ -14,6 +14,10 @@ pub fn ext_gcd(Int, Int) -> (Int, Int, Int)
 
 pub fn factorial(Int) -> @bigint.BigInt raise NumError
 
+pub fn format_percent(Double, Int, mode? : RoundingMode, suffix? : String) -> String raise NumError
+
+pub fn format_thousands(Double, Int, mode? : RoundingMode, sep? : Char, decimal_sep? : Char) -> String raise NumError
+
 pub fn gcd(Int, Int) -> Int
 
 pub fn is_prime(Int) -> Bool
@@ -28,6 +32,8 @@ pub fn round_to(Double, Int, mode? : RoundingMode) -> Double raise NumError
 
 pub fn round_to_str(Double, Int, mode? : RoundingMode) -> String raise NumError
 
+pub fn trim_trailing_zeros(String) -> String raise NumError
+
 // Errors
 pub suberror NumError {
   ScaleOutOfRange(Int)
@@ -37,9 +43,28 @@ pub suberror NumError {
   NonCoprime(Int, Int)
   NegativeFactorial(Int)
   NegativeCount(Int, Int)
+  NotDecimal(String)
+  NonPositiveTargets(Int)
+  NegativeRatio(Int)
+  RatioSumNotPositive(Int64)
+  MoneyOverflow
 }
 
 // Types and methods
+pub(all) struct Money {
+  cent : Int64
+}
+pub fn Money::add(Self, Self) -> Self raise NumError
+pub fn Money::allocate_by_ratio(Self, Array[Int]) -> Array[Self] raise NumError
+pub fn Money::allocate_even(Self, Int) -> Array[Self] raise NumError
+pub fn Money::cent(Self) -> Int64
+pub fn Money::from_yuan(Double, mode? : RoundingMode) -> Self raise NumError
+pub fn Money::from_yuan_str(String, mode? : RoundingMode) -> Self raise NumError
+pub fn Money::new(Int64) -> Self
+pub fn Money::sub(Self, Self) -> Self raise NumError
+pub fn Money::to_string(Self) -> String
+pub fn Money::to_yuan(Self) -> Double
+
 pub(all) enum RoundingMode {
   Up
   Down

@@ -6,7 +6,11 @@ hutool `NumberUtil` / `MathUtil` 的 MoonBit 对位·第一批：数论（`gcd` 
 
 完整边界矩阵与逐条读数来源见 [`docs/spec/08-num.md`](https://github.com/mldong/moon-hutool/blob/master/docs/spec/08-num.md)。本页只放**典型用法**，每条都带期望值——这些 `test` 块会被 `moon test` 真编译真执行。
 
-> 状态：**已实现（第一批）**（10-05，27 条用例全绿；`wasm`/`js`/`wasm-gc` 三档读数一致，native 档由 CI 出证）。
+> 状态：**分两批**。**第一批已交付**（10-05，27 条用例此刻仍绿，三档读数一致）；
+> **第二批契约已冻结、实现未开工**（格式化三件 + 薄 `Money`，函数体是 `abort`）——
+> 下面第二批那几块的期望值此刻红是设计态。
+> 期望串与 `num_test.mbt` / `format_test.mbt` / `money_test.mbt` 同受"期望值冻结"约束：
+> 实现期只许把红变绿（门禁 G5）。
 > 期望串与 `num_test.mbt` 同受"期望值冻结"约束：实现期只许把红变绿（门禁 G5）。
 
 ## 这一包的立身之本是"哪一类算术不许出现在 `Int` 域"
@@ -188,3 +192,104 @@ test "core 的 round 与本包 round_to 在负半边不同值" {
   assert_eq(2.5.round(), @num.round_to(2.5, 0))
 }
 ```
+
+
+## 第二批（一）：千分位与百分比站在"最短十进制"那一族
+
+Java 侧其实有**两个族**，本机 JDK 17 同输入对撞过：`BigDecimal.valueOf(v)` 走 `Double.toString`
+的最短十进制，`DecimalFormat` 走 `double` 的**二进制精确值**。三条实测分岔：`-0.0` 舍到 2 位：本库 `0.00` / `DecimalFormat` `-0.00`；`2.675` 舍到 2 位：本库 `2.68` / `DecimalFormat` `2.67`；`0.145` 舍到 0 位：本库 `15%` / `DecimalFormat` `14%`。
+hutool 的 `decimalFormat`/`decimalFormatMoney`/`formatPercent` 站在 `DecimalFormat` 那侧（还随 JVM
+默认 locale 变），而 `round`/`Money` 站在 `BigDecimal` 那侧——**它自己两半就不一致**。
+本库一个库只认一个族：最短十进制（与 #8.11 同一条腿）。所以 `format_thousands` 是 `round_to_str`
+之上加一层分组，不是另起一套舍入；这条选择不是偏好，而是"同一个数在一个库里不许有两种答案"。
+
+```mbt check
+///|
+test "format_thousands 与 #8.11 同一条腿" {
+  assert_eq(@num.format_thousands(1234567.891, 2), "1,234,567.89")
+  assert_eq(@num.format_thousands(-1234.5, -2), "-1,200")
+  // 分隔符是显式可选参：换符号不换方向（分组仍从右往左三位一隔）
+  assert_eq(
+    @num.format_thousands(1234567.5, 1, sep=' ', decimal_sep=','),
+    "1 234 567,5",
+  )
+}
+```
+
+百分比挪的是**十进制小数点**，不是 `x * 100.0`：`0.145` 舍到 0 位给 `15%`；
+先乘 100 会看到 `14.499999999999998` 而给 `14%`。后缀也是显式参数，不做 locale 货币符号。
+
+```mbt check
+///|
+test "format_percent 挪点而不是乘法" {
+  assert_eq(@num.format_percent(0.125, 2), "12.50%")
+  assert_eq(@num.format_percent(0.145, 0), "15%")
+  assert_eq(@num.format_percent(-0.125, 2), "-12.50%")
+}
+```
+
+## 第二批（二）：薄 `Money` 就是"分"这个 `Int64`
+
+三条取舍都有出处：
+
+1. 分用 **`Int64`**（定宽 64 位 ⇒ "越界"这条读数与目标无关，能冻结；`Int` 做不到，它 32/64 位随目标变）。
+   `9.2e18` 分 = `9.2e16` 元，真实金额量级够不到，但够不到**不等于可以静默回绕**——
+   `add`/`sub`/`cent * ratio` 越界一律 `MoneyOverflow`。hutool 那句 `(cent * ratios[i]) / total`
+   是 `long`，没有任何防线。
+2. **固定两位小数**：hutool 的 `Money` 带 `Currency`，`centFactor` 随币种变；本库不做多币种，
+   要别的精度用 #8.11 自己舍。
+3. 默认舍入档 **`HalfEven`**——**故意**与 #8.11/#8.14 的默认 `HalfUp` 不对称，因为 hutool 自己就是
+   `NumberUtil.round` 用 `HALF_UP`、`Money.DEFAULT_ROUNDING_MODE = HALF_EVEN`。两处都跟随，
+   不对称是它的，不是我造的。
+
+hutool 的 `Money(double)` 构造另有一条坑：源码写的是 `this.cent = Math.round(amount * getCentFactor())`
+——先浮点乘，再 `floor(x + 0.5)`，**它宣称的 `HALF_EVEN` 在这条路上一次都没生效**（`Money(BigDecimal)`
+那条才用）。本机对撞出三档分岔（本库 / 那侧）：`0.025` ⇒ 2 / 3；`12.345` ⇒ 1234 / 1235；
+`0.005` ⇒ 0 / 1。本库只留一条口径：最短十进制 + 显式模式。
+
+```mbt check
+///|
+test "Money 的默认档是 HalfEven，1.005 这一元有两种分法" {
+  assert_eq(@num.Money::from_yuan_str("1.005").cent(), 100)
+  assert_eq(@num.Money::from_yuan_str("1.005", mode=@num.HalfUp).cent(), 101)
+  assert_eq(@num.Money::new(5).to_string(), "0.05")
+  assert_eq(@num.Money::new(0).to_string(), "0.00")
+}
+```
+
+分配两式都跟随 hutool 的算法（**余数发给最前面几份**），但**负档本库规则化**：那侧
+`remainder = cent % targets` 为负时，补余的 `for (i = 0; i < remainder; i++)` 一次都不跑，
+分完的和回不到原值。所以负档不进参照实现对撞，本库按绝对值分配再回贴符号，
+并由用例断两条不变量（和 == 原值、份间差不超过一分）。
+
+```mbt check
+///|
+test "allocate 两式：余数发给最前，负档对称" {
+  assert_eq(@num.Money::new(1000).allocate_even(3).map(x => x.cent()), [
+    334, 333, 333,
+  ])
+  assert_eq(@num.Money::new(-1000).allocate_even(3).map(x => x.cent()), [
+    -334, -333, -333,
+  ])
+  assert_eq(
+    @num.Money::new(1000).allocate_by_ratio([2, 3]).map(x => x.cent()),
+    [400, 600],
+  )
+  let shape = try {
+    let _ = @num.Money::new(1000).allocate_even(0)
+    "未抛错"
+  } catch {
+    @num.NonPositiveTargets(t) => "NonPositiveTargets \{t}"
+    _ => "错种"
+  }
+  assert_eq(shape, "NonPositiveTargets 0")
+}
+```
+
+## 第二批还不含
+
+千分位**只做三位一隔这一档**，`java.text.DecimalFormat` 的 pattern 全套（`#`/`0`/前后缀/百分号混写）
+在 ROADMAP 的「不做」里；`Money` 的中文大写（hutool `toStringAndUnit`）与
+`NumberChineseFormatter`/`NumberWordFormatter` 是第三批；`Calculator` 表达式求值是第四批，
+它得先决定十进制精确算术用什么形状。逐条见
+[`docs/spec/08-num.md`](https://github.com/mldong/moon-hutool/blob/master/docs/spec/08-num.md) §6。

@@ -4,8 +4,10 @@
 /// 契约：`docs/spec/08-num.md`。期望值权威在 `num_test.mbt` 与 spec 的读数表——改任何期望串须单独一笔
 /// 并给外部读数来源（门禁 G5），实现只负责把契约里冻好的读数算出来。
 ///
-/// 本批只做**数论 + 十进制舍入**这一格。剩下的三格各自是一整块，不混进这份契约：
-/// 千分位/百分比格式化 + `Money` 薄档（第二批）、中文数字与英文 word（第三批）、`Calculator` 表达式求值（第四批）。
+/// 第一批做**数论 + 十进制舍入**两格，外加只在精确域出的增长型算术。
+/// 第二批（#8.14~#8.25）是**输出形状不同的那一半**：千分位与百分比、`trim_trailing_zeros`、
+/// 薄 `Money`（"分"这个 `Int64` + 两种分配）。剩下两格各自是一整块，不混进来：
+/// 中文数字与英文 word（第三批）、`Calculator` 表达式求值（第四批）。
 /// 分界的理由与本批逐条读数来源见 spec §1、§4、§6。
 ///
 /// 四条贯穿性规则（spec §0，这四条决定了本包哪些函数存在、哪些不存在）：
@@ -38,6 +40,17 @@ pub suberror NumError {
   NegativeFactorial(Int)
   /// `(n, m)` 原样两个读数：组合数/排列数的阶乘定义域是自然数
   NegativeCount(Int, Int)
+  /// 给进来的原串：它不是一个十进制数（第二批的 `trim_trailing_zeros` / `Money::from_yuan_str` 用）
+  NotDecimal(String)
+  /// 给进来的份数（`<= 0` 的那个值——分成 0 份不是"空分配"，是没有答案）
+  NonPositiveTargets(Int)
+  /// 给进来的那个负比例（比例分配里每一项都必须 `>= 0`）
+  NegativeRatio(Int)
+  /// 比例的**和**（`<= 0` 时没有分母可用；带和是因为逐项符号可能互相抵消，调用方不易一眼看出）
+  RatioSumNotPositive(Int64)
+  /// 分的加减或 `cent * ratio` 超出 `Int64` 可表范围。
+  /// **不带载荷**：两个操作数调用方都有，"越界"这件事本身就是新信息（同 `mapx` 的不带载荷立场）
+  MoneyOverflow
 }
 
 ///|
@@ -704,4 +717,265 @@ fn zero_run(n : Int) -> String {
     i += 1
   }
   s
+}
+
+///|
+/// 千分位分组：先按 #8.11 的十进制舍入拿到最短十进制的定点串，再对**整数部分**从右往左三位一隔
+///
+/// - Parameters:
+///   - `x`：任意有限 `Double`
+///   - `scale`：小数位数，可为负；界与语义与 #8.11 完全一致（复用同一条腿，不另立一套舍入）
+///   - `mode`：舍入模式，默认 `HalfUp`
+///   - `sep`：分组符，默认 `,`
+///   - `decimal_sep`：小数点符，默认 `.`
+/// - Returns: 分组后的平格式串。负号在最外层不参与分组（`-1234.5` ⇒ `"-1,234.50"`），
+///   小数位数仍恰好 = `scale`，整数位不够三位就不挂分隔符（`123` ⇒ `"123"`）
+/// - Raises: 同 #8.11（`NotFinite`、`ScaleOutOfRange`）
+/// - Note: hutool 对位是 `NumberUtil.decimalFormat("#,##0.00", v)`，**那一档本库不跟随**，理由有两条实测：
+///   ① `DecimalFormat` 对 `double` 的**二进制精确值**舍入，与 `BigDecimal.valueOf`（最短十进制）
+///   **是两个族**——本机 JDK 17 同输入对撞：`2.675` 舍两位 `DecimalFormat` 给 `"2.67"`、
+///   `BigDecimal` 族给 `"2.68"`；`-0.0` 前者保留负零 `"-0.00"`、后者给 `"0.00"`。
+///   本库整个数值件只认最短十进制这一个族（与 #8.11 一致），不允许一个库里对同一个数给两种答案；
+///   ② `DecimalFormat` 还跟 JVM 默认 locale（分隔符、负零、组大小都可能变）⇒ 读数无法跨环境冻结。
+///   所以这里只承诺"三位一隔"这一档封闭形状，pattern 全套（`#`/`0`/前缀后缀/百分号/千分位混写）在「不做」清单里
+pub fn format_thousands(
+  x : Double,
+  scale : Int,
+  mode? : RoundingMode = RoundingMode::HalfUp,
+  sep? : Char = ',',
+  decimal_sep? : Char = '.',
+) -> String raise NumError {
+  let _ = x
+  let _ = scale
+  let _ = mode
+  let _ = sep
+  let _ = decimal_sep
+  abort("moon-hutool: num.format_thousands 未实现（spec 08-num #8.14）")
+}
+
+///|
+/// 百分比：把**十进制小数点右挪两位**（不是浮点乘 100），再按 #8.11 舍到 `scale` 位，最后挂后缀
+///
+/// - Parameters:
+///   - `x`：任意有限 `Double`，`0.125` 就是 12.5%
+///   - `scale`：百分号**前**那个数的 decimal 位数，`>= -323` 且 `<= 308`（同 #8.11）
+///   - `mode`：舍入模式，默认 `HalfUp`
+///   - `suffix`：后缀，默认 `"%"`（要别的自己传，本库不做 locale 货币符号）
+/// - Returns: 平格式串挂后缀，如 `"12.50%"`；不保留负零（`-0.0` ⇒ `"0.00%"`）
+/// - Raises: 同 #8.11
+/// - Note: hutool 对位 `NumberUtil.formatPercent(double, scale)` 走
+///   `NumberFormat.getPercentInstance()`——**它随 JVM 默认 locale 变**（分隔符、舍入、组大小都可能不同），
+///   且和 `DecimalFormat` 同属"二进制精确值"那一族 ⇒ 本库不跟随，改走最短十进制挪点。
+///   实测过分岔一条：`0.145` 舍到 0 位，本库 `HalfUp` 给 `"15%"`（挪点是十进制精确的，
+///   14.5 就是 14.5），`DecimalFormat` 给 `"14%"`（它看到的是 14.499999999999998）
+pub fn format_percent(
+  x : Double,
+  scale : Int,
+  mode? : RoundingMode = RoundingMode::HalfUp,
+  suffix? : String = "%",
+) -> String raise NumError {
+  let _ = x
+  let _ = scale
+  let _ = mode
+  let _ = suffix
+  abort("moon-hutool: num.format_percent 未实现（spec 08-num #8.15）")
+}
+
+///|
+/// 去掉十进制串小数部分的尾随零；小数位清空时连小数点一起去掉
+///
+/// - Parameters:
+///   - `s`：一个十进制串（可带符号、可没有小数部分）
+/// - Returns: 最短的等值平格式串。**整数的尾随零不动**（`"100"` 还是 `"100"`，不会变成 `1E+2` 那类指数形状）；
+///   零档不保留负号（`"-0.00"` ⇒ `"0"`）
+/// - Raises: `NumError.NotDecimal(s)`：输入不是十进制串（实测 JDK 的 `new BigDecimal("abc")` 与
+///   `new BigDecimal("1.2.3")` 都抛 `NumberFormatException`，本库把它换成带原串的类型化错误）
+/// - Note: hutool 对位 `NumberUtil.toStr(bigDecimal, isStripTrailingZeros)`——它挂在 `BigDecimal` 上，
+///   本库没有 `BigDecimal`，所以这一件的输入是**串**而不是数值。逐条读数由本机 JDK 17 的
+///   `new BigDecimal(s).stripTrailingZeros().toPlainString()` 出（9 条与我草稿全等，但仍以 JDK 那一份为准）
+pub fn trim_trailing_zeros(s : String) -> String raise NumError {
+  let _ = s
+  abort("moon-hutool: num.trim_trailing_zeros 未实现（spec 08-num #8.16）")
+}
+
+///|
+/// 薄 `Money`——**固定两位小数，内部就是"分"这个 `Int64`**
+///
+/// 三条取舍（都在 spec §10 里逐条给了依据）：
+/// 1. **不做多币种小数位**：hutool 的 `Money` 带 `Currency`，`centFactor = 10^digit` 会变；
+///    本库固定两位（消费端都是人民币/美元这类两位货币），要别的精度请用 #8.11 自己舍。
+/// 2. **分用 `Int64` 而不是 `BigInt`**：`Int64` 定宽 64 位，**三档与 native 同宽**，
+///    所以"越界"是一条可以冻结的读数（`Int` 做不到——宽度随目标变）。
+///    `BigInt` 会让每次加减乘都造大数，而 9.2e18 分 = 9.2e16 元，真实金额量级远够不到；
+///    够不到但会越过边界的操作（`add`、`cent * ratio`）**必须显式 `raise`**，
+///    因为 hutool 那侧是 `long` 静默回绕（源码 `(cent * ratios[i]) / total` 没有任何防线）。
+/// 3. **中文大写不做**：hutool `Money.toStringAndUnit`/`NumberChineseFormatter` 那一档属于第三批
+pub(all) struct Money {
+  /// 分。可以为负（债务），`0` 就是零
+  cent : Int64
+}
+
+///|
+/// 用"分"直接构造
+///
+/// - Parameters:
+///   - `cent`：分值，可为负
+/// - Returns: 表示 `cent / 100` 元的金额
+/// - Note: 这是唯一的构造入口以外的直通档——它不做任何舍入（分本来就是整数），
+///   所以 `Money::new(5).to_string()` 就是 `"0.05"`
+pub fn Money::new(cent : Int64) -> Money {
+  let _ = cent
+  abort("moon-hutool: num.Money::new 未实现（spec 08-num #8.17）")
+}
+
+///|
+/// 从**十进制元串**构造（hutool `Money(String amount)` 那一档的对位）
+///
+/// - Parameters:
+///   - `s`：十进制串，小数位数不限（`"12.345"`）
+///   - `mode`：舍到两位时用的模式，默认 **`HalfEven`**
+/// - Returns: 分。`"12.345"` ⇒ `1234`（平局向偶数，4 是偶数 ⇒ 舍到 1234）
+/// - Raises: `NotDecimal(s)`、`MoneyOverflow`（元值大到分装不进 `Int64`）
+/// - Note: 默认档 `HalfEven` 是**照 hutool 的 `Money.DEFAULT_ROUNDING_MODE = RoundingMode.HALF_EVEN`**，
+///   与本包 #8.11/#8.14 的默认 `HalfUp` **不对称**——这个不对称是 hutool 自己书里的（`NumberUtil.round`
+///   用 HALF_UP、`Money` 用 HALF_EVEN），两处都跟随比"顺手统一"更负责。要 HalfUp 就显式传
+pub fn Money::from_yuan_str(
+  s : String,
+  mode? : RoundingMode = RoundingMode::HalfEven,
+) -> Money raise NumError {
+  let _ = s
+  let _ = mode
+  abort(
+    "moon-hutool: num.Money::from_yuan_str 未实现（spec 08-num #8.18）",
+  )
+}
+
+///|
+/// 从 `Double` 构造元值
+///
+/// - Parameters:
+///   - `yuan`：任意有限 `Double`
+///   - `mode`：舍到两位的模式，默认 `HalfEven`
+/// - Returns: 分。走**最短十进制**挪点，与 #8.11/#8.14 同一条路
+/// - Raises: `NotFinite`、`MoneyOverflow`
+/// - Note: **不跟随 hutool 的 `Money(double)`**——那条构造写的是
+///   `this.cent = Math.round(amount * getCentFactor())`：先做**浮点乘法**再用 `Math.round`
+///   （= `floor(x + 0.5)`），同类的 `Money(BigDecimal)` 那条路才用 `DEFAULT_ROUNDING_MODE`，
+///   也就是 hutool 自己两条构造路口径不同，且 `double` 那条根本没走它宣称的银行家舍入。
+///   本机三档分岔实测（本库 / hutool 的 double 路）：`0.025` ⇒ `2` / `3`；
+///   `0.005` ⇒ `0` / `1`；`12.345` ⇒ `1234` / `1235`。本库只留一条口径：最短十进制 + 显式模式
+pub fn Money::from_yuan(
+  yuan : Double,
+  mode? : RoundingMode = RoundingMode::HalfEven,
+) -> Money raise NumError {
+  let _ = yuan
+  let _ = mode
+  abort("moon-hutool: num.Money::from_yuan 未实现（spec 08-num #8.19）")
+}
+
+///|
+/// 取回分值
+///
+/// - Returns: 构造后存储的 `Int64` 分，不做任何换算
+/// - Note: 元方向的读数一律走 `to_string`（精确）或 `to_yuan`（`Double`，可能不可表）；
+///   `cent` 是这里唯一的"整数出口"，所以溢出检查都发生在**进**的那一侧
+pub fn Money::cent(self : Money) -> Int64 {
+  self.cent
+}
+
+///|
+/// 换算成 `Double` 元值
+///
+/// - Returns: `cent / 100.0`
+/// - Note: **不承诺精确**——`0.07` 这类值在 `Double` 里没有精确表示，要形状用 `to_string`。
+///   这一件存在的理由是"要和浮点接口对接"，不是"要一个可信的元值"
+/// - 恒不失败：`Int64` 的分转成 `Double` 元最多损失尾数，不会溢出
+pub fn Money::to_yuan(self : Money) -> Double {
+  let _ = self
+  abort("moon-hutool: num.Money::to_yuan 未实现（spec 08-num #8.20）")
+}
+
+///|
+/// 平格式元值串，**恒两位小数**
+///
+/// - Returns: 如 `"12.34"`、`"0.05"`、`"-12.34"`；`0` 分 ⇒ `"0.00"`，**不保留负零**
+///   （`Money::new(0)` 与 `-0` 分是同一个值）
+/// - Note: hutool 对位 `Money.toString()`（= `getAmount().toString()`，`BigDecimal` 的 scale=2 读数），
+///   本库自己按分拼串，逐条与 JDK 对撞过（含 `Int64::MAX` 分那一条）
+pub fn Money::to_string(self : Money) -> String {
+  let _ = self
+  abort("moon-hutool: num.Money::to_string 未实现（spec 08-num #8.21）")
+}
+
+///|
+/// 加法（分域，无精度损失）
+///
+/// - Parameters:
+///   - `other`：加数
+/// - Returns: 两笔金额之和
+/// - Raises: `MoneyOverflow`：和越过 `Int64` 边界。**这里不静默回绕**——同族风险见 hutool
+///   `Money.allocate` 里那句 `(cent * ratios[i]) / total`，它连溢出检查都没有
+pub fn Money::add(self : Money, other : Money) -> Money raise NumError {
+  let _ = self
+  let _ = other
+  abort("moon-hutool: num.Money::add 未实现（spec 08-num #8.22）")
+}
+
+///|
+/// 减法
+///
+/// - Parameters:
+///   - `other`：减数
+/// - Returns: 差，可为负
+/// - Raises: `MoneyOverflow`（同 `add`）
+pub fn Money::sub(self : Money, other : Money) -> Money raise NumError {
+  let _ = self
+  let _ = other
+  abort("moon-hutool: num.Money::sub 未实现（spec 08-num #8.23）")
+}
+
+///|
+/// 平均分成 `targets` 份，**余数发给最前面几份**
+///
+/// - Parameters:
+///   - `targets`：份数，必须 `>= 1`
+/// - Returns: 长度为 `targets` 的数组，**和恒等于原值**，任意两份之差 `<= 1` 分。
+///   先按 `|cent|` 分配再回贴符号（`-1000` 分 3 份 ⇒ `[-334, -333, -333]`）
+/// - Raises: `NonPositiveTargets(targets)`（0 份不是"空分配"，是没有答案）、`MoneyOverflow`
+/// - Note: hutool 对位 `Money.allocate(int)`——正档逐条跟随（`low = cent/targets`、
+///   `high = low + 1`、前 `cent % targets` 份拿 `high`），**负档不跟随**：那侧
+///   `remainder = cent % targets` 是负数，于是 `for (i = 0; i < remainder; i++)` 一次都不跑，
+///   分完的和不回原值；份数与索引错配时还会 `ArrayIndexOutOfBoundsException`。
+///   本库把负档规则化（对称分配），并由用例断言"和 == 原值"这条不变量
+pub fn Money::allocate_even(
+  self : Money,
+  targets : Int,
+) -> Array[Money] raise NumError {
+  let _ = self
+  let _ = targets
+  abort(
+    "moon-hutool: num.Money::allocate_even 未实现（spec 08-num #8.24）",
+  )
+}
+
+///|
+/// 按比例分配，**余数发给最前面几份**
+///
+/// - Parameters:
+///   - `ratios`：各项比例，必须全部 `>= 0` 且和 `> 0`
+/// - Returns: 与 `ratios` 同长的数组，**和恒等于原值**。逐份 `|cent| * ratio / sum` 向零截断，
+///   再把余下的分按索引序每份 +1（这正是 hutool `Money.allocate(long[])` 的算法）
+/// - Raises: `NegativeRatio(r)`、`RatioSumNotPositive(sum)`（全零比例没有分母）、
+///   `MoneyOverflow`（`|cent| * ratio` 越过 `Int64`——hutool 的 `long` 在这里静默回绕，本库不跟随）
+/// - Note: 比例全为 0 与出现负数是**两种不同的错**（前者是"没有分母"，后者是"方向都没定"），
+///   所以两个变体不合并
+pub fn Money::allocate_by_ratio(
+  self : Money,
+  ratios : Array[Int],
+) -> Array[Money] raise NumError {
+  let _ = self
+  let _ = ratios
+  abort(
+    "moon-hutool: num.Money::allocate_by_ratio 未实现（spec 08-num #8.25）",
+  )
 }

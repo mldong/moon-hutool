@@ -9,6 +9,11 @@ fn show(err : @num.NumError) -> String {
     @num.NonCoprime(a, m) => "NonCoprime \{a} \{m}"
     @num.NegativeFactorial(v) => "NegativeFactorial \{v}"
     @num.NegativeCount(n, m) => "NegativeCount \{n} \{m}"
+    @num.NotDecimal(s) => "NotDecimal \{s}"
+    @num.NonPositiveTargets(t) => "NonPositiveTargets \{t}"
+    @num.NegativeRatio(r) => "NegativeRatio \{r}"
+    @num.RatioSumNotPositive(sum) => "RatioSumNotPositive \{sum}"
+    @num.MoneyOverflow => "MoneyOverflow"
   }
 }
 

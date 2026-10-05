@@ -14,6 +14,10 @@ import {
   "mldong/moon-hutool/num",
 } for "test"
 
-// 实现已落地 ⇒ 骨架期那两条豁免（`unused_constructor` / `unused_error_type`）整行删掉：
-// 七档模式与七个错误变体现在都有人构造，每个 `raise` 点也真的 raise 了。
-// 本轮 G12 真抓到过一次：实现体落地了、豁免行却因为一笔脚本中断没删——这条不是空转门禁。
+// 第二批（薄 Money + 格式化三件）此刻是骨架 ⇒ 豁免重新挂上，三条都是"未实现"的机械后果：
+// - `unused_constructor`：`Money` 的构造与五个新错误变体还没人用
+// - `unused_error_type`：新签名写了 `raise NumError` 而体里没有 `raise`
+// - `struct_never_constructed`：`Money` 还没被构造出来过
+// 第二批实现落地那一笔必须整行删掉——G12 上一轮真拦到过它，这不是空转门禁。
+
+warnings = "-unused_constructor-unused_error_type-struct_never_constructed"

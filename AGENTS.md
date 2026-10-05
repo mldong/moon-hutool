@@ -278,3 +278,20 @@ core 数值语义侧（全部当场实测，三档 `wasm`/`js`/`wasm-gc` 读数�
 镜像侧一条硬教训：**Python 的 `//` 是 floor 除，MoonBit/Java 的整除是向零取整**。
 用 Python 复算扩展欧几里得 / 模逆 / 贝祖系数时必须写显式 `trunc_div`，否则负半边整片错——
 本轮就是先按 floor 除法跑出一批读数，靠"负数夹具的界断言不过"才发现。
+
+
+### num 第二批（10-05）四条编译器裁决 + 一条"两个族"的读数裁决
+
+- **方法定义不能写 `pub fn (m : Money) cent() -> Int64`**（本版判 `Parse error, unexpected token \`(\``）。
+  正写法与 core 的 `.mbti` 一致：`pub fn Money::cent(self : Money) -> Int64`。
+- **结构体字段不用逗号**：`cent : Int64,` 判 `Expecting a newline or \`;\` here`；裸换行分隔（照 `mapx` 的 `BiMap`/`Table` 抄）。
+- **Char 默认值不能再 `as Char`**：`sep~ : Char = ',' as Char` 判
+  `\`Char\` is not a trait object type, it cannot be used on the right hand side of \`as\``；裸 `','` 已是 `Char`。
+- **给 `suberror` 加变体会让既有的穷尽 `match` 当场报 `partial_match`**：第二批给 `NumError` 加五个变体后，
+  第一批 `num_test.mbt` 的 `show(err)` 立刻红。这是好事——新变体不会悄悄漏出错误形状展示面。
+- **Java 有两个舍入族，读数必须先选族**：`BigDecimal.valueOf(v)` 走 `Double.toString` 的**最短十进制**，
+  `DecimalFormat` 走 `double` 的**二进制精确值**。本机 JDK 17 同输入对撞：`2.675` 舍 2 位 ⇒ `"2.68"` / `"2.67"`；
+  `-0.0` 舍 2 位 ⇒ `"0.00"` / `"-0.00"`；`0.145` 舍 0 位（百分号那侧）⇒ `"15%"` / `"14%"`。
+  hutool 的 `round`/`Money` 在前一族、`decimalFormat`/`formatPercent` 在后一族（还随 JVM 默认 locale 变），
+  **它自己两半就不一致**。本库全线只认最短十进制这一族，与 `Double::to_string` 三档逐值一致是前提；
+  写格式化件之前必须先确认参照实现属于哪一族，否则"两腿对撞"会拿一个族去核对另一个族。

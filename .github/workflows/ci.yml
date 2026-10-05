@@ -34,11 +34,11 @@ jobs:
         run: moon version --all
 
       - name: Run contract gate G1-G13
-        # 基线 227 = text 23 + digest 16 + date 47 + id 32 + codec 38 + coll 16 + mapx 28 + num 27（契约冻结态也计数：
+        # 基线 244 = text 23 + digest 16 + date 47 + id 32 + codec 38 + coll 16 + mapx 28 + num 44（契约冻结态也计数：
           # 骨架期红是设计态，但用例必须被收集到，收不到就是静默丢套件）。用例只许增不许减：
           # 减到低于基线就是有用例被悄悄删掉（负向对照：本机把基线抬到 228 当场 RED）
         env:
-          BASELINE_TESTS: "227"
+          BASELINE_TESTS: "244"
           GATE_TARGETS: "wasm js"
         run: bash scripts/contract_gate.sh
 
