@@ -572,3 +572,24 @@ core 数值语义侧（全部当场实测，三档 `wasm`/`js`/`wasm-gc` 读数�
   "LFU 只删等于最小值的几条、不减其余"跑出 **0 红**——均匀减法保序，`min` 与取到 `min` 的集合都不变，
   只有计数逼近溢出才可能可观测。补跑"最小值判定取反""跳过公平减计"各 3 红才算够；
   顺带得出参照实现那句"以便新对象进入后可以公平计数"的归因是**防溢出**，不是选择规则。
+
+## hash 契约轮（10-05）：覆盖缺口要用脚本暴露，骨架期别写 `mut`
+
+- **件位置每轮现读，别照上一轮的结论套**。`dfa`/`cache` 两轮都是"hutool-core 的 jar 里没有、要另取 artifact"，
+  本轮反过来——`HashUtil`/`lang.hash.*`/`io.checksum.*` **全在 hutool-core**，一个 jar 够用。
+  同轮还翻出行里混着的 `Hashids`：它在 `codec` 且**不是哈希**（可逆编码），已从本行剔除、另判归属。
+- **生成脚本必须逐标签 `assert 读数存在`**，缺了就停。本轮第一次跑就报 `缺读数：rs.cn`，暴露的是
+  **参照腿夹具覆盖不齐**（只给六件配了非 ASCII 夹具）。两条出路：补腿，或把断言限制在已覆盖的范围——
+  本轮选了后者并明确记成欠账；**不许**"照公式自己算一个值填进去"，那是发明语义。
+  同类暴露：`crc8.init.31_0` 取不到数——腿里的标签是十进制 `49_0`，脚本按十六进制名找，标签对不上就等于漏断言。
+- **骨架期刻意不写 `mut` 字段**。本版 `unused_mut` 是 **error 级**（`Error Warning: The mutability of field … is never used`），
+  而骨架体不写状态 ⇒ 写了直接卡零警告门禁，且 `warnings` 豁免压不住 error 级。字段的 `mut` 留给落地笔按语义加
+  （`cache` 轮就是这条顺序，`.mbti` 相应前进这一档形状）。
+- **`Bytes` 的构造面只能现读**：`Bytes::new(len)` 要长度、`push_byte` 不存在；可用的是
+  `Bytes::from_array(ArrayView[Byte])` + `Int::to_byte`（截断低 8 位）。`String` 依旧没有 `slice`——
+  长夹具就把字面量直接灌进测试，别留切片依赖，免得把端点语义问题埋进契约。
+- **值兼容优先于"更正确"，但两侧读数都要留档**。三处本轮各自处置：`CRC8` 照抄参照的非标准表构造
+  （实测 2 对标准式 244，两个数都写进 spec）；`additive/rotating` 的 `prime == 0` 参照侧直接
+  `ArithmeticException`，本库换成可枚举的 `raise HashError::ZeroPrime`；Murmur 三参是 `(data, length, seed)`、
+  四参才是 `(data, offset, length, seed)`，只差一个位置 ⇒ 分成 `murmur32_len_seed` 与 `murmur32_range`，
+  把陷阱摆进名字而不是替参照补重载（64 位参照就没有 offset 档，本库也不发明）。
