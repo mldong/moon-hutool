@@ -238,3 +238,43 @@ PR-A 的合入标准：`moon check` 必须全绿（签名与类型自洽、文�
 - **长度域的字节序必须跟该算法取字的字节序一致**：MD5 是小端字 ⇒ 8 字节比特长度要按小端摆，
   SHA-256 才用网络字节序。统一按大端写的症状很阴——空串（长度 0）与全部 SHA 向量都对，
   只有"非空串的 MD5"才错，本轮就是这么撞的（镜像到 Python 逐向量比对才定位）。
+
+
+### num 轮（10-05）编译器语法五条 + core 数值语义六条实测
+
+语法侧（本轮编译器逐条裁决，别再靠猜）：
+
+- **带默认值的实参必须是标注参数**，写法 `mode~ : T = V`。`mode : T~ = V` 判词法错
+  （`unrecognized character "~"`），`mode : T = V` 判 `Only labelled arguments can have default value`；
+  `.mbti` 里这一档显示成 `mode? : T`。
+- **字符串插值要转义**：`"值 \{x}"` 才插值，裸 `{x}` 原样输出（`println("plain {s}")` 打出 `plain {s}`）。
+- **`expr catch { pat => arm }` 的各分支必须与 `expr` 同型**：`Int` 返回的调用配 `String` 分支判
+  `has type String, wanted Int`。要断"错误形状"就写 `try { let _ = f(); "未抛错" } catch { … }`
+  （`coll`/`date` 的 `err_shape` 本来就是这型，别自创糖）。
+- **指数面浮点字面量必须带小数点**：`5e-324` 判词法错，`1.0e-7`、`1.0e21` 通过；
+  且 **`Int` 字面量按当前目标位宽校验**——`4611686018427387904` 在 wasm 档直接判 out of range，
+  大整数夹具一律走 `BigInt::from_string`。
+- 数字字面量点方法要加括号（`(1500000000).next_power_of_two()`，同上一轮 `32.to_byte()` 那条）。
+
+core 数值语义侧（全部当场实测，三档 `wasm`/`js`/`wasm-gc` 读数一致；native 由 CI 出证）：
+
+- **越界是静默回绕，不是 abort**：`(2147483647).mul(2)` 给 `-2`、`(-2147483647 - 1).abs()` 给
+  `-2147483648`、`BigInt::from_string("2147483648").to_int()` 给 `-2147483648`、20 位的
+  `99999999999999999999.to_int()` 给 `1661992959`（就是 `mod 2^32` 的补码读法）、
+  `Int64(2^40).to_int()` 给 `0`。⇒ 本库的增长型算术只在 `BigInt` 域，断言里**一次 `.to_int()` 都不做**，
+  全比 `.to_string()`。
+- `Int::next_power_of_two` 的**源码把 32 位写死**（`let max_power_of_two = 1073741824` 与
+  `2147483647 >> ((self - 1).clz() - 1)`）⇒ 在 64 位 `Int` 的 native 档这条语义可疑，本库不依赖也不包装。
+- `Double::round()` 是 `floor(x + 0.5)`：`(-0.5)→0`、`(-3.5)→-3`（**向数轴正向**），
+  与 `java.math.RoundingMode.HALF_UP`（向绝对值增大）在负半边分岔 ⇒ `num` 的件不叫 `round` 叫 `round_to`，
+  并把这处分岔钉成用例。
+- `Double::to_string` 形如 ECMAScript `Number::toString`（`1e+21`、`123456789012345680`、`-0.0` 打 `0`），
+  三档逐值一致；位数超 21 走指数记法。**"最短十进制"这条在四档上是同一个数**，所以十进制舍入可以跨档冻结。
+- `@string.parse_*` 的口径（格式化那批要用）：`parse_int` **拒绝**首尾空白、接受 `_` 分隔与 `0x` 前缀、
+  超范围报错；`parse_double` 接受 `nan`/`inf`/`Infinity`/`.5`/`1.`/`+1.5`、拒绝空白与 `1,0`；
+  `"1e309"` **报错**（不给 Infinity）、`"1e-324"` 给 `0`（下溢不报）。
+- `@math.pi` 已废弃 ⇒ 用 `@math.PI`（本库不装常数，只在文档记一条）。
+
+镜像侧一条硬教训：**Python 的 `//` 是 floor 除，MoonBit/Java 的整除是向零取整**。
+用 Python 复算扩展欧几里得 / 模逆 / 贝祖系数时必须写显式 `trunc_div`，否则负半边整片错——
+本轮就是先按 floor 除法跑出一批读数，靠"负数夹具的界断言不过"才发现。

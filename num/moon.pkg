@@ -1,1 +1,20 @@
-// 依赖在此声明；占位期不 import 任何 core 包（未使用的 import 会吃 unused_package 警告并卡零警告门禁）
+// `lcm`/`factorial`/`combination_count`/`arrangement_count` 的签名就带 `BigInt`
+// （增长型算术只在精确域出，理由见 spec §0.1 与 #8.6），所以本包**非测试**侧要 import core 的
+// bigint——零依赖契约只允许 `moonbitlang/core`，这一条在内。
+import {
+  "moonbitlang/core/bigint",
+}
+
+// 测试侧：BigInt 造夹具与判等、`@double` 的 NaN/±Infinity 喂报错面（对拍腿走 core 现成件，见 G8）
+import {
+  "moonbitlang/core/bigint",
+  "moonbitlang/core/double",
+  "mldong/moon-hutool/num",
+} for "test"
+
+// 骨架期豁免（全是"未实现"的机械后果，不是代码缺陷）：
+// - `unused_constructor`：`RoundingMode` 的七档与 `NumError` 的七个变体还没人构造
+// - `unused_error_type`：签名写了 `raise NumError` 而体里没有 `raise`
+// 实现落地那一笔必须整行删掉——门禁 G12 拦着不让忘。
+
+warnings = "-unused_constructor-unused_error_type"

@@ -85,8 +85,8 @@
 | `ZipUtil`/gzip/deflate | 无 | — | `docs/ROADMAP.md` 的「暂不做」档（RFC 1951 独立工程） |
 | `CSV`/`Props`/`Ini` | 无 | ③ `csv`、`ini`（P5，**API 只收 `String`/`Bytes`**） | 文件读写 |
 | `Convert`（注册表 + 反射） | `json::{to_json,from_json,derive}` **已有** | ① `conv`（P3：`Json`→类型显式 `match`，无反射） | 运行时类型探测 |
-| `NumberUtil`/`BigDecimal` | `BigInt::pow(exp, modulus?)`、`math::*`、`double::*`；**无 Decimal、无 gcd/lcm** | ③ `num`（P3：含 `gcd/lcm/ext_gcd/mod_inverse`）+ 薄 `Money`（`Int64` 分 + `allocate`） | 完整 `BigDecimal` 语义、`DecimalFormat` 全套 pattern |
-| `NumberChineseFormatter` | 无 | ③ `num`（P3） | GB/T 2260 地址表、农历表（二期独立数据件） |
+| `NumberUtil`/`MathUtil`（数论与舍入那一半） | `BigInt::pow(exp, modulus?)`、`math::*`、`double::*`；**无 Decimal、`gcd`/`lcm`/`mod_inverse` 零命中** | ③ `num` **第一批契约已冻结**（`docs/spec/08-num.md` #8.1~#8.13）：`gcd`/`ext_gcd`/`mod_inverse`/`is_prime`/`isqrt` 在 `Int` 域，`lcm`/`factorial`/`combination_count`/`arrangement_count` 只在 `BigInt` 域，`round_to_str`/`round_to` 走 `RoundingMode` 七档 | 完整 `BigDecimal` 语义、`DecimalFormat` 全套 pattern；判定类 `isNumber`/`parseInt(default)` **不做**（不造 `Bool` 哨兵）；`divisor`/`isPrimes`/`sqrt(long)`/`factorial(long)` 四处不跟随各有源码级依据（spec §5） |
+| `NumberChineseFormatter`/`NumberWordFormatter`/`Calculator`/`Money` | 无 | ③ `num` 后三批：格式化与薄 `Money`（第二批）、中文数字四模式 + 反向解析与英文 word（第三批）、表达式求值（第四批，得先钉十进制精确算术的形状） | GB/T 2260 地址表、农历表（二期独立数据件）；hutool 的 `factorial(start, end)` 在 `start < end` 时返回 0，这条反直觉读数不复制 |
 | `IdUtil`（UUID/雪花/ObjectId/NanoId） | `random.Rand` + `env.rand(n)->Bytes?` 是熵源；**无 uuid** | ② `id`（P1：worker/dataCenter/时钟**全显式注入**） | hutool 用 PID+IP 自动派生 workerId（MoonBit 无此接口）；`ObjectId` 布局与 MongoDB 官方不同，按 hutool 实现并注明 |
 | `RandomUtil` | `random.Rand::{int,int64,uint64,double,boolean,bigint,shuffle}` + `Array::shuffle` | ③ `rand`（P1：62 字符表、加权抽样、secure/pseudo 双通道） | 无熵时静默降级（必须明确报错） |
 

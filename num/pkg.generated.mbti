@@ -1,11 +1,54 @@
 // Generated using `moon info`, DON'T EDIT IT
 package "mldong/moon-hutool/num"
 
+import {
+  "moonbitlang/core/bigint",
+}
+
 // Values
+pub fn arrangement_count(Int, Int) -> @bigint.BigInt raise NumError
+
+pub fn combination_count(Int, Int) -> @bigint.BigInt raise NumError
+
+pub fn ext_gcd(Int, Int) -> (Int, Int, Int)
+
+pub fn factorial(Int) -> @bigint.BigInt raise NumError
+
+pub fn gcd(Int, Int) -> Int
+
+pub fn is_prime(Int) -> Bool
+
+pub fn isqrt(Int) -> Int raise NumError
+
+pub fn lcm(@bigint.BigInt, @bigint.BigInt) -> @bigint.BigInt
+
+pub fn mod_inverse(Int, Int) -> Int raise NumError
+
+pub fn round_to(Double, Int, mode? : RoundingMode) -> Double raise NumError
+
+pub fn round_to_str(Double, Int, mode? : RoundingMode) -> String raise NumError
 
 // Errors
+pub suberror NumError {
+  ScaleOutOfRange(Int)
+  NotFinite
+  NegativeRadicand(Int)
+  InvalidModulus(Int)
+  NonCoprime(Int, Int)
+  NegativeFactorial(Int)
+  NegativeCount(Int, Int)
+}
 
 // Types and methods
+pub(all) enum RoundingMode {
+  Up
+  Down
+  Ceiling
+  Floor
+  HalfUp
+  HalfDown
+  HalfEven
+}
 
 // Type aliases
 
