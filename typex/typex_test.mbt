@@ -5,44 +5,6 @@
 // `compareTo` 的具体返回值不进契约（只钉符号档），参照自己给的 `hashCode` 只钉"同不同"这一位。
 
 ///|
-fn esc(s : String) -> String {
-  let digits = [
-    "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d", "e", "f",
-  ]
-  fn h4(v : Int) -> String {
-    digits[(v >> 12) & 0xf] +
-    digits[(v >> 8) & 0xf] +
-    digits[(v >> 4) & 0xf] +
-    digits[v & 0xf]
-  }
-  let mut out = ""
-  for c in s.to_array() {
-    let cp = c.to_int()
-    if cp == 0x5c {
-      out = out + "\\\\"
-    } else if cp == 0x0d {
-      out = out + "\\r"
-    } else if cp == 0x0a {
-      out = out + "\\n"
-    } else if cp == 0x09 {
-      out = out + "\\t"
-    } else if cp > 0xffff {
-      let x = cp - 0x10000
-      out = out +
-        "\\u" +
-        h4(0xd800 + (x >> 10)) +
-        "\\u" +
-        h4(0xdc00 + (x & 0x3ff))
-    } else if cp < 0x20 || cp == 0x7f || cp > 0x7e {
-      out = out + "\\u" + h4(cp)
-    } else {
-      out = out + c.to_string()
-    }
-  }
-  out
-}
-
-///|
 fn joinx(a : Array[String], sep : String) -> String {
   let mut out = ""
   let mut first = true
@@ -497,6 +459,93 @@ test "Version 比较：非数字段与前后缀、大小写档" {
     ),
     false,
   ) // V23.eq|false
+
+  assert_eq(@typex.version_to_string(@typex.version_of("z1.0")), "z1.0") // V25.to_string|z1.0
+  assert_eq(
+    sign_of(
+      @typex.version_compare(
+        @typex.version_of("z1.0"),
+        @typex.version_of("999.0"),
+      ),
+    ),
+    "-",
+  ) // V25.cmp|-
+  assert_eq(
+    @typex.version_equals(@typex.version_of("z1.0"), @typex.version_of("999.0")),
+    false,
+  ) // V25.eq|false
+
+  assert_eq(@typex.version_to_string(@typex.version_of("1.2.3")), "1.2.3") // V26.to_string|1.2.3
+  assert_eq(
+    sign_of(
+      @typex.version_compare(
+        @typex.version_of("1.2.3"),
+        @typex.version_of("1.2.3-SNAPSHOT"),
+      ),
+    ),
+    "+",
+  ) // V26.cmp|+
+  assert_eq(
+    @typex.version_equals(
+      @typex.version_of("1.2.3"),
+      @typex.version_of("1.2.3-SNAPSHOT"),
+    ),
+    false,
+  ) // V26.eq|false
+
+  assert_eq(@typex.version_to_string(@typex.version_of("")), "") // V27.to_string|
+  assert_eq(
+    sign_of(
+      @typex.version_compare(
+        @typex.version_of(""),
+        @typex.version_of("1.2.3-beta"),
+      ),
+    ),
+    "-",
+  ) // V27.cmp|-
+  assert_eq(
+    @typex.version_equals(
+      @typex.version_of(""),
+      @typex.version_of("1.2.3-beta"),
+    ),
+    false,
+  ) // V27.eq|false
+
+  assert_eq(@typex.version_to_string(@typex.version_of("1.2.3.A")), "1.2.3.A") // V28.to_string|1.2.3.A
+  assert_eq(
+    sign_of(
+      @typex.version_compare(
+        @typex.version_of("1.2.3.A"),
+        @typex.version_of("1.2.3.a"),
+      ),
+    ),
+    "-",
+  ) // V28.cmp|-
+  assert_eq(
+    @typex.version_equals(
+      @typex.version_of("1.2.3.A"),
+      @typex.version_of("1.2.3.a"),
+    ),
+    false,
+  ) // V28.eq|false
+
+  assert_eq(@typex.version_to_string(@typex.version_of("1.2.3.a")), "1.2.3.a") // V29.to_string|1.2.3.a
+  assert_eq(
+    sign_of(
+      @typex.version_compare(
+        @typex.version_of("1.2.3.a"),
+        @typex.version_of("1.2.3.A"),
+      ),
+    ),
+    "+",
+  ) // V29.cmp|+
+  assert_eq(
+    @typex.version_equals(
+      @typex.version_of("1.2.3.a"),
+      @typex.version_of("1.2.3.A"),
+    ),
+    false,
+  ) // V29.eq|false
 }
 
 ///|
@@ -571,8 +620,8 @@ test "PageUtil 首末页号与总页数（firstPageNo = 0 档）" {
   assert_eq(arr_str(@typex.page_rainbow_count(2, 2, 1)), "2") // P50003.rainbow3|2
   assert_eq(arr_str(@typex.page_rainbow_count(-3, 8, 4)), "1,2,3,4") // P50004.rainbow3|1,2,3,4
   assert_eq(arr_str(@typex.page_rainbow_count(9, 10, 3)), "8,9,10") // P50005.rainbow3|8,9,10
-  // P6000.segment|参照给 Segment 对象（cn.hutool.core.lang.DefaultSegment@7aec35a），本库不收（spec §1）
-  // P6001.segment|参照给 Segment 对象（cn.hutool.core.lang.DefaultSegment@42110406），本库不收（spec §1）
+  // P6000.segment|参照给 Segment 对象（默认 Object.hashCode 的十六进制是宿主态，不进读数），本库不收（spec §1）
+  // P6001.segment|参照给 Segment 对象（默认 Object.hashCode 的十六进制是宿主态，不进读数），本库不收（spec §1）
   @typex.typex_set_first_page_no(0) // 档位先设后测（全局静态）
   assert_eq(@typex.page_get_start(0, 10), 0) // P0.start|0
   @typex.typex_set_first_page_no(0)

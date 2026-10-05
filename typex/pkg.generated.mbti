@@ -31,6 +31,8 @@ pub fn version_to_string(Version) -> String
 // Errors
 
 // Types and methods
+type Token
+
 pub struct Version {
   // private fields
 }
