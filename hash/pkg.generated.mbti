@@ -2,10 +2,107 @@
 package "mldong/moon-hutool/hash"
 
 // Values
+pub fn additive_hash(String, Int) -> Int raise HashError
+
+pub fn ap_hash(String) -> Int
+
+pub fn bernstein(String) -> Int
+
+pub fn bkdr_hash(String) -> Int
+
+pub fn dek_hash(String) -> Int
+
+pub fn djb_hash(String) -> Int
+
+pub fn elf_hash(String) -> Int
+
+pub fn fnv_hash(String) -> Int
+
+pub fn fnv_hash_bytes(Bytes) -> Int
+
+pub fn hf_hash(String) -> Int64
+
+pub fn hf_ip_hash(String) -> Int64
+
+pub fn int_hash(Int) -> Int
+
+pub fn java_default_hash(String) -> Int
+
+pub fn js_hash(String) -> Int
+
+pub fn mix_hash(String) -> Int64
+
+pub fn murmur32(String) -> Int
+
+pub fn murmur32_bytes(Bytes) -> Int
+
+pub fn murmur32_len_seed(Bytes, Int, Int) -> Int
+
+pub fn murmur32_range(Bytes, Int, Int, Int) -> Int
+
+pub fn murmur64(String) -> Int64
+
+pub fn murmur64_bytes(Bytes) -> Int64
+
+pub fn murmur64_len_seed(Bytes, Int, Int) -> Int64
+
+pub fn new_crc16(Crc16Variant) -> Crc16
+
+pub fn new_crc8(Int, Int) -> Crc8
+
+pub fn one_by_one_hash(String) -> Int
+
+pub fn pjw_hash(String) -> Int
+
+pub fn rotating_hash(String, Int) -> Int raise HashError
+
+pub fn rs_hash(String) -> Int
+
+pub fn sdbm_hash(String) -> Int
+
+pub fn tianl_hash(String) -> Int64
 
 // Errors
+pub suberror HashError {
+  ZeroPrime
+}
 
 // Types and methods
+pub struct Crc16 {
+  variant : Crc16Variant
+  value : Int
+}
+pub fn Crc16::crc16_hex_value(Self, Bool) -> String
+pub fn Crc16::crc16_reset(Self) -> Unit
+pub fn Crc16::crc16_update(Self, Bytes) -> Unit
+pub fn Crc16::crc16_update_byte(Self, Int) -> Unit
+pub fn Crc16::crc16_update_range(Self, Bytes, Int, Int) -> Unit
+pub fn Crc16::crc16_value(Self) -> Int
+
+pub(all) enum Crc16Variant {
+  Ansi
+  Ccitt
+  CcittFalse
+  Dnp
+  Ibm
+  Maxim
+  Modbus
+  Usb
+  X25
+  XModem
+}
+
+pub struct Crc8 {
+  polynomial : Int
+  init : Int
+  value : Int
+  table : Array[Int]
+}
+pub fn Crc8::crc8_reset(Self) -> Unit
+pub fn Crc8::crc8_update(Self, Bytes) -> Unit
+pub fn Crc8::crc8_update_byte(Self, Int) -> Unit
+pub fn Crc8::crc8_update_range(Self, Bytes, Int, Int) -> Unit
+pub fn Crc8::crc8_value(Self) -> Int
 
 // Type aliases
 
