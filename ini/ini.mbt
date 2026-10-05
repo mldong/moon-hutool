@@ -747,3 +747,140 @@ pub fn ini_get_str_not_empty(
 pub fn ini_store_with_opts(gm : GroupedMap, opts : IniParseOpts) -> String {
   store_text(gm, opts.assign_flag)
 }
+
+///|
+// —— 第二批：`Props` 的 java.util.Properties 严格语义（`#22.26` 起，权威参照是 JDK 不是 hutool）——
+// 参照 `cn.hutool.setting.dialect.Props` 的解析全部转手 `super.load(reader)`，所以这一半的真相在
+// `java.util.Properties`（本机 JDK 17.0.14 现读）；与第一批的 INI 面**同名不同语义**：
+// 分隔符是 `=`/`:`/空白三档、裸键给空值、注释符 `#` 与 `!` 两个、反斜杠参与语法（续行 + `\t\n\f\r\\` + `\uXXXX`）、
+// 空白表是 JDK 的 `Character.isWhitespace` 族而不是 §3-1 的 34 位表（`00a0`/`3000` 在这里原样保留）。
+// 两批共用一个包但**不共用任何函数**：容器不同（`Props` 是扁平有序表，`GroupedMap` 带分组与陈旧缓存）、
+// trim 不同、行形状不同。
+
+///|
+/// #22.26 解析错误面。参照唯一实测可复现的失败：畸形的 `\uXXXX`（长度不足或含非十六进制字符）⇒
+/// `java.lang.IllegalArgumentException: Malformed \uxxxx encoding.`（腿 4 条 ERR 读数全在这一族）。
+/// 本库只映射"哪一档"，不复制 Java 文案；不携带位置（参照的异常文案里也没有位置信息）。
+pub suberror PropsError {
+  BadUnicodeEscape
+}
+
+///|
+/// #22.27 扁平属性表。对位 `java.util.Properties`（本质是 `Hashtable<Object,Object>`，
+/// 但 `load`/`setProperty` 只写 String，且 null 键或 null 值直接 `NullPointerException` ⇒ 本库两侧都收非空 `String`）。
+/// 参照无序，本库把顺序定成"首次出现位置"（后写覆盖值不改位置）——这条是本库自定，声明在 spec §8 第 8 条。
+pub struct Props {
+  priv order : Array[String]
+  priv values : Array[String]
+}
+
+///|
+/// #22.28 空表
+/// - Raises: 无
+/// - Note: hutool 对位 `Props.create()`（转手 `new Properties()` 的形状）
+pub fn props_new() -> Props {
+  abort("moon-hutool PR-B：契约骨架，见 docs/spec/22-ini.md #22.28")
+}
+
+///|
+/// #22.29 严格按 `java.util.Properties.load` 解析
+/// - Raises: `PropsError::BadUnicodeEscape`——畸形 `\u` 序列（参照在这一档抛 `IllegalArgumentException`）
+/// - Note: hutool 对位 `Props` 转手的 `super.load(reader)`；分隔符三档、裸键空值、`#`/`!` 注释、
+///   行尾 `\` 续行（注释行也一样续行，会把下一行整行吞掉）
+pub fn props_parse(text : String) -> Props raise PropsError {
+  abort("moon-hutool PR-B：契约骨架，见 docs/spec/22-ini.md #22.29")
+}
+
+///|
+/// #22.30 取值
+/// - Raises: 无
+/// - Note: hutool 对位 `Properties.getProperty(String)`（键不存在给 `None`）
+pub fn props_get(p : Props, key : String) -> String? {
+  abort("moon-hutool PR-B：契约骨架，见 docs/spec/22-ini.md #22.30")
+}
+
+///|
+/// #22.31 取值带缺省
+/// - Returns: 键不存在（或值为 `null`，参照的 `Properties` 存不了 `null`）时给 `default`
+/// - Raises: 无
+/// - Note: hutool 对位 `Properties.getProperty(String key, String defaultValue)`
+pub fn props_get_or(p : Props, key : String, default : String) -> String {
+  abort("moon-hutool PR-B：契约骨架，见 docs/spec/22-ini.md #22.31")
+}
+
+///|
+/// #22.32 写一条，返回旧值
+/// - Returns: 该键旧值；首次写入给 `None`
+/// - Raises: 无
+/// - Note: hutool 对位 `Object setProperty(String key, String value)` 的返回值
+///   （参照另有一条 `put(k, null)` ⇒ `NullPointerException` 的档，本库类型层面排除，见 spec §8 第 11 条）
+pub fn props_set(p : Props, key : String, value : String) -> String? {
+  abort("moon-hutool PR-B：契约骨架，见 docs/spec/22-ini.md #22.32")
+}
+
+///|
+/// #22.33 删一条，返回被删的值
+/// - Raises: 无
+/// - Note: hutool 对位 `Object remove(Object key)`
+pub fn props_remove(p : Props, key : String) -> String? {
+  abort("moon-hutool PR-B：契约骨架，见 docs/spec/22-ini.md #22.33")
+}
+
+///|
+/// #22.34 是否含该键
+/// - Raises: 无
+/// - Note: hutool 对位 `boolean containsKey(Object key)`
+pub fn props_has_key(p : Props, key : String) -> Bool {
+  abort("moon-hutool PR-B：契约骨架，见 docs/spec/22-ini.md #22.34")
+}
+
+///|
+/// #22.35 条数
+/// - Raises: 无
+/// - Note: hutool 对位 `int size()`（参照无缓存，本库也无——与第一批 `grouped_map_size` 的陈旧档不同）
+pub fn props_size(p : Props) -> Int {
+  abort("moon-hutool PR-B：契约骨架，见 docs/spec/22-ini.md #22.35")
+}
+
+///|
+/// #22.36 是否空表
+/// - Raises: 无
+/// - Note: hutool 对位 `boolean isEmpty()`
+pub fn props_is_empty(p : Props) -> Bool {
+  abort("moon-hutool PR-B：契约骨架，见 docs/spec/22-ini.md #22.36")
+}
+
+///|
+/// #22.37 键列表（本库自定的首次出现序）
+/// - Raises: 无
+/// - Note: hutool 对位 `Set<String> stringPropertyNames()`（参照无序，故对账用排序集，见 spec §8 第 8 条）
+pub fn props_keys(p : Props) -> Array[String] {
+  abort("moon-hutool PR-B：契约骨架，见 docs/spec/22-ini.md #22.37")
+}
+
+///|
+/// #22.38 值列表（与 #22.37 同序）
+/// - Raises: 无
+/// - Note: hutool 对位 `Collection<Object> values()` 的 String 档
+pub fn props_values(p : Props) -> Array[String] {
+  abort("moon-hutool PR-B：契约骨架，见 docs/spec/22-ini.md #22.38")
+}
+
+///|
+/// #22.39 条目列表（与 #22.37 同序）
+/// - Raises: 无
+/// - Note: hutool 对位 `entrySet()` 的 String 档
+pub fn props_entries(p : Props) -> Array[(String, String)] {
+  abort("moon-hutool PR-B：契约骨架，见 docs/spec/22-ini.md #22.39")
+}
+
+///|
+/// #22.40 序列化成 `.properties` 文本
+/// - Returns: 每条形如 `键=值`，键侧空格写 `\ `、值侧只有**首个**空格写 `\ `；
+///   `\t`/`\n`/`\r`/`\f`/`\\` 与非 Latin-1 字符（含 BMP 外，逐 UTF-16 码元出 `\uXXXX`）都转义；
+///   **不出参照首行的时间戳注释**（宿主状态），行分隔符固定 `\n`（参照是平台量，本机现读 `\r\n`）
+/// - Raises: 无
+/// - Note: hutool 对位 `Properties.store(Writer, null)` 去掉注释头那一档
+pub fn props_store(p : Props) -> String {
+  abort("moon-hutool PR-B：契约骨架，见 docs/spec/22-ini.md #22.40")
+}

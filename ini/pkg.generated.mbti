@@ -48,7 +48,36 @@ pub fn ini_store(GroupedMap) -> String
 
 pub fn ini_store_with_opts(GroupedMap, IniParseOpts) -> String
 
+pub fn props_entries(Props) -> Array[(String, String)]
+
+pub fn props_get(Props, String) -> String?
+
+pub fn props_get_or(Props, String, String) -> String
+
+pub fn props_has_key(Props, String) -> Bool
+
+pub fn props_is_empty(Props) -> Bool
+
+pub fn props_keys(Props) -> Array[String]
+
+pub fn props_new() -> Props
+
+pub fn props_parse(String) -> Props raise PropsError
+
+pub fn props_remove(Props, String) -> String?
+
+pub fn props_set(Props, String, String) -> String?
+
+pub fn props_size(Props) -> Int
+
+pub fn props_store(Props) -> String
+
+pub fn props_values(Props) -> Array[String]
+
 // Errors
+pub suberror PropsError {
+  BadUnicodeEscape
+}
 
 // Types and methods
 pub struct GroupedMap {
@@ -58,6 +87,10 @@ pub struct GroupedMap {
 pub(all) struct IniParseOpts {
   use_variable : Bool
   assign_flag : Char
+}
+
+pub struct Props {
+  // private fields
 }
 
 // Type aliases
