@@ -309,3 +309,33 @@ core 数值语义侧（全部当场实测，三档 `wasm`/`js`/`wasm-gc` 读数�
 - **格式化件先确认"参照实现属于哪个族"**：`BigDecimal.valueOf` = 最短十进制、`DecimalFormat` = 二进制精确值，
   同一台 JDK 对同一个数会给两种读数（`2.675` 舍 2 位 `2.68` / `2.67`；`-0.0` 保不保留负号 `0.00` / `-0.00`）。
   拿一个族去核对另一个族，会产出一堆"两腿不符"的假故障。
+
+### conv 第一批（10-05）编译器语法七条裁决 + 镜像腿三条
+
+- **泛型函数的参数表挂在 `fn` 上，不挂在名字上**：写 `pub fn[A] chain(custom : JsonConv[A], …)`；
+  `pub fn chain[A](…)` 判 `Parse error, unexpected fn f[T], you may expect fn[T] f`。
+- **透明别名没有 `alias` 关键字**（`alias` 是保留字，写出来既是语法错又吃 `reserved_keyword` 警告）：
+  `pub type JsonConv[A] = (Json) -> A?` 就是别名本体，能当形参类型、能隐式接函数值与闭包。
+- **`var x = e` 已进弃用通知**（`Warning (deprecated_syntax) … Use let mut`）⇒ 一律 `let mut`。
+  本版工具链：moon 0.1.20260920 / moonc 0.10.14+7d59c7ec9。
+- **会 raise 的匿名函数**要么写成箭头形 `() => expr`，要么显式标 raise；`fn (x) { 里面会 raise }` 吃
+  `deprecated_syntax`（效应推断那种写法正在被拆掉）。把"会 raise 的调用"传给形参时，形参类型写
+  `() -> A raise E`，调用点用 `g()`。
+- **`Json` 变体是只读类型**：`Number(1.0)` 直接判 `Cannot create values of the read-only type` +
+  `The labels repr~ are required` ⇒ 夹具一律 `@json.parse`/`@json.to_json`；模式匹配仍可以写
+  `Number(d, repr~)`（core 自己也用这个形式，见 `json_path.mbt` 的 `Key(parent, key~)`）。
+- **`Double::inf(1)` 已 deprecated** ⇒ 用 `@double.infinity` / `@double.neg_infinity`（`pub let`）。
+  零警告门禁下，deprecated 警告与 error 同价。
+- **core 的 `String` 没有 `to_lowercase`/`trim`/`split(Char)` 公开面**（`Type String has no method to_lowercase`），
+  `string/*.mbt` 的 `pub fn String::` 全表数下来是 `all/any/char_length/compare_ignore_ascii_case/iter/rev_iter/`
+  `substring/suffixes/to_array/to_bytes/unsafe_substring/…` 那一套 ⇒ 大小写折叠自写 ASCII 档，trim/切分用本仓 `@text`。
+- **镜像腿要跑"同一条输入 × 两个 locale"**：`NumberFormat.getInstance()` 那支在 hutool 自己的运行时上
+  就会给两个答案（本机 JDK 17：`"123.56"` 在 zh_CN 是 `123`、在 de_DE 是 `12356`，41 条不同）。
+  这不是"我们不喜欢 locale"，是**参照实现不确定**——拿到这种读数就整支不跟随，并把两读并排放进 spec。
+- **分岔表必须自证**：声明"不跟随"的每一条都要断言两边读数**确实不同**，相同就报"水分"。
+  本轮真抓到一条水分（`int` 腿的 `"Infinity"` 两边都是 `None`），删掉才算闭环。
+  反向判据（不同而未声明 ⇒ assert 失败）也要在，否则分岔表就是一张许愿池。
+- **`git ls-files` 型的死链检查意味着"新文件必须先 `git add` 再跑门禁"**：`scripts/check_doc_links.py`
+  故意不用 `os.path.exists`（本地有、没提交的文件克隆出去就是死链），G10 会在 add 之前判红——
+  这不是门禁坏，是它在告诉你工作还没做完。
+
