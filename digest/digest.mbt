@@ -356,21 +356,12 @@ pub fn sha256_of_bytes(data : Bytes) -> Bytes {
 ///|
 /// HMAC-SHA-256（RFC 2104 §5）：block size 64；键长 > 64 先把键哈希一次，不足右侧补零；
 /// `H((key ⊕ opad) ‖ H((key ⊕ ipad) ‖ message))`
+///
+/// ⚠ 字符串入参一律按 **UTF-8** 成字节。`String::to_bytes()` 打的是 UTF-16 小端码元
+/// （core `builtin/string.mbt`，已被标废弃），每个 ASCII 字符都会摊成 2 字节，
+/// 任何输入都错——这一格是被 README 里 RFC 4231 TC2 那条 ASCII 用例逮住的，不是中文用例。
 pub fn hmac_sha256_bytes(key : String, data : String) -> Bytes {
-  let block = 64
-  let kb = @utf8.encode(key)
-  let keyed = if kb.length() > block { sha256_bytes(key) } else { kb }
-  let inner = @buffer.Buffer()
-  let outer = @buffer.Buffer()
-  for i in 0..<block {
-    let b = if i < keyed.length() { keyed[i].to_uint() } else { 0 }
-    inner.write_byte((b ^ 0x36).reinterpret_as_int().to_byte())
-    outer.write_byte((b ^ 0x5c).reinterpret_as_int().to_byte())
-  }
-  inner.write_bytes(@utf8.encode(data))
-  let ih = sha256_of_bytes(inner.to_bytes())
-  outer.write_bytes(ih)
-  sha256_of_bytes(outer.to_bytes())
+  hmac_sha256_of_bytes(@utf8.encode(key), @utf8.encode(data))
 }
 
 ///|
@@ -392,5 +383,132 @@ pub fn equal_digest(a : Bytes, b : Bytes) -> Bool {
       diff = diff ^ (a[i].to_uint() ^ b[i].to_uint())
     }
     diff == 0
+  }
+}
+
+///|
+// ===== 第二批：HMAC 家族（MD5 全套 + 字节键档 + verify）。契约与读数见 spec 2.7 =====
+
+///|
+/// HMAC-MD5（RFC 2104 §5，块长 64）。对位 hutool `HMac(HmacAlgorithm.HmacMD5, key)` 的一次性用法。
+/// - Raises: 无——纯计算，`key`/`data` 是字节不是可失败输入
+pub fn hmac_md5_bytes(key : String, data : String) -> Bytes {
+  hmac_md5_of_bytes(@utf8.encode(key), @utf8.encode(data))
+}
+
+///|
+/// HMAC-MD5 十六进制小写。对位 `HMac#digestHex`。
+/// - Raises: 无——纯计算，`key`/`data` 是字节不是可失败输入
+pub fn hmac_md5_hex(key : String, data : String) -> String {
+  to_hex_lower(hmac_md5_bytes(key, data))
+}
+
+///|
+/// HMAC-MD5 的**字节键**档。对位 `new HMac(HmacAlgorithm.HmacMD5, byte[] key)`——密钥可以是任意字节（RFC 4231 的官方向量全是裸字节键），字符串档表达不了那一半。
+/// - Raises: 无——纯计算，`key`/`data` 是字节不是可失败输入
+pub fn hmac_md5_of_bytes(key : Bytes, data : Bytes) -> Bytes {
+  hmac_of(md5_of_bytes, key, data)
+}
+
+///|
+/// HMAC-MD5 字节键 → 十六进制小写
+/// - Raises: 无——纯计算，`key`/`data` 是字节不是可失败输入
+pub fn hmac_md5_hex_of_bytes(key : Bytes, data : Bytes) -> String {
+  to_hex_lower(hmac_md5_of_bytes(key, data))
+}
+
+///|
+/// HMAC-SHA-256 的字节键档（与已有 `hmac_sha256_bytes(String, String)` 同一张嘴，只是不再假定键是文本）
+/// - Raises: 无——纯计算，`key`/`data` 是字节不是可失败输入
+pub fn hmac_sha256_of_bytes(key : Bytes, data : Bytes) -> Bytes {
+  hmac_of(sha256_of_bytes, key, data)
+}
+
+///|
+/// HMAC-SHA-256 字节键 → 十六进制小写
+/// - Raises: 无——纯计算，`key`/`data` 是字节不是可失败输入
+pub fn hmac_sha256_hex_of_bytes(key : Bytes, data : Bytes) -> String {
+  to_hex_lower(hmac_sha256_of_bytes(key, data))
+}
+
+///|
+/// 校验：重算 HMAC-MD5 再与给定十六进制比。对位 `HMac#verify(byte[] expected)` 的十六进制形态——
+/// 比较走 `equal_digest`（常量时间）。十六进制按标准解：**大小写都收**（别的工具贴来的大写串应当验得过），
+/// 奇数长度或含非十六进制字符 ⇒ 解出空字节、长度必然不等 ⇒ 判假，不另开错误档。
+/// - Raises: 无——纯计算，`key`/`data` 是字节不是可失败输入
+pub fn hmac_md5_verify_hex(
+  key : Bytes,
+  data : Bytes,
+  expected : String,
+) -> Bool {
+  equal_digest(hmac_md5_of_bytes(key, data), hex_to_bytes(expected))
+}
+
+///|
+/// 校验：重算 HMAC-SHA-256 再与给定十六进制比（同上）
+/// - Raises: 无——纯计算，`key`/`data` 是字节不是可失败输入
+pub fn hmac_sha256_verify_hex(
+  key : Bytes,
+  data : Bytes,
+  expected : String,
+) -> Bool {
+  equal_digest(hmac_sha256_of_bytes(key, data), hex_to_bytes(expected))
+}
+
+///|
+// HMAC 的共用机器（RFC 2104 §5）：块长 64（MD5 与 SHA-256 同），键长超块先哈希一次，不足右侧补零，
+// 最后 `H((key ⊕ opad) ‖ H((key ⊕ ipad) ‖ message))`。`hash` 传的是**字节进字节出**那一档，
+// 所以 MD5 与 SHA-256 共用这一台机器，两把摘要不存在第二份实现。
+fn hmac_of(hash : (Bytes) -> Bytes, key : Bytes, data : Bytes) -> Bytes {
+  let block = 64
+  let keyed = if key.length() > block { hash(key) } else { key }
+  let inner = @buffer.Buffer()
+  let outer = @buffer.Buffer()
+  for i in 0..<block {
+    let b = if i < keyed.length() { keyed[i].to_uint() } else { 0 }
+    inner.write_byte((b ^ 0x36).reinterpret_as_int().to_byte())
+    outer.write_byte((b ^ 0x5c).reinterpret_as_int().to_byte())
+  }
+  inner.write_bytes(data)
+  outer.write_bytes(hash(inner.to_bytes()))
+  hash(outer.to_bytes())
+}
+
+///|
+// verify 档要常量时间比较，所以先把期望的十六进制解成字节再走 `equal_digest`。
+// 长度不是十六进制偶数位、或含非十六进制字符 ⇒ 解成空字节（长度必然不等 ⇒ 判假），不另开错误档。
+fn hex_to_bytes(hex_ : String) -> Bytes {
+  let cs = hex_.to_array()
+  let n = cs.length()
+  let out = @buffer.Buffer()
+  let mut ok = n % 2 == 0
+  let mut i = 0
+  while ok && i < n {
+    let hi = hex_digit(cs[i])
+    let lo = hex_digit(cs[i + 1])
+    if hi < 0 || lo < 0 {
+      ok = false
+    } else {
+      out.write_byte((hi * 16 + lo).to_byte())
+    }
+    i += 2
+  }
+  if ok {
+    out.to_bytes()
+  } else {
+    @buffer.Buffer().to_bytes()
+  }
+}
+
+///|
+fn hex_digit(c : Char) -> Int {
+  if c >= '0' && c <= '9' {
+    c.to_int() - 48
+  } else if c >= 'a' && c <= 'f' {
+    c.to_int() - 87
+  } else if c >= 'A' && c <= 'F' {
+    c.to_int() - 55
+  } else {
+    -1
   }
 }

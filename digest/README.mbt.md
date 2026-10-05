@@ -105,6 +105,39 @@ test "equal_digest 常量时间" {
 }
 ```
 
+## HMAC 家族：MD5 一把 + 字节键档 + verify
+
+`hmac_md5_*` 与 `hmac_sha256_*` 同形（键 / 数据），差别只在算法；块长都是 64 字节，长键同样先哈希一次。
+密钥是原始二进制（不是文本）时走 `_of_bytes` 档，`String` 档固定按 **UTF-8** 取字节。
+`*_verify_hex` 重算后与给定十六进制做常量时间比较；**空密钥那一档不承诺**（参照实现 JDK 在那里直接抛 `IllegalArgumentException`）。
+
+```mbt check
+///|
+test "hmac 家族 MD5 与字节键" {
+  assert_eq(
+    @digest.hmac_md5_hex("key", "what do you want for lunch today"),
+    "8141d87875d4fe5bcf3b6dd15343ea82",
+  )
+  // RFC 4231 Case 1：20 个 0x0b 的裸字节键
+  let key = @buffer.Buffer()
+  for _ in 0..<20 {
+    key.write_byte(b'\x0b')
+  }
+  assert_eq(
+    @digest.hmac_sha256_hex_of_bytes(key.to_bytes(), @utf8.encode("Hi There")),
+    "b0344c61d8db38535ca8afceaf0bf12b881dc200c9833da726e9376c2e32cff7",
+  )
+  let k = @utf8.encode("key")
+  let d = @utf8.encode("what do you want for lunch today")
+  assert_true(
+    @digest.hmac_md5_verify_hex(k, d, "8141d87875d4fe5bcf3b6dd15343ea82"),
+  )
+  assert_false(
+    @digest.hmac_md5_verify_hex(k, d, "8141d87875d4fe5bcf3b6dd15343ea83"),
+  )
+}
+```
+
 ## 本包不做的事
 
 SHA-1 / SHA-512 在下一批（UUID v5 依赖前者）；国密 SM3、SHA-3、AES、RSA/ECDSA、BCrypt/Argon2/PBKDF2 均未排期；也不做带状态的流式写接口（core 无 io，且那会破坏"纯函数一次调用"的可测形状）。

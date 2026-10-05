@@ -4,9 +4,25 @@ package "mldong/moon-hutool/digest"
 // Values
 pub fn equal_digest(Bytes, Bytes) -> Bool
 
+pub fn hmac_md5_bytes(String, String) -> Bytes
+
+pub fn hmac_md5_hex(String, String) -> String
+
+pub fn hmac_md5_hex_of_bytes(Bytes, Bytes) -> String
+
+pub fn hmac_md5_of_bytes(Bytes, Bytes) -> Bytes
+
+pub fn hmac_md5_verify_hex(Bytes, Bytes, String) -> Bool
+
 pub fn hmac_sha256_bytes(String, String) -> Bytes
 
 pub fn hmac_sha256_hex(String, String) -> String
+
+pub fn hmac_sha256_hex_of_bytes(Bytes, Bytes) -> String
+
+pub fn hmac_sha256_of_bytes(Bytes, Bytes) -> Bytes
+
+pub fn hmac_sha256_verify_hex(Bytes, Bytes, String) -> Bool
 
 pub fn md5_bytes(String) -> Bytes
 

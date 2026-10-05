@@ -97,7 +97,8 @@ block size = **64 字节**；键长 > 64 ⇒ **先对键做一次 SHA-256** 再�
 | 键长 80 > 64 | `"a"` ×80 | `"Test Using Larger Than Block-Size Key - Hash Key First"` | `7502d8b2069f64dcbca4d51628fdc86a17200b3fad268755483946baf3d99fa8` |
 
 hutool 对位 `HMac(HmacAlgorithm.HmacSHA256)` ｜ 读数来源：RFC 2104 §5 + RFC 4231 §4（本机 hashlib 核对）。
-⚠ 键的字节解释固定为 **UTF-8**；需要原始二进制密钥（如 JWT 的 32 随机字节）的调用方走 `_bytes` 入口的后续扩展档（此刻不放公开骨架——先证明需要再加（别预铺 API））。
+⚠ 键的字节解释固定为 **UTF-8**；需要原始二进制密钥（如 JWT 的 32 随机字节）的调用方走 `_of_bytes` 档——
+初稿那句"此刻不放公开骨架——先证明需要再加"**已在第二批兑现**（证明来自 `id.uuid_v5`/JWT 那类裸字节密钥与 RFC 4231 全套裸字节向量），见 §2.7。
 
 ## 2.5 `equal_digest(a : Bytes, b : Bytes) -> Bool`
 
@@ -111,11 +112,61 @@ hutool 对位 `HMac(HmacAlgorithm.HmacSHA256)` ｜ 读数来源：RFC 2104 §5 +
 
 hutool 对位：无（hutool 直接用 `equals`）⇒ **本库主动加的一条安全件**，属"契约形状"而非移植；读数来源：owner 拍板 + OWASP 时序比较惯例。
 
-## 2.6 相位与不承诺
+## 2.6 第二批：HMAC 家族（MD5 全套 + 裸字节键 + verify，10-05）
+
+八个公开项，签名以 `digest/pkg.generated.mbti` 为准：
+
+| 项 | 签名 | 对位 hutool | 说明 |
+|---|---|---|---|
+| `hmac_md5_bytes` | `(String, String) -> Bytes` | `HMac(HmacMD5, String key)` | 键/数据固定 UTF-8 取字节 |
+| `hmac_md5_hex` | `(String, String) -> String` | `HMac#digestHex` 的 MD5 档 | 小写十六进制 |
+| `hmac_md5_of_bytes` | `(Bytes, Bytes) -> Bytes` | `HMac(HmacMD5, byte[] key)` | 裸字节键——RFC 4231 全套向量都是这一档 |
+| `hmac_md5_hex_of_bytes` | `(Bytes, Bytes) -> String` | 同上 + `digestHex` | |
+| `hmac_sha256_of_bytes` | `(Bytes, Bytes) -> Bytes` | `HMac(HmacSHA256, byte[] key)` | 与 §2.4 的 `String` 档同一张嘴，只放开键的编码假定 |
+| `hmac_sha256_hex_of_bytes` | `(Bytes, Bytes) -> String` | 同上 + `digestHex` | |
+| `hmac_md5_verify_hex` | `(Bytes, Bytes, String) -> Bool` | `HMac#verify(byte[] expected)` 的十六进制形态 | 比较走 §2.5 `equal_digest` |
+| `hmac_sha256_verify_hex` | `(Bytes, Bytes, String) -> Bool` | 同上 | |
+
+四条口径：
+
+1. **两台机器合成一台**：MD5 与 SHA-256 的 HMAC 共用同一个私有 `hmac_of(hash, key, data)`，`hash` 传 §2.1.1/§2.1.2 的**字节进字节出**那一档 ⇒ 不存在第二份 pad/xor 实现。块长恒 64（两把摘要相同），键长 > 64 先把键哈希一次，短键**右侧补零**。
+2. **`String` 档固定 UTF-8**。这里踩过一次：`String::to_bytes()` 打的是 **UTF-16 小端码元**（core `builtin/string.mbt`，已标废弃），连 ASCII 都摊成 2 字节，任何输入都错。
+3. **verify 无错误档**：十六进制按标准解（大小写都收）；奇数长度或含非十六进制字符 ⇒ 解出空字节、长度必然不等 ⇒ 判假。不返回"格式错"这一档，因为调用方拿到的答案都是"不是这条 MAC"。
+4. **空密钥档不承诺**：参照腿 JDK 在 `keylen=0` 直接抛 `IllegalArgumentException`（HMAC 的 RFC 也不给空键向量）⇒ 本包不钉这一档的期望值，也不声称与谁一致。
+
+**读数腿**（`jdk_hmac.txt`，22 条十六进制读数 + 键长/数据长度元数据，脚本灌进用例，手打 0 条）：
+
+| 腿 | 来源 | 条数 | 备注 |
+|---|---|---|---|
+| A 参照实现 | 本机 JDK 17.0.14 `javax.crypto.Mac`（HmacMD5 / HmacSHA256） | 11 夹具 × 2 算法 = 22 | 键长 1/20/25/64/65/100/131 + 空数据 + `key`/`what do you want for lunch today` + 中文 UTF-8 + 含 `0x00`/`0xff` 裸字节 |
+| B 官方交叉 | RFC 4231 Case 1 | 1 | 腿 A 的 `key-20` SHA-256 读数与官方向量 `b0344c61…cff7` **逐字符相同** ⇒ "只认官方向量"的规矩（门禁 G6）在这批上成立 |
+
+分界覆盖是这批的核心：`keylen=64` 与 `keylen=65` 一条在"不哈希键"一侧、一条在另一侧，两条都必须钉住（变异 A 就是靠这两条抓的）。
+
+**三条实测更正/事实**：
+
+1. **参照腿自己被编码坑了一次**（这条是本批最值钱的一条，因为它教训的是"权威腿"）：首跑时 `javac` 用平台默认编码（GBK）读了 UTF-8 的 `.java`，中文夹具落成 mojibake——读数文件里 `keylen=10, datalen=18` 就是自证（正确 UTF-8 应为 `7/12`，`密钥K` = 3+3+1、`中文数据` = 4×3）。改 `javac -encoding UTF-8` 重跑，22 条里**只有这 2 条变**，其余 ASCII 夹具逐字节相同；本包实现值与 Python `hmac` 同读 ⇒ 病灶在参照腿不在实现。做法上的规矩由此加一条：**参照腿含非 ASCII 字面量时必须显式 `-encoding UTF-8`，且读数文件要带 `keylen/datalen` 这类能自证编码的字段**。
+2. **实现初稿用 `to_bytes()` 把已绿的文档块拖红**：委托到 `_of_bytes` 时顺手把编码写错，7 条红里包含 `digest/README.mbt.md` 的 RFC 4231 TC2——那条此前是绿的（原实现内联 `@utf8.encode`）。教训：**改已有公开项的实现要连它旧的正例一起看**，不能只数新增用例。
+3. **verify 的大写档**：签名注释初稿写"不做大小写归一，给大写就判假"，实测十六进制解码器收 `A-F`（任何标准 hex 解码都收），大写串验得过。**按实现改注释、不改实现**——拒绝大写对调用方是脚坑（别处贴来的 MAC 常常是大写）。
+
+**变异对照**（四条逐条有块红，全部 sha256 断言还原到变异前字节）：
+
+| 变异 | 红块数 | 抓它的用例 |
+|---|---|---|
+| A 丢掉"键长 > 块 ⇒ 先哈希键" | 4 | 键长 100/131 两档（MD5、SHA-256 各二）+ §2.4 长键那条 |
+| B 短键改成左侧补零 | 7 | 全部短键档（1/20/25/64…）+ RFC 4231 TC2 |
+| C ipad/opad 对调 | 7 | 同上，一把都不剩 |
+| D `equal_digest` 退化成只比长度 | 3 | §2.5 三条 + verify 的"改一个字符判假"两条 |
+
+**`mac` 包（ROADMAP 第 13 行）判不建，内容落在这批**：`HMac` 在 **hutool-crypto** 而不是 hutool-core（本机 `javap -cp hutool-core-5.8.35.jar cn.hutool.crypto.digest.HMac` 找不到类，而 `ReUtil`/`Validator` 都在 core），它是**有状态对象**——7 个构造器 + `update(...)`/`digest()`/`digestHex()`/`verify(...)`，`update` 那半属于"流式/增量摘要"，早已在 §2.7（相位与不承诺）的暂不做档；剩下的"一次性算完"薄薄一层，全部已由上表八件覆盖 ⇒ 再开一个 `mac` 包只会造出 `digest` 的第二张嘴。**结论：不建 `mac`，签名口径记在这里。**
+
+## 2.7 相位与不承诺
 
 | 项 | 相位 | 说明 |
 |---|---|---|
 | `md5*` / `sha256*` / `hmac_sha256*` / `equal_digest` | **P1（见 ROADMAP）** | 登录口令列、签名、消息校验的最小集 |
+| HMAC 家族八件（`hmac_md5*` / `*_of_bytes` / `*_verify_hex`） | **已实现（第二批，10-05，§2.6）** | 与 P1 同一张嘴，只是放开"键必须是文本"的假定 |
+| `mac` 独立包（ROADMAP 第 13 行） | **判不做，内容并入 §2.6** | `HMac` 在 hutool-crypto 且是有状态对象；一次性用法已由八件覆盖 |
 | `sha1*`（含 UUID v5 依赖）、`sha512*` | P6 | 官方向量同法冻结后再实现 |
 | `sm3`、`ripemd160`、`sha3/keccak` | `docs/ROADMAP.md` 的「暂不做」档 | 国密合规出口 / 需要新算法工程 |
 | `Digester`（salt + saltPosition + digestCount 迭代） | P6 | hutool 私有行为，期望值全量对 v5-master 反推后才进契约 |

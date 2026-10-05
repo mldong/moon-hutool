@@ -33,7 +33,8 @@
 |---|---|---|---|
 | `md5/md5Hex/md5Hex16` | **无**（全树 `md5` 命中 0） | ② `digest.md5_*`（输入固定 UTF-8） | 字符集参数（无码表） |
 | `sha1/sha256/sha512` | 无 | ② P1 只做 sha256，sha1/sha512 在 P6 | — |
-| `hmac*` | 无 | ② `digest.hmac_sha256_*`（block size 64、长键先哈希） | — |
+| `hmac*` | 无 | ② `digest` **两批齐**：`hmac_sha256_*`（`String` 档固定 UTF-8、block size 64、长键先哈希）+ 第二批 HMAC-MD5 全套 / `*_of_bytes` 裸字节键 / `*_verify_hex` 常量时间校验 | 空密钥档**不承诺**（参照腿 JDK 抛 `IllegalArgumentException`，RFC 也不给空键向量） |
+| `HMac` 对象（`update`/`digest`/`digestHex`/`verify`，ROADMAP 第 13 行） | 无 | ② **判不建 `mac` 包**（10-05）：一次性用法已由 `digest` 八件覆盖，三条判据现读记在 `02-digest.md` §2.6——在 hutool-crypto 不在 core、是有状态对象、剩下的薄一层 | `update` 那半属流式/增量摘要，在「暂不做」档 |
 | `Digester(salt,saltPosition,digestCount)` | 无 | P6（hutool 私有行为，先反推再冻结） | — |
 | 国密 `sm3`、`ripemd160`、SHA-3 | 无 | — | `docs/ROADMAP.md` 的「暂不做」档 |
 | 对称/非对称（AES/DES/RSA/EC/SM2）、BCrypt/Argon2/PBKDF2 | 无；`BigInt::pow(modulus)` + `math::probable_prime` 是门票，缺 gcd 族与 ASN.1 | — | `docs/ROADMAP.md` 的「暂不做」档不排期 |
