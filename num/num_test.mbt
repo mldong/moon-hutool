@@ -94,17 +94,28 @@ test "ext_gcd 的逐条读数与贝祖不变量" {
 ///|
 test "mod_inverse 取最小非负剩余" {
   assert_eq(@num.mod_inverse(3, 11), 4)
-  assert_eq(@num.mod_inverse(3, 11) * 3 % 11, 1)
+  assert_eq((@num.mod_inverse(3, 11).to_int64() * 3 % 11 + 11) % 11, 1)
   assert_eq(@num.mod_inverse(7, 26), 15)
-  assert_eq(@num.mod_inverse(7, 26) * 7 % 26, 1)
+  assert_eq((@num.mod_inverse(7, 26).to_int64() * 7 % 26 + 26) % 26, 1)
   assert_eq(@num.mod_inverse(1, 2), 1)
-  assert_eq(@num.mod_inverse(1, 2) * 1 % 2, 1)
+  assert_eq((@num.mod_inverse(1, 2).to_int64() * 1 % 2 + 2) % 2, 1)
   assert_eq(@num.mod_inverse(1234567, 9999991), 9411761)
-  assert_eq(@num.mod_inverse(1234567, 9999991) * 1234567 % 9999991, 1)
+  assert_eq(
+    (
+      @num.mod_inverse(1234567, 9999991).to_int64() * 1234567 % 9999991 +
+      9999991
+    ) %
+    9999991,
+    1,
+  )
   assert_eq(@num.mod_inverse(-3, 11), 7)
-  assert_eq(@num.mod_inverse(-3, 11) * -3 % 11, 1)
+  assert_eq((@num.mod_inverse(-3, 11).to_int64() * -3 % 11 + 11) % 11, 1)
   assert_eq(@num.mod_inverse(17, 2147483647), 252645135)
-  assert_eq(@num.mod_inverse(17, 2147483647) * 17 % 2147483647, 1)
+  assert_eq(
+    (@num.mod_inverse(17, 2147483647).to_int64() * 17 % 2147483647 + 2147483647) %
+    2147483647,
+    1,
+  )
 }
 
 ///|
@@ -137,27 +148,34 @@ test "is_prime 的 0/1/负数档与地标素数" {
 
 ///|
 test "isqrt 是 floor(sqrt(n))，负被开方数报错" {
-  assert_eq(@num.isqrt(0), 0)
-  assert_true(0 * 0 <= 0)
-  assert_true((0 + 1) * (0 + 1) > 0)
-  assert_eq(@num.isqrt(1), 1)
-  assert_true(1 * 1 <= 1)
-  assert_true((1 + 1) * (1 + 1) > 1)
-  assert_eq(@num.isqrt(4), 2)
-  assert_true(2 * 2 <= 4)
-  assert_true((2 + 1) * (2 + 1) > 4)
-  assert_eq(@num.isqrt(8), 2)
-  assert_true(2 * 2 <= 8)
-  assert_true((2 + 1) * (2 + 1) > 8)
-  assert_eq(@num.isqrt(9), 3)
-  assert_true(3 * 3 <= 9)
-  assert_true((3 + 1) * (3 + 1) > 9)
-  assert_eq(@num.isqrt(2147395600), 46340)
-  assert_true(46340 * 46340 <= 2147395600)
-  assert_true((46340 + 1) * (46340 + 1) > 2147395600)
-  assert_eq(@num.isqrt(2147483647), 46340)
-  assert_true(46340 * 46340 <= 2147483647)
-  assert_true((46340 + 1) * (46340 + 1) > 2147483647)
+  let r0 = @num.isqrt(0)
+  assert_eq(r0, 0)
+  assert_true(r0.to_int64() * r0.to_int64() <= 0)
+  assert_true((r0 + 1).to_int64() * (r0 + 1).to_int64() > 0)
+  let r1 = @num.isqrt(1)
+  assert_eq(r1, 1)
+  assert_true(r1.to_int64() * r1.to_int64() <= 1)
+  assert_true((r1 + 1).to_int64() * (r1 + 1).to_int64() > 1)
+  let r2 = @num.isqrt(4)
+  assert_eq(r2, 2)
+  assert_true(r2.to_int64() * r2.to_int64() <= 4)
+  assert_true((r2 + 1).to_int64() * (r2 + 1).to_int64() > 4)
+  let r3 = @num.isqrt(8)
+  assert_eq(r3, 2)
+  assert_true(r3.to_int64() * r3.to_int64() <= 8)
+  assert_true((r3 + 1).to_int64() * (r3 + 1).to_int64() > 8)
+  let r4 = @num.isqrt(9)
+  assert_eq(r4, 3)
+  assert_true(r4.to_int64() * r4.to_int64() <= 9)
+  assert_true((r4 + 1).to_int64() * (r4 + 1).to_int64() > 9)
+  let r5 = @num.isqrt(2147395600)
+  assert_eq(r5, 46340)
+  assert_true(r5.to_int64() * r5.to_int64() <= 2147395600)
+  assert_true((r5 + 1).to_int64() * (r5 + 1).to_int64() > 2147395600)
+  let r6 = @num.isqrt(2147483647)
+  assert_eq(r6, 46340)
+  assert_true(r6.to_int64() * r6.to_int64() <= 2147483647)
+  assert_true((r6 + 1).to_int64() * (r6 + 1).to_int64() > 2147483647)
   assert_eq(err_shape(() => @num.isqrt(-1)), "NegativeRadicand -1")
 }
 
