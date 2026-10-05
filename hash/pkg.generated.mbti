@@ -70,7 +70,7 @@ pub suberror HashError {
 // Types and methods
 pub struct Crc16 {
   variant : Crc16Variant
-  value : Int
+  mut value : Int
 }
 pub fn Crc16::crc16_hex_value(Self, Bool) -> String
 pub fn Crc16::crc16_reset(Self) -> Unit
@@ -95,7 +95,7 @@ pub(all) enum Crc16Variant {
 pub struct Crc8 {
   polynomial : Int
   init : Int
-  value : Int
+  mut value : Int
   table : Array[Int]
 }
 pub fn Crc8::crc8_reset(Self) -> Unit

@@ -1,5 +1,8 @@
-// 依赖在此声明；契约骨架期的 `warnings` 豁免由 G12 钉在"体还是不是 abort"上
-warnings = "-unused_value-struct_never_constructed-unused_constructor-unused_error_type-unused_trait_bound"
+// 落地轮：体子已是真实现，骨架期的 `warnings` 豁免按 G12 撤掉
+
+import {
+  "moonbitlang/core/encoding/utf8",
+}
 
 import {
   "mldong/moon-hutool/hash",

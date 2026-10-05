@@ -3,7 +3,10 @@
 // 参照腿：`hutool-core-5.8.35.jar` 的 `cn.hutool.core.util.HashUtil` + `lang.hash.MurmurHash` +
 // `io.checksum.{CRC8,CRC16}` 与十个 `crc16/CRC16*` 变体 + 本机 JDK 17.0.14；`javac -encoding UTF-8`，
 // 非 ASCII 夹具在 Java 侧写 Unicode 转义（`digest` 轮那条编码教训的形状）。
-// 这批**预期红**（契约已冻结、实现未落地）——落地那一笔只许把红变绿，不许动期望值（门禁 G5）。
+// 这批 10 块 452 条断言落地后全绿。**每条 `assert_*` 的右侧与契约笔 `56c1077` 逐字同形**；
+// 落地笔动的是夹具左边：`b_cn` / `b_emoji` 两份字节列表是我手打错的 UTF-8，现改成与参照腿
+// `StandardCharsets.UTF_8` 同源（今后字节夹具一律由生成脚本算出，不手打）；另把一条"两个函数之和
+// == 某读数"的病断言拆成两条各比各的——左边那个表达式在参照腿里根本没有对应读数。
 // 位置口径：hutool 返回 Java `int`/`long`，本库公开面是有符号 `Int`/`Int64`，与读数十进制逐字同形。
 
 ///|
@@ -217,29 +220,29 @@ test "hash fnv 两档的分岔与末尾 abs 可为负" {
   assert_eq(@hash.fnv_hash_bytes(bytes_of([97, 98, 99])), 34757373) // fnvB.b_abc
   assert_eq(
     @hash.fnv_hash_bytes(
-      bytes_of([228, 184, 173, 230, 181, 149, 230, 181, 155, 233, 135, 141]),
+      bytes_of([228, 184, 173, 230, 150, 135, 230, 181, 139, 232, 175, 149]),
     ),
     2129874571,
   ) // fnvB.b_cn
   assert_eq(
-    @hash.fnv_hash_bytes(bytes_of([240, 159, 140, 142, 97, 98, 99])),
+    @hash.fnv_hash_bytes(bytes_of([240, 159, 141, 142, 97, 98, 99])),
     857138028,
   ) // fnvB.b_emoji
   assert_eq(@hash.fnv_hash_bytes(bytes_of([97, 98, 99, 100])), 567647560) // fnvB.b_abcd
   // 纯 ASCII 两档同值；非 ASCII 必分岔（spec §3 第 3 条）
   assert_eq(@hash.fnv_hash("abc"), 34757373) // fnvS.abc
   assert_eq(@hash.fnv_hash("123456789"), 1030266748) // fnvS.digits
+  assert_eq(@hash.fnv_hash("中文测试"), 1995683249) // fnvS.cn
   assert_eq(
-    @hash.fnv_hash("中文测试") +
     @hash.fnv_hash_bytes(
-      bytes_of([228, 184, 173, 230, 181, 149, 230, 181, 155, 233, 135, 141]),
+      bytes_of([228, 184, 173, 230, 150, 135, 230, 181, 139, 232, 175, 149]),
     ),
-    1995683249,
-  ) // fnvS.cn
+    2129874571,
+  ) // fnvB.b_cn
   assert_true(
     @hash.fnv_hash("中文测试") !=
     @hash.fnv_hash_bytes(
-      bytes_of([228, 184, 173, 230, 181, 149, 230, 181, 155, 233, 135, 141]),
+      bytes_of([228, 184, 173, 230, 150, 135, 230, 181, 139, 232, 175, 149]),
     ),
   )
   // Math.abs(Integer.MIN_VALUE) 仍是负数：这条读数是"返回值可以为负"的证据
@@ -342,12 +345,12 @@ test "hash murmur32：四档形状、偏移与切片等值、委托等值" {
   assert_eq(@hash.murmur32_bytes(bytes_of([97, 98, 99])), -1277324294) // mmr32B.b_abc
   assert_eq(
     @hash.murmur32_bytes(
-      bytes_of([228, 184, 173, 230, 181, 149, 230, 181, 155, 233, 135, 141]),
+      bytes_of([228, 184, 173, 230, 150, 135, 230, 181, 139, 232, 175, 149]),
     ),
     -2141167703,
   ) // mmr32B.b_cn
   assert_eq(
-    @hash.murmur32_bytes(bytes_of([240, 159, 140, 142, 97, 98, 99])),
+    @hash.murmur32_bytes(bytes_of([240, 159, 141, 142, 97, 98, 99])),
     1679776045,
   ) // mmr32B.b_emoji
   assert_eq(@hash.murmur32_bytes(bytes_of([97, 98, 99, 100])), 1139631978) // mmr32B.b_abcd
@@ -417,12 +420,12 @@ test "hash murmur64：三档与 HashUtil 委托等值（64 位无 offset 档）"
   assert_eq(@hash.murmur64_bytes(bytes_of([97, 98, 99])), 4021449166862159587L) // mmr64B.b_abc
   assert_eq(
     @hash.murmur64_bytes(
-      bytes_of([228, 184, 173, 230, 181, 149, 230, 181, 155, 233, 135, 141]),
+      bytes_of([228, 184, 173, 230, 150, 135, 230, 181, 139, 232, 175, 149]),
     ),
     5174524126007482595L,
   ) // mmr64B.b_cn
   assert_eq(
-    @hash.murmur64_bytes(bytes_of([240, 159, 140, 142, 97, 98, 99])),
+    @hash.murmur64_bytes(bytes_of([240, 159, 141, 142, 97, 98, 99])),
     7446618072222008343L,
   ) // mmr64B.b_emoji
   assert_eq(
@@ -852,13 +855,13 @@ test "hash 委托等值与默认档：HashUtil.murmur* 只是转手、crc16 默�
   // 参照侧 HashUtil.murmur32 直接 return MurmurHash.hash32 ⇒ 本库只建一件，读数对拍（true）
   assert_eq(
     @hash.murmur32_bytes(
-      bytes_of([228, 184, 173, 230, 181, 149, 230, 181, 155, 233, 135, 141]),
+      bytes_of([228, 184, 173, 230, 150, 135, 230, 181, 139, 232, 175, 149]),
     ),
     -2141167703,
   ) // mmr32B.b_cn
   // 参照侧 HashUtil.murmur32 直接 return MurmurHash.hash32 ⇒ 本库只建一件，读数对拍（true）
   assert_eq(
-    @hash.murmur32_bytes(bytes_of([240, 159, 140, 142, 97, 98, 99])),
+    @hash.murmur32_bytes(bytes_of([240, 159, 141, 142, 97, 98, 99])),
     1679776045,
   ) // mmr32B.b_emoji
   // 参照侧 HashUtil.murmur32 直接 return MurmurHash.hash32 ⇒ 本库只建一件，读数对拍（true）
