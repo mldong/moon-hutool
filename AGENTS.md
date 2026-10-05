@@ -660,3 +660,35 @@ core 数值语义侧（全部当场实测，三档 `wasm`/`js`/`wasm-gc` 读数�
    core 无 `Array::init`；`StringBuf` 不在 prelude（用 `String::from_array(ArrayView[Char])`）；
    `Array::make(n, 内层数组)` 会把 n 行**共享同一份内层数组**，DP 矩阵必须逐行 `push`；
    labelled 实参传法是同名字段尾随波浪号 `mode~`，写成 `mode: value` 报的是 `suffix is unbound`（misleading）。
+
+
+## cron 两笔（10-05：契约 `49d2973` → 落地 `29e2da7`，425 全绿三档一致）
+
+- **契约轮的期望值要过两道判据，不是一道**：抄写对不对（`§4` 腿对标签）**加**"本库出口形状产不产得出这条读数"。
+  本轮把冻结文件 1112 条用例逐条反抽出来重跑了一遍腿（脚本从 `cron_test.mbt` 抽 (kind, pattern, 时刻, flag) 喂给 Java 腿），
+  当场抓到四处 PR-A 缺陷：①`nx/nm` 块第 2 号基准腿是 `2024-12-31 23:59:00`、测试写成 `2024-03-31 12:00:00`（70 处）；
+  ②`nx.34.*`/`nm.34.*` 十二条期望直接抄了 `IllegalArgumentException:Invalid matcher: ...YearValueMatcher`——本库的
+  `nx_tag` 只会输出 `OK:<时刻>` 或六档标签，**永远产不出**；③块 8 末尾两条把参照值当本库期望，与块 1 的 `BadParts` 矛盾；
+  ④`nx_tag`/`nm_tag` 漏 `OK:` 前缀。**"块红"会掩盖"块内未跑"**：`assert_eq` 一红就中断该块，204 条 `nx/nm` 里有 100 多条从没被执行过。
+- **改期望值必须留双侧读数**：`-1`、空串、`5L`、年档无未来解这四处本库与参照不同判，处理一律是"取可推导的一侧 +
+  参照原文留在标签注释里 + spec §5 单独立一行"。G5 授权通道的自查要说"删了几行期望串、每行属于哪一处改判"，
+  不能只报 numstat 的总行数（本轮 `-14/+14`：12 行改判 + 2 行降级为注释）。
+- **参照内部是 lenient 容器 ⇒ 出口不许逐字段校验**：cron 的回退查找会把字段送出段区间（分=60、月=13），
+  Java 靠 `Calendar` 滚动整体滚进下一时/下一年；本库第一版用 `Date::of`/`DateTime::of` 逐字段验，
+  13 月被判非法 ⇒ 2025-01-01 变 1970-01-01。移植 CRC/日期/进制这类"容器会自己滚"的算法时，
+  **出口必须同效折算**（本轮：按 epoch 秒/天整体换算 `from_epoch_millis(天秒 × 1000, 0)`）。
+- **BoolArray 匹配器的 min 不是首元素**：`5-1,7` 展开成 `{5..59, 0, 1}`，`vs[0]=5` 而真 min=0；
+  拿首元素当回绕基准 ⇒ `12:01` 变 `12:05`。照抄参照构造器时，它显式扫 min/max 的那两行不能省。
+- **"某段不参与匹配"要先确认该段在这几种段数下存不存在**：PR-A 写"第 7 段既不解析也不匹配"是把 5/6 段的情形
+  推广过头——7 段式的年档**参与匹配**（`m.33.*` 为凭）。
+- **变异对照里会出现"不是红，是不收敛"**：去掉月末夹取分支后 `nx.49.*` 的逐日重试永远命中不了 ⇒ 120s 墙钟超时。
+  这类变异要带超时跑，并且超时本身就是判据（它说明该分支承重的是"总函数"承诺，不是取值）。
+  本轮另有两条如实记录：**"段数 ≥5 即放行"是等价变异**（50 条 `ok.*` 里没有 8 段式 ⇒ 判据不可达，列覆盖欠账）；
+  **"毫秒清零"无法作为变异挂载**（出口毫秒位没有第二个来源）。
+- **本版编译器面六条**：`priv` 不能标注 `fn`；`pub struct` 的字段要写 `priv x : ...` 才能依赖包内类型
+  （否则 "A public definition cannot depend on private type"，`moon info` 会出 `// private fields`）；
+  数组 `.length()` 是方法（`arr.length` 判 "abstract type and not a struct"）；`Char` 取码位是 `to_int()`；
+  单元素进数组用 `push`（`append` 是接另一个数组，报 "wanted ArrayView[...]"），`String.trim()` 出 `StringView` 不出 `String`；
+  `while true { ... return x }` 判 "这个 while 要产出 DateTime，请加 nobreak 块" ⇒ 改成条件循环 + 末尾表达式。
+- **Windows 腿的两条老坑本轮各撞一次**：`javac -cp "a.jar;b.jar"` 用 `/c/...` 形式的 POSIX 路径会"包不存在"，
+  要先 `cygpath -w`；`grep -a` 之前忘了 `tr -d ''` 会让中文读数整段被当 Binary file 吞掉。
