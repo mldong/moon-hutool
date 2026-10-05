@@ -496,3 +496,18 @@ core 数值语义侧（全部当场实测，三档 `wasm`/`js`/`wasm-gc` 读数�
   `cn.hutool.core.text.AntPathMatcher` **确实在 hutool-core 的 jar 里**（实测 15 个 `public` 成员 + 4 个内部类），
   但它自身是 Spring-core 的拷贝（Apache-2.0）——所以"从 hutool 读取"不改变血统判定，写这一包之前必须先拍定许可证口径。
   同时记一条机制：`match` 是 MoonBit 保留字，对位方法名只能改叫 `first_match`（这类坑只有写签名那一刻编译器会告警，骨架期不能省）。
+
+## path 轮（10-05）：血统不等于待办，以及黑盒面的三条编译器裁决
+
+- **先现读仓内文件，再决定某件事是不是待办**。`path` 行只写"血统 = Spring-core（Apache-2.0）"，
+  我就顺手把"许可证还没拍"当成开工前置——现读推翻：`LICENSE` 与 `moon.mod` 从骨架那一笔起就是 Apache-2.0。
+  **血统是事实，待办是决定**，两者不能混着写；血统照旧写进 spec 单独一节（不藏），但它不构成屏障。
+- **参照腿在哪个 jar 里要先 `unzip -l` / `javap` 现读**。`dfa` 轮的结论是"不在 core，要另取件"，
+  本轮开局几乎照它去找"Spring 的 jar"——实测 `AntPathMatcher` **就在 hutool-core 的 jar 里**。
+  两轮合起来的规矩不是"要不要换件"，而是**先现读再决定从哪取**。
+- **黑盒测试要构造记录，得写 `pub(all) struct`**：普通 `pub struct PathOptions { ... }` 字段读得到、
+  构造器导不出来（`Cannot create values of the read-only type`）。只想读字段（如 `FoundWord`）就用普通 `pub struct`。
+- **错误枚举变体在黑盒面归一成档名，别捷径用 `show`**：骨架期测试里 `show(err)` 报
+  `The value identifier show is unbound`（黑盒测试语境里它不在作用域），改成一个 `match` 分支返回档名就稳了。
+- **本版废弃新增两条**：`String::starts_with` → **`has_prefix`**；`UInt::reinterpret_as_int` 仍可用，
+  但 **`Int::to_uint` 已废弃 → `Int::reinterpret_as_uint`**，而把 `Int` 写进 `Byte` 直接用 **`Int::to_byte`**（截断低 8 位，不报错）。
