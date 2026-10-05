@@ -2,10 +2,32 @@
 package "mldong/moon-hutool/dfa"
 
 // Values
+pub fn is_not_stop_char(Char) -> Bool
+
+pub fn is_stop_char(Char) -> Bool
+
+pub fn new_word_tree(Array[String]) -> WordTree
 
 // Errors
 
 // Types and methods
+pub struct FoundWord {
+  word : String
+  found : String
+  start : Int
+  end : Int
+}
+
+pub struct WordTree {
+  placeholder : Int
+}
+pub fn WordTree::first_found(Self, String) -> FoundWord?
+pub fn WordTree::first_match(Self, String) -> String?
+pub fn WordTree::is_match(Self, String) -> Bool
+pub fn WordTree::match_all(Self, String) -> Array[String]
+pub fn WordTree::match_all_mode(Self, String, Int, Bool, Bool) -> Array[String]
+pub fn WordTree::match_all_words(Self, String) -> Array[FoundWord]
+pub fn WordTree::match_all_words_mode(Self, String, Int, Bool, Bool) -> Array[FoundWord]
 
 // Type aliases
 
