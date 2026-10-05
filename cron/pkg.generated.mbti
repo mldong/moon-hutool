@@ -1,11 +1,35 @@
 // Generated using `moon info`, DON'T EDIT IT
 package "mldong/moon-hutool/cron"
 
+import {
+  "mldong/moon-hutool/date",
+}
+
 // Values
+pub fn cron_match(Cron, @date.DateTime, match_second? : Bool) -> Bool
+
+pub fn cron_next_match(Cron, @date.DateTime) -> @date.DateTime
+
+pub fn cron_next_match_after(Cron, @date.DateTime) -> @date.DateTime
+
+pub fn cron_of(String) -> Cron raise CronError
+
+pub fn cron_pattern_text(Cron) -> String
 
 // Errors
+pub suberror CronError {
+  BadParts(String)
+  BadValue(String)
+  BadAlias(String)
+  OutOfRange(String, Int)
+  NonPositiveStep(String)
+  BadSyntax(String)
+}
 
 // Types and methods
+pub struct Cron {
+  text : String
+}
 
 // Type aliases
 
