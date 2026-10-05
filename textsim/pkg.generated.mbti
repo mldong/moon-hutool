@@ -1,7 +1,20 @@
 // Generated using `moon info`, DON'T EDIT IT
 package "mldong/moon-hutool/textsim"
 
+import {
+  "mldong/moon-hutool/num",
+}
+
 // Values
+pub fn is_valid_char(Char) -> Bool
+
+pub fn longest_common_subsequence(String, String) -> String
+
+pub fn remove_sign(String) -> String
+
+pub fn similar(String, String) -> Double
+
+pub fn similar_percent(String, String, Int) -> String raise @num.NumError
 
 // Errors
 
