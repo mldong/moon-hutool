@@ -254,6 +254,77 @@ test "ini 解析：注释、空行、切分与丢弃的行规则" {
   assert_eq(esc_all(@ini.grouped_map_groups(gm_empty_text)), []) // i.empty_text.groups|
   assert_eq(flat_str(gm_empty_text), "") // i.empty_text.flat|
   assert_eq(esc(@ini.ini_store(gm_empty_text)), "") // i.empty_text.store|
+
+  let gm_semi_with_assign = @ini.ini_parse(";k=v\n")
+  assert_eq(dmp(gm_semi_with_assign), "?;k=v") // i.semi_with_assign.dmp|?;k=v
+  assert_eq(@ini.grouped_map_size(gm_semi_with_assign), 1) // i.semi_with_assign.size|1
+  assert_eq(esc_all(@ini.grouped_map_groups(gm_semi_with_assign)), [""]) // i.semi_with_assign.groups|
+  assert_eq(flat_str(gm_semi_with_assign), ";k=v") // i.semi_with_assign.flat|;k=v
+  assert_eq(esc(@ini.ini_store(gm_semi_with_assign)), "[]\\n;k = v\\n") // i.semi_with_assign.store|[]\n;k = v\n
+
+  let gm_bang_with_assign = @ini.ini_parse("!k=v\n")
+  assert_eq(dmp(gm_bang_with_assign), "?!k=v") // i.bang_with_assign.dmp|?!k=v
+  assert_eq(@ini.grouped_map_size(gm_bang_with_assign), 1) // i.bang_with_assign.size|1
+  assert_eq(esc_all(@ini.grouped_map_groups(gm_bang_with_assign)), [""]) // i.bang_with_assign.groups|
+  assert_eq(flat_str(gm_bang_with_assign), "!k=v") // i.bang_with_assign.flat|!k=v
+  assert_eq(esc(@ini.ini_store(gm_bang_with_assign)), "[]\\n!k = v\\n") // i.bang_with_assign.store|[]\n!k = v\n
+
+  let gm_semi_indented_with_assign = @ini.ini_parse("  ; k = v  \n")
+  assert_eq(dmp(gm_semi_indented_with_assign), "?; k=v") // i.semi_indented_with_assign.dmp|?; k=v
+  assert_eq(@ini.grouped_map_size(gm_semi_indented_with_assign), 1) // i.semi_indented_with_assign.size|1
+  assert_eq(esc_all(@ini.grouped_map_groups(gm_semi_indented_with_assign)), [""]) // i.semi_indented_with_assign.groups|
+  assert_eq(flat_str(gm_semi_indented_with_assign), "; k=v") // i.semi_indented_with_assign.flat|; k=v
+  assert_eq(
+    esc(@ini.ini_store(gm_semi_indented_with_assign)),
+    "[]\\n; k = v\\n",
+  ) // i.semi_indented_with_assign.store|[]\n; k = v\n
+
+  let gm_sharp_with_assign = @ini.ini_parse("#k=v\n")
+  assert_eq(dmp(gm_sharp_with_assign), "") // i.sharp_with_assign.dmp|
+  assert_eq(@ini.grouped_map_size(gm_sharp_with_assign), 0) // i.sharp_with_assign.size|0
+  assert_eq(esc_all(@ini.grouped_map_groups(gm_sharp_with_assign)), []) // i.sharp_with_assign.groups|
+  assert_eq(flat_str(gm_sharp_with_assign), "") // i.sharp_with_assign.flat|
+  assert_eq(esc(@ini.ini_store(gm_sharp_with_assign)), "") // i.sharp_with_assign.store|
+
+  let gm_semi_mid_value = @ini.ini_parse("a=;b\n")
+  assert_eq(dmp(gm_semi_mid_value), "?a=;b") // i.semi_mid_value.dmp|?a=;b
+  assert_eq(@ini.grouped_map_size(gm_semi_mid_value), 1) // i.semi_mid_value.size|1
+  assert_eq(esc_all(@ini.grouped_map_groups(gm_semi_mid_value)), [""]) // i.semi_mid_value.groups|
+  assert_eq(flat_str(gm_semi_mid_value), "a=;b") // i.semi_mid_value.flat|a=;b
+  assert_eq(esc(@ini.ini_store(gm_semi_mid_value)), "[]\\na = ;b\\n") // i.semi_mid_value.store|[]\na = ;b\n
+
+  let gm_bang_mid_value = @ini.ini_parse("a=!b\n")
+  assert_eq(dmp(gm_bang_mid_value), "?a=!b") // i.bang_mid_value.dmp|?a=!b
+  assert_eq(@ini.grouped_map_size(gm_bang_mid_value), 1) // i.bang_mid_value.size|1
+  assert_eq(esc_all(@ini.grouped_map_groups(gm_bang_mid_value)), [""]) // i.bang_mid_value.groups|
+  assert_eq(flat_str(gm_bang_mid_value), "a=!b") // i.bang_mid_value.flat|a=!b
+  assert_eq(esc(@ini.ini_store(gm_bang_mid_value)), "[]\\na = !b\\n") // i.bang_mid_value.store|[]\na = !b\n
+
+  let gm_comment_hash_only = @ini.ini_parse("#[g]\nk=1\n")
+  assert_eq(dmp(gm_comment_hash_only), "?k=1") // i.comment_hash_only.dmp|?k=1
+  assert_eq(@ini.grouped_map_size(gm_comment_hash_only), 1) // i.comment_hash_only.size|1
+  assert_eq(esc_all(@ini.grouped_map_groups(gm_comment_hash_only)), [""]) // i.comment_hash_only.groups|
+  assert_eq(flat_str(gm_comment_hash_only), "k=1") // i.comment_hash_only.flat|k=1
+  assert_eq(esc(@ini.ini_store(gm_comment_hash_only)), "[]\\nk = 1\\n") // i.comment_hash_only.store|[]\nk = 1\n
+
+  let gm_semi_group_line = @ini.ini_parse(";[g]\nk=1\n")
+  assert_eq(dmp(gm_semi_group_line), "?k=1") // i.semi_group_line.dmp|?k=1
+  assert_eq(@ini.grouped_map_size(gm_semi_group_line), 1) // i.semi_group_line.size|1
+  assert_eq(esc_all(@ini.grouped_map_groups(gm_semi_group_line)), [""]) // i.semi_group_line.groups|
+  assert_eq(flat_str(gm_semi_group_line), "k=1") // i.semi_group_line.flat|k=1
+  assert_eq(esc(@ini.ini_store(gm_semi_group_line)), "[]\\nk = 1\\n") // i.semi_group_line.store|[]\nk = 1\n
+
+  let gm_blank_then_value_only_assign = @ini.ini_parse("   =   x\n")
+  assert_eq(dmp(gm_blank_then_value_only_assign), "?=x") // i.blank_then_value_only_assign.dmp|?=x
+  assert_eq(@ini.grouped_map_size(gm_blank_then_value_only_assign), 1) // i.blank_then_value_only_assign.size|1
+  assert_eq(esc_all(@ini.grouped_map_groups(gm_blank_then_value_only_assign)), [
+    "",
+  ]) // i.blank_then_value_only_assign.groups|
+  assert_eq(flat_str(gm_blank_then_value_only_assign), "=x") // i.blank_then_value_only_assign.flat|=x
+  assert_eq(
+    esc(@ini.ini_store(gm_blank_then_value_only_assign)),
+    "[]\\n = x\\n",
+  ) // i.blank_then_value_only_assign.store|[]\n = x\n
 }
 
 ///|
@@ -642,7 +713,15 @@ test "ini 解析：变量替换（use_variable 打开）" {
   assert_eq(@ini.grouped_map_size(gm_var_basic), 2) // i.var_basic.size|2
   assert_eq(esc_all(@ini.grouped_map_groups(gm_var_basic)), [""]) // i.var_basic.groups|
   assert_eq(flat_str(gm_var_basic), "a=1|b=1") // i.var_basic.flat|a=1|b=1
-  assert_eq(esc(@ini.ini_store(gm_var_basic)), "[]\\na = 1\\nb = 1\\n") // i.var_basic.store|[]\na = 1\nb = 1\n
+  assert_eq(
+    esc(
+      @ini.ini_store_with_opts(gm_var_basic, @ini.IniParseOpts::{
+        use_variable: true,
+        assign_flag: '=',
+      }),
+    ),
+    "[]\\na = 1\\nb = 1\\n",
+  ) // i.var_basic.store|[]\na = 1\nb = 1\n
 
   let gm_var_same_group = @ini.ini_parse_with_opts("[g]\na=1\nb=${a}\n", @ini.IniParseOpts::{
     use_variable: true,
@@ -652,7 +731,15 @@ test "ini 解析：变量替换（use_variable 打开）" {
   assert_eq(@ini.grouped_map_size(gm_var_same_group), 2) // i.var_same_group.size|2
   assert_eq(esc_all(@ini.grouped_map_groups(gm_var_same_group)), ["g"]) // i.var_same_group.groups|g
   assert_eq(flat_str(gm_var_same_group), "g.a=1|g.b=1") // i.var_same_group.flat|g.a=1|g.b=1
-  assert_eq(esc(@ini.ini_store(gm_var_same_group)), "[g]\\na = 1\\nb = 1\\n") // i.var_same_group.store|[g]\na = 1\nb = 1\n
+  assert_eq(
+    esc(
+      @ini.ini_store_with_opts(gm_var_same_group, @ini.IniParseOpts::{
+        use_variable: true,
+        assign_flag: '=',
+      }),
+    ),
+    "[g]\\na = 1\\nb = 1\\n",
+  ) // i.var_same_group.store|[g]\na = 1\nb = 1\n
 
   let gm_var_cross_group = @ini.ini_parse_with_opts(
     "[g]\na=1\n[h]\nb=${g.a}\n",
@@ -663,7 +750,12 @@ test "ini 解析：变量替换（use_variable 打开）" {
   assert_eq(esc_all(@ini.grouped_map_groups(gm_var_cross_group)), ["g", "h"]) // i.var_cross_group.groups|g|h
   assert_eq(flat_str(gm_var_cross_group), "g.a=1|h.b=1") // i.var_cross_group.flat|g.a=1|h.b=1
   assert_eq(
-    esc(@ini.ini_store(gm_var_cross_group)),
+    esc(
+      @ini.ini_store_with_opts(gm_var_cross_group, @ini.IniParseOpts::{
+        use_variable: true,
+        assign_flag: '=',
+      }),
+    ),
     "[g]\\na = 1\\n[h]\\nb = 1\\n",
   ) // i.var_cross_group.store|[g]\na = 1\n[h]\nb = 1\n
 
@@ -675,7 +767,15 @@ test "ini 解析：变量替换（use_variable 打开）" {
   assert_eq(@ini.grouped_map_size(gm_var_cross_missing), 1) // i.var_cross_missing.size|1
   assert_eq(esc_all(@ini.grouped_map_groups(gm_var_cross_missing)), ["h"]) // i.var_cross_missing.groups|h
   assert_eq(flat_str(gm_var_cross_missing), "h.b=${g.a}") // i.var_cross_missing.flat|h.b=${g.a}
-  assert_eq(esc(@ini.ini_store(gm_var_cross_missing)), "[h]\\nb = ${g.a}\\n") // i.var_cross_missing.store|[h]\nb = ${g.a}\n
+  assert_eq(
+    esc(
+      @ini.ini_store_with_opts(gm_var_cross_missing, @ini.IniParseOpts::{
+        use_variable: true,
+        assign_flag: '=',
+      }),
+    ),
+    "[h]\\nb = ${g.a}\\n",
+  ) // i.var_cross_missing.store|[h]\nb = ${g.a}\n
 
   let gm_var_missing = @ini.ini_parse_with_opts("a=${nope}\n", @ini.IniParseOpts::{
     use_variable: true,
@@ -685,7 +785,15 @@ test "ini 解析：变量替换（use_variable 打开）" {
   assert_eq(@ini.grouped_map_size(gm_var_missing), 1) // i.var_missing.size|1
   assert_eq(esc_all(@ini.grouped_map_groups(gm_var_missing)), [""]) // i.var_missing.groups|
   assert_eq(flat_str(gm_var_missing), "a=${nope}") // i.var_missing.flat|a=${nope}
-  assert_eq(esc(@ini.ini_store(gm_var_missing)), "[]\\na = ${nope}\\n") // i.var_missing.store|[]\na = ${nope}\n
+  assert_eq(
+    esc(
+      @ini.ini_store_with_opts(gm_var_missing, @ini.IniParseOpts::{
+        use_variable: true,
+        assign_flag: '=',
+      }),
+    ),
+    "[]\\na = ${nope}\\n",
+  ) // i.var_missing.store|[]\na = ${nope}\n
 
   let gm_var_empty_inner = @ini.ini_parse_with_opts("a=${}\n", @ini.IniParseOpts::{
     use_variable: true,
@@ -695,7 +803,15 @@ test "ini 解析：变量替换（use_variable 打开）" {
   assert_eq(@ini.grouped_map_size(gm_var_empty_inner), 1) // i.var_empty_inner.size|1
   assert_eq(esc_all(@ini.grouped_map_groups(gm_var_empty_inner)), [""]) // i.var_empty_inner.groups|
   assert_eq(flat_str(gm_var_empty_inner), "a=${}") // i.var_empty_inner.flat|a=${}
-  assert_eq(esc(@ini.ini_store(gm_var_empty_inner)), "[]\\na = ${}\\n") // i.var_empty_inner.store|[]\na = ${}\n
+  assert_eq(
+    esc(
+      @ini.ini_store_with_opts(gm_var_empty_inner, @ini.IniParseOpts::{
+        use_variable: true,
+        assign_flag: '=',
+      }),
+    ),
+    "[]\\na = ${}\\n",
+  ) // i.var_empty_inner.store|[]\na = ${}\n
 
   let gm_var_twice = @ini.ini_parse_with_opts("a=x\nb=${a}${a}\n", @ini.IniParseOpts::{
     use_variable: true,
@@ -705,7 +821,15 @@ test "ini 解析：变量替换（use_variable 打开）" {
   assert_eq(@ini.grouped_map_size(gm_var_twice), 2) // i.var_twice.size|2
   assert_eq(esc_all(@ini.grouped_map_groups(gm_var_twice)), [""]) // i.var_twice.groups|
   assert_eq(flat_str(gm_var_twice), "a=x|b=xx") // i.var_twice.flat|a=x|b=xx
-  assert_eq(esc(@ini.ini_store(gm_var_twice)), "[]\\na = x\\nb = xx\\n") // i.var_twice.store|[]\na = x\nb = xx\n
+  assert_eq(
+    esc(
+      @ini.ini_store_with_opts(gm_var_twice, @ini.IniParseOpts::{
+        use_variable: true,
+        assign_flag: '=',
+      }),
+    ),
+    "[]\\na = x\\nb = xx\\n",
+  ) // i.var_twice.store|[]\na = x\nb = xx\n
 
   let gm_var_spaced = @ini.ini_parse_with_opts("a=x\nb=${a} ${a}\n", @ini.IniParseOpts::{
     use_variable: true,
@@ -715,7 +839,15 @@ test "ini 解析：变量替换（use_variable 打开）" {
   assert_eq(@ini.grouped_map_size(gm_var_spaced), 2) // i.var_spaced.size|2
   assert_eq(esc_all(@ini.grouped_map_groups(gm_var_spaced)), [""]) // i.var_spaced.groups|
   assert_eq(flat_str(gm_var_spaced), "a=x|b=x x") // i.var_spaced.flat|a=x|b=x x
-  assert_eq(esc(@ini.ini_store(gm_var_spaced)), "[]\\na = x\\nb = x x\\n") // i.var_spaced.store|[]\na = x\nb = x x\n
+  assert_eq(
+    esc(
+      @ini.ini_store_with_opts(gm_var_spaced, @ini.IniParseOpts::{
+        use_variable: true,
+        assign_flag: '=',
+      }),
+    ),
+    "[]\\na = x\\nb = x x\\n",
+  ) // i.var_spaced.store|[]\na = x\nb = x x\n
 
   let gm_var_prefix_collide = @ini.ini_parse_with_opts(
     "ab=2\na=1\nc=${a}-${ab}\n",
@@ -726,7 +858,12 @@ test "ini 解析：变量替换（use_variable 打开）" {
   assert_eq(esc_all(@ini.grouped_map_groups(gm_var_prefix_collide)), [""]) // i.var_prefix_collide.groups|
   assert_eq(flat_str(gm_var_prefix_collide), "ab=2|a=1|c=1-2") // i.var_prefix_collide.flat|ab=2|a=1|c=1-2
   assert_eq(
-    esc(@ini.ini_store(gm_var_prefix_collide)),
+    esc(
+      @ini.ini_store_with_opts(gm_var_prefix_collide, @ini.IniParseOpts::{
+        use_variable: true,
+        assign_flag: '=',
+      }),
+    ),
     "[]\\nab = 2\\na = 1\\nc = 1-2\\n",
   ) // i.var_prefix_collide.store|[]\nab = 2\na = 1\nc = 1-2\n
 
@@ -738,7 +875,15 @@ test "ini 解析：变量替换（use_variable 打开）" {
   assert_eq(@ini.grouped_map_size(gm_var_dotted_key), 2) // i.var_dotted_key.size|2
   assert_eq(esc_all(@ini.grouped_map_groups(gm_var_dotted_key)), [""]) // i.var_dotted_key.groups|
   assert_eq(flat_str(gm_var_dotted_key), "g.a=1|b=1") // i.var_dotted_key.flat|g.a=1|b=1
-  assert_eq(esc(@ini.ini_store(gm_var_dotted_key)), "[]\\ng.a = 1\\nb = 1\\n") // i.var_dotted_key.store|[]\ng.a = 1\nb = 1\n
+  assert_eq(
+    esc(
+      @ini.ini_store_with_opts(gm_var_dotted_key, @ini.IniParseOpts::{
+        use_variable: true,
+        assign_flag: '=',
+      }),
+    ),
+    "[]\\ng.a = 1\\nb = 1\\n",
+  ) // i.var_dotted_key.store|[]\ng.a = 1\nb = 1\n
 
   let gm_var_self_ref = @ini.ini_parse_with_opts("a=${a}\n", @ini.IniParseOpts::{
     use_variable: true,
@@ -748,7 +893,15 @@ test "ini 解析：变量替换（use_variable 打开）" {
   assert_eq(@ini.grouped_map_size(gm_var_self_ref), 1) // i.var_self_ref.size|1
   assert_eq(esc_all(@ini.grouped_map_groups(gm_var_self_ref)), [""]) // i.var_self_ref.groups|
   assert_eq(flat_str(gm_var_self_ref), "a=${a}") // i.var_self_ref.flat|a=${a}
-  assert_eq(esc(@ini.ini_store(gm_var_self_ref)), "[]\\na = ${a}\\n") // i.var_self_ref.store|[]\na = ${a}\n
+  assert_eq(
+    esc(
+      @ini.ini_store_with_opts(gm_var_self_ref, @ini.IniParseOpts::{
+        use_variable: true,
+        assign_flag: '=',
+      }),
+    ),
+    "[]\\na = ${a}\\n",
+  ) // i.var_self_ref.store|[]\na = ${a}\n
 
   let gm_var_forward_ref = @ini.ini_parse_with_opts("b=${a}\na=1\n", @ini.IniParseOpts::{
     use_variable: true,
@@ -758,7 +911,15 @@ test "ini 解析：变量替换（use_variable 打开）" {
   assert_eq(@ini.grouped_map_size(gm_var_forward_ref), 2) // i.var_forward_ref.size|2
   assert_eq(esc_all(@ini.grouped_map_groups(gm_var_forward_ref)), [""]) // i.var_forward_ref.groups|
   assert_eq(flat_str(gm_var_forward_ref), "b=${a}|a=1") // i.var_forward_ref.flat|b=${a}|a=1
-  assert_eq(esc(@ini.ini_store(gm_var_forward_ref)), "[]\\nb = ${a}\\na = 1\\n") // i.var_forward_ref.store|[]\nb = ${a}\na = 1\n
+  assert_eq(
+    esc(
+      @ini.ini_store_with_opts(gm_var_forward_ref, @ini.IniParseOpts::{
+        use_variable: true,
+        assign_flag: '=',
+      }),
+    ),
+    "[]\\nb = ${a}\\na = 1\\n",
+  ) // i.var_forward_ref.store|[]\nb = ${a}\na = 1\n
 
   let gm_var_undefined_keeps = @ini.ini_parse_with_opts("a=1-${x}-2\n", @ini.IniParseOpts::{
     use_variable: true,
@@ -768,7 +929,15 @@ test "ini 解析：变量替换（use_variable 打开）" {
   assert_eq(@ini.grouped_map_size(gm_var_undefined_keeps), 1) // i.var_undefined_keeps.size|1
   assert_eq(esc_all(@ini.grouped_map_groups(gm_var_undefined_keeps)), [""]) // i.var_undefined_keeps.groups|
   assert_eq(flat_str(gm_var_undefined_keeps), "a=1-${x}-2") // i.var_undefined_keeps.flat|a=1-${x}-2
-  assert_eq(esc(@ini.ini_store(gm_var_undefined_keeps)), "[]\\na = 1-${x}-2\\n") // i.var_undefined_keeps.store|[]\na = 1-${x}-2\n
+  assert_eq(
+    esc(
+      @ini.ini_store_with_opts(gm_var_undefined_keeps, @ini.IniParseOpts::{
+        use_variable: true,
+        assign_flag: '=',
+      }),
+    ),
+    "[]\\na = 1-${x}-2\\n",
+  ) // i.var_undefined_keeps.store|[]\na = 1-${x}-2\n
 
   let gm_var_multi_dot = @ini.ini_parse_with_opts(
     "[g]\na=1\n[h]\nb=${g.a.b}\n",
@@ -779,7 +948,12 @@ test "ini 解析：变量替换（use_variable 打开）" {
   assert_eq(esc_all(@ini.grouped_map_groups(gm_var_multi_dot)), ["g", "h"]) // i.var_multi_dot.groups|g|h
   assert_eq(flat_str(gm_var_multi_dot), "g.a=1|h.b=${g.a.b}") // i.var_multi_dot.flat|g.a=1|h.b=${g.a.b}
   assert_eq(
-    esc(@ini.ini_store(gm_var_multi_dot)),
+    esc(
+      @ini.ini_store_with_opts(gm_var_multi_dot, @ini.IniParseOpts::{
+        use_variable: true,
+        assign_flag: '=',
+      }),
+    ),
     "[g]\\na = 1\\n[h]\\nb = ${g.a.b}\\n",
   ) // i.var_multi_dot.store|[g]\na = 1\n[h]\nb = ${g.a.b}\n
 
@@ -792,7 +966,12 @@ test "ini 解析：变量替换（use_variable 打开）" {
   assert_eq(esc_all(@ini.grouped_map_groups(gm_var_in_group_name)), ["a.b", "g"]) // i.var_in_group_name.groups|a.b|g
   assert_eq(flat_str(gm_var_in_group_name), "a.b.k=1|g.x=${a.b.k}") // i.var_in_group_name.flat|a.b.k=1|g.x=${a.b.k}
   assert_eq(
-    esc(@ini.ini_store(gm_var_in_group_name)),
+    esc(
+      @ini.ini_store_with_opts(gm_var_in_group_name, @ini.IniParseOpts::{
+        use_variable: true,
+        assign_flag: '=',
+      }),
+    ),
     "[a.b]\\nk = 1\\n[g]\\nx = ${a.b.k}\\n",
   ) // i.var_in_group_name.store|[a.b]\nk = 1\n[g]\nx = ${a.b.k}\n
 
@@ -805,7 +984,12 @@ test "ini 解析：变量替换（use_variable 打开）" {
   assert_eq(esc_all(@ini.grouped_map_groups(gm_var_blank_after_trim)), [""]) // i.var_blank_after_trim.groups|
   assert_eq(flat_str(gm_var_blank_after_trim), "a=1|b=${ a }") // i.var_blank_after_trim.flat|a=1|b=${ a }
   assert_eq(
-    esc(@ini.ini_store(gm_var_blank_after_trim)),
+    esc(
+      @ini.ini_store_with_opts(gm_var_blank_after_trim, @ini.IniParseOpts::{
+        use_variable: true,
+        assign_flag: '=',
+      }),
+    ),
     "[]\\na = 1\\nb = ${ a }\\n",
   ) // i.var_blank_after_trim.store|[]\na = 1\nb = ${ a }\n
 
@@ -817,7 +1001,15 @@ test "ini 解析：变量替换（use_variable 打开）" {
   assert_eq(@ini.grouped_map_size(gm_var_partial), 2) // i.var_partial.size|2
   assert_eq(esc_all(@ini.grouped_map_groups(gm_var_partial)), [""]) // i.var_partial.groups|
   assert_eq(flat_str(gm_var_partial), "a=1|b=pre1post") // i.var_partial.flat|a=1|b=pre1post
-  assert_eq(esc(@ini.ini_store(gm_var_partial)), "[]\\na = 1\\nb = pre1post\\n") // i.var_partial.store|[]\na = 1\nb = pre1post\n
+  assert_eq(
+    esc(
+      @ini.ini_store_with_opts(gm_var_partial, @ini.IniParseOpts::{
+        use_variable: true,
+        assign_flag: '=',
+      }),
+    ),
+    "[]\\na = 1\\nb = pre1post\\n",
+  ) // i.var_partial.store|[]\na = 1\nb = pre1post\n
 
   let gm_var_blank_value = @ini.ini_parse_with_opts("a=   \nb=${a}\n", @ini.IniParseOpts::{
     use_variable: true,
@@ -827,7 +1019,15 @@ test "ini 解析：变量替换（use_variable 打开）" {
   assert_eq(@ini.grouped_map_size(gm_var_blank_value), 2) // i.var_blank_value.size|2
   assert_eq(esc_all(@ini.grouped_map_groups(gm_var_blank_value)), [""]) // i.var_blank_value.groups|
   assert_eq(flat_str(gm_var_blank_value), "a=|b=") // i.var_blank_value.flat|a=|b=
-  assert_eq(esc(@ini.ini_store(gm_var_blank_value)), "[]\\na = \\nb = \\n") // i.var_blank_value.store|[]\na = \nb = \n
+  assert_eq(
+    esc(
+      @ini.ini_store_with_opts(gm_var_blank_value, @ini.IniParseOpts::{
+        use_variable: true,
+        assign_flag: '=',
+      }),
+    ),
+    "[]\\na = \\nb = \\n",
+  ) // i.var_blank_value.store|[]\na = \nb = \n
 
   let gm_nested_brace = @ini.ini_parse("a=x\nb=${a\n")
   assert_eq(dmp(gm_nested_brace), "?a=x,b=${a") // i.nested_brace.dmp|?a=x,b=${a
@@ -844,7 +1044,15 @@ test "ini 解析：变量替换（use_variable 打开）" {
   assert_eq(@ini.grouped_map_size(gm_brace_only), 2) // i.brace_only.size|2
   assert_eq(esc_all(@ini.grouped_map_groups(gm_brace_only)), [""]) // i.brace_only.groups|
   assert_eq(flat_str(gm_brace_only), "a=}|b=}") // i.brace_only.flat|a=}|b=}
-  assert_eq(esc(@ini.ini_store(gm_brace_only)), "[]\\na = }\\nb = }\\n") // i.brace_only.store|[]\na = }\nb = }\n
+  assert_eq(
+    esc(
+      @ini.ini_store_with_opts(gm_brace_only, @ini.IniParseOpts::{
+        use_variable: true,
+        assign_flag: '=',
+      }),
+    ),
+    "[]\\na = }\\nb = }\\n",
+  ) // i.brace_only.store|[]\na = }\nb = }\n
 
   let gm_var_system_prop_missing = @ini.ini_parse_with_opts(
     "a=${no.such.prop.xyz}\n",
@@ -855,7 +1063,12 @@ test "ini 解析：变量替换（use_variable 打开）" {
   assert_eq(esc_all(@ini.grouped_map_groups(gm_var_system_prop_missing)), [""]) // i.var_system_prop_missing.groups|
   assert_eq(flat_str(gm_var_system_prop_missing), "a=${no.such.prop.xyz}") // i.var_system_prop_missing.flat|a=${no.such.prop.xyz}
   assert_eq(
-    esc(@ini.ini_store(gm_var_system_prop_missing)),
+    esc(
+      @ini.ini_store_with_opts(gm_var_system_prop_missing, @ini.IniParseOpts::{
+        use_variable: true,
+        assign_flag: '=',
+      }),
+    ),
     "[]\\na = ${no.such.prop.xyz}\\n",
   ) // i.var_system_prop_missing.store|[]\na = ${no.such.prop.xyz}\n
 }
@@ -870,7 +1083,15 @@ test "ini 解析：选项面（assign_flag 与开关关闭档）" {
   assert_eq(@ini.grouped_map_size(gm_assign_colon), 1) // i.assign_colon.size|1
   assert_eq(esc_all(@ini.grouped_map_groups(gm_assign_colon)), [""]) // i.assign_colon.groups|
   assert_eq(flat_str(gm_assign_colon), "a=b") // i.assign_colon.flat|a=b
-  assert_eq(esc(@ini.ini_store(gm_assign_colon)), "[]\\na : b\\n") // i.assign_colon.store|[]\na : b\n
+  assert_eq(
+    esc(
+      @ini.ini_store_with_opts(gm_assign_colon, @ini.IniParseOpts::{
+        use_variable: false,
+        assign_flag: ':',
+      }),
+    ),
+    "[]\\na : b\\n",
+  ) // i.assign_colon.store|[]\na : b\n
 
   let gm_var_assign_colon = @ini.ini_parse_with_opts("a=1\nb=${a}\n", @ini.IniParseOpts::{
     use_variable: true,
@@ -880,7 +1101,15 @@ test "ini 解析：选项面（assign_flag 与开关关闭档）" {
   assert_eq(@ini.grouped_map_size(gm_var_assign_colon), 0) // i.var_assign_colon.size|0
   assert_eq(esc_all(@ini.grouped_map_groups(gm_var_assign_colon)), []) // i.var_assign_colon.groups|
   assert_eq(flat_str(gm_var_assign_colon), "") // i.var_assign_colon.flat|
-  assert_eq(esc(@ini.ini_store(gm_var_assign_colon)), "") // i.var_assign_colon.store|
+  assert_eq(
+    esc(
+      @ini.ini_store_with_opts(gm_var_assign_colon, @ini.IniParseOpts::{
+        use_variable: true,
+        assign_flag: ':',
+      }),
+    ),
+    "",
+  ) // i.var_assign_colon.store|
 
   let gm_var_no_flag = @ini.ini_parse("a=1\nb=${a}\n")
   assert_eq(dmp(gm_var_no_flag), "?a=1,b=${a}") // i.var_no_flag.dmp|?a=1,b=${a}
@@ -897,7 +1126,15 @@ test "ini 解析：选项面（assign_flag 与开关关闭档）" {
   assert_eq(@ini.grouped_map_size(gm_assign_is_space), 1) // i.assign_is_space.size|1
   assert_eq(esc_all(@ini.grouped_map_groups(gm_assign_is_space)), [""]) // i.assign_is_space.groups|
   assert_eq(flat_str(gm_assign_is_space), "a=b c") // i.assign_is_space.flat|a=b c
-  assert_eq(esc(@ini.ini_store(gm_assign_is_space)), "[]\\na   b c\\n") // i.assign_is_space.store|[]\na   b c\n
+  assert_eq(
+    esc(
+      @ini.ini_store_with_opts(gm_assign_is_space, @ini.IniParseOpts::{
+        use_variable: false,
+        assign_flag: ' ',
+      }),
+    ),
+    "[]\\na   b c\\n",
+  ) // i.assign_is_space.store|[]\na   b c\n
 
   let gm_assign_is_tab = @ini.ini_parse_with_opts("a\tb\tc\n", @ini.IniParseOpts::{
     use_variable: false,
@@ -907,7 +1144,15 @@ test "ini 解析：选项面（assign_flag 与开关关闭档）" {
   assert_eq(@ini.grouped_map_size(gm_assign_is_tab), 1) // i.assign_is_tab.size|1
   assert_eq(esc_all(@ini.grouped_map_groups(gm_assign_is_tab)), [""]) // i.assign_is_tab.groups|
   assert_eq(flat_str(gm_assign_is_tab), "a=b\\tc") // i.assign_is_tab.flat|a=b\tc
-  assert_eq(esc(@ini.ini_store(gm_assign_is_tab)), "[]\\na \\t b\\tc\\n") // i.assign_is_tab.store|[]\na \t b\tc\n
+  assert_eq(
+    esc(
+      @ini.ini_store_with_opts(gm_assign_is_tab, @ini.IniParseOpts::{
+        use_variable: false,
+        assign_flag: '\t',
+      }),
+    ),
+    "[]\\na \\t b\\tc\\n",
+  ) // i.assign_is_tab.store|[]\na \t b\tc\n
 }
 
 ///|

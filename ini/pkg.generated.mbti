@@ -46,6 +46,8 @@ pub fn ini_parse_with_opts(String, IniParseOpts) -> GroupedMap
 
 pub fn ini_store(GroupedMap) -> String
 
+pub fn ini_store_with_opts(GroupedMap, IniParseOpts) -> String
+
 // Errors
 
 // Types and methods

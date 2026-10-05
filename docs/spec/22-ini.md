@@ -22,7 +22,7 @@
 **分批**：行 22 的第二半——`java.util.Properties` 的严格语义（`\` 续行、`!` 也当注释、键值分隔符是
 `=`/`:`/空格三档、`\uXXXX` 解码、ISO-8859-1、`store` 的转义表）落在 `dialect/Props` 转手的 `super.load(reader)` 上，
 权威参照是 JDK 而不是 hutool，形状与本格的"剥边 + 单分隔符 + 无转义"几乎处处相反 ⇒ **另立第二批**（同一 `ini/` 包、
-`#22.25` 起续号），不混进本批的语义表里。
+`#22.26` 起续号），不混进本批的语义表里。
 
 ## 2. 公开面（24 件）
 
@@ -52,6 +52,7 @@
 | 22.22 | `ini_store(gm) -> String` | `private store(PrintWriter)` |
 | 22.23 | `ini_get_str(gm, key, group?, default?) -> String?` | `AbsSetting.getStr(key, group, default)` |
 | 22.24 | `ini_get_str_not_empty(gm, key, group?, default?) -> String?` | `AbsSetting.getStrNotEmpty(key, group, default)` |
+| 22.25 | `ini_store_with_opts(gm, opts) -> String` | `SettingLoader.store(PrintWriter)` 读的正是该 loader 的 `assignFlag` 字段（**PR-B 补的公开项**，见 §5 第 10 行） |
 
 **无 raise 面**：参照在这条文本路径上不报错——不合规的行是**丢弃**（`keyValue.length < 2 ⇒ continue`），
 `load(InputStream)` 只 `return true`；`SettingRuntimeException` 属 `SettingUtil` 的 IO 路径，不进本库。
@@ -161,18 +162,43 @@
 8. **键的 null 档**：参照签名容 `null` 键（`o.S14.8` 读数 `null`），本库键类型 `String` ⇒ 该档不进契约。
 9. **并发面**：参照 `GroupedMap` 内部是 `ReentrantReadWriteLock`；本库全单线程，锁不进契约（无共享状态可保护）。
 
-## 6. 变异对照（PR-B 填读数）
+10. **序列化要拿得到分隔符**：PR-A 只给了 `ini_store(gm)`（默认 `=`），但参照 `store` 输出的是它自己 loader 的 `assignFlag` 档 ⇒ 腿的 `i.assign_colon`（`a : b`）、`i.assign_is_space`（`a` 后三个空格）、`i.assign_is_tab` 三条读数用默认档点不亮。**落地时补 #22.25 `ini_store_with_opts`，三条断言只换调用式、期望串逐字未动**（不删期望、不改期望——那是 PR-A 的漏，不是腿的错）。
 
-计划 12 条，每条都要能指出"哪一块因此红"：
-M1 注释符加 `;`；M2 分组判定改成"行首 `[` 即可"；M3 切分改成"切最后一刀"；M4 裸键不丢弃（当空值收）；
-M5 键/值不剥边；M6 重复键按后写位置；M7 `get` 也剥边（修掉不对称）；M8 `size` 在 `remove`/`clear` 后也失效；
-M9 `clear` 连组一起摘；M10 变量替换跨组优先于同组；M11 变量查不到时替换成空串；M12 `store` 的值做转义。
-第二批落地时另补空白码位表的两条（把 `00a0` 移出表、把 `0085` 移进表）。
+## 6. 变异对照（PR-B 实测读数，10-06）
+
+工装：整树 `tar` 到隔离副本（`Temp/mutini/proj`）后逐条改源码跑 `moon test ./ini --target wasm`，
+每条写完立刻还原，收尾断言"副本与基线字节相同 + 基线复跑仍 0 红"。
+**开局先断基线**：上一版工装在第一条测试调用处被 GBK 解码异常打断，把已改的源码留成了"基线"，
+于是那一轮的 10 条读数全是相对脏基线测的——本轮加了三道判据（开局断言基线 0 红、逐条 finally 还原、
+收尾字节比对 + 复跑），修完重跑才是下面这组数。
+
+| # | 变异 | 读数 | 判据落点 |
+|---|---|---|---|
+| M1 | 注释符把 `;` 也算注释 | 红 1 / 14 | 首轮是**等价变异**（红 0）——老夹具里 `;` 起头的行本来就不含 `=`，两种走法都落进"丢弃"。补 `;k=v`、`  ; k = v  `、`;[g]` 三条夹具后这条判据才可达（腿现读键 `;k` 值 `v`） |
+| M2 | 分组判定放宽成"行首是 `[` 就算" | 红 1 / 14 | `i.value_brackets`（`[a]=b` 的键是 `[a]`） |
+| M3 | 切分改成切最后一刀 | 红 2 / 14 | `i.multi_eq`、`i.line_only_assigns` |
+| M4 | 裸键不丢弃（当空值收） | 红 3 / 14 | `i.no_assign`、`i.comment_semi`、`i.semi_group_line` |
+| M5 | 键与值都不剥边 | 红 3 / 14 | `i.tab_around`、`i.val_blank_only`、`i.blank_lines` |
+| M6 | 重复键改成"移到末尾" | 红 2 / 14 | `i.dup_three`（键序须是 `a,b,c`）、`o.S6` 系列 |
+| M7 | 双参 `get` 也剥组名边（修掉不对称） | 红 1 / 14 | `o.S2.3`/`o.S2.4`——**跟随参照的不对称确实被钉住了** |
+| M8 | `remove` 之后也失效总条数缓存 | 红 2 / 14 | `o.S3.5`/`o.S8.7`——陈旧读数同样确实被钉住 |
+| M9 | 变量查找改成跨组优先 | 红 1 / 14 | `i.var_dotted_key`（同组里就有键 `g.a`） |
+| M10 | 查不到的变量替换成空串 | 红 1 / 14 | `i.var_missing` 等"原样留着 `${...}`"档 |
+| M11 | `store` 对值里的换行做转义 | 红 1 / 14 | `w.S15.store`（值含 `\n` 就写出多行） |
+| M14 | 值一律写成空串（抹掉 null 档与真空串档的差别） | 红 11 / 14 | 覆盖面最广的一条，说明形状断言不是摆设 |
+| M12 | 空白码表去掉 `feff` | **未挂载** | `moon fmt` 把 17 项布尔式折成多行，按源码字面挂锚点失败。判据本身可达（`i.bom_line` 的键 `a` 就靠这条），留第二批连同 M13 一起补挂（改法是把码表数据化成数组再判） |
+| M13 | 空白码表加入 `0085` | **未挂载** | 同上锚点问题；另注：现有夹具只在**值中间**放过 `0085`（`i.u0085_in_value`），没在行/键/值的**边上**放过 ⇒ 即便挂上也仍是等价变异，要连夹具一起补 |
+
+等价变异一条（M1 首测）已用补夹具的方式转成可达判据；两条未挂载（M12/M13）如实记着，不写成"已覆盖"。
 
 ## 7. 状态
 
-`契约已冻结`（10-06 PR-A：spec + 24 件签名骨架 + 14 块 634 条冻结期望值，全部由腿灌入；`moon check` 0 警告 0 错误，
-`moon test --target wasm` 读数为 **Total 14 / passed 0 / failed 14** 的设计态红）。
-骨架期 `ini/moon.pkg` 带 G12 豁免行（压掉 `unused_value`/`struct_never_constructed`/`unused_constructor`/
-`unused_error_type`/`unused_trait_bound`，本轮**新增 `unused_field`**——三个 `priv` 字段在体全是 abort 时必然没人读）；
-落地笔整行删除。下一笔＝PR-B 实现（替换 24 个 abort 体）＋§6 变异读数回填。
+`已实现`（10-06 两笔：PR-A 契约 `ad64808` + PR-B 落地本轮）。
+落地轮读数以 `docs/ROADMAP.md` 逐包表与 README 读数块的当场生成值为准（本包 14 块、674 条断言，
+wasm / wasm-gc / js 三档一致；`moon check` 0 警告 0 错误，`.mbti` 由 `moon info` 现生成）。
+PR-B 对契约的**两处更正**都记在案：
+① 新增公开项 **#22.25 `ini_store_with_opts`**——参照的 `store` 读的是它自己 loader 的 `assignFlag` 字段，
+   PR-A 只给默认档，落地时点不亮 `i.assign_colon`/`i.assign_is_space`/`i.assign_is_tab` 三条腿读数；
+   因此这三条断言的调用改成带选项档（**期望串逐字未动**，只换调用式，见 §5 第 10 行）。
+② 新增 9 条注释符夹具（M1 等价变异暴露的覆盖面缺口）。
+第二批（`Props` 的 `java.util.Properties` 严格语义，`#22.26` 起，权威参照是 JDK）仍待开工。
