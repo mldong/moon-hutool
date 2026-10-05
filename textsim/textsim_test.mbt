@@ -443,6 +443,14 @@ test "textsim 百分比：33 组 × {0,1,2,10}（腿 A 码元读数 132 条）" 
   assert_eq(@textsim.similar_percent(fx_a(3), fx_b(3), 1), "100%") // pct.3.1
   assert_eq(@textsim.similar_percent(fx_a(3), fx_b(3), 2), "100%") // pct.3.2
   assert_eq(@textsim.similar_percent(fx_a(3), fx_b(3), 10), "100%") // pct.3.10
+  // §6「负 scale 不再夹成 0」那条等价变形的补强夹具：非 tie 值才钉得住。
+  // 腿新读（TextSimNeg.java，真 hutool-core 5.8.35 + JDK 17.0.14）：参照在 scale=-1/-2 上给的是
+  // `OK:67%` 而不是推导以为的 `70%`（`DecimalFormat` 拿到负的最大小数位当作不限制），
+  // 所以这几条钉的是「本库与参照在非 tie 夹具上同值」，夹 0 与不夹 0 谁输谁赢交给下面的变异重跑说话。
+  assert_eq(@textsim.similar_percent("abc", "axc", -1), "67%") // neg.-1|OK:67%
+  assert_eq(@textsim.similar_percent("abc", "axc", -2), "67%") // neg.-2|OK:67%
+  assert_eq(@textsim.similar_percent("abc", "axc", 0), "67%") // neg.0|OK:67%
+  assert_eq(@textsim.similar_percent("ab", "abc", -1), "67%") // neg.swap|OK:67%
   assert_eq(@textsim.similar_percent(fx_a(4), fx_b(4), 0), "100%") // pct.4.0
   assert_eq(@textsim.similar_percent(fx_a(4), fx_b(4), 1), "100%") // pct.4.1
   assert_eq(@textsim.similar_percent(fx_a(4), fx_b(4), 2), "100%") // pct.4.2
