@@ -339,3 +339,25 @@ core 数值语义侧（全部当场实测，三档 `wasm`/`js`/`wasm-gc` 读数�
   故意不用 `os.path.exists`（本地有、没提交的文件克隆出去就是死链），G10 会在 add 之前判红——
   这不是门禁坏，是它在告诉你工作还没做完。
 
+### conv 实现轮（10-05）四条写法坑 + 两条判据教训
+
+- **`try { Some(e) } catch { _ => None }` 会被 `moon fmt` 折成 `e catch { _ => None }`**，折完类型就错
+  （`catch` 的分支必须与 `e` 同型，而我们要的是 `T?`）⇒ 直接写 `Some(@string.parse_int(t)) catch { _ => None }`，
+  把 `Some(...)` 放进被 `catch` 的那个表达式里，fmt 就不会再拆坏。
+- **core 的严格解析件比 hutool 的文法宽**：实测 `@string.parse_int("1_000")` 给 1000（收下划线分隔）、
+  `@string.parse_double("NaN")`/`("Infinity")` 直接给值，而它**不做 trim**（`" 123 "` 报错）。
+  ⇒ 宽松腿的"能不能转"必须本包自己扫字符定文法，core 只负责求值与位宽界校验；
+  把文本直接丢给 `parse_int` 就等于偷偷跟回了 Java 的 `NumberFormat` 分支。
+- **`Json` 变体是只读类型**：构造用 `Json::null()` / `@json.to_json(v)` / `@json.parse(s)`，
+  匹配可以用 `Number(d, repr~)`；忽略带标签的字段写 `Number(d, ..)`，写 `Number(d, _)` 报
+  `requires 1 positional arguments, but is given 2`。
+- **私有枚举别挂 `derive(Eq)`**：`derive(Eq)` 会生成 `impl Eq`，而本版把"impl 方法被当普通方法隐式调用"
+  标成 `implicit_impl_as_method` 弃用警告——一个用不到的 `Eq` 就吃掉两条警告。要么标 `priv enum` 并删掉
+  `derive(Eq)`，要么补 `pub extend 名 with Eq::{equal, not_equal}`。
+- **优先序类规则必须有"两边都能做"的判别夹具**：`chain` 那 9 条断言原本全喂"内置转不出、自定义能转"的样本，
+  把优先序整个反过来仍然 277 全绿——是变异对照（`chain` 反过来 ⇒ 8 块红）把它抓出来的。
+  以后写这类规则先问一句"把实现反过来会红吗"，不会红就是没测。
+- **期望值自身也会错**：本轮两处（`to_char("-0")` 把 JSON 源文本当 Double 形态、`to_big_int` 对带 `repr`
+  的大整数绕了一次 `float`）。两处都按"单独一笔 + 外部读数来源"处理，来源是 `Number` 变体 19 条
+  `(d, repr)` 实测表与 spec §4 的腿，不是"实现给什么就改成什么"。
+

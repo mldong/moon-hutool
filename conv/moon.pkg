@@ -1,25 +1,20 @@
-// `to_big_int` 的签名带 `BigInt`、`to_int64` 带 `Int64`，所以非测试侧要 import core 的这两个包
-// （零依赖契约只允许 moonbitlang/core，这一条在内）。取值腿与转换腿都要 `Json`。
+// 实现落地的这一笔起，骨架豁免整行删除（G12 盯着这一条：体里没有 abort 就不许再压豁免）。
+//
+// 非测试侧的依赖全是 `moonbitlang/core` + 本仓自己的 `text`——零依赖契约（只用 core、零 extern、
+// 全同步）没破：`@text.trim`/`is_blank`/`split` 是上一包的公开面，跨包 import 在本仓有先例
+// （`codec`→`digest`、`id`→`digest`）。签名里带 `BigInt`/`Int64` 也要对应包在案。
 import {
-  "moonbitlang/core/bigint",
-  "moonbitlang/core/int64",
-  "moonbitlang/core/json",
-}
-
-// 测试侧：@json.parse 造夹具、@double.inf 喂 ±Infinity 档、@bigint 的十进制串比对
-import {
+  "mldong/moon-hutool/text",
   "moonbitlang/core/bigint",
   "moonbitlang/core/double",
-  "moonbitlang/core/int64",
+  "moonbitlang/core/int",
+  "moonbitlang/core/json",
+  "moonbitlang/core/string",
+}
+
+// 测试侧：@json.parse 造夹具、@double 的 ±Infinity 喂越界档、@bigint 的十进制串比对
+import {
+  "moonbitlang/core/double",
   "moonbitlang/core/json",
   "mldong/moon-hutool/conv",
 } for "test"
-
-// 骨架期豁免（全是"未实现"的机械后果，不是代码缺陷）：
-// - `unused_value`：每条公开项的形参在 `abort` 体里都没人用
-// - `unused_error_type`：`get_by_path` 签名写了 `raise ConvError` 而体里没有 `raise`
-// - `unused_package`：实现轮才用到的 core 包此刻没人 import
-// - `unused_constructor`：`ConvError::BadPath` 还没人构造
-// 实现落地那一笔必须整行删掉——门禁 G12 拦着不让忘。
-
-warnings = "-unused_value-unused_error_type-unused_package-unused_constructor"
