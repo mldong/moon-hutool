@@ -1,7 +1,8 @@
-// 依赖在此声明；契约期不 import core 包
+// 依赖在此声明；落地轮起体子是真实现，契约骨架期的 `warnings` 豁免按 G12 撤掉
 
-// 契约骨架期：体子是 abort，签名上的参数没人读、类型没人构造 ⇒ 压提两类机械警告（G12 钉在"体还是不是 abort"上）
-warnings = "-unused_value-struct_never_constructed-unused_constructor-unused_error_type"
+import {
+  "moonbitlang/core/string",
+}
 
 import {
   "mldong/moon-hutool/path",

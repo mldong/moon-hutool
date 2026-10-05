@@ -109,7 +109,7 @@
 
 | 腿 | 来源 | 条数 | 说明 |
 |---|---|---|---|
-| A | `hutool-core-5.8.35.jar` 的 `AntPathMatcher` + 本机 JDK 17.0.14 | **101 行读数**（33 条 `match`/`matchStart`、11 条 `extract`+`within`、12 条 `combine`（含两条抛点）、4 条排序 + 2 条同级给 0、7 条 `is_pattern`、3 条抛点、默认构造与常量） | `javac -encoding UTF-8`（`digest` 轮那条编码教训开局就带）；每条都带 `sep/trim/case/start` 四个参数列，读数可复算 |
+| A | `hutool-core-5.8.35.jar` 的 `AntPathMatcher` + 本机 JDK 17.0.14 | **101 行读数**（33 条 `match`/`matchStart`、11 条 `extract`+`within`、12 条 `combine`（含两条抛点）、4 条排序 + 10 条比较器逐对直读（含同级给 0 的两条）、7 条 `is_pattern`、3 条抛点、默认构造与常量） | `javac -encoding UTF-8`（`digest` 轮那条编码教训开局就带）；每条都带 `sep/trim/case/start` 四个参数列，读数可复算 |
 | B | **参照实现源码**（`hutool-core-5.8.35-sources.jar`，`AntPathMatcher.java` 945 行） | 4 条机制判定 | 只能由源码给：默认字段值（`caseSensitive=true`、`trimTokens=false`）、`{*name}` 抛点的 `startsWith("*")` 分支、`startsWith(sep)` 那条前导斜杠判据、`**` 只在整段 token 上生效的位置 |
 
 **普查阶段自己踩的坑记在这儿**（避免下一包再踩）：分隔符档位初版写成 `a:**/c` 对 `a:x:y:c`（混用两种分隔符，恒假），
@@ -132,8 +132,8 @@
 
 | 项 | 相位 | 说明 |
 |---|---|---|
-| 本文件 10 件 + `PathOptions` + `PathError` | **契约已冻结**（10-05 本笔） | 函数体是 `abort`，7 块用例**预期红**；落地那一笔只许把红变绿（门禁 G5） |
-| 变异对照 | PR-B | 至少四条：`**` 的整段判定改成子串判定、`*` 允许跨段、大小写开关接反、排序里"更通用"的判定顺序（`**` 结尾 vs `*` 计数）挪位 |
+| 本文件 10 件 + `PathOptions` + `PathError` | **已实现**（10-05 四笔：骨架 `8bc6423` + 契约补充 `9cfaf16` + 期望值更正 `137e248` + 落地） | 11 块全绿（7 断言块 + 4 文档块），wasm / js / wasm-gc 三档一致，`.mbti` 公开面未变 |
+| 变异对照 | **已做五条，逐条有块红** | `**` 的整段判定拿掉 ⇒ 3 红 / 路径不拆段（等于让 `*` 跨段）⇒ 5 红 / 大小写开关接反 ⇒ 2 红 / `combine` 的单星截断分支拿掉 ⇒ 2 红 / 比较器的双前缀分支挪位 ⇒ 1 红；五条全部按 sha256 字节还原。**一条弱点如实记着**：「大小写接反」只被 2 块抓到——现有夹具两侧同升降，改后 `want` 与 `target` 仍对称，反向夹具（模式小写、路径大写）没能把它区分开；补一条"只降一边"的夹具再判，这一格算待补强。 |
 | `PathMatcher`/`PathPatternParser` 那一族（Spring 的新解析器） | **不做** | 参照实现自己就抛"用 PathPatternParser instead"；本库不引第二套语法 |
 | `tokenize*`/`doMatch` 这些 `protected` 扩展点 | 不做 | 那是 Java 继承体系的扩展面，本库无子类语义可承接（对外只承诺上面 10 件） |
 | 路径规范化（`normalize`、`..` 折叠、`.` 去除） | 不在本包 | hutool 那件在 `PathUtil`/`FileUtil`，需要 IO 语义，属另一个包 |

@@ -43,7 +43,7 @@ pub(all) struct PathOptions {
 /// 参照实现默认构造的等价档：`separator="/"`、`case_sensitive=true`、`trim_tokens=false`。
 /// - Raises: 无——常量
 pub fn default_options() -> PathOptions {
-  abort("moon-hutool/path 第一批未实现（契约 docs/spec/15-path.md）")
+  PathOptions::{ separator: "/", case_sensitive: true, trim_tokens: false, }
 }
 
 ///|
@@ -70,14 +70,31 @@ pub suberror PathError {
 /// `""` 假、`/a:b` 假（**冒号不算模式字符**）、`**` 真。
 /// - Raises: 无——纯判定
 pub fn is_pattern(pattern : String) -> Bool {
-  abort("moon-hutool/path 第一批未实现（契约 docs/spec/15-path.md）")
+  // 判据照搬参照实现：`*`/`?` 立刻算数，`{` 要有配对的 `}` 才算（实测 `/{a` 不算）
+  let cs = pattern.to_array()
+  let mut i = 0
+  let mut uri_var = false
+  let mut hit = false
+  while i < cs.length() && !hit {
+    let c = cs[i]
+    if c == '*' || c == '?' {
+      hit = true
+    } else if c == '{' {
+      uri_var = true
+    } else if c == '}' && uri_var {
+      hit = true
+    }
+    i = i + 1
+  }
+  hit
 }
 
 ///|
 /// 默认档整段匹配（`default_options()` 那三个开关）。名字不叫 `match`——`match` 是 MoonBit 保留字。
 /// - Raises: 无——匹配判定自身不抛，非法模式给假（参照实现对非法模式的抛点只出现在 `extract` 那一族）
 pub fn match_path(pattern : String, path : String) -> Bool {
-  abort("moon-hutool/path 第一批未实现（契约 docs/spec/15-path.md）")
+  let (ok, _) = do_match(pattern, path, true, default_options(), None)
+  ok
 }
 
 ///|
@@ -90,7 +107,8 @@ pub fn match_path_with(
   path : String,
   opts : PathOptions,
 ) -> Bool {
-  abort("moon-hutool/path 第一批未实现（契约 docs/spec/15-path.md）")
+  let (ok, _) = do_match(pattern, path, true, opts, None)
+  ok
 }
 
 ///|
@@ -103,7 +121,8 @@ pub fn match_start_with(
   path : String,
   opts : PathOptions,
 ) -> Bool {
-  abort("moon-hutool/path 第一批未实现（契约 docs/spec/15-path.md）")
+  let (ok, _) = do_match(pattern, path, false, opts, None)
+  ok
 }
 
 ///|
@@ -116,7 +135,12 @@ pub fn extract_variables_with(
   path : String,
   opts : PathOptions,
 ) -> Map[String, String] raise PathError {
-  abort("moon-hutool/path 第一批未实现（契约 docs/spec/15-path.md）")
+  let map : Map[String, String] = Map([])
+  let (ok, err) = do_match(pattern, path, true, opts, Some(map))
+  match err {
+    Some(e) => raise e
+    None => if ok { map } else { raise NoMatch(pattern, path) }
+  }
 }
 
 ///|
@@ -126,7 +150,7 @@ pub fn extract_variables(
   pattern : String,
   path : String,
 ) -> Map[String, String] raise PathError {
-  abort("moon-hutool/path 第一批未实现（契约 docs/spec/15-path.md）")
+  extract_variables_with(pattern, path, default_options())
 }
 
 ///|
@@ -134,7 +158,7 @@ pub fn extract_variables(
 /// `/**` 对 `/a/b` 给 `a/b`；精确模式 `/a/b` 对 `/a/b` 给**空串**；不匹配也给空串（参照实现不抛）。
 /// - Raises: 无
 pub fn extract_within(pattern : String, path : String) -> String {
-  abort("moon-hutool/path 第一批未实现（契约 docs/spec/15-path.md）")
+  within_of(pattern, path)
 }
 
 ///|
@@ -150,7 +174,11 @@ pub fn extract_within(pattern : String, path : String) -> String {
 ///    两边相等也拼：`combine("/hotels", "/hotels")` 给 `/hotels/hotels`。
 /// - Raises: `PathError.ExtensionConflict(prefix, suffix)`
 pub fn combine(prefix : String, suffix : String) -> String raise PathError {
-  abort("moon-hutool/path 第一批未实现（契约 docs/spec/15-path.md）")
+  let (out, err) = combine_go(prefix, suffix)
+  match err {
+    Some(e) => raise e
+    None => out
+  }
 }
 
 ///|
@@ -162,7 +190,7 @@ pub fn combine(prefix : String, suffix : String) -> String raise PathError {
 ///   用 `Int` 而不用 `Ordering`：本仓没有 `Ordering` 的现成前例，而排序函数正好要 `Int`
 /// - Raises: 无
 pub fn compare_patterns(against : String, a : String, b : String) -> Int {
-  abort("moon-hutool/path 第一批未实现（契约 docs/spec/15-path.md）")
+  compare_pat(against, a, b)
 }
 
 ///|
@@ -170,5 +198,5 @@ pub fn compare_patterns(against : String, a : String, b : String) -> Int {
 /// 是为了让调用方可以拿它拼 `PathOptions`。
 /// - Raises: 无——常量
 pub fn default_separator() -> String {
-  abort("moon-hutool/path 第一批未实现（契约 docs/spec/15-path.md）")
+  "/"
 }
