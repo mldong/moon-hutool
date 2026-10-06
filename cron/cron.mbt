@@ -746,16 +746,9 @@ fn from_values(v : Array[Int]) -> @date.DateTime {
 ///|
 fn earliest(c : Cron, values : Array[Int]) -> @date.DateTime {
   // 参照 nextMatchAfter(int[], zone)：各匹配器各给一个候选，取最早的那个
-  let mut best = from_values(sub_next_values(c.subs[0].ms, values))
-  let mut k = 1
-  while k < c.subs.length() {
-    let cand = from_values(sub_next_values(c.subs[k].ms, values))
-    if cand < best {
-      best = cand
-    }
-    k += 1
-  }
-  best
+  // （第二批的带区名入口共用同一台引擎，实现挪在 zone_util.mbt 的 `earliest_of`，
+  // 这里只留一层转调——一条判据不留两处实现）
+  earliest_of(c.subs, values)
 }
 
 ///|

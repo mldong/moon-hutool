@@ -86,6 +86,40 @@ fn pb_case(name : String) -> @cron.CronBuilder raise @cron.CronError {
         @cron.CronPart::Minute,
         [],
       )
+    "values_empty_second" =>
+      @cron.cron_builder_set_values(
+        @cron.cron_builder_new(),
+        @cron.CronPart::Second,
+        [],
+      )
+    "values_empty_year" =>
+      @cron.cron_builder_set_values(
+        @cron.cron_builder_new(),
+        @cron.CronPart::Year,
+        [],
+      )
+    "blank_second" =>
+      @cron.cron_builder_set(
+        @cron.cron_builder_new(),
+        @cron.CronPart::Second,
+        "",
+      )
+    "space_year" =>
+      @cron.cron_builder_set(
+        @cron.cron_builder_new(),
+        @cron.CronPart::Year,
+        " ",
+      )
+    "blank_second_with_year" =>
+      @cron.cron_builder_set(
+        @cron.cron_builder_set(
+          @cron.cron_builder_new(),
+          @cron.CronPart::Second,
+          "",
+        ),
+        @cron.CronPart::Year,
+        "2030",
+      )
     "dow_seven" =>
       @cron.cron_builder_set(
         @cron.cron_builder_new(),
@@ -273,7 +307,7 @@ test "@cron2 单值校验判而不变（腿 C 的 C 行去重后，第 1 块 61 
 // K.null_minute 不进夹具：参照的 `set(part, null)` 在本库没有对应形状——未设置就是未设置，没有第二种；参照原读数 RET|* * * * * 在案
 
 ///|
-test "@cron2 建造器的 build 串与回环（腿 C 的 K/RT 行，第 1 块 34 条）" {
+test "@cron2 建造器的 build 串与回环（腿 C 的 K/RT 行，第 1 块 44 条）" {
   assert_eq(pb_tag("empty"), "OK:* * * * *") // 腿 C K.empty RET|* * * * *
   assert_eq(pb_tag("minute_only"), "OK:*/5 * * * *") // 腿 C K.minute_only RET|*/5 * * * *
   assert_eq(pb_tag("values_hour"), "OK:* 1,2,3 * * *") // 腿 C K.values_hour RET|* 1,2,3 * * *
@@ -286,6 +320,11 @@ test "@cron2 建造器的 build 串与回环（腿 C 的 K/RT 行，第 1 块 34
   assert_eq(pb_tag("range_reversed"), "OK:* * 20-5 * *") // 腿 C K.range_reversed RET|* * 20-5 * *
   assert_eq(pb_tag("values_with_second"), "OK:0 0,30 * * * *") // 腿 C K.values_with_second RET|0 0,30 * * * *
   assert_eq(pb_tag("values_empty"), "OK:* * * * *") // 腿 C K.values_empty RET|* * * * *
+  assert_eq(pb_tag("values_empty_second"), "OK: * * * * *") // 腿 C K.values_empty_second RET| * * * * *
+  assert_eq(pb_tag("values_empty_year"), "OK:* * * * * ") // 腿 C K.values_empty_year RET|* * * * * 
+  assert_eq(pb_tag("blank_second"), "OK: * * * * *") // 腿 C K.blank_second RET| * * * * *
+  assert_eq(pb_tag("space_year"), "OK:* * * * *  ") // 腿 C K.space_year RET|* * * * *  
+  assert_eq(pb_tag("blank_second_with_year"), "OK:* * * * * * 2030") // spec §11 第 1 行（秒设成空白也算没给） ⇒ 本库补秒成 7 段；参照原读数 K.blank_second_with_year RET| * * * * * 2030 在案
   assert_eq(pb_tag("dow_seven"), "OK:* * * * 7") // 腿 C K.dow_seven RET|* * * * 7
   assert_eq(pb_tag("junk_minute"), "OK:abc * * * *") // 腿 C K.junk_minute RET|abc * * * *
   assert_eq(pb_tag("values_out_of_range"), "ERR:OutOfRange[HOUR,25]") // 腿 C K.values_out_of_range ERR_cn.hutool.cron.CronException|HOUR value 25 out of range: [0 , 23] ⇒ 参照在 setter 那一格就抛
@@ -303,6 +342,11 @@ test "@cron2 建造器的 build 串与回环（腿 C 的 K/RT 行，第 1 块 34
   assert_eq(pb_round_tag("range_reversed"), "OK:* * 20-5 * *") // 腿 C RT.range_reversed RET|* * 20-5 * *
   assert_eq(pb_round_tag("values_with_second"), "OK:0 0,30 * * * *") // 腿 C RT.values_with_second RET|0 0,30 * * * *
   assert_eq(pb_round_tag("values_empty"), "OK:* * * * *") // 腿 C RT.values_empty RET|* * * * *
+  assert_eq(pb_round_tag("values_empty_second"), "OK: * * * * *") // 腿 C RT.values_empty_second RET| * * * * *
+  assert_eq(pb_round_tag("values_empty_year"), "OK:* * * * * ") // 腿 C RT.values_empty_year RET|* * * * * 
+  assert_eq(pb_round_tag("blank_second"), "OK: * * * * *") // 腿 C RT.blank_second RET| * * * * *
+  assert_eq(pb_round_tag("space_year"), "OK:* * * * *  ") // 腿 C RT.space_year RET|* * * * *  
+  assert_eq(pb_round_tag("blank_second_with_year"), "OK:* * * * * * 2030") // spec §11 第 1 行（秒设成空白也算没给） ⇒ 本库这一格的串可解析；参照原读数 RT.blank_second_with_year ERR|CronException|DAY_OF_WEEK value 2030 out of range: [0 , 6] 在案
   assert_eq(pb_round_tag("dow_seven"), "OK:* * * * 7") // 腿 C RT.dow_seven RET|* * * * 7
   assert_eq(pb_round_tag("junk_minute"), "BadAlias[abc]") // 腿 C RT.junk_minute ERR|CronException|Invalid alias value: [abc] ⇒ 本库同档
   // RT.values_out_of_range：参照没走到 build（setter 就抛）⇒ 上一条 pb_tag 已钉同一件事

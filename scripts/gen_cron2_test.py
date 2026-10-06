@@ -49,6 +49,13 @@ RECIPES = {
     "range_reversed": "set_range(%s, DayOfMonth, 20, 5)" % NEW,
     "values_with_second": "set_values(set(%s, Second, \"0\"), Minute, [0, 30])" % NEW,
     "values_empty": "set_values(%s, Minute, [])" % NEW,
+    "values_empty_second": "set_values(%s, Second, [])" % NEW,
+    "values_empty_year": "set_values(%s, Year, [])" % NEW,
+    # 秒/年这两档"设成空白"与"从未设置"在参照里是两回事（IGNORE 只认 null），
+    # 本库只有 String 没有 null ⇒ 空白这一档必须单独读、单独钉
+    "blank_second": "set(%s, Second, \"\")" % NEW,
+    "space_year": "set(%s, Year, \" \")" % NEW,
+    "blank_second_with_year": "set(set(%s, Second, \"\"), Year, \"2030\")" % NEW,
     "dow_seven": "set(%s, DayOfWeek, \"7\")" % NEW,
     "junk_minute": "set(%s, Minute, \"abc\")" % NEW,
     "values_out_of_range": "set_values(%s, Hour, [25])" % NEW,
@@ -72,6 +79,12 @@ DECISION_BUILDER = {
     "year_only_no_second": (
         "* * * * * * 2030",
         "spec §11 第 1 行",
+    ),
+    # 同一格的第二个读数：秒设成空白而非未设置。参照照样产出自家解析器收不了的串，
+    # 本库的补秒规则按"秒这一格给不出可用文本"来判，两种形状同归一处
+    "blank_second_with_year": (
+        "* * * * * * 2030",
+        "spec §11 第 1 行（秒设成空白也算没给）",
     ),
 }
 
@@ -378,6 +391,13 @@ def main():
             if got.startswith("ERR_"):
                 skipped.append((label, got))
                 continue
+            if not in_window(got):
+                # 基准在窗内、落点在窗外 ⇒ 本库给 None（spec §11 第 4 行：内置表只承诺
+                # [1970, 2050)，不外推）。参照那一侧照样给值，原读数留在注释里
+                p.append("  assert_eq(%s(%s, %s, %s), \"null\") // %s ⇒ 落点出表窗，本库不外推"
+                         "（参照原读数 %s｜UTC %s，spec §11 第 4 行）"
+                         % (fn_, mb(pat), mb(zone), ms(base), label, got, iso))
+                continue
             p.append("  assert_eq(%s(%s, %s, %s), %s) // %s|参照读数 %s（UTC 串 %s）"
                      % (fn_, mb(pat), mb(zone), ms(base), mb(got), label, got, iso))
         B += blocks(p, "test \"@cron2 带区名的下一瞬间（腿 C %s 行，%s，第 %%d 块 %%d 条）\" {"
@@ -408,7 +428,10 @@ def main():
         if millis.startswith("ERR_"):
             p.append("  // %s 不进夹具：参照读数 %s" % (label, millis))
             continue
-        want = "[]" if millis == "<none>" else "[" + "|".join(ms(x) for x in millis.split("|")) + "]"
+        # 结果串是 `md_tag` 渲染出来的**十进制文本**（`x.to_string()` 不带 `L` 后缀），
+        # 这里拼的必须同样是裸数字——把 MoonBit 的字面量后缀拼进期望串是一条假红（本轮实跑抓到）
+        want = ("[]" if millis == "<none>"
+                else "[" + "|".join(str(int(x)) for x in millis.split("|")) + "]")
         p.append("  assert_eq(md_tag(%s, %s, %s, %s, %s, %s), %s) // %s|参照 UTC 串 %s"
                  % (mb(pat), mb(zone), ms(start), ms(end), count, secb, mb(want), label, isos))
     B += blocks(p, "test \"@cron2 带区名的一批命中瞬间（腿 C 的 M 行，第 %d 块 %d 条）\" {")

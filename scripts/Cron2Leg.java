@@ -67,13 +67,15 @@ public class Cron2Leg {
   }
 
   /**
-   * 腿跑的五个区：UTC（零偏移基线）、Asia/Shanghai（1986 那次前跳 + 空洞）、
-   * America/New_York（回拨重叠）、Asia/Kathmandu（+05:45 那种 45 分偏移）、
-   * Australia/Lord_Howe（DST 只挪 30 分的那族）——后两族专门试"栅格模 60 秒"与
-   * "重叠档取哪一支"，只跑前三区会把这两件事藏住。
+   * 腿跑的七个区：UTC（零偏移基线）、Asia/Shanghai（1986 那次前跳 + 空洞）、
+   * America/New_York（回拨重叠）、Asia/Kathmandu（**+05:45** 那种 45 分偏移）、
+   * Australia/Lord_Howe（**DST 只挪 30 分**）、America/Santiago（历史上在 **24:00** 跳变那一族）、
+   * Asia/Tehran（历史上在 **00:00** 跳变那一族）。
+   * 后两区专挑"候选墙上时刻本身不存在、参照的 Calendar 先滚过午夜再回退重试"这条路径——
+   * 只跑前五区，「跳过一天是从哪一天起算」这件事一次都没被测到过。
    */
   static final String[] ZONES = { "UTC", "Asia/Shanghai", "America/New_York",
-      "Asia/Kathmandu", "Australia/Lord_Howe" };
+      "Asia/Kathmandu", "Australia/Lord_Howe", "America/Santiago", "Asia/Tehran" };
 
   static void line(String... cols) {
     System.out.println(String.join("\t", cols));
@@ -205,6 +207,21 @@ public class Cron2Leg {
                        .setValues(Part.MINUTE, 0, 30).build() } },
         { "values_empty", new Sup[] {
             () -> CronPatternBuilder.of().setValues(Part.MINUTE).build() } },
+        // 同一件事在**秒档**上另是一格：秒不在"补默认"的圈里，null 与空串到这里才真分家
+        // （K8/K14 两条变异第一轮报 0 红，就是因为只挂了分档）
+        { "values_empty_second", new Sup[] {
+            () -> CronPatternBuilder.of().setValues(Part.SECOND).build() } },
+        { "values_empty_year", new Sup[] {
+            () -> CronPatternBuilder.of().setValues(Part.YEAR).build() } },
+        // 秒/年这两档参照只对 **null** 走 StrJoiner 的 IGNORE，空串是另一件事——本库只有
+        // String（没有 null），所以"空白"才是本库能产出的形状，必须单独读：
+        { "blank_second", new Sup[] {
+            () -> CronPatternBuilder.of().set(Part.SECOND, "").build() } },
+        { "space_year", new Sup[] {
+            () -> CronPatternBuilder.of().set(Part.YEAR, " ").build() } },
+        { "blank_second_with_year", new Sup[] {
+            () -> CronPatternBuilder.of().set(Part.SECOND, "").set(Part.YEAR, "2030")
+                       .build() } },
         { "dow_seven", new Sup[] {
             () -> CronPatternBuilder.of().set(Part.DAY_OF_WEEK, "7").build() } },
         { "junk_minute", new Sup[] {
@@ -249,6 +266,15 @@ public class Cron2Leg {
         { "span_dst_cn", "30 1 * * *", "1986-05-02 00:00:00", "1986-05-07 00:00:00", "4", "false" },
         { "leap_feb", "0 0 0 29 2 *", "2024-01-01 00:00:00", "2025-01-01 00:00:00", "3", "true" },
         { "dow_mon", "0 0 * * 1", "2024-03-10 00:00:00", "2024-03-25 00:00:00", "3", "false" },
+        // 采样**相位**：参照从 `start` 起每步长取一瞬，start 带 30 秒 ⇒ 命中也带 30 秒。
+        // 早先全部夹具的 start 都在整分上，这条相位一次没被测到（"栅格折算"那条判据因此挂不住变异）
+        { "phase_sec30", "* * * * *", "2024-03-10 06:00:30", "2024-03-10 06:05:30", "3", "false" },
+        // 重叠那一小时**每分钟都命中**：count 要跨过两支的分界，才能试出"两支的先后顺序"。
+        // 前面那些格子每小时只命中一次，插入顺序与升序一致，去排序也挂不住
+        { "fold_hour_all_min", "* 1 * * *", "2024-11-03 04:00:00", "2024-11-03 08:00:00", "65", "false" },
+        // 6 段式 + 秒位非 0 + `match_second=false`：参照跳过秒匹配器 ⇒ 命中落在采样栅格上，
+        // 而"把秒档换成恒真匹配器"这一步做没做，只有这一格能区分（K8 第一轮 0 红的成因）
+        { "sec30_min_off", "30 0 * * * *", "2024-03-10 06:00:00", "2024-03-10 06:03:00", "3", "false" },
     };
     SimpleDateFormat in = utc("yyyy-MM-dd HH:mm:ss");
     TimeZone before = TimeZone.getDefault();
@@ -315,6 +341,8 @@ public class Cron2Leg {
         { "star", "* * * * *" },
         { "daily_0130", "0 30 1 * * *" },
         { "daily_0230", "0 30 2 * * *" },      // 前跳空洞正中间那一档
+        { "daily_0030", "0 30 0 * * *" },      // 午夜那一档：00:00 型跳变（Santiago/Tehran）把它整段吃掉
+        { "daily_2345", "45 23 * * *" },       // 前一天 23:45：24:00 型跳变的另一头
         { "leap_only", "0 0 0 29 2 *" },       // 四年一个点
         { "apr31", "0 12 31 4 *" },            // 不存在的日子夹月末
         { "last_day", "0 0 0 L * *" },
@@ -329,7 +357,10 @@ public class Cron2Leg {
     long[] nb = { s0, at("2024-11-03 05:30:00"), at("2024-11-03 06:30:00"),
         at("2024-02-29 12:00:00"), at("2024-04-30 00:00:00"), at("1986-05-04 01:30:00"),
         at("2098-12-31 00:00:00"), at("2024-11-03 04:00:00"), at("2024-03-09 12:00:00"),
-        at("2024-11-02 12:00:00"), at("1986-05-03 12:00:00") };
+        at("2024-11-02 12:00:00"), at("1986-05-03 12:00:00"),
+        // 两条 24:00 / 00:00 型跳变的前夜：Santiago 2024-09-08 00:00 → 01:00、
+        // Tehran 2022-03-22 00:00 → 01:00，正好把 00:30 那一档吃掉
+        at("2024-09-07 12:00:00"), at("2022-03-21 12:00:00") };
     // N = CronPatternUtil.nextDateAfter（已匹配先 +1 秒那一族，= 第一批 #19.3 的带区版）
     // N2 = CronPattern.nextMatch（已匹配返回自身那一族，= 第一批 #19.4 的带区版）
     // 两族在**同一条基线**上成对读数：第一批 §3 第 13 条靠这对读数抓住过变异，带区版必须留同一对。

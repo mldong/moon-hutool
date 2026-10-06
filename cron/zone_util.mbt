@@ -1,6 +1,7 @@
 ///|
 // moon-hutool/cron —— 第二批之二：带区名的"下一个时刻"与"一批时刻"
-// 契约真相在 `docs/spec/19-cron.md` §8~§11。本文件的实现体在 PR-B 落地；现在是契约骨架。
+// 契约真相在 `docs/spec/19-cron.md` §8~§11。读数标签 `腿 C <家族>.<格>.<基准>.<区>` 指
+// `scripts/Cron2Leg.java` 的输出行；期望值由 `scripts/gen_cron2_test.py` 从那些行灌入。
 //
 // 这一档存在的前提：`date` §5 已经把 603 区 / 36701 段的内置表放进了库里，
 // 于是第一批那句"本库不带 tzdb ⇒ 不收毫秒/时区入口"的前提没了（spec §11 第 6 行）。
@@ -36,9 +37,8 @@ pub fn cron_next_match_after_in(
   zone : String,
   millis : Int64,
 ) -> Int64? {
-  abort(
-    "moon-hutool PR-B：契约骨架 —— 复用 #19.3/#19.4 那台字段进位引擎，别摆第二套日历算法；墙上→瞬间走 date 的末支规矩",
-  )
+  // skip_self=true ⇒ 已匹配先 +1000ms（参照 issue#I9FQUA 那条，与 #19.3 同形）
+  znext_in(c, zone, millis, true)
 }
 
 ///|
@@ -50,9 +50,7 @@ pub fn cron_next_match_after_in(
 ///   （`N2.daily_0130 → 1730615400000`）。这一对读数是本件最容易想当然的地方
 /// - Note: hutool 对位 `CronPattern.nextMatch(Calendar)`（5.8.30 才有的一件）
 pub fn cron_next_match_in(c : Cron, zone : String, millis : Int64) -> Int64? {
-  abort(
-    "moon-hutool PR-B：契约骨架 —— 已匹配也要按'重叠档取末支'折算，别直接回传进来的那个毫秒",
-  )
+  znext_in(c, zone, millis, false)
 }
 
 ///|
@@ -100,7 +98,213 @@ pub fn cron_matched_dates(
   count : Int,
   match_second : Bool,
 ) -> Array[Int64]? raise CronError {
-  abort(
-    "moon-hutool PR-B：契约骨架 —— 先判 start<end 再谈窗口；重叠档两支都要进结果，别只取第一支",
-  )
+  if start >= end {
+    // 参照 `Assert.isTrue(start < end, "Start date is later than end !")` —— 主动抛且带文案，
+    // 按本仓规矩留变体、不并成空表（spec §9 第 10 条）
+    raise BadRange(start, end)
+  }
+  if count <= 0 {
+    // 参照 add-then-check 给 1 条、负数抛 Java 容器内部件；本库取可推导那一侧（spec §11 第 2 行）
+    return Some([])
+  }
+  // 区名与表窗两条通道：任一头拿不到偏移 ⇒ 整格无读数（不外推，spec §11 第 4 行）
+  if !zone_covers(zone, start) || !zone_covers(zone, end) {
+    return None
+  }
+  let stop_at = @date.datetime_in(zone, end - 1L)
+  let mut wall = match @date.datetime_in(zone, start) {
+    None => return None
+    Some(w) => w
+  }
+  let end_wall = match stop_at {
+    None => return None
+    Some(w) => w
+  }
+  let step = if match_second { 1000L } else { 60000L }
+  let subs = subs_view(c, match_second)
+  let out : Array[Int64] = []
+  let mut more = true
+  while more {
+    let cand = earliest_of(subs, zone_fields(wall, match_second))
+    let offs = @date.zone_offsets_at_wall(zone, cand)
+    let has = offs.length() > 0
+    if has {
+      let mut k = 0
+      while k < offs.length() {
+        let g = grid_up(cand.to_epoch_millis(offs[k]), start, step)
+        let in_range = g >= start && g < end && zone_covers(zone, g)
+        // 三条各自都要过：在窗内、本库表认得这一瞬、**读回字段仍匹配**。最后一条不是冗余——
+        // 栅格折算把候选挪到采样点上，挪完若不再匹配，参照在那一瞬同样不计命中（它的判据
+        // 就是 `match(i, …)`）
+        let back = @date.datetime_in(zone, g)
+        let hit = match back {
+          Some(w) => in_range && cron_match(c, w, match_second~)
+          None => false
+        }
+        if hit {
+          push_sorted(out, g)
+          if out.length() > count {
+            // 只留最小的 count 个。后来的墙上时刻更晚，唯一例外是重叠档的第二支会插到前一支
+            // 前面（腿 `M.daily` 的纽约那格），所以淘汰的一直是当前最大那个
+            let _ = out.pop()
+          }
+        }
+        k += 1
+      }
+    }
+    // 前进：秒参与匹配时按秒走，否则按分钟走（候选的秒位恒 0，不按分钟走会原地打转）
+    let unit = if match_second {
+      @date.TimeUnit::Second
+    } else {
+      @date.TimeUnit::Minute
+    }
+    wall = cand.add(unit, 1L)
+    // 停止：已经攒够且后来的排不进了，或墙上时刻过了窗内最后一瞬。
+    // 空洞档（0 支）那一轮不做前一条判定——没有瞬间可比，只靠墙上时刻那条兜住
+    let done_enough = has &&
+      out.length() == count &&
+      cand.to_epoch_millis(offs[0]) >= out[count - 1]
+    more = cand <= end_wall && !done_enough
+  }
+  Some(out)
+}
+
+///|
+// 本库内置表认不认这一瞬（坏区名或窗外都是 false）——`date` §5 的偏移探头就是这条判据的口
+fn zone_covers(zone : String, millis : Int64) -> Bool {
+  match @date.zone_offset_minutes(zone, millis) {
+    Some(_) => true
+    None => false
+  }
+}
+
+///|
+// 秒档不参与匹配时把它换成恒真匹配器——参照 `match(fields, isMatchSecond=false)` 跳过的
+// 正是秒匹配器（spec §9 第 17 条）
+fn subs_view(c : Cron, match_second : Bool) -> Array[Sub] {
+  if match_second {
+    c.subs
+  } else {
+    let out : Array[Sub] = []
+    for s in c.subs {
+      let ms2 = s.ms.copy()
+      ms2[0] = pm_always()
+      let one : Sub = { ms: ms2, }
+      out.push(one)
+    }
+    out
+  }
+}
+
+///|
+// 候选墙上时刻的七字段。秒不参与匹配时字段里的秒给 0——`fields_of(_, false)` 给的是 -1 哨兵，
+// 那是"放行判定"用的，进位引擎要的是一个真的起点
+fn zone_fields(w : @date.DateTime, match_second : Bool) -> Array[Int] {
+  let f = fields_of(w, match_second)
+  if !match_second {
+    f[0] = 0
+  }
+  f
+}
+
+///|
+// 参照 `PatternMatcher.nextMatchAfter(int[], zone)`：各子表达式各给一个候选，取最早那个
+fn earliest_of(subs : Array[Sub], values : Array[Int]) -> @date.DateTime {
+  let mut best = from_values(sub_next_values(subs[0].ms, values))
+  let mut k = 1
+  while k < subs.length() {
+    let cand = from_values(sub_next_values(subs[k].ms, values))
+    if cand < best {
+      best = cand
+    }
+    k += 1
+  }
+  best
+}
+
+///|
+// 参照 `matchedDates` 的采样栅格：它从 `start` 起每 `step` 毫秒取一瞬，所以命中必须折回
+// `start + k*step` 那一列。折在**瞬间**上而不是"墙上秒为 0"——
+// 腿 `M.every_min` 在 `Asia/Kathmandu` 的首条是 UTC 的 :15（`+05:45`）就是这条的判据
+fn grid_up(ci : Int64, start : Int64, step : Int64) -> Int64 {
+  let d = ci - start
+  // 向上取整到 step 的整数倍（MoonBit 的整数除法截断，负数那侧要单独摆）
+  let k = if d >= 0L { (d + step - 1L) / step } else { d / step }
+  start + k * step
+}
+
+///|
+// 升序插入。只有重叠档那一段会出现"后来者排在前"，其余都是尾插
+fn push_sorted(out : Array[Int64], v : Int64) -> Unit {
+  let n = out.length()
+  let mut i = n
+  while i > 0 && out[i - 1] > v {
+    i -= 1
+  }
+  let _ = out.push(v)
+  let mut j = n
+  while j > i {
+    out[j] = out[j - 1]
+    j -= 1
+  }
+  out[i] = v
+}
+
+///|
+// 带区名的"下一个匹配瞬间"内核：#19.17 与 #19.18 只差 `skip_self` 一值
+// （参照那两侧用的是同一台字段进位引擎，区别只在要不要先 +1 秒）
+fn znext_in(c : Cron, zone : String, from : Int64, skip_self : Bool) -> Int64? {
+  let mut cur = from
+  if skip_self {
+    let same = match @date.datetime_in(zone, cur) {
+      Some(w) => cron_match(c, w, match_second=true)
+      None => false
+    }
+    if same {
+      // 参照 issue#I9FQUA：已匹配时先 +1000ms，否则永远停在原地
+      cur += 1000L
+    }
+  }
+  let mut wall = match @date.datetime_in(zone, cur) {
+    None => return None
+    Some(w) => w
+  }
+  let mut answer : Int64? = None
+  let mut done = false
+  while !done {
+    let cand = cron_next_match(c, wall)
+    let offs = @date.zone_offsets_at_wall(zone, cand)
+    if !zone_covers(zone, cand.to_epoch_millis(0)) {
+      // 候选已经出了本库表窗 `[1970, 2050)` ⇒ 不外推（spec §11 第 4 行）。
+      // **这一刀必须排在"空洞档"那条之前**：窗外与空洞在 `zone_offsets_at_wall` 里都是 0 支，
+      // 先判 0 支就会把窗外当成空洞，"跳过一天重来"从此无限递推——
+      // 本轮实测就是这样挂住的（`0 0 12 * * ? 2099` 从 2024 基准起算）
+      answer = None
+      done = true
+    } else if offs.length() == 0 {
+      // 空洞档：这堵墙上时刻在本区不存在 ⇒ 整档跳过，不做"往后挪一小时"的回落。
+      // 参照是靠 Calendar 滚出去后读回字段不等，走同一条"次日重来"（腿 N.daily_0230 纽约/上海）
+      wall = day_start(cand.date.add_days(1))
+    } else {
+      // 重叠档取**末支**=转换后那一支（腿 N 与 N2 两个家族各证一次，spec §9 第 13 条）
+      let ms = cand.to_epoch_millis(offs[offs.length() - 1])
+      if !zone_covers(zone, ms) {
+        // 落点出本库表窗 ⇒ 不外推（spec §11 第 4 行）
+        answer = None
+        done = true
+      } else {
+        let ok = match @date.datetime_in(zone, ms) {
+          Some(w) => cron_match(c, w, match_second=true)
+          None => false
+        }
+        if ok {
+          answer = Some(ms)
+          done = true
+        } else {
+          wall = day_start(cand.date.add_days(1))
+        }
+      }
+    }
+  }
+  answer
 }
