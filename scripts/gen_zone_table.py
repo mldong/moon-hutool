@@ -17,6 +17,7 @@ from collections import OrderedDict
 def read_leg(path):
     meta = {}
     segs, probes, bounds, walls, unknown, instants = OrderedDict(), [], [], [], [], []
+    seg_count = {}
     with io.open(path, encoding="utf-8", errors="replace") as fh:
         for line in fh:
             p = line.rstrip("\n").split("\t")
@@ -25,6 +26,8 @@ def read_leg(path):
             tag = p[0]
             if tag == "B":
                 meta[p[1]] = p[2]
+            elif tag == "Z" and len(p) == 4:
+                seg_count[p[1]] = int(p[2])
             elif tag == "D" and len(p) == 4:
                 segs.setdefault(p[1], []).append((int(p[2]), int(p[3])))
             elif tag == "P" and len(p) == 4:
@@ -40,6 +43,10 @@ def read_leg(path):
                 walls.append((p[1], p[2], int(p[3]), offs))
             elif tag == "U" and len(p) == 4:
                 unknown.append((p[1], p[2], p[3]))
+    # 腿的 T 行是"全部段界"的超集，直接灌进期望文件就是 7 万余条断言，太重。
+    # 收录判据机械取：按 Z 行段数降序的前 10 个区，逐条段界都收（段最密的那批全在里面）。
+    top = {z for z, _ in sorted(seg_count.items(), key=lambda kv: (-kv[1], kv[0]))[:10]}
+    bounds = [b for b in bounds if b[0] in top]
     return meta, segs, probes, bounds, walls, unknown, instants
 
 
@@ -93,7 +100,6 @@ def table_text(meta, names, segs):
     L += [
         "let tbl_window_lo : Int64 = %sL" % meta.get("WINDOW_LO"),
         "let tbl_window_hi : Int64 = %sL" % meta.get("WINDOW_HI"),
-        "let tbl_size : Int = %s" % meta.get("ZONES"),
     ]
     return "\n".join(L) + "\n"
 
@@ -109,6 +115,7 @@ def test_text(meta, names, probes, bounds, walls, unknown, instants):
     hi = int(meta.get("WINDOW_HI", "0"))
     lo = int(meta.get("WINDOW_LO", "0"))
     L = [
+        "///|",
         "// moon-hutool/date 内置时区表契约用例（黑盒）。**生成件，勿手改**：",
         "// 生成器 scripts/gen_zone_table.py，每条期望都是参照腿 scripts/TzLeg.java 的机器读数。",
         "// 参照代次：JDK %s · lib/tzdb.dat %s bytes · 窗口 [1970-01-01, 2050-01-01)。"
@@ -124,20 +131,31 @@ def test_text(meta, names, probes, bounds, walls, unknown, instants):
         "  }",
         "}",
         "",
-        'test "@date 内置表逐区六瞬间偏移（腿 P 行全量，%d 条）" {' % len(probes),
     ]
-    for zone, sec, off in probes:
-        L.append("  assert_eq(@date.zone_offset_minutes(%s, %dL), Some(%d))"
-                 % (mbstr(zone), sec * 1000, off))
-    L += ["}", "",
-          'test "@date 段界两侧各差一段（腿 T 行，段数最多的前 10 区，共 %d 条）" {' % len(bounds)]
-    for zone, sec, before, after in bounds:
-        L.append("  assert_eq(@date.zone_offset_minutes(%s, %dL), Some(%d))"
-                 % (mbstr(zone), (sec - 1) * 1000, before))
-        L.append("  assert_eq(@date.zone_offset_minutes(%s, %dL), Some(%d))"
-                 % (mbstr(zone), sec * 1000, after))
-    L += ["}", "",
-          'test "@date 墙上时刻的合法偏移：0 档（前跳空洞）/ 1 档 / 2 档（回拨重叠），顺序照腿 V 行" {']
+    CHUNK = 200
+
+    def chunks(items, title, render):
+        # 一个 test 块塞几千条断言会撞 text_segment_excceed（段太长），按 CHUNK 条切块
+        n = (len(items) + CHUNK - 1) // CHUNK
+        for i in range(n):
+            part = items[i * CHUNK:(i + 1) * CHUNK]
+            L.append('test "@date %s（第 %d/%d 块，本块 %d 条）" {'
+                     % (title, i + 1, n, len(part)))
+            for it in part:
+                L.extend(render(it))
+            L.append("}")
+            L.append("")
+
+    chunks(probes, "内置表逐区六瞬间偏移（腿 P 行全量）", lambda it: [
+        "  assert_eq(@date.zone_offset_minutes(%s, %dL), Some(%d))"
+        % (mbstr(it[0]), it[1] * 1000, it[2])])
+    chunks(bounds, "段界两侧各差一段（腿 T 行，段数最多的前 10 区）", lambda it: [
+        "  assert_eq(@date.zone_offset_minutes(%s, %dL), Some(%d))"
+        % (mbstr(it[0]), (it[1] - 1) * 1000, it[2]),
+        "  assert_eq(@date.zone_offset_minutes(%s, %dL), Some(%d))"
+        % (mbstr(it[0]), it[1] * 1000, it[3])])
+    L += [
+        'test "@date 墙上时刻的合法偏移：0 档（前跳空洞）/ 1 档 / 2 档（回拨重叠），顺序照腿 V 行" {']
     for zone, wall, n, offs in walls:
         y, mo, d, hh, mi, ss = parse_wall(wall)
         L.append("  // 腿 V 行：%s|%s -> n=%d %s" % (zone, wall, n, "|".join(str(o) for o in offs)))
@@ -204,6 +222,16 @@ def test_text(meta, names, probes, bounds, walls, unknown, instants):
     return "\n".join(L) + "\n"
 
 
+def with_markers(text):
+    # 每个 test 块前插一行 ///|：不分段会撞 text_segment_excceed 警告，G1 的零警告判据就红
+    out = []
+    for line in text.split("\n"):
+        if line.startswith('test "'):
+            out.append("///|")
+        out.append(line)
+    return "\n".join(out)
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--leg", required=True)
@@ -220,7 +248,7 @@ def main():
             fh.write(table_text(meta, names, segs))
         with io.open(os.path.join(root, "date", "zone_test.mbt"), "w",
                      encoding="utf-8", newline="\n") as fh:
-            fh.write(test_text(meta, names, probes, bounds, walls, unknown, instants))
+            fh.write(with_markers(test_text(meta, names, probes, bounds, walls, unknown, instants)))
         subprocess.run(["moon", "fmt"], cwd=root, check=False)
     print("zones=%s rows=%d probes=%d bounds=%d walls=%d unknown=%d instants=%d"
           % (meta.get("ZONES"), sum(len(v) for v in segs.values()), len(probes),

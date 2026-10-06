@@ -1,3 +1,4 @@
+///|
 // moon-hutool/date 内置时区表契约用例（黑盒）。**生成件，勿手改**：
 // 生成器 scripts/gen_zone_table.py，每条期望都是参照腿 scripts/TzLeg.java 的机器读数。
 // 参照代次：JDK 17.0.14 · lib/tzdb.dat 101731 bytes · 窗口 [1970-01-01, 2050-01-01)。
@@ -13,7 +14,7 @@ fn ztag(o : @date.DateTime?) -> String {
 }
 
 ///|
-test "@date 内置表逐区六瞬间偏移（腿 P 行全量，3618 条）" {
+test "@date 内置表逐区六瞬间偏移（腿 P 行全量）（第 1/19 块，本块 200 条）" {
   assert_eq(@date.zone_offset_minutes("Africa/Abidjan", 0L), Some(0))
   assert_eq(@date.zone_offset_minutes("Africa/Abidjan", 515556000000L), Some(0))
   assert_eq(@date.zone_offset_minutes("Africa/Abidjan", 961070400000L), Some(0))
@@ -559,6 +560,10 @@ test "@date 内置表逐区六瞬间偏移（腿 P 行全量，3618 条）" {
   )
   assert_eq(@date.zone_offset_minutes("Africa/Lome", 0L), Some(0))
   assert_eq(@date.zone_offset_minutes("Africa/Lome", 515556000000L), Some(0))
+}
+
+///|
+test "@date 内置表逐区六瞬间偏移（腿 P 行全量）（第 2/19 块，本块 200 条）" {
   assert_eq(@date.zone_offset_minutes("Africa/Lome", 961070400000L), Some(0))
   assert_eq(@date.zone_offset_minutes("Africa/Lome", 1710052200000L), Some(0))
   assert_eq(@date.zone_offset_minutes("Africa/Lome", 1730613600000L), Some(0))
@@ -1245,6 +1250,10 @@ test "@date 内置表逐区六瞬间偏移（腿 P 行全量，3618 条）" {
     @date.zone_offset_minutes("America/Argentina/Rio_Gallegos", 1710052200000L),
     Some(-180),
   )
+}
+
+///|
+test "@date 内置表逐区六瞬间偏移（腿 P 行全量）（第 3/19 块，本块 200 条）" {
   assert_eq(
     @date.zone_offset_minutes("America/Argentina/Rio_Gallegos", 1730613600000L),
     Some(-180),
@@ -1961,6 +1970,10 @@ test "@date 内置表逐区六瞬间偏移（腿 P 行全量，3618 条）" {
     @date.zone_offset_minutes("America/Creston", 2145916799000L),
     Some(-420),
   )
+}
+
+///|
+test "@date 内置表逐区六瞬间偏移（腿 P 行全量）（第 4/19 块，本块 200 条）" {
   assert_eq(@date.zone_offset_minutes("America/Cuiaba", 0L), Some(-240))
   assert_eq(
     @date.zone_offset_minutes("America/Cuiaba", 515556000000L),
@@ -2674,6 +2687,10 @@ test "@date 内置表逐区六瞬间偏移（腿 P 行全量，3618 条）" {
     @date.zone_offset_minutes("America/Indiana/Vincennes", 515556000000L),
     Some(-300),
   )
+}
+
+///|
+test "@date 内置表逐区六瞬间偏移（腿 P 行全量）（第 5/19 块，本块 200 条）" {
   assert_eq(
     @date.zone_offset_minutes("America/Indiana/Vincennes", 961070400000L),
     Some(-300),
@@ -3384,6 +3401,10 @@ test "@date 内置表逐区六瞬间偏移（腿 P 行全量，3618 条）" {
     @date.zone_offset_minutes("America/Montreal", 1710052200000L),
     Some(-300),
   )
+}
+
+///|
+test "@date 内置表逐区六瞬间偏移（腿 P 行全量）（第 6/19 块，本块 200 条）" {
   assert_eq(
     @date.zone_offset_minutes("America/Montreal", 1730613600000L),
     Some(-300),
@@ -4094,6 +4115,10 @@ test "@date 内置表逐区六瞬间偏移（腿 P 行全量，3618 条）" {
     @date.zone_offset_minutes("America/Sao_Paulo", 2145916799000L),
     Some(-180),
   )
+}
+
+///|
+test "@date 内置表逐区六瞬间偏移（腿 P 行全量）（第 7/19 块，本块 200 条）" {
   assert_eq(@date.zone_offset_minutes("America/Scoresbysund", 0L), Some(-120))
   assert_eq(
     @date.zone_offset_minutes("America/Scoresbysund", 515556000000L),
@@ -4795,6 +4820,10 @@ test "@date 内置表逐区六瞬间偏移（腿 P 行全量，3618 条）" {
     @date.zone_offset_minutes("Antarctica/Vostok", 515556000000L),
     Some(420),
   )
+}
+
+///|
+test "@date 内置表逐区六瞬间偏移（腿 P 行全量）（第 8/19 块，本块 200 条）" {
   assert_eq(
     @date.zone_offset_minutes("Antarctica/Vostok", 961070400000L),
     Some(420),
@@ -5211,6 +5240,10 @@ test "@date 内置表逐区六瞬间偏移（腿 P 行全量，3618 条）" {
   assert_eq(@date.zone_offset_minutes("Asia/Harbin", 515556000000L), Some(540))
   assert_eq(@date.zone_offset_minutes("Asia/Harbin", 961070400000L), Some(480))
   assert_eq(@date.zone_offset_minutes("Asia/Harbin", 1710052200000L), Some(480))
+}
+
+///|
+test "@date 内置表逐区六瞬间偏移（腿 P 行全量）（第 9/19 块，本块 200 条）" {
   assert_eq(@date.zone_offset_minutes("Asia/Harbin", 1730613600000L), Some(480))
   assert_eq(@date.zone_offset_minutes("Asia/Harbin", 2145916799000L), Some(480))
   assert_eq(@date.zone_offset_minutes("Asia/Hebron", 0L), Some(120))
@@ -5708,6 +5741,10 @@ test "@date 内置表逐区六瞬间偏移（腿 P 行全量，3618 条）" {
     @date.zone_offset_minutes("Asia/Phnom_Penh", 2145916799000L),
     Some(420),
   )
+}
+
+///|
+test "@date 内置表逐区六瞬间偏移（腿 P 行全量）（第 10/19 块，本块 200 条）" {
   assert_eq(@date.zone_offset_minutes("Asia/Pontianak", 0L), Some(480))
   assert_eq(
     @date.zone_offset_minutes("Asia/Pontianak", 515556000000L),
@@ -6214,6 +6251,10 @@ test "@date 内置表逐区六瞬间偏移（腿 P 行全量，3618 条）" {
   )
   assert_eq(@date.zone_offset_minutes("Asia/Yerevan", 0L), Some(240))
   assert_eq(@date.zone_offset_minutes("Asia/Yerevan", 515556000000L), Some(300))
+}
+
+///|
+test "@date 内置表逐区六瞬间偏移（腿 P 行全量）（第 11/19 块，本块 200 条）" {
   assert_eq(@date.zone_offset_minutes("Asia/Yerevan", 961070400000L), Some(300))
   assert_eq(
     @date.zone_offset_minutes("Asia/Yerevan", 1710052200000L),
@@ -6912,6 +6953,10 @@ test "@date 内置表逐区六瞬间偏移（腿 P 行全量，3618 条）" {
     @date.zone_offset_minutes("Australia/Victoria", 1710052200000L),
     Some(660),
   )
+}
+
+///|
+test "@date 内置表逐区六瞬间偏移（腿 P 行全量）（第 12/19 块，本块 200 条）" {
   assert_eq(
     @date.zone_offset_minutes("Australia/Victoria", 1730613600000L),
     Some(660),
@@ -7340,6 +7385,10 @@ test "@date 内置表逐区六瞬间偏移（腿 P 行全量，3618 条）" {
   assert_eq(@date.zone_offset_minutes("Etc/GMT+5", 1710052200000L), Some(-300))
   assert_eq(@date.zone_offset_minutes("Etc/GMT+5", 1730613600000L), Some(-300))
   assert_eq(@date.zone_offset_minutes("Etc/GMT+5", 2145916799000L), Some(-300))
+}
+
+///|
+test "@date 内置表逐区六瞬间偏移（腿 P 行全量）（第 13/19 块，本块 200 条）" {
   assert_eq(@date.zone_offset_minutes("Etc/GMT+6", 0L), Some(-360))
   assert_eq(@date.zone_offset_minutes("Etc/GMT+6", 515556000000L), Some(-360))
   assert_eq(@date.zone_offset_minutes("Etc/GMT+6", 961070400000L), Some(-360))
@@ -7663,6 +7712,10 @@ test "@date 内置表逐区六瞬间偏移（腿 P 行全量，3618 条）" {
     @date.zone_offset_minutes("Europe/Brussels", 515556000000L),
     Some(120),
   )
+}
+
+///|
+test "@date 内置表逐区六瞬间偏移（腿 P 行全量）（第 14/19 块，本块 200 条）" {
   assert_eq(
     @date.zone_offset_minutes("Europe/Brussels", 961070400000L),
     Some(120),
@@ -8193,6 +8246,10 @@ test "@date 内置表逐区六瞬间偏移（腿 P 行全量，3618 条）" {
   assert_eq(@date.zone_offset_minutes("Europe/Rome", 515556000000L), Some(120))
   assert_eq(@date.zone_offset_minutes("Europe/Rome", 961070400000L), Some(120))
   assert_eq(@date.zone_offset_minutes("Europe/Rome", 1710052200000L), Some(60))
+}
+
+///|
+test "@date 内置表逐区六瞬间偏移（腿 P 行全量）（第 15/19 块，本块 200 条）" {
   assert_eq(@date.zone_offset_minutes("Europe/Rome", 1730613600000L), Some(60))
   assert_eq(@date.zone_offset_minutes("Europe/Rome", 2145916799000L), Some(60))
   assert_eq(@date.zone_offset_minutes("Europe/Samara", 0L), Some(240))
@@ -8756,6 +8813,10 @@ test "@date 内置表逐区六瞬间偏移（腿 P 行全量，3618 条）" {
     @date.zone_offset_minutes("Indian/Cocos", 2145916799000L),
     Some(390),
   )
+}
+
+///|
+test "@date 内置表逐区六瞬间偏移（腿 P 行全量）（第 16/19 块，本块 200 条）" {
   assert_eq(@date.zone_offset_minutes("Indian/Comoro", 0L), Some(180))
   assert_eq(
     @date.zone_offset_minutes("Indian/Comoro", 515556000000L),
@@ -9238,6 +9299,10 @@ test "@date 内置表逐区六瞬间偏移（腿 P 行全量，3618 条）" {
     @date.zone_offset_minutes("Pacific/Funafuti", 515556000000L),
     Some(720),
   )
+}
+
+///|
+test "@date 内置表逐区六瞬间偏移（腿 P 行全量）（第 17/19 块，本块 200 条）" {
   assert_eq(
     @date.zone_offset_minutes("Pacific/Funafuti", 961070400000L),
     Some(720),
@@ -9912,6 +9977,10 @@ test "@date 内置表逐区六瞬间偏移（腿 P 行全量，3618 条）" {
   assert_eq(@date.zone_offset_minutes("Pacific/Yap", 515556000000L), Some(600))
   assert_eq(@date.zone_offset_minutes("Pacific/Yap", 961070400000L), Some(600))
   assert_eq(@date.zone_offset_minutes("Pacific/Yap", 1710052200000L), Some(600))
+}
+
+///|
+test "@date 内置表逐区六瞬间偏移（腿 P 行全量）（第 18/19 块，本块 200 条）" {
   assert_eq(@date.zone_offset_minutes("Pacific/Yap", 1730613600000L), Some(600))
   assert_eq(@date.zone_offset_minutes("Pacific/Yap", 2145916799000L), Some(600))
   assert_eq(@date.zone_offset_minutes("Poland", 0L), Some(60))
@@ -10364,6 +10433,10 @@ test "@date 内置表逐区六瞬间偏移（腿 P 行全量，3618 条）" {
   assert_eq(@date.zone_offset_minutes("Universal", 1710052200000L), Some(0))
   assert_eq(@date.zone_offset_minutes("Universal", 1730613600000L), Some(0))
   assert_eq(@date.zone_offset_minutes("Universal", 2145916799000L), Some(0))
+}
+
+///|
+test "@date 内置表逐区六瞬间偏移（腿 P 行全量）（第 19/19 块，本块 18 条）" {
   assert_eq(@date.zone_offset_minutes("W-SU", 0L), Some(180))
   assert_eq(@date.zone_offset_minutes("W-SU", 515556000000L), Some(240))
   assert_eq(@date.zone_offset_minutes("W-SU", 961070400000L), Some(240))
@@ -10385,6884 +10458,19142 @@ test "@date 内置表逐区六瞬间偏移（腿 P 行全量，3618 条）" {
 }
 
 ///|
-test "@date 段界两侧各差一段（腿 T 行，段数最多的前 10 区，共 1150 条）" {
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 142379999000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 142380000000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 150843599000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 150843600000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 167176799000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 167176800000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 178664399000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 178664400000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 334101599000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 334101600000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 337730399000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 337730400000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 452642399000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 452642400000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 462319199000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 462319200000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 482277599000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 482277600000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 494369999000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 494370000000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 516751199000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 516751200000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 526424399000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 526424400000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 545435999000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 545436000000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 558478799000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 558478800000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 576626399000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 576626400000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 589323599000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 589323600000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 609890399000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 609890400000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 620773199000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 620773200000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 638315999000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 638316000000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 651617999000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 651618000000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 669765599000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 669765600000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 683672399000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 683672400000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 701819999000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 701820000000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 715726799000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 715726800000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 733701599000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 733701600000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 747176399000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 747176400000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 765151199000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 765151200000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 778021199000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 778021200000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 796600799000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 796600800000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 810075599000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 810075600000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 828655199000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 828655200000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 843170399000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 843170400000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 860104799000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 860104800000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 874619999000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 874620000000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 891554399000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 891554400000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 906069599000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 906069600000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 924213599000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 924213600000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 939934799000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 939934800000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 956267999000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 956268000000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 971989199000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 971989200000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 987717599000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 987717600000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1003438799000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1003438800000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1019167199000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1019167200000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1034888399000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1034888400000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1050616799000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1050616800000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1066337999000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1066338000000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1082066399000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1082066400000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1096581599000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1096581600000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1113515999000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1113516000000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1128380399000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1128380400000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1143842399000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1143842400000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1158872399000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1158872400000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1175378399000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1175378400000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1189637999000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1189638000000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1206655199000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1206655200000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1220216399000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1220216400000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1238104799000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1238104800000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1252015199000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1252015200000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1269554399000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1269554400000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1281473999000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1281474000000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1301608859000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1301608860000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1312145999000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1312146000000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1314655199000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1314655200000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1317329999000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1317330000000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1333058399000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1333058400000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1348178399000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1348178400000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1364507999000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1364508000000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1380229199000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1380229200000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1395957599000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1395957600000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1414097999000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1414098000000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1427493599000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1427493600000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1445551199000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1445551200000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1458946799000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1458946800000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1477691999000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1477692000000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1490396399000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1490396400000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1509141599000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1509141600000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1521845999000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1521846000000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1540591199000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1540591200000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1553810399000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1553810400000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1572037199000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1572037200000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1585346399000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1585346400000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1603490399000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1603490400000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1616795999000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1616796000000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1635458399000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1635458400000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1648331999000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1648332000000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1666997999000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1666998000000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1682726399000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1682726400000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1698447599000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1698447600000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1713571199000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1713571200000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1729897199000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1729897200000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1744415999000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1744416000000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1761346799000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1761346800000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1774655999000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1774656000000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1792796399000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1792796400000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1806105599000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1806105600000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1824850799000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1824850800000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1837555199000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1837555200000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1856300399000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1856300400000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1869004799000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1869004800000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1887749999000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1887750000000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1901059199000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1901059200000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1919199599000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1919199600000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1932508799000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1932508800000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1950649199000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1950649200000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1963958399000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1963958400000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1982703599000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1982703600000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1995407999000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 1995408000000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2014153199000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2014153200000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2026857599000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2026857600000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2045602799000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2045602800000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2058307199000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2058307200000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2077052399000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2077052400000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2090361599000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2090361600000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2107897199000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2107897200000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2121811199000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2121811200000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2138741999000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2138742000000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2153260799000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2153260800000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2168981999000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2168982000000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2184710399000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2184710400000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2199826799000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2199826800000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2216159999000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2216160000000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2230066799000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2230066800000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2234303999000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2234304000000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2234905199000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2234905200000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2248214399000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2248214400000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2260911599000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2260911600000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2264543999000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2264544000000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2266354799000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2266354800000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2279663999000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2279664000000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2291756399000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2291756400000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2295388799000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2295388800000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2297804399000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2297804400000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2311113599000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2311113600000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2321996399000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2321996400000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2326233599000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2326233600000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2329253999000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2329254000000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2342563199000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2342563200000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2352841199000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2352841200000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2356473599000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2356473600000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2361308399000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2361308400000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2374012799000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2374012800000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2383685999000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2383686000000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2387318399000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2387318400000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2392757999000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2392758000000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2405462399000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2405462400000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2413925999000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2413926000000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2418163199000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2418163200000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2424207599000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2424207600000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2437516799000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2437516800000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2444770799000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2444770800000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2448403199000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2448403200000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2455657199000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2455657200000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2468966399000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2468966400000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2475010799000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2475010800000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2479247999000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2479248000000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2487106799000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2487106800000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2500415999000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2500416000000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2505855599000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2505855600000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2509487999000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2509488000000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2519161199000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Hebron", 2519161200000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 142379999000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 142380000000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 150843599000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 150843600000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 167176799000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 167176800000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 178664399000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 178664400000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 334101599000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 334101600000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 337730399000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 337730400000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 452642399000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 452642400000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 462319199000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 462319200000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 482277599000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 482277600000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 494369999000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 494370000000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 516751199000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 516751200000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 526424399000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 526424400000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 545435999000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 545436000000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 558478799000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 558478800000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 576626399000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 576626400000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 589323599000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 589323600000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 609890399000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 609890400000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 620773199000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 620773200000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 638315999000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 638316000000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 651617999000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 651618000000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 669765599000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 669765600000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 683672399000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 683672400000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 701819999000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 701820000000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 715726799000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 715726800000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 733701599000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 733701600000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 747176399000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 747176400000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 765151199000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 765151200000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 778021199000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 778021200000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 796600799000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 796600800000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 810075599000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 810075600000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 828655199000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 828655200000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 843170399000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 843170400000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 860104799000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 860104800000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 874619999000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 874620000000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 891554399000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 891554400000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 906069599000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 906069600000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 924213599000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 924213600000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 939934799000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 939934800000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 956267999000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 956268000000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 971989199000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 971989200000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 987717599000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 987717600000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1003438799000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1003438800000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1019167199000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1019167200000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1034888399000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1034888400000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1050616799000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1050616800000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1066337999000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1066338000000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1082066399000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1082066400000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1096581599000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1096581600000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1113515999000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1113516000000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1128380399000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1128380400000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1143842399000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1143842400000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1158872399000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1158872400000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1175378399000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1175378400000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1189637999000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1189638000000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1206655199000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1206655200000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1219957199000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1219957200000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1238104799000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1238104800000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1252015199000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1252015200000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1269640859000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1269640860000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1281473999000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1281474000000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1301608859000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1301608860000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1312145999000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1312146000000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1333058399000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1333058400000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1348178399000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1348178400000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1364507999000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1364508000000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1380229199000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1380229200000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1395957599000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1395957600000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1414097999000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1414098000000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1427493599000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1427493600000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1445551199000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1445551200000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1458946799000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1458946800000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1477691999000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1477692000000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1490396399000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1490396400000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1509141599000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1509141600000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1521845999000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1521846000000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1540591199000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1540591200000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1553810399000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1553810400000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1572037199000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1572037200000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1585346399000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1585346400000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1603490399000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1603490400000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1616795999000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1616796000000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1635458399000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1635458400000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1648331999000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1648332000000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1666997999000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1666998000000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1682726399000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1682726400000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1698447599000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1698447600000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1713571199000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1713571200000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1729897199000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1729897200000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1744415999000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1744416000000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1761346799000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1761346800000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1774655999000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1774656000000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1792796399000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1792796400000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1806105599000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1806105600000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1824850799000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1824850800000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1837555199000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1837555200000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1856300399000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1856300400000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1869004799000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1869004800000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1887749999000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1887750000000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1901059199000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1901059200000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1919199599000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1919199600000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1932508799000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1932508800000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1950649199000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1950649200000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1963958399000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1963958400000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1982703599000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1982703600000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1995407999000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 1995408000000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2014153199000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2014153200000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2026857599000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2026857600000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2045602799000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2045602800000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2058307199000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2058307200000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2077052399000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2077052400000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2090361599000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2090361600000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2107897199000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2107897200000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2121811199000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2121811200000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2138741999000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2138742000000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2153260799000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2153260800000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2168981999000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2168982000000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2184710399000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2184710400000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2199826799000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2199826800000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2216159999000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2216160000000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2230066799000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2230066800000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2234303999000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2234304000000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2234905199000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2234905200000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2248214399000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2248214400000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2260911599000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2260911600000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2264543999000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2264544000000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2266354799000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2266354800000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2279663999000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2279664000000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2291756399000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2291756400000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2295388799000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2295388800000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2297804399000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2297804400000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2311113599000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2311113600000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2321996399000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2321996400000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2326233599000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2326233600000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2329253999000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2329254000000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2342563199000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2342563200000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2352841199000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2352841200000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2356473599000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2356473600000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2361308399000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2361308400000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2374012799000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2374012800000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2383685999000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2383686000000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2387318399000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2387318400000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2392757999000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2392758000000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2405462399000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2405462400000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2413925999000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2413926000000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2418163199000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2418163200000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2424207599000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2424207600000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2437516799000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2437516800000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2444770799000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2444770800000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2448403199000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2448403200000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2455657199000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2455657200000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2468966399000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2468966400000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2475010799000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2475010800000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2479247999000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2479248000000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2487106799000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2487106800000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2500415999000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2500416000000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2505855599000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2505855600000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2509487999000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2509488000000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2519161199000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Gaza", 2519161200000L), Some(120))
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 141263999000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 141264000000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 147221999000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 147222000000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 199756799000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 199756800000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 207701999000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 207702000000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 231292799000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 231292800000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 244249199000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 244249200000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 265507199000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 265507200000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 271033199000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 271033200000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 448243199000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 448243200000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 504917999000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 504918000000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1212278399000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1212278400000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1220223599000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1220223600000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1243814399000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1243814400000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1250809199000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1250809200000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1272758399000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1272758400000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1281221999000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1281222000000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1301788799000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1301788800000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1312066799000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1312066800000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1335664799000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1335664800000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1342749599000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1342749600000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1345427999000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1345428000000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1348970399000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1348970400000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1367114399000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1367114400000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1373162399000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1373162400000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1376099999000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1376100000000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1382839199000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1382839200000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1396144799000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1396144800000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1403920799000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1403920800000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1406944799000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1406944800000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1414288799000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1414288800000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1427594399000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1427594400000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1434247199000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1434247200000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1437271199000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1437271200000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1445738399000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1445738400000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1459043999000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1459044000000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1465091999000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1465092000000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1468115999000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1468116000000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1477792799000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1477792800000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1490493599000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1490493600000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1495331999000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1495332000000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1498960799000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1498960800000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1509242399000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1509242400000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1521943199000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1521943200000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1526176799000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1526176800000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1529200799000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1529200800000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1557021599000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1557021600000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1560045599000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1560045600000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1587261599000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1587261600000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1590890399000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1590890400000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1618106399000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1618106400000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1621130399000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1621130400000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1648346399000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1648346400000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1651975199000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1651975200000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1679191199000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1679191200000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1682215199000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1682215200000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1710035999000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1710036000000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1713059999000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1713060000000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1740275999000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1740276000000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1743904799000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1743904800000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1771120799000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1771120800000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1774144799000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1774144800000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1801965599000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1801965600000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1804989599000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1804989600000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1832205599000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1832205600000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1835834399000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1835834400000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1863050399000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1863050400000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1866074399000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1866074400000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1893290399000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1893290400000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1896919199000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1896919200000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1924135199000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1924135200000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1927159199000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1927159200000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1954979999000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1954980000000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1958003999000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1958004000000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1985219999000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1985220000000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1988848799000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 1988848800000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 2016064799000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 2016064800000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 2019088799000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 2019088800000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 2046304799000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 2046304800000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 2049933599000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 2049933600000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 2077149599000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 2077149600000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 2080778399000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 2080778400000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 2107994399000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 2107994400000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 2111018399000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 2111018400000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 2138234399000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 2138234400000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 2141863199000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 2141863200000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 2169079199000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 2169079200000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 2172103199000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 2172103200000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 2199923999000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 2199924000000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 2202947999000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 2202948000000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 2230163999000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 2230164000000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 2233792799000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 2233792800000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 2261008799000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 2261008800000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 2264032799000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 2264032800000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 2291248799000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 2291248800000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 2294877599000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 2294877600000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 2322093599000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 2322093600000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 2325722399000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 2325722400000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 2352938399000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 2352938400000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 2355962399000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 2355962400000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 2383178399000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 2383178400000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 2386807199000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 2386807200000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 2414023199000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 2414023200000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 2417047199000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 2417047200000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 2444867999000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 2444868000000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 2447891999000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 2447892000000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 2475107999000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 2475108000000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 2478736799000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 2478736800000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 2505952799000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 2505952800000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 2508976799000L),
-    Some(0),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Africa/Casablanca", 2508976800000L),
-    Some(60),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 7527599000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 7527600000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 24465599000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 24465600000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 37767599000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 37767600000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 55915199000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 55915200000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 69217199000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 69217200000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 87969599000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 87969600000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 100666799000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 100666800000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 118209599000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 118209600000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 132116399000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 132116400000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 150868799000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 150868800000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 163565999000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 163566000000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 182318399000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 182318400000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 195620399000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 195620400000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 213767999000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 213768000000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 227069999000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 227070000000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 245217599000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 245217600000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 258519599000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 258519600000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 277271999000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 277272000000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 289969199000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 289969200000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 308721599000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 308721600000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 321418799000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 321418800000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 340171199000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 340171200000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 353473199000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 353473200000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 371620799000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 371620800000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 384922799000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 384922800000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 403070399000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 403070400000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 416372399000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 416372400000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 434519999000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 434520000000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 447821999000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 447822000000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 466574399000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 466574400000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 479271599000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 479271600000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 498023999000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 498024000000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 510721199000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 510721200000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 529473599000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 529473600000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 545194799000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 545194800000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 560923199000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 560923200000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 574225199000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 574225200000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 592372799000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 592372800000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 605674799000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 605674800000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 624427199000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 624427200000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 637124399000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 637124400000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 653457599000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 653457600000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 668573999000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 668574000000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 687326399000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 687326400000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 700628399000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 700628400000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 718775999000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 718776000000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 732077999000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 732078000000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 750225599000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 750225600000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 763527599000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 763527600000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 781675199000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 781675200000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 794977199000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 794977200000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 813729599000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 813729600000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 826426799000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 826426800000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 845179199000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 845179200000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 859690799000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 859690800000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 876628799000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 876628800000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 889930799000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 889930800000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 906868799000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 906868800000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 923194799000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 923194800000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 939527999000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 939528000000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 952829999000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 952830000000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 971582399000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 971582400000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 984279599000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 984279600000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1003031999000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1003032000000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1015729199000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1015729200000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1034481599000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1034481600000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1047178799000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1047178800000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1065931199000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1065931200000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1079233199000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1079233200000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1097380799000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1097380800000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1110682799000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1110682800000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1128830399000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1128830400000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1142132399000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1142132400000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1160884799000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1160884800000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1173581999000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1173582000000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1192334399000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1192334400000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1206845999000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1206846000000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1223783999000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1223784000000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1237085999000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1237086000000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1255233599000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1255233600000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1270349999000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1270350000000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1286683199000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1286683200000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1304823599000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1304823600000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1313899199000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1313899200000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1335668399000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1335668400000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1346558399000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1346558400000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1367117999000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1367118000000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1378612799000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1378612800000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1398567599000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1398567600000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1410062399000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1410062400000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1463281199000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1463281200000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1471147199000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1471147200000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1494730799000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1494730800000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1502596799000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1502596800000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1526180399000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1526180400000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1534046399000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1534046400000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1554605999000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1554606000000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1567915199000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1567915200000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1586055599000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1586055600000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1599364799000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1599364800000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1617505199000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1617505200000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1630814399000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1630814400000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1648954799000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1648954800000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1662868799000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1662868800000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1680404399000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1680404400000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1693713599000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1693713600000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1712458799000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1712458800000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1725767999000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("America/Santiago", 1725768000000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 7527599000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 7527600000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 24465599000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 24465600000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 37767599000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 37767600000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 55915199000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 55915200000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 69217199000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 69217200000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 87969599000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 87969600000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 100666799000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 100666800000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 118209599000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 118209600000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 132116399000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 132116400000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 150868799000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 150868800000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 163565999000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 163566000000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 182318399000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 182318400000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 195620399000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 195620400000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 213767999000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 213768000000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 227069999000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 227070000000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 245217599000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 245217600000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 258519599000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 258519600000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 277271999000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 277272000000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 289969199000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 289969200000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 308721599000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 308721600000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 321418799000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 321418800000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 340171199000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 340171200000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 353473199000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 353473200000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 371620799000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 371620800000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 384922799000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 384922800000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 403070399000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 403070400000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 416372399000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 416372400000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 434519999000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 434520000000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 447821999000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 447822000000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 466574399000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 466574400000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 479271599000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 479271600000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 498023999000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 498024000000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 510721199000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 510721200000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 529473599000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 529473600000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 545194799000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 545194800000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 560923199000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 560923200000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 574225199000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 574225200000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 592372799000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 592372800000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 605674799000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 605674800000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 624427199000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 624427200000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 637124399000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 637124400000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 653457599000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 653457600000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 668573999000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 668574000000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 687326399000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 687326400000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 700628399000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 700628400000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 718775999000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 718776000000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 732077999000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 732078000000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 750225599000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 750225600000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 763527599000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 763527600000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 781675199000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 781675200000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 794977199000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 794977200000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 813729599000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 813729600000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 826426799000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 826426800000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 845179199000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 845179200000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 859690799000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 859690800000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 876628799000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 876628800000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 889930799000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 889930800000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 906868799000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 906868800000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 923194799000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 923194800000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 939527999000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 939528000000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 952829999000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 952830000000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 971582399000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 971582400000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 984279599000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 984279600000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1003031999000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1003032000000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1015729199000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1015729200000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1034481599000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1034481600000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1047178799000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1047178800000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1065931199000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1065931200000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1079233199000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1079233200000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1097380799000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1097380800000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1110682799000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1110682800000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1128830399000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1128830400000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1142132399000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1142132400000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1160884799000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1160884800000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1173581999000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1173582000000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1192334399000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1192334400000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1206845999000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1206846000000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1223783999000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1223784000000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1237085999000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1237086000000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1255233599000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1255233600000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1270349999000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1270350000000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1286683199000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1286683200000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1304823599000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1304823600000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1313899199000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1313899200000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1335668399000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1335668400000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1346558399000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1346558400000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1367117999000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1367118000000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1378612799000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1378612800000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1398567599000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1398567600000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1410062399000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1410062400000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1463281199000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1463281200000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1471147199000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1471147200000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1494730799000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1494730800000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1502596799000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1502596800000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1526180399000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1526180400000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1534046399000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1534046400000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1554605999000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1554606000000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1567915199000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1567915200000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1586055599000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1586055600000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1599364799000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1599364800000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1617505199000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1617505200000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1630814399000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1630814400000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1648954799000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1648954800000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1662868799000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1662868800000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1680404399000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1680404400000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1693713599000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1693713600000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1712458799000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1712458800000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1725767999000L),
-    Some(-240),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/Continental", 1725768000000L),
-    Some(-180),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 7527599000L),
+test "@date 段界两侧各差一段（腿 T 行，段数最多的前 10 区）（第 1/12 块，本块 200 条）" {
+  assert_eq(@date.zone_offset_minutes("America/Boise", 9968399000L), Some(-420))
+  assert_eq(@date.zone_offset_minutes("America/Boise", 9968400000L), Some(-360))
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 25689599000L),
     Some(-360),
   )
   assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 7527600000L),
+    @date.zone_offset_minutes("America/Boise", 25689600000L),
     Some(-420),
   )
   assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 24465599000L),
+    @date.zone_offset_minutes("America/Boise", 41417999000L),
     Some(-420),
   )
   assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 24465600000L),
+    @date.zone_offset_minutes("America/Boise", 41418000000L),
     Some(-360),
   )
   assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 37767599000L),
+    @date.zone_offset_minutes("America/Boise", 57743999000L),
     Some(-360),
   )
   assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 37767600000L),
+    @date.zone_offset_minutes("America/Boise", 57744000000L),
     Some(-420),
   )
   assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 55915199000L),
+    @date.zone_offset_minutes("America/Boise", 73472399000L),
     Some(-420),
   )
   assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 55915200000L),
+    @date.zone_offset_minutes("America/Boise", 73472400000L),
     Some(-360),
   )
   assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 69217199000L),
+    @date.zone_offset_minutes("America/Boise", 89193599000L),
     Some(-360),
   )
   assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 69217200000L),
+    @date.zone_offset_minutes("America/Boise", 89193600000L),
     Some(-420),
   )
   assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 87969599000L),
+    @date.zone_offset_minutes("America/Boise", 104921999000L),
     Some(-420),
   )
   assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 87969600000L),
+    @date.zone_offset_minutes("America/Boise", 104922000000L),
     Some(-360),
   )
   assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 100666799000L),
+    @date.zone_offset_minutes("America/Boise", 120643199000L),
     Some(-360),
   )
   assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 100666800000L),
+    @date.zone_offset_minutes("America/Boise", 120643200000L),
     Some(-420),
   )
   assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 118209599000L),
+    @date.zone_offset_minutes("America/Boise", 129113999000L),
     Some(-420),
   )
   assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 118209600000L),
+    @date.zone_offset_minutes("America/Boise", 129114000000L),
     Some(-360),
   )
   assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 132116399000L),
+    @date.zone_offset_minutes("America/Boise", 152092799000L),
     Some(-360),
   )
   assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 132116400000L),
+    @date.zone_offset_minutes("America/Boise", 152092800000L),
     Some(-420),
   )
   assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 150868799000L),
+    @date.zone_offset_minutes("America/Boise", 162377999000L),
     Some(-420),
   )
   assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 150868800000L),
+    @date.zone_offset_minutes("America/Boise", 162378000000L),
     Some(-360),
   )
   assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 163565999000L),
+    @date.zone_offset_minutes("America/Boise", 183542399000L),
     Some(-360),
   )
   assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 163566000000L),
+    @date.zone_offset_minutes("America/Boise", 183542400000L),
     Some(-420),
   )
   assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 182318399000L),
+    @date.zone_offset_minutes("America/Boise", 199270799000L),
     Some(-420),
   )
   assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 182318400000L),
+    @date.zone_offset_minutes("America/Boise", 199270800000L),
     Some(-360),
   )
   assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 195620399000L),
+    @date.zone_offset_minutes("America/Boise", 215596799000L),
     Some(-360),
   )
   assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 195620400000L),
+    @date.zone_offset_minutes("America/Boise", 215596800000L),
     Some(-420),
   )
   assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 213767999000L),
+    @date.zone_offset_minutes("America/Boise", 230720399000L),
     Some(-420),
   )
   assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 213768000000L),
+    @date.zone_offset_minutes("America/Boise", 230720400000L),
     Some(-360),
   )
   assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 227069999000L),
+    @date.zone_offset_minutes("America/Boise", 247046399000L),
     Some(-360),
   )
   assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 227070000000L),
+    @date.zone_offset_minutes("America/Boise", 247046400000L),
     Some(-420),
   )
   assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 245217599000L),
+    @date.zone_offset_minutes("America/Boise", 262774799000L),
     Some(-420),
   )
   assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 245217600000L),
+    @date.zone_offset_minutes("America/Boise", 262774800000L),
     Some(-360),
   )
   assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 258519599000L),
+    @date.zone_offset_minutes("America/Boise", 278495999000L),
     Some(-360),
   )
   assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 258519600000L),
+    @date.zone_offset_minutes("America/Boise", 278496000000L),
     Some(-420),
   )
   assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 277271999000L),
+    @date.zone_offset_minutes("America/Boise", 294224399000L),
     Some(-420),
   )
   assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 277272000000L),
+    @date.zone_offset_minutes("America/Boise", 294224400000L),
     Some(-360),
   )
   assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 289969199000L),
+    @date.zone_offset_minutes("America/Boise", 309945599000L),
     Some(-360),
   )
   assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 289969200000L),
+    @date.zone_offset_minutes("America/Boise", 309945600000L),
     Some(-420),
   )
   assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 308721599000L),
+    @date.zone_offset_minutes("America/Boise", 325673999000L),
     Some(-420),
   )
   assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 308721600000L),
+    @date.zone_offset_minutes("America/Boise", 325674000000L),
     Some(-360),
   )
   assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 321418799000L),
+    @date.zone_offset_minutes("America/Boise", 341395199000L),
     Some(-360),
   )
   assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 321418800000L),
+    @date.zone_offset_minutes("America/Boise", 341395200000L),
     Some(-420),
   )
   assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 340171199000L),
+    @date.zone_offset_minutes("America/Boise", 357123599000L),
     Some(-420),
   )
   assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 340171200000L),
+    @date.zone_offset_minutes("America/Boise", 357123600000L),
     Some(-360),
   )
   assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 353473199000L),
+    @date.zone_offset_minutes("America/Boise", 372844799000L),
     Some(-360),
   )
   assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 353473200000L),
+    @date.zone_offset_minutes("America/Boise", 372844800000L),
     Some(-420),
   )
   assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 371620799000L),
+    @date.zone_offset_minutes("America/Boise", 388573199000L),
     Some(-420),
   )
   assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 371620800000L),
+    @date.zone_offset_minutes("America/Boise", 388573200000L),
     Some(-360),
   )
   assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 403070399000L),
+    @date.zone_offset_minutes("America/Boise", 404899199000L),
     Some(-360),
   )
   assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 403070400000L),
-    Some(-300),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 416372399000L),
-    Some(-300),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 416372400000L),
-    Some(-360),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 434519999000L),
-    Some(-360),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 434520000000L),
-    Some(-300),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 447821999000L),
-    Some(-300),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 447822000000L),
-    Some(-360),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 466574399000L),
-    Some(-360),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 466574400000L),
-    Some(-300),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 479271599000L),
-    Some(-300),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 479271600000L),
-    Some(-360),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 498023999000L),
-    Some(-360),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 498024000000L),
-    Some(-300),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 510721199000L),
-    Some(-300),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 510721200000L),
-    Some(-360),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 529473599000L),
-    Some(-360),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 529473600000L),
-    Some(-300),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 545194799000L),
-    Some(-300),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 545194800000L),
-    Some(-360),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 560923199000L),
-    Some(-360),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 560923200000L),
-    Some(-300),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 574225199000L),
-    Some(-300),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 574225200000L),
-    Some(-360),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 592372799000L),
-    Some(-360),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 592372800000L),
-    Some(-300),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 605674799000L),
-    Some(-300),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 605674800000L),
-    Some(-360),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 624427199000L),
-    Some(-360),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 624427200000L),
-    Some(-300),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 637124399000L),
-    Some(-300),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 637124400000L),
-    Some(-360),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 653457599000L),
-    Some(-360),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 653457600000L),
-    Some(-300),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 668573999000L),
-    Some(-300),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 668574000000L),
-    Some(-360),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 687326399000L),
-    Some(-360),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 687326400000L),
-    Some(-300),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 700628399000L),
-    Some(-300),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 700628400000L),
-    Some(-360),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 718775999000L),
-    Some(-360),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 718776000000L),
-    Some(-300),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 732077999000L),
-    Some(-300),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 732078000000L),
-    Some(-360),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 750225599000L),
-    Some(-360),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 750225600000L),
-    Some(-300),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 763527599000L),
-    Some(-300),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 763527600000L),
-    Some(-360),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 781675199000L),
-    Some(-360),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 781675200000L),
-    Some(-300),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 794977199000L),
-    Some(-300),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 794977200000L),
-    Some(-360),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 813729599000L),
-    Some(-360),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 813729600000L),
-    Some(-300),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 826426799000L),
-    Some(-300),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 826426800000L),
-    Some(-360),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 845179199000L),
-    Some(-360),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 845179200000L),
-    Some(-300),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 859690799000L),
-    Some(-300),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 859690800000L),
-    Some(-360),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 876628799000L),
-    Some(-360),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 876628800000L),
-    Some(-300),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 889930799000L),
-    Some(-300),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 889930800000L),
-    Some(-360),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 906868799000L),
-    Some(-360),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 906868800000L),
-    Some(-300),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 923194799000L),
-    Some(-300),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 923194800000L),
-    Some(-360),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 939527999000L),
-    Some(-360),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 939528000000L),
-    Some(-300),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 952829999000L),
-    Some(-300),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 952830000000L),
-    Some(-360),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 971582399000L),
-    Some(-360),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 971582400000L),
-    Some(-300),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 984279599000L),
-    Some(-300),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 984279600000L),
-    Some(-360),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1003031999000L),
-    Some(-360),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1003032000000L),
-    Some(-300),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1015729199000L),
-    Some(-300),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1015729200000L),
-    Some(-360),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1034481599000L),
-    Some(-360),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1034481600000L),
-    Some(-300),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1047178799000L),
-    Some(-300),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1047178800000L),
-    Some(-360),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1065931199000L),
-    Some(-360),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1065931200000L),
-    Some(-300),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1079233199000L),
-    Some(-300),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1079233200000L),
-    Some(-360),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1097380799000L),
-    Some(-360),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1097380800000L),
-    Some(-300),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1110682799000L),
-    Some(-300),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1110682800000L),
-    Some(-360),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1128830399000L),
-    Some(-360),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1128830400000L),
-    Some(-300),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1142132399000L),
-    Some(-300),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1142132400000L),
-    Some(-360),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1160884799000L),
-    Some(-360),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1160884800000L),
-    Some(-300),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1173581999000L),
-    Some(-300),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1173582000000L),
-    Some(-360),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1192334399000L),
-    Some(-360),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1192334400000L),
-    Some(-300),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1206845999000L),
-    Some(-300),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1206846000000L),
-    Some(-360),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1223783999000L),
-    Some(-360),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1223784000000L),
-    Some(-300),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1237085999000L),
-    Some(-300),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1237086000000L),
-    Some(-360),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1255233599000L),
-    Some(-360),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1255233600000L),
-    Some(-300),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1270349999000L),
-    Some(-300),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1270350000000L),
-    Some(-360),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1286683199000L),
-    Some(-360),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1286683200000L),
-    Some(-300),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1304823599000L),
-    Some(-300),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1304823600000L),
-    Some(-360),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1313899199000L),
-    Some(-360),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1313899200000L),
-    Some(-300),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1335668399000L),
-    Some(-300),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1335668400000L),
-    Some(-360),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1346558399000L),
-    Some(-360),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1346558400000L),
-    Some(-300),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1367117999000L),
-    Some(-300),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1367118000000L),
-    Some(-360),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1378612799000L),
-    Some(-360),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1378612800000L),
-    Some(-300),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1398567599000L),
-    Some(-300),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1398567600000L),
-    Some(-360),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1410062399000L),
-    Some(-360),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1410062400000L),
-    Some(-300),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1463281199000L),
-    Some(-300),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1463281200000L),
-    Some(-360),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1471147199000L),
-    Some(-360),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1471147200000L),
-    Some(-300),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1494730799000L),
-    Some(-300),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1494730800000L),
-    Some(-360),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1502596799000L),
-    Some(-360),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1502596800000L),
-    Some(-300),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1526180399000L),
-    Some(-300),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1526180400000L),
-    Some(-360),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1534046399000L),
-    Some(-360),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1534046400000L),
-    Some(-300),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1554605999000L),
-    Some(-300),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1554606000000L),
-    Some(-360),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1567915199000L),
-    Some(-360),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1567915200000L),
-    Some(-300),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1586055599000L),
-    Some(-300),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1586055600000L),
-    Some(-360),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1599364799000L),
-    Some(-360),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1599364800000L),
-    Some(-300),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1617505199000L),
-    Some(-300),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1617505200000L),
-    Some(-360),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1630814399000L),
-    Some(-360),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1630814400000L),
-    Some(-300),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1648954799000L),
-    Some(-300),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1648954800000L),
-    Some(-360),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1662868799000L),
-    Some(-360),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1662868800000L),
-    Some(-300),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1680404399000L),
-    Some(-300),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1680404400000L),
-    Some(-360),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1693713599000L),
-    Some(-360),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1693713600000L),
-    Some(-300),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1712458799000L),
-    Some(-300),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1712458800000L),
-    Some(-360),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1725767999000L),
-    Some(-360),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Chile/EasterIsland", 1725768000000L),
-    Some(-300),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 7527599000L),
-    Some(-360),
-  )
-  assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 7527600000L),
+    @date.zone_offset_minutes("America/Boise", 404899200000L),
     Some(-420),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 24465599000L),
+    @date.zone_offset_minutes("America/Boise", 420022799000L),
     Some(-420),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 24465600000L),
+    @date.zone_offset_minutes("America/Boise", 420022800000L),
     Some(-360),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 37767599000L),
+    @date.zone_offset_minutes("America/Boise", 436348799000L),
     Some(-360),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 37767600000L),
+    @date.zone_offset_minutes("America/Boise", 436348800000L),
     Some(-420),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 55915199000L),
+    @date.zone_offset_minutes("America/Boise", 452077199000L),
     Some(-420),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 55915200000L),
+    @date.zone_offset_minutes("America/Boise", 452077200000L),
     Some(-360),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 69217199000L),
+    @date.zone_offset_minutes("America/Boise", 467798399000L),
     Some(-360),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 69217200000L),
+    @date.zone_offset_minutes("America/Boise", 467798400000L),
     Some(-420),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 87969599000L),
+    @date.zone_offset_minutes("America/Boise", 483526799000L),
     Some(-420),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 87969600000L),
+    @date.zone_offset_minutes("America/Boise", 483526800000L),
     Some(-360),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 100666799000L),
+    @date.zone_offset_minutes("America/Boise", 499247999000L),
     Some(-360),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 100666800000L),
+    @date.zone_offset_minutes("America/Boise", 499248000000L),
     Some(-420),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 118209599000L),
+    @date.zone_offset_minutes("America/Boise", 514976399000L),
     Some(-420),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 118209600000L),
+    @date.zone_offset_minutes("America/Boise", 514976400000L),
     Some(-360),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 132116399000L),
+    @date.zone_offset_minutes("America/Boise", 530697599000L),
     Some(-360),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 132116400000L),
+    @date.zone_offset_minutes("America/Boise", 530697600000L),
     Some(-420),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 150868799000L),
+    @date.zone_offset_minutes("America/Boise", 544611599000L),
     Some(-420),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 150868800000L),
+    @date.zone_offset_minutes("America/Boise", 544611600000L),
     Some(-360),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 163565999000L),
+    @date.zone_offset_minutes("America/Boise", 562147199000L),
     Some(-360),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 163566000000L),
+    @date.zone_offset_minutes("America/Boise", 562147200000L),
     Some(-420),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 182318399000L),
+    @date.zone_offset_minutes("America/Boise", 576061199000L),
     Some(-420),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 182318400000L),
+    @date.zone_offset_minutes("America/Boise", 576061200000L),
     Some(-360),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 195620399000L),
+    @date.zone_offset_minutes("America/Boise", 594201599000L),
     Some(-360),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 195620400000L),
+    @date.zone_offset_minutes("America/Boise", 594201600000L),
     Some(-420),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 213767999000L),
+    @date.zone_offset_minutes("America/Boise", 607510799000L),
     Some(-420),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 213768000000L),
+    @date.zone_offset_minutes("America/Boise", 607510800000L),
     Some(-360),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 227069999000L),
+    @date.zone_offset_minutes("America/Boise", 625651199000L),
     Some(-360),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 227070000000L),
+    @date.zone_offset_minutes("America/Boise", 625651200000L),
     Some(-420),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 245217599000L),
+    @date.zone_offset_minutes("America/Boise", 638960399000L),
     Some(-420),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 245217600000L),
+    @date.zone_offset_minutes("America/Boise", 638960400000L),
     Some(-360),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 258519599000L),
+    @date.zone_offset_minutes("America/Boise", 657100799000L),
     Some(-360),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 258519600000L),
+    @date.zone_offset_minutes("America/Boise", 657100800000L),
     Some(-420),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 277271999000L),
+    @date.zone_offset_minutes("America/Boise", 671014799000L),
     Some(-420),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 277272000000L),
+    @date.zone_offset_minutes("America/Boise", 671014800000L),
     Some(-360),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 289969199000L),
+    @date.zone_offset_minutes("America/Boise", 688550399000L),
     Some(-360),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 289969200000L),
+    @date.zone_offset_minutes("America/Boise", 688550400000L),
     Some(-420),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 308721599000L),
+    @date.zone_offset_minutes("America/Boise", 702464399000L),
     Some(-420),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 308721600000L),
+    @date.zone_offset_minutes("America/Boise", 702464400000L),
     Some(-360),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 321418799000L),
+    @date.zone_offset_minutes("America/Boise", 719999999000L),
     Some(-360),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 321418800000L),
+    @date.zone_offset_minutes("America/Boise", 720000000000L),
     Some(-420),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 340171199000L),
+    @date.zone_offset_minutes("America/Boise", 733913999000L),
     Some(-420),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 340171200000L),
+    @date.zone_offset_minutes("America/Boise", 733914000000L),
     Some(-360),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 353473199000L),
+    @date.zone_offset_minutes("America/Boise", 752054399000L),
     Some(-360),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 353473200000L),
+    @date.zone_offset_minutes("America/Boise", 752054400000L),
     Some(-420),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 371620799000L),
+    @date.zone_offset_minutes("America/Boise", 765363599000L),
     Some(-420),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 371620800000L),
+    @date.zone_offset_minutes("America/Boise", 765363600000L),
     Some(-360),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 403070399000L),
+    @date.zone_offset_minutes("America/Boise", 783503999000L),
     Some(-360),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 403070400000L),
+    @date.zone_offset_minutes("America/Boise", 783504000000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 796813199000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 796813200000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 814953599000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 814953600000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 828867599000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 828867600000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 846403199000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 846403200000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 860317199000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 860317200000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 877852799000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 877852800000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 891766799000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 891766800000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 909302399000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 909302400000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 923216399000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 923216400000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 941356799000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 941356800000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 954665999000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 954666000000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 972806399000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 972806400000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 986115599000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 986115600000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1004255999000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1004256000000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1018169999000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1018170000000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1035705599000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1035705600000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1049619599000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1049619600000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1067155199000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1067155200000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1081069199000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1081069200000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1099209599000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1099209600000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1112518799000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1112518800000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1130659199000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1130659200000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1143968399000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1143968400000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1162108799000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1162108800000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1173603599000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1173603600000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1194163199000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1194163200000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1205053199000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1205053200000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1225612799000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1225612800000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1236502799000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1236502800000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1257062399000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1257062400000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1268557199000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1268557200000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1289116799000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1289116800000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1300006799000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1300006800000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1320566399000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1320566400000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1331456399000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1331456400000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1352015999000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1352016000000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1362905999000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1362906000000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1383465599000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1383465600000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1394355599000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1394355600000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1414915199000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1414915200000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1425805199000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1425805200000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1446364799000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1446364800000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1457859599000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1457859600000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1478419199000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1478419200000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1489309199000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1489309200000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1509868799000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1509868800000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1520758799000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1520758800000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1541318399000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1541318400000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1552208399000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1552208400000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1572767999000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1572768000000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1583657999000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1583658000000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1604217599000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1604217600000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1615712399000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1615712400000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1636271999000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1636272000000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1647161999000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1647162000000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1667721599000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1667721600000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1678611599000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1678611600000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1699171199000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1699171200000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1710061199000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1710061200000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1730620799000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1730620800000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1741510799000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1741510800000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1762070399000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1762070400000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1772960399000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1772960400000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1793519999000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1793520000000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1805014799000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1805014800000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1825574399000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1825574400000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1836464399000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1836464400000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1857023999000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1857024000000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1867913999000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1867914000000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1888473599000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1888473600000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1899363599000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1899363600000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1919923199000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1919923200000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1930813199000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1930813200000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1951372799000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1951372800000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1962867599000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1962867600000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1983427199000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1983427200000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1994317199000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1994317200000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 2014876799000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 2014876800000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 2025766799000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 2025766800000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 2046326399000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 2046326400000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 2057216399000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 2057216400000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 2077775999000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 2077776000000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 2088665999000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 2088666000000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 2109225599000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 2109225600000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 2120115599000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 2120115600000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 2140675199000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 2140675200000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 2152169999000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 2152170000000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 2172729599000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 2172729600000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 2183619599000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 2183619600000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 2204179199000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 2204179200000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 2215069199000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 2215069200000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 2235628799000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 2235628800000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 2246518799000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 2246518800000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 2267078399000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 2267078400000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 2277968399000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 2277968400000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 2298527999000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 2298528000000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 2309417999000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 2309418000000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 2329977599000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 2329977600000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 2341472399000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 2341472400000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 2362031999000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 2362032000000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 2372921999000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 2372922000000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 2393481599000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 2393481600000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 2404371599000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 2404371600000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 2424931199000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 2424931200000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 2435821199000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 2435821200000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 2456380799000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 2456380800000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 2467270799000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 2467270800000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 2487830399000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 2487830400000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 2499325199000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 2499325200000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 2519884799000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 2519884800000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 9964799000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 9964800000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 25685999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 25686000000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 41414399000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 41414400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 57740399000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 57740400000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 73468799000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 73468800000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 89189999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 89190000000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 104918399000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 104918400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 120639599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 120639600000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 126691199000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 126691200000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 152089199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 152089200000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 162374399000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 162374400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 183538799000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 183538800000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 199267199000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 199267200000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 215593199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 215593200000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 230716799000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 230716800000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 247042799000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 247042800000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 262771199000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 262771200000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 278492399000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 278492400000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 294220799000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 294220800000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 309941999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 309942000000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 325670399000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 325670400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 341391599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 341391600000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 357119999000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 357120000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 372841199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 372841200000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 388569599000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 388569600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 404895599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 404895600000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 420019199000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 420019200000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 436345199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 436345200000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 452073599000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 452073600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 467794799000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 467794800000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 483523199000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 483523200000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 499244399000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 499244400000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 514972799000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 514972800000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 530693999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 530694000000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 544607999000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 544608000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 562143599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 562143600000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 576057599000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 576057600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 594197999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 594198000000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 607507199000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 607507200000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 625647599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 625647600000L),
+    Some(-360),
+  )
+}
+
+///|
+test "@date 段界两侧各差一段（腿 T 行，段数最多的前 10 区）（第 2/12 块，本块 200 条）" {
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 638956799000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 638956800000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 657097199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 657097200000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 671011199000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 671011200000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 688546799000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 688546800000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 702460799000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 702460800000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 719996399000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 719996400000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 733910399000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 733910400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 752050799000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 752050800000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 765359999000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 765360000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 783500399000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 783500400000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 796809599000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 796809600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 814949999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 814950000000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 828863999000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 828864000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 846399599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 846399600000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 860313599000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 860313600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 877849199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 877849200000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 891763199000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 891763200000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 909298799000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 909298800000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 923212799000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 923212800000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 941353199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 941353200000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 954662399000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 954662400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 972802799000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 972802800000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 986111999000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 986112000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1004252399000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1004252400000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1018166399000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1018166400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1035701999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1035702000000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1049615999000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1049616000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1067151599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1067151600000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1081065599000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1081065600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1099205999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1099206000000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1112515199000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1112515200000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1130655599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1130655600000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1143964799000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1143964800000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1162105199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1162105200000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1173599999000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1173600000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1194159599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1194159600000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1205049599000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1205049600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1225609199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1225609200000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1236499199000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1236499200000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1257058799000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1257058800000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1268553599000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1268553600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1289113199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1289113200000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1300003199000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1300003200000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1320562799000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1320562800000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1331452799000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1331452800000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1352012399000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1352012400000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1362902399000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1362902400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1383461999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1383462000000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1394351999000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1394352000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1414911599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1414911600000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1425801599000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1425801600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1446361199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1446361200000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1457855999000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1457856000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1478415599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1478415600000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1489305599000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1489305600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1509865199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1509865200000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1520755199000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1520755200000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1541314799000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1541314800000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1552204799000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1552204800000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1572764399000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1572764400000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1583654399000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1583654400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1604213999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1604214000000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1615708799000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1615708800000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1636268399000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1636268400000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1647158399000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1647158400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1667717999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1667718000000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1678607999000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1678608000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1699167599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1699167600000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1710057599000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1710057600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1730617199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1730617200000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1741507199000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1741507200000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1762066799000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1762066800000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1772956799000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1772956800000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1793516399000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1793516400000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1805011199000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1805011200000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1825570799000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1825570800000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1836460799000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1836460800000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1857020399000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1857020400000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1867910399000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1867910400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1888469999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1888470000000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1899359999000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1899360000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1919919599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1919919600000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1930809599000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1930809600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1951369199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1951369200000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1962863999000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1962864000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1983423599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1983423600000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1994313599000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1994313600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 2014873199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 2014873200000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 2025763199000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 2025763200000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 2046322799000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 2046322800000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 2057212799000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 2057212800000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 2077772399000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 2077772400000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 2088662399000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 2088662400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 2109221999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 2109222000000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 2120111999000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 2120112000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 2140671599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 2140671600000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 2152166399000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 2152166400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 2172725999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 2172726000000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 2183615999000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 2183616000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 2204175599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 2204175600000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 2215065599000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 2215065600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 2235625199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 2235625200000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 2246515199000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 2246515200000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 2267074799000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 2267074800000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 2277964799000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 2277964800000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 2298524399000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 2298524400000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 2309414399000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 2309414400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 2329973999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 2329974000000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 2341468799000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 2341468800000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 2362028399000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 2362028400000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 2372918399000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 2372918400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 2393477999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 2393478000000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 2404367999000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 2404368000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 2424927599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 2424927600000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 2435817599000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 2435817600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 2456377199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 2456377200000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 2467267199000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 2467267200000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 2487826799000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 2487826800000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 2499321599000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 2499321600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 2519881199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 2519881200000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 9968399000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 9968400000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 25689599000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 25689600000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 41417999000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 41418000000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 57743999000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 57744000000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 73472399000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 73472400000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 89193599000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 89193600000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 104921999000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 104922000000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 120643199000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 120643200000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 126694799000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 126694800000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 152092799000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 152092800000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 162377999000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 162378000000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 183542399000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 183542400000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 199270799000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 199270800000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 215596799000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 215596800000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 230720399000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 230720400000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 247046399000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 247046400000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 262774799000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 262774800000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 278495999000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 278496000000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 294224399000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 294224400000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 309945599000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 309945600000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 325673999000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 325674000000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 341395199000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 341395200000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 357123599000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 357123600000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 372844799000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 372844800000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 388573199000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 388573200000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 404899199000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 404899200000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 420022799000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 420022800000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 436348799000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 436348800000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 452077199000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 452077200000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 467798399000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 467798400000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 483526799000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 483526800000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 499247999000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 499248000000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 514976399000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 514976400000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 530697599000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 530697600000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 544611599000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 544611600000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 562147199000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 562147200000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 576061199000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 576061200000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 594201599000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 594201600000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 607510799000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 607510800000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 625651199000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 625651200000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 638960399000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 638960400000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 657100799000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 657100800000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 671014799000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 671014800000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 688550399000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 688550400000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 702464399000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 702464400000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 719999999000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 720000000000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 733913999000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 733914000000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 752054399000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 752054400000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 765363599000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 765363600000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 783503999000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 783504000000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 796813199000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 796813200000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 814953599000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 814953600000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 828867599000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 828867600000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 846403199000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 846403200000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 860317199000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 860317200000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 877852799000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 877852800000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 891766799000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 891766800000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 909302399000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 909302400000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 923216399000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 923216400000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 941356799000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 941356800000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 954665999000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 954666000000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 972806399000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 972806400000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 986115599000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 986115600000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1004255999000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1004256000000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1018169999000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1018170000000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1035705599000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1035705600000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1049619599000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1049619600000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1067155199000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1067155200000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1081069199000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1081069200000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1099209599000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1099209600000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1112518799000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1112518800000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1130659199000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1130659200000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1143968399000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1143968400000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1162108799000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1162108800000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1173603599000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1173603600000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1194163199000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1194163200000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1205053199000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1205053200000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1225612799000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1225612800000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1236502799000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1236502800000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1257062399000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1257062400000L),
+    Some(-420),
+  )
+}
+
+///|
+test "@date 段界两侧各差一段（腿 T 行，段数最多的前 10 区）（第 3/12 块，本块 200 条）" {
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1268557199000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1268557200000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1289116799000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1289116800000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1300006799000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1300006800000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1320566399000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1320566400000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1331456399000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1331456400000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1352015999000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1352016000000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1362905999000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1362906000000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1383465599000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1383465600000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1394355599000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1394355600000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1414915199000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1414915200000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1425805199000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1425805200000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1446364799000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1446364800000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1457859599000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1457859600000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1478419199000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1478419200000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1489309199000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1489309200000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1509868799000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1509868800000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1520758799000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1520758800000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1541318399000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1541318400000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1552208399000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1552208400000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1572767999000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1572768000000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1583657999000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1583658000000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1604217599000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1604217600000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1615712399000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1615712400000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1636271999000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1636272000000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1647161999000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1647162000000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1667721599000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1667721600000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1678611599000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1678611600000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1699171199000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1699171200000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1710061199000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1710061200000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1730620799000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1730620800000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1741510799000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1741510800000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1762070399000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1762070400000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1772960399000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1772960400000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1793519999000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1793520000000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1805014799000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1805014800000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1825574399000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1825574400000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1836464399000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1836464400000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1857023999000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1857024000000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1867913999000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1867914000000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1888473599000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1888473600000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1899363599000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1899363600000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1919923199000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1919923200000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1930813199000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1930813200000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1951372799000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1951372800000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1962867599000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1962867600000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1983427199000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1983427200000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1994317199000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1994317200000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 2014876799000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 2014876800000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 2025766799000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 2025766800000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 2046326399000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 2046326400000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 2057216399000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 2057216400000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 2077775999000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 2077776000000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 2088665999000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 2088666000000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 2109225599000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 2109225600000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 2120115599000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 2120115600000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 2140675199000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 2140675200000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 2152169999000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 2152170000000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 2172729599000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 2172729600000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 2183619599000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 2183619600000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 2204179199000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 2204179200000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 2215069199000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 2215069200000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 2235628799000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 2235628800000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 2246518799000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 2246518800000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 2267078399000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 2267078400000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 2277968399000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 2277968400000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 2298527999000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 2298528000000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 2309417999000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 2309418000000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 2329977599000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 2329977600000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 2341472399000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 2341472400000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 2362031999000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 2362032000000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 2372921999000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 2372922000000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 2393481599000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 2393481600000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 2404371599000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 2404371600000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 2424931199000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 2424931200000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 2435821199000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 2435821200000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 2456380799000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 2456380800000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 2467270799000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 2467270800000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 2487830399000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 2487830400000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 2499325199000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 2499325200000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 2519884799000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 2519884800000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 9957599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 9957600000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 25678799000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 25678800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 41407199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 41407200000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 57733199000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 57733200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 73461599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 73461600000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 89182799000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 89182800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 104911199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 104911200000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 120632399000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 120632400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 136360799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 136360800000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 152081999000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 152082000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 167810399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 167810400000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 183531599000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 183531600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 199259999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 199260000000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 215585999000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 215586000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 230709599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 230709600000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 247035599000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 247035600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 262763999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 262764000000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 278485199000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 278485200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 294213599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 294213600000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 309934799000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 309934800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 325663199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 325663200000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 341384399000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 341384400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 357112799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 357112800000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 372833999000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 372834000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 388562399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 388562400000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 404888399000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 404888400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 420011999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 420012000000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 436337999000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 436338000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 452066399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 452066400000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 467787599000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 467787600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 483515999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 483516000000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 499237199000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 499237200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 514965599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 514965600000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 530686799000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 530686800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 544593659000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 544593660000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 562129259000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 562129260000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 576043259000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 576043260000L),
+    Some(-120),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 594180059000L),
+    Some(-120),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 594180060000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 607492859000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 607492860000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 625633259000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 625633260000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 638942459000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 638942460000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 657082859000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 657082860000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 670996859000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 670996860000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 688532459000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 688532460000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 702446459000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 702446460000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 719982059000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 719982060000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 733896059000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 733896060000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 752036459000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 752036460000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 765345659000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 765345660000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 783486059000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 783486060000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 796795259000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 796795260000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 814935659000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 814935660000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 828849659000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 828849660000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 846385259000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 846385260000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 860299259000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 860299260000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 877834859000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 877834860000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 891748859000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 891748860000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 909284459000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 909284460000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 923198459000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 923198460000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 941338859000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 941338860000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 954648059000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 954648060000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 972788459000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 972788460000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 986097659000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 986097660000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1004238059000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1004238060000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1018152059000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1018152060000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1035687659000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1035687660000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1049601659000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1049601660000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1067137259000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1067137260000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1081051259000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1081051260000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1099191659000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1099191660000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1112500859000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1112500860000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1130641259000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1130641260000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1143950459000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1143950460000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1162090859000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1162090860000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1173585659000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1173585660000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1194145259000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1194145260000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1205035259000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1205035260000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1225594859000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1225594860000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1236484859000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1236484860000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1257044459000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1257044460000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1268539259000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1268539260000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1289098859000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1289098860000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1299988859000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1299988860000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1320555599000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1320555600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1331445599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1331445600000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1352005199000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1352005200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1362895199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1362895200000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1383454799000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1383454800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1394344799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1394344800000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1414904399000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1414904400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1425794399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1425794400000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1446353999000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1446354000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1457848799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1457848800000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1478408399000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1478408400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1489298399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1489298400000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1509857999000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1509858000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1520747999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1520748000000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1541307599000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1541307600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1552197599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1552197600000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1572757199000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1572757200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1583647199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1583647200000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1604206799000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1604206800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1615701599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1615701600000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1636261199000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1636261200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1647151199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1647151200000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1667710799000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1667710800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1678600799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1678600800000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1699160399000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1699160400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1710050399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1710050400000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1730609999000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1730610000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1741499999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1741500000000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1762059599000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1762059600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1772949599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1772949600000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1793509199000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1793509200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1805003999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1805004000000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1825563599000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1825563600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1836453599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1836453600000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1857013199000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1857013200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1867903199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1867903200000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1888462799000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1888462800000L),
+    Some(-240),
+  )
+}
+
+///|
+test "@date 段界两侧各差一段（腿 T 行，段数最多的前 10 区）（第 4/12 块，本块 200 条）" {
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1899352799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1899352800000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1919912399000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1919912400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1930802399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1930802400000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1951361999000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1951362000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1962856799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1962856800000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1983416399000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1983416400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1994306399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1994306400000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 2014865999000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 2014866000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 2025755999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 2025756000000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 2046315599000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 2046315600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 2057205599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 2057205600000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 2077765199000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 2077765200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 2088655199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 2088655200000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 2109214799000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 2109214800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 2120104799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 2120104800000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 2140664399000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 2140664400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 2152159199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 2152159200000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 2172718799000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 2172718800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 2183608799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 2183608800000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 2204168399000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 2204168400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 2215058399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 2215058400000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 2235617999000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 2235618000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 2246507999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 2246508000000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 2267067599000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 2267067600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 2277957599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 2277957600000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 2298517199000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 2298517200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 2309407199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 2309407200000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 2329966799000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 2329966800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 2341461599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 2341461600000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 2362021199000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 2362021200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 2372911199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 2372911200000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 2393470799000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 2393470800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 2404360799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 2404360800000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 2424920399000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 2424920400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 2435810399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 2435810400000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 2456369999000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 2456370000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 2467259999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 2467260000000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 2487819599000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 2487819600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 2499314399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 2499314400000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 2519873999000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 2519874000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 9957599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 9957600000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 25678799000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 25678800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 41407199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 41407200000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 57733199000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 57733200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 73461599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 73461600000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 89182799000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 89182800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 104911199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 104911200000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 120632399000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 120632400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 136360799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 136360800000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 152081999000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 152082000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 167810399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 167810400000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 183531599000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 183531600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 199259999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 199260000000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 215585999000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 215586000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 230709599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 230709600000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 247035599000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 247035600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 262763999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 262764000000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 278485199000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 278485200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 294213599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 294213600000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 309934799000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 309934800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 325663199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 325663200000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 341384399000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 341384400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 357112799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 357112800000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 372833999000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 372834000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 388562399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 388562400000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 404888399000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 404888400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 420011999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 420012000000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 436337999000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 436338000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 452066399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 452066400000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 467787599000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 467787600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 483515999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 483516000000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 499237199000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 499237200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 514965599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 514965600000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 530686799000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 530686800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 544600799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 544600800000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 562136399000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 562136400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 576050399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 576050400000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 594190799000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 594190800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 607499999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 607500000000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 625640399000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 625640400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 638949599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 638949600000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 657089999000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 657090000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 671003999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 671004000000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 688539599000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 688539600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 702453599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 702453600000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 719989199000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 719989200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 733903199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 733903200000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 752043599000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 752043600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 765352799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 765352800000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 783493199000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 783493200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 796802399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 796802400000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 814942799000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 814942800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 828856799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 828856800000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 846392399000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 846392400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 860306399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 860306400000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 877841999000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 877842000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 891755999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 891756000000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 909291599000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 909291600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 923205599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 923205600000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 941345999000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 941346000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 954655199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 954655200000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 972795599000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 972795600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 986104799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 986104800000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1004245199000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1004245200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1018159199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1018159200000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1035694799000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1035694800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1049608799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1049608800000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1067144399000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1067144400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1081058399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1081058400000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1099198799000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1099198800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1112507999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1112508000000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1130648399000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1130648400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1143957599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1143957600000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1162097999000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1162098000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1173592799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1173592800000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1194152399000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1194152400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1205042399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1205042400000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1225601999000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1225602000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1236491999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1236492000000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1257051599000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1257051600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1268546399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1268546400000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1289105999000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1289106000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1299995999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1299996000000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1320555599000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1320555600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1331445599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1331445600000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1352005199000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1352005200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1362895199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1362895200000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1383454799000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1383454800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1394344799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1394344800000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1414904399000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1414904400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1425794399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1425794400000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1446353999000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1446354000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1457848799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1457848800000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1478408399000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1478408400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1489298399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1489298400000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1509857999000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1509858000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1520747999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1520748000000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1541307599000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1541307600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1552197599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1552197600000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1572757199000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1572757200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1583647199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1583647200000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1604206799000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1604206800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1615701599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1615701600000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1636261199000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1636261200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1647151199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1647151200000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1667710799000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1667710800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1678600799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1678600800000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1699160399000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1699160400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1710050399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1710050400000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1730609999000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1730610000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1741499999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1741500000000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1762059599000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1762059600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1772949599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1772949600000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1793509199000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1793509200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1805003999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1805004000000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1825563599000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1825563600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1836453599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1836453600000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1857013199000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1857013200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1867903199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1867903200000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1888462799000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1888462800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1899352799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1899352800000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1919912399000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1919912400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1930802399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1930802400000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1951361999000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1951362000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1962856799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1962856800000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1983416399000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1983416400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1994306399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1994306400000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 2014865999000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 2014866000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 2025755999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 2025756000000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 2046315599000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 2046315600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 2057205599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 2057205600000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 2077765199000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 2077765200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 2088655199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 2088655200000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 2109214799000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 2109214800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 2120104799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 2120104800000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 2140664399000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 2140664400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 2152159199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 2152159200000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 2172718799000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 2172718800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 2183608799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 2183608800000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 2204168399000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 2204168400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 2215058399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 2215058400000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 2235617999000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 2235618000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 2246507999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 2246508000000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 2267067599000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 2267067600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 2277957599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 2277957600000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 2298517199000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 2298517200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 2309407199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 2309407200000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 2329966799000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 2329966800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 2341461599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 2341461600000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 2362021199000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 2362021200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 2372911199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 2372911200000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 2393470799000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 2393470800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 2404360799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 2404360800000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 2424920399000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 2424920400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 2435810399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 2435810400000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 2456369999000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 2456370000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 2467259999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 2467260000000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 2487819599000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 2487819600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 2499314399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 2499314400000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 2519873999000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 2519874000000L),
+    Some(-240),
+  )
+}
+
+///|
+test "@date 段界两侧各差一段（腿 T 行，段数最多的前 10 区）（第 5/12 块，本块 200 条）" {
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 9971999000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 9972000000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 25693199000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 25693200000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 41421599000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 41421600000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 57747599000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 57747600000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 73475999000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 73476000000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 89197199000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 89197200000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 104925599000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 104925600000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 120646799000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 120646800000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 126698399000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 126698400000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 152096399000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 152096400000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 162381599000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 162381600000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 183545999000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 183546000000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 199274399000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 199274400000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 215600399000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 215600400000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 230723999000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 230724000000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 247049999000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 247050000000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 262778399000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 262778400000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 278499599000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 278499600000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 294227999000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 294228000000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 309949199000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 309949200000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 325677599000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 325677600000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 341398799000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 341398800000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 357127199000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 357127200000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 372848399000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 372848400000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 388576799000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 388576800000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 404902799000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 404902800000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 420026399000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 420026400000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 436352399000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 436352400000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 452080799000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 452080800000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 467801999000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 467802000000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 483530399000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 483530400000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 499251599000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 499251600000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 514979999000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 514980000000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 530701199000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 530701200000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 544615199000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 544615200000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 562150799000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 562150800000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 576064799000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 576064800000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 594205199000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 594205200000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 607514399000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 607514400000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 625654799000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 625654800000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 638963999000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 638964000000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 657104399000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 657104400000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 671018399000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 671018400000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 688553999000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 688554000000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 702467999000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 702468000000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 720003599000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 720003600000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 733917599000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 733917600000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 752057999000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 752058000000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 765367199000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 765367200000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 783507599000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 783507600000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 796816799000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 796816800000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 814957199000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 814957200000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 828871199000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 828871200000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 846406799000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 846406800000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 860320799000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 860320800000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 877856399000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 877856400000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 891770399000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 891770400000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 909305999000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 909306000000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 923219999000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 923220000000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 941360399000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 941360400000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 954669599000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 954669600000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 972809999000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 972810000000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 986119199000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 986119200000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1004259599000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1004259600000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1018173599000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1018173600000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1035709199000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1035709200000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1049623199000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1049623200000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1067158799000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1067158800000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1081072799000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1081072800000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1099213199000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1099213200000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1112522399000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1112522400000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1130662799000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1130662800000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1143971999000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1143972000000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1162112399000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1162112400000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1173607199000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1173607200000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1194166799000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1194166800000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1205056799000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1205056800000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1225616399000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1225616400000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1236506399000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1236506400000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1257065999000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1257066000000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1268560799000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1268560800000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1289120399000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1289120400000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1300010399000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1300010400000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1320569999000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1320570000000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1331459999000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1331460000000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1352019599000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1352019600000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1362909599000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1362909600000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1383469199000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1383469200000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1394359199000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1394359200000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1414918799000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1414918800000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1425808799000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1425808800000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1446368399000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1446368400000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1457863199000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1457863200000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1478422799000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1478422800000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1489312799000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1489312800000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1509872399000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1509872400000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1520762399000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1520762400000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1541321999000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1541322000000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1552211999000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1552212000000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1572771599000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1572771600000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1583661599000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1583661600000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1604221199000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1604221200000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1615715999000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1615716000000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1636275599000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1636275600000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1647165599000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1647165600000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1667725199000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1667725200000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1678615199000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1678615200000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1699174799000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1699174800000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1710064799000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1710064800000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1730624399000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1730624400000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1741514399000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1741514400000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1762073999000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1762074000000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1772963999000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1772964000000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1793523599000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1793523600000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1805018399000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1805018400000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1825577999000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1825578000000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1836467999000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1836468000000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1857027599000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1857027600000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1867917599000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1867917600000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1888477199000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1888477200000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1899367199000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1899367200000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1919926799000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1919926800000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1930816799000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1930816800000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1951376399000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1951376400000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1962871199000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1962871200000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1983430799000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1983430800000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1994320799000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1994320800000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 2014880399000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 2014880400000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 2025770399000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 2025770400000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 2046329999000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 2046330000000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 2057219999000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 2057220000000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 2077779599000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 2077779600000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 2088669599000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 2088669600000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 2109229199000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 2109229200000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 2120119199000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 2120119200000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 2140678799000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 2140678800000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 2152173599000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 2152173600000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 2172733199000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 2172733200000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 2183623199000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 2183623200000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 2204182799000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 2204182800000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 2215072799000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 2215072800000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 2235632399000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 2235632400000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 2246522399000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 2246522400000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 2267081999000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 2267082000000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 2277971999000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 2277972000000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 2298531599000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 2298531600000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 2309421599000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 2309421600000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 2329981199000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 2329981200000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 2341475999000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 2341476000000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 2362035599000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 2362035600000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 2372925599000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 2372925600000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 2393485199000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 2393485200000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 2404375199000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 2404375200000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 2424934799000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 2424934800000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 2435824799000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 2435824800000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 2456384399000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 2456384400000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 2467274399000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 2467274400000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 2487833999000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 2487834000000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 2499328799000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 2499328800000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 2519888399000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 2519888400000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 9961199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 9961200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 25682399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 25682400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 41410799000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 41410800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 57736799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 57736800000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 73465199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 73465200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 89186399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 89186400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 104914799000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 104914800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 120635999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 120636000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 136364399000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 136364400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 152085599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 152085600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 167813999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 167814000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 183535199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 183535200000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 199263599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 199263600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 215589599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 215589600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 230713199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 230713200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 247039199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 247039200000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 262767599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 262767600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 278488799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 278488800000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 294217199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 294217200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 309938399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 309938400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 325666799000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 325666800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 341387999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 341388000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 357116399000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 357116400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 372837599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 372837600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 388565999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 388566000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 404891999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 404892000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 420015599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 420015600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 436341599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 436341600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 452069999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 452070000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 467791199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 467791200000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 483519599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 483519600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 499240799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 499240800000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 514969199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 514969200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 530690399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 530690400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 544604399000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 544604400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 562139999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 562140000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 576053999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 576054000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 594194399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 594194400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 607503599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 607503600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 625643999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 625644000000L),
+    Some(-300),
+  )
+}
+
+///|
+test "@date 段界两侧各差一段（腿 T 行，段数最多的前 10 区）（第 6/12 块，本块 200 条）" {
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 638953199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 638953200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 657093599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 657093600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 671007599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 671007600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 688543199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 688543200000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 702457199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 702457200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 719992799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 719992800000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 733906799000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 733906800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 752047199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 752047200000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 765356399000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 765356400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 783496799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 783496800000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 796805999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 796806000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 814946399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 814946400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 828860399000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 828860400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 846395999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 846396000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 860309999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 860310000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 877845599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 877845600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 891759599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 891759600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 909295199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 909295200000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 923209199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 923209200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 941349599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 941349600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 954658799000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 954658800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 972799199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 972799200000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 986108399000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 986108400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1004248799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1004248800000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1018162799000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1018162800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1035698399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1035698400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1049612399000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1049612400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1067147999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1067148000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1081061999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1081062000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1099202399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1099202400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1112511599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1112511600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1130651999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1130652000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1143961199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1143961200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1162101599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1162101600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1173596399000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1173596400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1194155999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1194156000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1205045999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1205046000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1225605599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1225605600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1236495599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1236495600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1257055199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1257055200000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1268549999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1268550000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1289109599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1289109600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1299999599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1299999600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1320559199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1320559200000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1331449199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1331449200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1352008799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1352008800000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1362898799000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1362898800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1383458399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1383458400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1394348399000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1394348400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1414907999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1414908000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1425797999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1425798000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1446357599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1446357600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1457852399000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1457852400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1478411999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1478412000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1489301999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1489302000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1509861599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1509861600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1520751599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1520751600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1541311199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1541311200000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1552201199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1552201200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1572760799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1572760800000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1583650799000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1583650800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1604210399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1604210400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1615705199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1615705200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1636264799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1636264800000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1647154799000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1647154800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1667714399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1667714400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1678604399000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1678604400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1699163999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1699164000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1710053999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1710054000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1730613599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1730613600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1741503599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1741503600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1762063199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1762063200000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1772953199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1772953200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1793512799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1793512800000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1805007599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1805007600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1825567199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1825567200000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1836457199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1836457200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1857016799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1857016800000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1867906799000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1867906800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1888466399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1888466400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1899356399000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1899356400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1919915999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1919916000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1930805999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1930806000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1951365599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1951365600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1962860399000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1962860400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1983419999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1983420000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1994309999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 1994310000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 2014869599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 2014869600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 2025759599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 2025759600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 2046319199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 2046319200000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 2057209199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 2057209200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 2077768799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 2077768800000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 2088658799000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 2088658800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 2109218399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 2109218400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 2120108399000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 2120108400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 2140667999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 2140668000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 2152162799000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 2152162800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 2172722399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 2172722400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 2183612399000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 2183612400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 2204171999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 2204172000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 2215061999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 2215062000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 2235621599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 2235621600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 2246511599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 2246511600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 2267071199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 2267071200000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 2277961199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 2277961200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 2298520799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 2298520800000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 2309410799000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 2309410800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 2329970399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 2329970400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 2341465199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 2341465200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 2362024799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 2362024800000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 2372914799000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 2372914800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 2393474399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 2393474400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 2404364399000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 2404364400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 2424923999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 2424924000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 2435813999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 2435814000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 2456373599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 2456373600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 2467263599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 2467263600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 2487823199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 2487823200000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 2499317999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 2499318000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 2519877599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 2519877600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 9961199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 9961200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 25682399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 25682400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 41410799000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 41410800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 57736799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 57736800000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 73465199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 73465200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 89186399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 89186400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 104914799000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 104914800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 120635999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 120636000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 136364399000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 136364400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 152085599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 152085600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 167813999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 167814000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 183535199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 183535200000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 199263599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 199263600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 215589599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 215589600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 230713199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 230713200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 247039199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 247039200000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 262767599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 262767600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 278488799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 278488800000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 294217199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 294217200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 309938399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 309938400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 325666799000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 325666800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 341387999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 341388000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 357116399000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 357116400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 372837599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 372837600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 388565999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 388566000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 404891999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 404892000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 420015599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 420015600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 436341599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 436341600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 452069999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 452070000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 467791199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 467791200000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 483519599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 483519600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 499240799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 499240800000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 514969199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 514969200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 530690399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 530690400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 544604399000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 544604400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 562139999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 562140000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 576053999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 576054000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 594194399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 594194400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 607503599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 607503600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 625643999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 625644000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 638953199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 638953200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 657093599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 657093600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 671007599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 671007600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 688543199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 688543200000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 702457199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 702457200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 719992799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 719992800000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 733906799000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 733906800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 752047199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 752047200000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 765356399000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 765356400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 783496799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 783496800000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 796805999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 796806000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 814946399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 814946400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 828860399000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 828860400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 846395999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 846396000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 860309999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 860310000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 877845599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 877845600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 891759599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 891759600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 909295199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 909295200000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 923209199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 923209200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 941349599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 941349600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 954658799000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 954658800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 972799199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 972799200000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 986108399000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 986108400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1004248799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1004248800000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1018162799000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1018162800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1035698399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1035698400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1049612399000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1049612400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1067147999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1067148000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1081061999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1081062000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1099202399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1099202400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1112511599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1112511600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1130651999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1130652000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1143961199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1143961200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1162101599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1162101600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1173596399000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1173596400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1194155999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1194156000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1205045999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1205046000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1225605599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1225605600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1236495599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1236495600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1257055199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1257055200000L),
+    Some(-300),
+  )
+}
+
+///|
+test "@date 段界两侧各差一段（腿 T 行，段数最多的前 10 区）（第 7/12 块，本块 200 条）" {
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1268549999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1268550000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1289109599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1289109600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1299999599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1299999600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1320559199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1320559200000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1331449199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1331449200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1352008799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1352008800000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1362898799000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1362898800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1383458399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1383458400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1394348399000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1394348400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1414907999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1414908000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1425797999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1425798000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1446357599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1446357600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1457852399000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1457852400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1478411999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1478412000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1489301999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1489302000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1509861599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1509861600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1520751599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1520751600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1541311199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1541311200000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1552201199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1552201200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1572760799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1572760800000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1583650799000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1583650800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1604210399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1604210400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1615705199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1615705200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1636264799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1636264800000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1647154799000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1647154800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1667714399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1667714400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1678604399000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1678604400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1699163999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1699164000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1710053999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1710054000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1730613599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1730613600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1741503599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1741503600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1762063199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1762063200000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1772953199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1772953200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1793512799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1793512800000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1805007599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1805007600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1825567199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1825567200000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1836457199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1836457200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1857016799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1857016800000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1867906799000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1867906800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1888466399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1888466400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1899356399000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1899356400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1919915999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1919916000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1930805999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1930806000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1951365599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1951365600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1962860399000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1962860400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1983419999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1983420000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1994309999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 1994310000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 2014869599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 2014869600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 2025759599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 2025759600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 2046319199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 2046319200000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 2057209199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 2057209200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 2077768799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 2077768800000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 2088658799000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 2088658800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 2109218399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 2109218400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 2120108399000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 2120108400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 2140667999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 2140668000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 2152162799000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 2152162800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 2172722399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 2172722400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 2183612399000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 2183612400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 2204171999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 2204172000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 2215061999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 2215062000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 2235621599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 2235621600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 2246511599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 2246511600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 2267071199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 2267071200000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 2277961199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 2277961200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 2298520799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 2298520800000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 2309410799000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 2309410800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 2329970399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 2329970400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 2341465199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 2341465200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 2362024799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 2362024800000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 2372914799000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 2372914800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 2393474399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 2393474400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 2404364399000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 2404364400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 2424923999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 2424924000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 2435813999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 2435814000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 2456373599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 2456373600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 2467263599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 2467263600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 2487823199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 2487823200000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 2499317999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 2499318000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 2519877599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nassau", 2519877600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 9961199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 9961200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 25682399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 25682400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 41410799000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 41410800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 57736799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 57736800000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 73465199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 73465200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 89186399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 89186400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 104914799000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 104914800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 120635999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 120636000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 126687599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 126687600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 152085599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 152085600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 162370799000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 162370800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 183535199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 183535200000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 199263599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 199263600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 215589599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 215589600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 230713199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 230713200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 247039199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 247039200000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 262767599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 262767600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 278488799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 278488800000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 294217199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 294217200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 309938399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 309938400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 325666799000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 325666800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 341387999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 341388000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 357116399000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 357116400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 372837599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 372837600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 388565999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 388566000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 404891999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 404892000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 420015599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 420015600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 436341599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 436341600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 452069999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 452070000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 467791199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 467791200000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 483519599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 483519600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 499240799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 499240800000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 514969199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 514969200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 530690399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 530690400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 544604399000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 544604400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 562139999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 562140000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 576053999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 576054000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 594194399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 594194400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 607503599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 607503600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 625643999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 625644000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 638953199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 638953200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 657093599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 657093600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 671007599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 671007600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 688543199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 688543200000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 702457199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 702457200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 719992799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 719992800000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 733906799000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 733906800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 752047199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 752047200000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 765356399000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 765356400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 783496799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 783496800000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 796805999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 796806000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 814946399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 814946400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 828860399000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 828860400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 846395999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 846396000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 860309999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 860310000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 877845599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 877845600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 891759599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 891759600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 909295199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 909295200000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 923209199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 923209200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 941349599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 941349600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 954658799000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 954658800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 972799199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 972799200000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 986108399000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 986108400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1004248799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1004248800000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1018162799000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1018162800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1035698399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1035698400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1049612399000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1049612400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1067147999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1067148000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1081061999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1081062000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1099202399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1099202400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1112511599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1112511600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1130651999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1130652000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1143961199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1143961200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1162101599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1162101600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1173596399000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1173596400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1194155999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1194156000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1205045999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1205046000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1225605599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1225605600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1236495599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1236495600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1257055199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1257055200000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1268549999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1268550000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1289109599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1289109600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1299999599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1299999600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1320559199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1320559200000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1331449199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1331449200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1352008799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1352008800000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1362898799000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1362898800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1383458399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1383458400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1394348399000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1394348400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1414907999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1414908000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1425797999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1425798000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1446357599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1446357600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1457852399000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1457852400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1478411999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1478412000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1489301999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1489302000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1509861599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1509861600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1520751599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1520751600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1541311199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1541311200000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1552201199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1552201200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1572760799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1572760800000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1583650799000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1583650800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1604210399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1604210400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1615705199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1615705200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1636264799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1636264800000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1647154799000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1647154800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1667714399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1667714400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1678604399000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1678604400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1699163999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1699164000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1710053999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1710054000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1730613599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1730613600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1741503599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1741503600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1762063199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1762063200000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1772953199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1772953200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1793512799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1793512800000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1805007599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1805007600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1825567199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1825567200000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1836457199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1836457200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1857016799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1857016800000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1867906799000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1867906800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1888466399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1888466400000L),
+    Some(-300),
+  )
+}
+
+///|
+test "@date 段界两侧各差一段（腿 T 行，段数最多的前 10 区）（第 8/12 块，本块 200 条）" {
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1899356399000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1899356400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1919915999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1919916000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1930805999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1930806000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1951365599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1951365600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1962860399000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1962860400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1983419999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1983420000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1994309999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 1994310000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 2014869599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 2014869600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 2025759599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 2025759600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 2046319199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 2046319200000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 2057209199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 2057209200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 2077768799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 2077768800000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 2088658799000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 2088658800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 2109218399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 2109218400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 2120108399000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 2120108400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 2140667999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 2140668000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 2152162799000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 2152162800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 2172722399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 2172722400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 2183612399000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 2183612400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 2204171999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 2204172000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 2215061999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 2215062000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 2235621599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 2235621600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 2246511599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 2246511600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 2267071199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 2267071200000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 2277961199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 2277961200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 2298520799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 2298520800000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 2309410799000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 2309410800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 2329970399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 2329970400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 2341465199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 2341465200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 2362024799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 2362024800000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 2372914799000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 2372914800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 2393474399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 2393474400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 2404364399000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 2404364400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 2424923999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 2424924000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 2435813999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 2435814000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 2456373599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 2456373600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 2467263599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 2467263600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 2487823199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 2487823200000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 2499317999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 2499318000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 2519877599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/New_York", 2519877600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 9961199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 9961200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 25682399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 25682400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 41410799000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 41410800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 57736799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 57736800000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 73465199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 73465200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 89186399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 89186400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 104914799000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 104914800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 120635999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 120636000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 136364399000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 136364400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 152085599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 152085600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 167813999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 167814000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 183535199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 183535200000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 199263599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 199263600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 215589599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 215589600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 230713199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 230713200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 247039199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 247039200000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 262767599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 262767600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 278488799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 278488800000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 294217199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 294217200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 309938399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 309938400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 325666799000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 325666800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 341387999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 341388000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 357116399000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 357116400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 372837599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 372837600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 388565999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 388566000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 404891999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 404892000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 420015599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 420015600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 436341599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 436341600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 452069999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 452070000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 467791199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 467791200000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 483519599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 483519600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 499240799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 499240800000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 514969199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 514969200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 530690399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 530690400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 544604399000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 544604400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 562139999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 562140000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 576053999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 576054000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 594194399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 594194400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 607503599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 607503600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 625643999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 625644000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 638953199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 638953200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 657093599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 657093600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 671007599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 671007600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 688543199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 688543200000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 702457199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 702457200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 719992799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 719992800000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 733906799000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 733906800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 752047199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 752047200000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 765356399000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 765356400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 783496799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 783496800000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 796805999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 796806000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 814946399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 814946400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 828860399000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 828860400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 846395999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 846396000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 860309999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 860310000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 877845599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 877845600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 891759599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 891759600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 909295199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 909295200000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 923209199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 923209200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 941349599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 941349600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 954658799000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 954658800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 972799199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 972799200000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 986108399000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 986108400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1004248799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1004248800000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1018162799000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1018162800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1035698399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1035698400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1049612399000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1049612400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1067147999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1067148000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1081061999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1081062000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1099202399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1099202400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1112511599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1112511600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1130651999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1130652000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1143961199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1143961200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1162101599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1162101600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1173596399000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1173596400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1194155999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1194156000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1205045999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1205046000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1225605599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1225605600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1236495599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1236495600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1257055199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1257055200000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1268549999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1268550000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1289109599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1289109600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1299999599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1299999600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1320559199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1320559200000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1331449199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1331449200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1352008799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1352008800000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1362898799000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1362898800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1383458399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1383458400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1394348399000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1394348400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1414907999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1414908000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1425797999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1425798000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1446357599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1446357600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1457852399000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1457852400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1478411999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1478412000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1489301999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1489302000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1509861599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1509861600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1520751599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1520751600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1541311199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1541311200000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1552201199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1552201200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1572760799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1572760800000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1583650799000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1583650800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1604210399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1604210400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1615705199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1615705200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1636264799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1636264800000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1647154799000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1647154800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1667714399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1667714400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1678604399000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1678604400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1699163999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1699164000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1710053999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1710054000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1730613599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1730613600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1741503599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1741503600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1762063199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1762063200000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1772953199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1772953200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1793512799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1793512800000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1805007599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1805007600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1825567199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1825567200000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1836457199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1836457200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1857016799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1857016800000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1867906799000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1867906800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1888466399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1888466400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1899356399000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1899356400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1919915999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1919916000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1930805999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1930806000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1951365599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1951365600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1962860399000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1962860400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1983419999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1983420000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1994309999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 1994310000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 2014869599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 2014869600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 2025759599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 2025759600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 2046319199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 2046319200000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 2057209199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 2057209200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 2077768799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 2077768800000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 2088658799000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 2088658800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 2109218399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 2109218400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 2120108399000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 2120108400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 2140667999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 2140668000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 2152162799000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 2152162800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 2172722399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 2172722400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 2183612399000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 2183612400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 2204171999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 2204172000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 2215061999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 2215062000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 2235621599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 2235621600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 2246511599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 2246511600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 2267071199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 2267071200000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 2277961199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 2277961200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 2298520799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 2298520800000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 2309410799000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 2309410800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 2329970399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 2329970400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 2341465199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 2341465200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 2362024799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 2362024800000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 2372914799000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 2372914800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 2393474399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 2393474400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 2404364399000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 2404364400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 2424923999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 2424924000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 2435813999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 2435814000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 2456373599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 2456373600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 2467263599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 2467263600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 2487823199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 2487823200000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 2499317999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 2499318000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 2519877599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Nipigon", 2519877600000L),
+    Some(-300),
+  )
+}
+
+///|
+test "@date 段界两侧各差一段（腿 T 行，段数最多的前 10 区）（第 9/12 块，本块 200 条）" {
+  assert_eq(@date.zone_offset_minutes("America/Boise", 9968399000L), Some(-420))
+  assert_eq(@date.zone_offset_minutes("America/Boise", 9968400000L), Some(-360))
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 25689599000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 25689600000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 41417999000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 41418000000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 57743999000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 57744000000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 73472399000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 73472400000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 89193599000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 89193600000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 104921999000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 104922000000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 120643199000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 120643200000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 129113999000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 129114000000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 152092799000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 152092800000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 162377999000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 162378000000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 183542399000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 183542400000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 199270799000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 199270800000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 215596799000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 215596800000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 230720399000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 230720400000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 247046399000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 247046400000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 262774799000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 262774800000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 278495999000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 278496000000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 294224399000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 294224400000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 309945599000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 309945600000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 325673999000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 325674000000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 341395199000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 341395200000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 357123599000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 357123600000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 372844799000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 372844800000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 388573199000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 388573200000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 404899199000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 404899200000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 420022799000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 420022800000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 436348799000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 436348800000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 452077199000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 452077200000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 467798399000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 467798400000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 483526799000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 483526800000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 499247999000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 499248000000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 514976399000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 514976400000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 530697599000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 530697600000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 544611599000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 544611600000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 562147199000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 562147200000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 576061199000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 576061200000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 594201599000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 594201600000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 607510799000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 607510800000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 625651199000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 625651200000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 638960399000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 638960400000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 657100799000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 657100800000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 671014799000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 671014800000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 688550399000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 688550400000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 702464399000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 702464400000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 719999999000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 720000000000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 733913999000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 733914000000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 752054399000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 752054400000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 765363599000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 765363600000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 783503999000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 783504000000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 796813199000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 796813200000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 814953599000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 814953600000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 828867599000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 828867600000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 846403199000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 846403200000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 860317199000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 860317200000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 877852799000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 877852800000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 891766799000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 891766800000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 909302399000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 909302400000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 923216399000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 923216400000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 941356799000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 941356800000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 954665999000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 954666000000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 972806399000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 972806400000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 986115599000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 986115600000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1004255999000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1004256000000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1018169999000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1018170000000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1035705599000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1035705600000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1049619599000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1049619600000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1067155199000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1067155200000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1081069199000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1081069200000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1099209599000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1099209600000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1112518799000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1112518800000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1130659199000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1130659200000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1143968399000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1143968400000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1162108799000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1162108800000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1173603599000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1173603600000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1194163199000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1194163200000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1205053199000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1205053200000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1225612799000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Boise", 1225612800000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 9964799000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 9964800000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 25685999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 25686000000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 41414399000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 41414400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 57740399000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 57740400000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 73468799000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 73468800000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 89189999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 89190000000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 104918399000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 104918400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 120639599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 120639600000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 126691199000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 126691200000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 152089199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 152089200000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 162374399000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 162374400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 183538799000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 183538800000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 199267199000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 199267200000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 215593199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 215593200000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 230716799000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 230716800000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 247042799000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 247042800000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 262771199000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 262771200000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 278492399000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 278492400000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 294220799000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 294220800000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 309941999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 309942000000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 325670399000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 325670400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 341391599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 341391600000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 357119999000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 357120000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 372841199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 372841200000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 388569599000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 388569600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 404895599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 404895600000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 420019199000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 420019200000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 436345199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 436345200000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 452073599000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 452073600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 467794799000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 467794800000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 483523199000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 483523200000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 499244399000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 499244400000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 514972799000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 514972800000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 530693999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 530694000000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 544607999000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 544608000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 562143599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 562143600000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 576057599000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 576057600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 594197999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 594198000000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 607507199000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 607507200000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 625647599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 625647600000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 638956799000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 638956800000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 657097199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 657097200000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 671011199000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 671011200000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 688546799000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 688546800000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 702460799000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 702460800000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 719996399000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 719996400000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 733910399000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 733910400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 752050799000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 752050800000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 765359999000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 765360000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 783500399000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 783500400000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 796809599000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 796809600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 814949999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 814950000000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 828863999000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 828864000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 846399599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 846399600000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 860313599000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 860313600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 877849199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 877849200000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 891763199000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 891763200000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 909298799000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 909298800000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 923212799000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 923212800000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 941353199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 941353200000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 954662399000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 954662400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 972802799000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 972802800000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 986111999000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 986112000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1004252399000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1004252400000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1018166399000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1018166400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1035701999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1035702000000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1049615999000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1049616000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1067151599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1067151600000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1081065599000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1081065600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1099205999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1099206000000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1112515199000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1112515200000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1130655599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1130655600000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1143964799000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1143964800000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1162105199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1162105200000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1173599999000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1173600000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1194159599000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1194159600000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1205049599000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1205049600000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1225609199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Chicago", 1225609200000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 9968399000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 9968400000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 25689599000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 25689600000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 41417999000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 41418000000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 57743999000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 57744000000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 73472399000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 73472400000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 89193599000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 89193600000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 104921999000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 104922000000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 120643199000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 120643200000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 126694799000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 126694800000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 152092799000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 152092800000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 162377999000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 162378000000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 183542399000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 183542400000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 199270799000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 199270800000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 215596799000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 215596800000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 230720399000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 230720400000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 247046399000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 247046400000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 262774799000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 262774800000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 278495999000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 278496000000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 294224399000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 294224400000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 309945599000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 309945600000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 325673999000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 325674000000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 341395199000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 341395200000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 357123599000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 357123600000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 372844799000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 372844800000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 388573199000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 388573200000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 404899199000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 404899200000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 420022799000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 420022800000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 436348799000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 436348800000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 452077199000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 452077200000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 467798399000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 467798400000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 483526799000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 483526800000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 499247999000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 499248000000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 514976399000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 514976400000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 530697599000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 530697600000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 544611599000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 544611600000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 562147199000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 562147200000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 576061199000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 576061200000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 594201599000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 594201600000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 607510799000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 607510800000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 625651199000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 625651200000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 638960399000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 638960400000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 657100799000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 657100800000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 671014799000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 671014800000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 688550399000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 688550400000L),
+    Some(-420),
+  )
+}
+
+///|
+test "@date 段界两侧各差一段（腿 T 行，段数最多的前 10 区）（第 10/12 块，本块 200 条）" {
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 702464399000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 702464400000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 719999999000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 720000000000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 733913999000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 733914000000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 752054399000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 752054400000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 765363599000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 765363600000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 783503999000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 783504000000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 796813199000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 796813200000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 814953599000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 814953600000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 828867599000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 828867600000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 846403199000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 846403200000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 860317199000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 860317200000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 877852799000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 877852800000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 891766799000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 891766800000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 909302399000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 909302400000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 923216399000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 923216400000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 941356799000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 941356800000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 954665999000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 954666000000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 972806399000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 972806400000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 986115599000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 986115600000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1004255999000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1004256000000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1018169999000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1018170000000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1035705599000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1035705600000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1049619599000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1049619600000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1067155199000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1067155200000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1081069199000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1081069200000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1099209599000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1099209600000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1112518799000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1112518800000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1130659199000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1130659200000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1143968399000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1143968400000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1162108799000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1162108800000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1173603599000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1173603600000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1194163199000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1194163200000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1205053199000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1205053200000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1225612799000L),
+    Some(-360),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Denver", 1225612800000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 9957599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 9957600000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 25678799000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 25678800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 41407199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 41407200000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 57733199000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 57733200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 73461599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 73461600000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 89182799000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 89182800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 104911199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 104911200000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 120632399000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 120632400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 136360799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 136360800000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 152081999000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 152082000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 167810399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 167810400000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 183531599000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 183531600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 199259999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 199260000000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 215585999000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 215586000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 230709599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 230709600000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 247035599000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 247035600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 262763999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 262764000000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 278485199000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 278485200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 294213599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 294213600000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 309934799000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 309934800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 325663199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 325663200000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 341384399000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 341384400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 357112799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 357112800000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 372833999000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 372834000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 388562399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 388562400000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 404888399000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 404888400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 420011999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 420012000000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 436337999000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 436338000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 452066399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 452066400000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 467787599000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 467787600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 483515999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 483516000000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 499237199000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 499237200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 514965599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 514965600000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 530686799000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 530686800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 544593659000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 544593660000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 562129259000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 562129260000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 576043259000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 576043260000L),
+    Some(-120),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 594180059000L),
+    Some(-120),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 594180060000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 607492859000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 607492860000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 625633259000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 625633260000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 638942459000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 638942460000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 657082859000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 657082860000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 670996859000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 670996860000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 688532459000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 688532460000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 702446459000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 702446460000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 719982059000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 719982060000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 733896059000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 733896060000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 752036459000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 752036460000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 765345659000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 765345660000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 783486059000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 783486060000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 796795259000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 796795260000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 814935659000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 814935660000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 828849659000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 828849660000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 846385259000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 846385260000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 860299259000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 860299260000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 877834859000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 877834860000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 891748859000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 891748860000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 909284459000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 909284460000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 923198459000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 923198460000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 941338859000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 941338860000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 954648059000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 954648060000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 972788459000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 972788460000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 986097659000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 986097660000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1004238059000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1004238060000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1018152059000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1018152060000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1035687659000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1035687660000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1049601659000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1049601660000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1067137259000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1067137260000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1081051259000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1081051260000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1099191659000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1099191660000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1112500859000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1112500860000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1130641259000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1130641260000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1143950459000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1143950460000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1162090859000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1162090860000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1173585659000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1173585660000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1194145259000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1194145260000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1205035259000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1205035260000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1225594859000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1225594860000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1236484859000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1236484860000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1257044459000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1257044460000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1268539259000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1268539260000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1289098859000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1289098860000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1299988859000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1299988860000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1320555599000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1320555600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1331445599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1331445600000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1352005199000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Goose_Bay", 1352005200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 9957599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 9957600000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 25678799000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 25678800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 41407199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 41407200000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 57733199000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 57733200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 73461599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 73461600000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 89182799000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 89182800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 104911199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 104911200000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 120632399000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 120632400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 136360799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 136360800000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 152081999000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 152082000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 167810399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 167810400000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 183531599000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 183531600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 199259999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 199260000000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 215585999000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 215586000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 230709599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 230709600000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 247035599000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 247035600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 262763999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 262764000000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 278485199000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 278485200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 294213599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 294213600000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 309934799000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 309934800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 325663199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 325663200000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 341384399000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 341384400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 357112799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 357112800000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 372833999000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 372834000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 388562399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 388562400000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 404888399000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 404888400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 420011999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 420012000000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 436337999000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 436338000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 452066399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 452066400000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 467787599000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 467787600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 483515999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 483516000000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 499237199000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 499237200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 514965599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 514965600000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 530686799000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 530686800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 544600799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 544600800000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 562136399000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 562136400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 576050399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 576050400000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 594190799000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 594190800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 607499999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 607500000000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 625640399000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 625640400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 638949599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 638949600000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 657089999000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 657090000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 671003999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 671004000000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 688539599000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 688539600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 702453599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 702453600000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 719989199000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 719989200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 733903199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 733903200000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 752043599000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 752043600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 765352799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 765352800000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 783493199000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 783493200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 796802399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 796802400000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 814942799000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 814942800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 828856799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 828856800000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 846392399000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 846392400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 860306399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 860306400000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 877841999000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 877842000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 891755999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 891756000000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 909291599000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 909291600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 923205599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 923205600000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 941345999000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 941346000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 954655199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 954655200000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 972795599000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 972795600000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 986104799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 986104800000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1004245199000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1004245200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1018159199000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1018159200000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1035694799000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1035694800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1049608799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1049608800000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1067144399000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1067144400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1081058399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1081058400000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1099198799000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1099198800000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1112507999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1112508000000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1130648399000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1130648400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1143957599000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1143957600000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1162097999000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1162098000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1173592799000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1173592800000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1194152399000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1194152400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1205042399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1205042400000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1225601999000L),
+    Some(-180),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Halifax", 1225602000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 9971999000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 9972000000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 25693199000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 25693200000L),
+    Some(-480),
+  )
+}
+
+///|
+test "@date 段界两侧各差一段（腿 T 行，段数最多的前 10 区）（第 11/12 块，本块 200 条）" {
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 41421599000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 41421600000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 57747599000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 57747600000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 73475999000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 73476000000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 89197199000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 89197200000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 104925599000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 104925600000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 120646799000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 120646800000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 126698399000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 126698400000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 152096399000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 152096400000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 162381599000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 162381600000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 183545999000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 183546000000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 199274399000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 199274400000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 215600399000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 215600400000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 230723999000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 230724000000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 247049999000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 247050000000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 262778399000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 262778400000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 278499599000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 278499600000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 294227999000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 294228000000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 309949199000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 309949200000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 325677599000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 325677600000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 341398799000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 341398800000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 357127199000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 357127200000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 372848399000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 372848400000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 388576799000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 388576800000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 404902799000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 404902800000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 420026399000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 420026400000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 436352399000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 436352400000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 452080799000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 452080800000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 467801999000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 467802000000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 483530399000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 483530400000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 499251599000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 499251600000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 514979999000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 514980000000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 530701199000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 530701200000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 544615199000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 544615200000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 562150799000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 562150800000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 576064799000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 576064800000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 594205199000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 594205200000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 607514399000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 607514400000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 625654799000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 625654800000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 638963999000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 638964000000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 657104399000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 657104400000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 671018399000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 671018400000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 688553999000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 688554000000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 702467999000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 702468000000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 720003599000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 720003600000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 733917599000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 733917600000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 752057999000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 752058000000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 765367199000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 765367200000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 783507599000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 783507600000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 796816799000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 796816800000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 814957199000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 814957200000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 828871199000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 828871200000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 846406799000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 846406800000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 860320799000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 860320800000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 877856399000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 877856400000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 891770399000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 891770400000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 909305999000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 909306000000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 923219999000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 923220000000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 941360399000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 941360400000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 954669599000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 954669600000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 972809999000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 972810000000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 986119199000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 986119200000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1004259599000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1004259600000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1018173599000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1018173600000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1035709199000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1035709200000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1049623199000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1049623200000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1067158799000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1067158800000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1081072799000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1081072800000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1099213199000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1099213200000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1112522399000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1112522400000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1130662799000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1130662800000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1143971999000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1143972000000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1162112399000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1162112400000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1173607199000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1173607200000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1194166799000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1194166800000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1205056799000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1205056800000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1225616399000L),
+    Some(-420),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Los_Angeles", 1225616400000L),
+    Some(-480),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 9961199000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 9961200000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 25682399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 25682400000L),
     Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 416372399000L),
+    @date.zone_offset_minutes("America/Montreal", 41410799000L),
     Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 416372400000L),
-    Some(-360),
+    @date.zone_offset_minutes("America/Montreal", 41410800000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 434519999000L),
-    Some(-360),
+    @date.zone_offset_minutes("America/Montreal", 57736799000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 434520000000L),
+    @date.zone_offset_minutes("America/Montreal", 57736800000L),
     Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 447821999000L),
+    @date.zone_offset_minutes("America/Montreal", 73465199000L),
     Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 447822000000L),
-    Some(-360),
+    @date.zone_offset_minutes("America/Montreal", 73465200000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 466574399000L),
-    Some(-360),
+    @date.zone_offset_minutes("America/Montreal", 89186399000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 466574400000L),
+    @date.zone_offset_minutes("America/Montreal", 89186400000L),
     Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 479271599000L),
+    @date.zone_offset_minutes("America/Montreal", 104914799000L),
     Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 479271600000L),
-    Some(-360),
+    @date.zone_offset_minutes("America/Montreal", 104914800000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 498023999000L),
-    Some(-360),
+    @date.zone_offset_minutes("America/Montreal", 120635999000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 498024000000L),
+    @date.zone_offset_minutes("America/Montreal", 120636000000L),
     Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 510721199000L),
+    @date.zone_offset_minutes("America/Montreal", 136364399000L),
     Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 510721200000L),
-    Some(-360),
+    @date.zone_offset_minutes("America/Montreal", 136364400000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 529473599000L),
-    Some(-360),
+    @date.zone_offset_minutes("America/Montreal", 152085599000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 529473600000L),
+    @date.zone_offset_minutes("America/Montreal", 152085600000L),
     Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 545194799000L),
+    @date.zone_offset_minutes("America/Montreal", 167813999000L),
     Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 545194800000L),
-    Some(-360),
+    @date.zone_offset_minutes("America/Montreal", 167814000000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 560923199000L),
-    Some(-360),
+    @date.zone_offset_minutes("America/Montreal", 183535199000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 560923200000L),
+    @date.zone_offset_minutes("America/Montreal", 183535200000L),
     Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 574225199000L),
+    @date.zone_offset_minutes("America/Montreal", 199263599000L),
     Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 574225200000L),
-    Some(-360),
+    @date.zone_offset_minutes("America/Montreal", 199263600000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 592372799000L),
-    Some(-360),
+    @date.zone_offset_minutes("America/Montreal", 215589599000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 592372800000L),
+    @date.zone_offset_minutes("America/Montreal", 215589600000L),
     Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 605674799000L),
+    @date.zone_offset_minutes("America/Montreal", 230713199000L),
     Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 605674800000L),
-    Some(-360),
+    @date.zone_offset_minutes("America/Montreal", 230713200000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 624427199000L),
-    Some(-360),
+    @date.zone_offset_minutes("America/Montreal", 247039199000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 624427200000L),
+    @date.zone_offset_minutes("America/Montreal", 247039200000L),
     Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 637124399000L),
+    @date.zone_offset_minutes("America/Montreal", 262767599000L),
     Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 637124400000L),
-    Some(-360),
+    @date.zone_offset_minutes("America/Montreal", 262767600000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 653457599000L),
-    Some(-360),
+    @date.zone_offset_minutes("America/Montreal", 278488799000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 653457600000L),
+    @date.zone_offset_minutes("America/Montreal", 278488800000L),
     Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 668573999000L),
+    @date.zone_offset_minutes("America/Montreal", 294217199000L),
     Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 668574000000L),
-    Some(-360),
+    @date.zone_offset_minutes("America/Montreal", 294217200000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 687326399000L),
-    Some(-360),
+    @date.zone_offset_minutes("America/Montreal", 309938399000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 687326400000L),
+    @date.zone_offset_minutes("America/Montreal", 309938400000L),
     Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 700628399000L),
+    @date.zone_offset_minutes("America/Montreal", 325666799000L),
     Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 700628400000L),
-    Some(-360),
+    @date.zone_offset_minutes("America/Montreal", 325666800000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 718775999000L),
-    Some(-360),
+    @date.zone_offset_minutes("America/Montreal", 341387999000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 718776000000L),
+    @date.zone_offset_minutes("America/Montreal", 341388000000L),
     Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 732077999000L),
+    @date.zone_offset_minutes("America/Montreal", 357116399000L),
     Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 732078000000L),
-    Some(-360),
+    @date.zone_offset_minutes("America/Montreal", 357116400000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 750225599000L),
-    Some(-360),
+    @date.zone_offset_minutes("America/Montreal", 372837599000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 750225600000L),
+    @date.zone_offset_minutes("America/Montreal", 372837600000L),
     Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 763527599000L),
+    @date.zone_offset_minutes("America/Montreal", 388565999000L),
     Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 763527600000L),
-    Some(-360),
+    @date.zone_offset_minutes("America/Montreal", 388566000000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 781675199000L),
-    Some(-360),
+    @date.zone_offset_minutes("America/Montreal", 404891999000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 781675200000L),
+    @date.zone_offset_minutes("America/Montreal", 404892000000L),
     Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 794977199000L),
+    @date.zone_offset_minutes("America/Montreal", 420015599000L),
     Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 794977200000L),
-    Some(-360),
+    @date.zone_offset_minutes("America/Montreal", 420015600000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 813729599000L),
-    Some(-360),
+    @date.zone_offset_minutes("America/Montreal", 436341599000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 813729600000L),
+    @date.zone_offset_minutes("America/Montreal", 436341600000L),
     Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 826426799000L),
+    @date.zone_offset_minutes("America/Montreal", 452069999000L),
     Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 826426800000L),
-    Some(-360),
+    @date.zone_offset_minutes("America/Montreal", 452070000000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 845179199000L),
-    Some(-360),
+    @date.zone_offset_minutes("America/Montreal", 467791199000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 845179200000L),
+    @date.zone_offset_minutes("America/Montreal", 467791200000L),
     Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 859690799000L),
+    @date.zone_offset_minutes("America/Montreal", 483519599000L),
     Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 859690800000L),
-    Some(-360),
+    @date.zone_offset_minutes("America/Montreal", 483519600000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 876628799000L),
-    Some(-360),
+    @date.zone_offset_minutes("America/Montreal", 499240799000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 876628800000L),
+    @date.zone_offset_minutes("America/Montreal", 499240800000L),
     Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 889930799000L),
+    @date.zone_offset_minutes("America/Montreal", 514969199000L),
     Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 889930800000L),
-    Some(-360),
+    @date.zone_offset_minutes("America/Montreal", 514969200000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 906868799000L),
-    Some(-360),
+    @date.zone_offset_minutes("America/Montreal", 530690399000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 906868800000L),
+    @date.zone_offset_minutes("America/Montreal", 530690400000L),
     Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 923194799000L),
+    @date.zone_offset_minutes("America/Montreal", 544604399000L),
     Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 923194800000L),
-    Some(-360),
+    @date.zone_offset_minutes("America/Montreal", 544604400000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 939527999000L),
-    Some(-360),
+    @date.zone_offset_minutes("America/Montreal", 562139999000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 939528000000L),
+    @date.zone_offset_minutes("America/Montreal", 562140000000L),
     Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 952829999000L),
+    @date.zone_offset_minutes("America/Montreal", 576053999000L),
     Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 952830000000L),
-    Some(-360),
+    @date.zone_offset_minutes("America/Montreal", 576054000000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 971582399000L),
-    Some(-360),
+    @date.zone_offset_minutes("America/Montreal", 594194399000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 971582400000L),
+    @date.zone_offset_minutes("America/Montreal", 594194400000L),
     Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 984279599000L),
+    @date.zone_offset_minutes("America/Montreal", 607503599000L),
     Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 984279600000L),
-    Some(-360),
+    @date.zone_offset_minutes("America/Montreal", 607503600000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1003031999000L),
-    Some(-360),
+    @date.zone_offset_minutes("America/Montreal", 625643999000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1003032000000L),
+    @date.zone_offset_minutes("America/Montreal", 625644000000L),
     Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1015729199000L),
+    @date.zone_offset_minutes("America/Montreal", 638953199000L),
     Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1015729200000L),
-    Some(-360),
+    @date.zone_offset_minutes("America/Montreal", 638953200000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1034481599000L),
-    Some(-360),
+    @date.zone_offset_minutes("America/Montreal", 657093599000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1034481600000L),
+    @date.zone_offset_minutes("America/Montreal", 657093600000L),
     Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1047178799000L),
+    @date.zone_offset_minutes("America/Montreal", 671007599000L),
     Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1047178800000L),
-    Some(-360),
+    @date.zone_offset_minutes("America/Montreal", 671007600000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1065931199000L),
-    Some(-360),
+    @date.zone_offset_minutes("America/Montreal", 688543199000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1065931200000L),
+    @date.zone_offset_minutes("America/Montreal", 688543200000L),
     Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1079233199000L),
+    @date.zone_offset_minutes("America/Montreal", 702457199000L),
     Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1079233200000L),
-    Some(-360),
+    @date.zone_offset_minutes("America/Montreal", 702457200000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1097380799000L),
-    Some(-360),
+    @date.zone_offset_minutes("America/Montreal", 719992799000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1097380800000L),
+    @date.zone_offset_minutes("America/Montreal", 719992800000L),
     Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1110682799000L),
+    @date.zone_offset_minutes("America/Montreal", 733906799000L),
     Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1110682800000L),
-    Some(-360),
+    @date.zone_offset_minutes("America/Montreal", 733906800000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1128830399000L),
-    Some(-360),
+    @date.zone_offset_minutes("America/Montreal", 752047199000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1128830400000L),
+    @date.zone_offset_minutes("America/Montreal", 752047200000L),
     Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1142132399000L),
+    @date.zone_offset_minutes("America/Montreal", 765356399000L),
     Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1142132400000L),
-    Some(-360),
+    @date.zone_offset_minutes("America/Montreal", 765356400000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1160884799000L),
-    Some(-360),
+    @date.zone_offset_minutes("America/Montreal", 783496799000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1160884800000L),
+    @date.zone_offset_minutes("America/Montreal", 783496800000L),
     Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1173581999000L),
+    @date.zone_offset_minutes("America/Montreal", 796805999000L),
     Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1173582000000L),
-    Some(-360),
+    @date.zone_offset_minutes("America/Montreal", 796806000000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 814946399000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 814946400000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 828860399000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 828860400000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 846395999000L),
+    Some(-240),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 846396000000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 860309999000L),
+    Some(-300),
+  )
+  assert_eq(
+    @date.zone_offset_minutes("America/Montreal", 860310000000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1192334399000L),
-    Some(-360),
+    @date.zone_offset_minutes("America/Montreal", 877845599000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1192334400000L),
+    @date.zone_offset_minutes("America/Montreal", 877845600000L),
     Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1206845999000L),
+    @date.zone_offset_minutes("America/Montreal", 891759599000L),
     Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1206846000000L),
-    Some(-360),
+    @date.zone_offset_minutes("America/Montreal", 891759600000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1223783999000L),
-    Some(-360),
+    @date.zone_offset_minutes("America/Montreal", 909295199000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1223784000000L),
+    @date.zone_offset_minutes("America/Montreal", 909295200000L),
     Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1237085999000L),
+    @date.zone_offset_minutes("America/Montreal", 923209199000L),
     Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1237086000000L),
-    Some(-360),
+    @date.zone_offset_minutes("America/Montreal", 923209200000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1255233599000L),
-    Some(-360),
+    @date.zone_offset_minutes("America/Montreal", 941349599000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1255233600000L),
+    @date.zone_offset_minutes("America/Montreal", 941349600000L),
     Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1270349999000L),
+    @date.zone_offset_minutes("America/Montreal", 954658799000L),
     Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1270350000000L),
-    Some(-360),
+    @date.zone_offset_minutes("America/Montreal", 954658800000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1286683199000L),
-    Some(-360),
+    @date.zone_offset_minutes("America/Montreal", 972799199000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1286683200000L),
+    @date.zone_offset_minutes("America/Montreal", 972799200000L),
     Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1304823599000L),
+    @date.zone_offset_minutes("America/Montreal", 986108399000L),
     Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1304823600000L),
-    Some(-360),
+    @date.zone_offset_minutes("America/Montreal", 986108400000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1313899199000L),
-    Some(-360),
+    @date.zone_offset_minutes("America/Montreal", 1004248799000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1313899200000L),
+    @date.zone_offset_minutes("America/Montreal", 1004248800000L),
     Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1335668399000L),
+    @date.zone_offset_minutes("America/Montreal", 1018162799000L),
     Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1335668400000L),
-    Some(-360),
+    @date.zone_offset_minutes("America/Montreal", 1018162800000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1346558399000L),
-    Some(-360),
+    @date.zone_offset_minutes("America/Montreal", 1035698399000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1346558400000L),
+    @date.zone_offset_minutes("America/Montreal", 1035698400000L),
     Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1367117999000L),
+    @date.zone_offset_minutes("America/Montreal", 1049612399000L),
     Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1367118000000L),
-    Some(-360),
+    @date.zone_offset_minutes("America/Montreal", 1049612400000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1378612799000L),
-    Some(-360),
+    @date.zone_offset_minutes("America/Montreal", 1067147999000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1378612800000L),
+    @date.zone_offset_minutes("America/Montreal", 1067148000000L),
     Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1398567599000L),
+    @date.zone_offset_minutes("America/Montreal", 1081061999000L),
     Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1398567600000L),
-    Some(-360),
+    @date.zone_offset_minutes("America/Montreal", 1081062000000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1410062399000L),
-    Some(-360),
+    @date.zone_offset_minutes("America/Montreal", 1099202399000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1410062400000L),
+    @date.zone_offset_minutes("America/Montreal", 1099202400000L),
     Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1463281199000L),
+    @date.zone_offset_minutes("America/Montreal", 1112511599000L),
     Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1463281200000L),
-    Some(-360),
+    @date.zone_offset_minutes("America/Montreal", 1112511600000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1471147199000L),
-    Some(-360),
+    @date.zone_offset_minutes("America/Montreal", 1130651999000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1471147200000L),
+    @date.zone_offset_minutes("America/Montreal", 1130652000000L),
     Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1494730799000L),
+    @date.zone_offset_minutes("America/Montreal", 1143961199000L),
     Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1494730800000L),
-    Some(-360),
+    @date.zone_offset_minutes("America/Montreal", 1143961200000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1502596799000L),
-    Some(-360),
+    @date.zone_offset_minutes("America/Montreal", 1162101599000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1502596800000L),
+    @date.zone_offset_minutes("America/Montreal", 1162101600000L),
     Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1526180399000L),
+    @date.zone_offset_minutes("America/Montreal", 1173596399000L),
     Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1526180400000L),
-    Some(-360),
+    @date.zone_offset_minutes("America/Montreal", 1173596400000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1534046399000L),
-    Some(-360),
+    @date.zone_offset_minutes("America/Montreal", 1194155999000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1534046400000L),
+    @date.zone_offset_minutes("America/Montreal", 1194156000000L),
     Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1554605999000L),
+    @date.zone_offset_minutes("America/Montreal", 1205045999000L),
     Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1554606000000L),
-    Some(-360),
+    @date.zone_offset_minutes("America/Montreal", 1205046000000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1567915199000L),
-    Some(-360),
+    @date.zone_offset_minutes("America/Montreal", 1225605599000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1567915200000L),
+    @date.zone_offset_minutes("America/Montreal", 1225605600000L),
     Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1586055599000L),
+    @date.zone_offset_minutes("America/Nassau", 9961199000L),
     Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1586055600000L),
-    Some(-360),
+    @date.zone_offset_minutes("America/Nassau", 9961200000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1599364799000L),
-    Some(-360),
+    @date.zone_offset_minutes("America/Nassau", 25682399000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1599364800000L),
+    @date.zone_offset_minutes("America/Nassau", 25682400000L),
     Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1617505199000L),
+    @date.zone_offset_minutes("America/Nassau", 41410799000L),
     Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1617505200000L),
-    Some(-360),
+    @date.zone_offset_minutes("America/Nassau", 41410800000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1630814399000L),
-    Some(-360),
+    @date.zone_offset_minutes("America/Nassau", 57736799000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1630814400000L),
+    @date.zone_offset_minutes("America/Nassau", 57736800000L),
     Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1648954799000L),
+    @date.zone_offset_minutes("America/Nassau", 73465199000L),
     Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1648954800000L),
-    Some(-360),
+    @date.zone_offset_minutes("America/Nassau", 73465200000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1662868799000L),
-    Some(-360),
+    @date.zone_offset_minutes("America/Nassau", 89186399000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1662868800000L),
+    @date.zone_offset_minutes("America/Nassau", 89186400000L),
     Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1680404399000L),
+    @date.zone_offset_minutes("America/Nassau", 104914799000L),
     Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1680404400000L),
-    Some(-360),
+    @date.zone_offset_minutes("America/Nassau", 104914800000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1693713599000L),
-    Some(-360),
+    @date.zone_offset_minutes("America/Nassau", 120635999000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1693713600000L),
+    @date.zone_offset_minutes("America/Nassau", 120636000000L),
     Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1712458799000L),
+    @date.zone_offset_minutes("America/Nassau", 136364399000L),
     Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1712458800000L),
-    Some(-360),
+    @date.zone_offset_minutes("America/Nassau", 136364400000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1725767999000L),
-    Some(-360),
+    @date.zone_offset_minutes("America/Nassau", 152085599000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Pacific/Easter", 1725768000000L),
+    @date.zone_offset_minutes("America/Nassau", 152085600000L),
     Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 198291599000L),
-    Some(-60),
+    @date.zone_offset_minutes("America/Nassau", 167813999000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 198291600000L),
-    Some(0),
+    @date.zone_offset_minutes("America/Nassau", 167814000000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 199756799000L),
-    Some(0),
+    @date.zone_offset_minutes("America/Nassau", 183535199000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 199756800000L),
-    Some(60),
+    @date.zone_offset_minutes("America/Nassau", 183535200000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 207701999000L),
-    Some(60),
+    @date.zone_offset_minutes("America/Nassau", 199263599000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 207702000000L),
-    Some(0),
+    @date.zone_offset_minutes("America/Nassau", 199263600000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 231292799000L),
-    Some(0),
+    @date.zone_offset_minutes("America/Nassau", 215589599000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 231292800000L),
-    Some(60),
+    @date.zone_offset_minutes("America/Nassau", 215589600000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 244249199000L),
-    Some(60),
+    @date.zone_offset_minutes("America/Nassau", 230713199000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 244249200000L),
-    Some(0),
+    @date.zone_offset_minutes("America/Nassau", 230713200000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 265507199000L),
-    Some(0),
+    @date.zone_offset_minutes("America/Nassau", 247039199000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 265507200000L),
-    Some(60),
+    @date.zone_offset_minutes("America/Nassau", 247039200000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 271033199000L),
-    Some(60),
+    @date.zone_offset_minutes("America/Nassau", 262767599000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 271033200000L),
-    Some(0),
+    @date.zone_offset_minutes("America/Nassau", 262767600000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1212278399000L),
-    Some(0),
+    @date.zone_offset_minutes("America/Nassau", 278488799000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1212278400000L),
-    Some(60),
+    @date.zone_offset_minutes("America/Nassau", 278488800000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1220223599000L),
-    Some(60),
+    @date.zone_offset_minutes("America/Nassau", 294217199000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1220223600000L),
-    Some(0),
+    @date.zone_offset_minutes("America/Nassau", 294217200000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1243814399000L),
-    Some(0),
+    @date.zone_offset_minutes("America/Nassau", 309938399000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1243814400000L),
-    Some(60),
+    @date.zone_offset_minutes("America/Nassau", 309938400000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1250809199000L),
-    Some(60),
+    @date.zone_offset_minutes("America/Nassau", 325666799000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1250809200000L),
-    Some(0),
+    @date.zone_offset_minutes("America/Nassau", 325666800000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1272758399000L),
-    Some(0),
+    @date.zone_offset_minutes("America/Nassau", 341387999000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1272758400000L),
-    Some(60),
+    @date.zone_offset_minutes("America/Nassau", 341388000000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1281221999000L),
-    Some(60),
+    @date.zone_offset_minutes("America/Nassau", 357116399000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1281222000000L),
-    Some(0),
+    @date.zone_offset_minutes("America/Nassau", 357116400000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1301788799000L),
-    Some(0),
+    @date.zone_offset_minutes("America/Nassau", 372837599000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1301788800000L),
-    Some(60),
+    @date.zone_offset_minutes("America/Nassau", 372837600000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1312066799000L),
-    Some(60),
+    @date.zone_offset_minutes("America/Nassau", 388565999000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1312066800000L),
-    Some(0),
+    @date.zone_offset_minutes("America/Nassau", 388566000000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1335664799000L),
-    Some(0),
+    @date.zone_offset_minutes("America/Nassau", 404891999000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1335664800000L),
-    Some(60),
+    @date.zone_offset_minutes("America/Nassau", 404892000000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1342749599000L),
-    Some(60),
+    @date.zone_offset_minutes("America/Nassau", 420015599000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1342749600000L),
-    Some(0),
+    @date.zone_offset_minutes("America/Nassau", 420015600000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1345427999000L),
-    Some(0),
+    @date.zone_offset_minutes("America/Nassau", 436341599000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1345428000000L),
-    Some(60),
+    @date.zone_offset_minutes("America/Nassau", 436341600000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1348970399000L),
-    Some(60),
+    @date.zone_offset_minutes("America/Nassau", 452069999000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1348970400000L),
-    Some(0),
+    @date.zone_offset_minutes("America/Nassau", 452070000000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1367114399000L),
-    Some(0),
+    @date.zone_offset_minutes("America/Nassau", 467791199000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1367114400000L),
-    Some(60),
+    @date.zone_offset_minutes("America/Nassau", 467791200000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1373162399000L),
-    Some(60),
+    @date.zone_offset_minutes("America/Nassau", 483519599000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1373162400000L),
-    Some(0),
+    @date.zone_offset_minutes("America/Nassau", 483519600000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1376099999000L),
-    Some(0),
+    @date.zone_offset_minutes("America/Nassau", 499240799000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1376100000000L),
-    Some(60),
+    @date.zone_offset_minutes("America/Nassau", 499240800000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1382839199000L),
-    Some(60),
+    @date.zone_offset_minutes("America/Nassau", 514969199000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1382839200000L),
-    Some(0),
+    @date.zone_offset_minutes("America/Nassau", 514969200000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1396144799000L),
-    Some(0),
+    @date.zone_offset_minutes("America/Nassau", 530690399000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1396144800000L),
-    Some(60),
+    @date.zone_offset_minutes("America/Nassau", 530690400000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1403920799000L),
-    Some(60),
+    @date.zone_offset_minutes("America/Nassau", 544604399000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1403920800000L),
-    Some(0),
+    @date.zone_offset_minutes("America/Nassau", 544604400000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1406944799000L),
-    Some(0),
+    @date.zone_offset_minutes("America/Nassau", 562139999000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1406944800000L),
-    Some(60),
+    @date.zone_offset_minutes("America/Nassau", 562140000000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1414288799000L),
-    Some(60),
+    @date.zone_offset_minutes("America/Nassau", 576053999000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1414288800000L),
-    Some(0),
+    @date.zone_offset_minutes("America/Nassau", 576054000000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1427594399000L),
-    Some(0),
+    @date.zone_offset_minutes("America/Nassau", 594194399000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1427594400000L),
-    Some(60),
+    @date.zone_offset_minutes("America/Nassau", 594194400000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1434247199000L),
-    Some(60),
+    @date.zone_offset_minutes("America/Nassau", 607503599000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1434247200000L),
-    Some(0),
+    @date.zone_offset_minutes("America/Nassau", 607503600000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1437271199000L),
-    Some(0),
+    @date.zone_offset_minutes("America/Nassau", 625643999000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1437271200000L),
-    Some(60),
+    @date.zone_offset_minutes("America/Nassau", 625644000000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1445738399000L),
-    Some(60),
+    @date.zone_offset_minutes("America/Nassau", 638953199000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1445738400000L),
-    Some(0),
+    @date.zone_offset_minutes("America/Nassau", 638953200000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1459043999000L),
-    Some(0),
+    @date.zone_offset_minutes("America/Nassau", 657093599000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1459044000000L),
-    Some(60),
+    @date.zone_offset_minutes("America/Nassau", 657093600000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1465091999000L),
-    Some(60),
+    @date.zone_offset_minutes("America/Nassau", 671007599000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1465092000000L),
-    Some(0),
+    @date.zone_offset_minutes("America/Nassau", 671007600000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1468115999000L),
-    Some(0),
+    @date.zone_offset_minutes("America/Nassau", 688543199000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1468116000000L),
-    Some(60),
+    @date.zone_offset_minutes("America/Nassau", 688543200000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1477792799000L),
-    Some(60),
+    @date.zone_offset_minutes("America/Nassau", 702457199000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1477792800000L),
-    Some(0),
+    @date.zone_offset_minutes("America/Nassau", 702457200000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1490493599000L),
-    Some(0),
+    @date.zone_offset_minutes("America/Nassau", 719992799000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1490493600000L),
-    Some(60),
+    @date.zone_offset_minutes("America/Nassau", 719992800000L),
+    Some(-300),
   )
+}
+
+///|
+test "@date 段界两侧各差一段（腿 T 行，段数最多的前 10 区）（第 12/12 块，本块 188 条）" {
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1495331999000L),
-    Some(60),
+    @date.zone_offset_minutes("America/Nassau", 733906799000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1495332000000L),
-    Some(0),
+    @date.zone_offset_minutes("America/Nassau", 733906800000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1498960799000L),
-    Some(0),
+    @date.zone_offset_minutes("America/Nassau", 752047199000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1498960800000L),
-    Some(60),
+    @date.zone_offset_minutes("America/Nassau", 752047200000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1509242399000L),
-    Some(60),
+    @date.zone_offset_minutes("America/Nassau", 765356399000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1509242400000L),
-    Some(0),
+    @date.zone_offset_minutes("America/Nassau", 765356400000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1521943199000L),
-    Some(0),
+    @date.zone_offset_minutes("America/Nassau", 783496799000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1521943200000L),
-    Some(60),
+    @date.zone_offset_minutes("America/Nassau", 783496800000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1526176799000L),
-    Some(60),
+    @date.zone_offset_minutes("America/Nassau", 796805999000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1526176800000L),
-    Some(0),
+    @date.zone_offset_minutes("America/Nassau", 796806000000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1529200799000L),
-    Some(0),
+    @date.zone_offset_minutes("America/Nassau", 814946399000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1529200800000L),
-    Some(60),
+    @date.zone_offset_minutes("America/Nassau", 814946400000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1557021599000L),
-    Some(60),
+    @date.zone_offset_minutes("America/Nassau", 828860399000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1557021600000L),
-    Some(0),
+    @date.zone_offset_minutes("America/Nassau", 828860400000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1560045599000L),
-    Some(0),
+    @date.zone_offset_minutes("America/Nassau", 846395999000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1560045600000L),
-    Some(60),
+    @date.zone_offset_minutes("America/Nassau", 846396000000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1587261599000L),
-    Some(60),
+    @date.zone_offset_minutes("America/Nassau", 860309999000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1587261600000L),
-    Some(0),
+    @date.zone_offset_minutes("America/Nassau", 860310000000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1590890399000L),
-    Some(0),
+    @date.zone_offset_minutes("America/Nassau", 877845599000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1590890400000L),
-    Some(60),
+    @date.zone_offset_minutes("America/Nassau", 877845600000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1618106399000L),
-    Some(60),
+    @date.zone_offset_minutes("America/Nassau", 891759599000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1618106400000L),
-    Some(0),
+    @date.zone_offset_minutes("America/Nassau", 891759600000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1621130399000L),
-    Some(0),
+    @date.zone_offset_minutes("America/Nassau", 909295199000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1621130400000L),
-    Some(60),
+    @date.zone_offset_minutes("America/Nassau", 909295200000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1648346399000L),
-    Some(60),
+    @date.zone_offset_minutes("America/Nassau", 923209199000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1648346400000L),
-    Some(0),
+    @date.zone_offset_minutes("America/Nassau", 923209200000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1651975199000L),
-    Some(0),
+    @date.zone_offset_minutes("America/Nassau", 941349599000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1651975200000L),
-    Some(60),
+    @date.zone_offset_minutes("America/Nassau", 941349600000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1679191199000L),
-    Some(60),
+    @date.zone_offset_minutes("America/Nassau", 954658799000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1679191200000L),
-    Some(0),
+    @date.zone_offset_minutes("America/Nassau", 954658800000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1682215199000L),
-    Some(0),
+    @date.zone_offset_minutes("America/Nassau", 972799199000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1682215200000L),
-    Some(60),
+    @date.zone_offset_minutes("America/Nassau", 972799200000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1710035999000L),
-    Some(60),
+    @date.zone_offset_minutes("America/Nassau", 986108399000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1710036000000L),
-    Some(0),
+    @date.zone_offset_minutes("America/Nassau", 986108400000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1713059999000L),
-    Some(0),
+    @date.zone_offset_minutes("America/Nassau", 1004248799000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1713060000000L),
-    Some(60),
+    @date.zone_offset_minutes("America/Nassau", 1004248800000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1740275999000L),
-    Some(60),
+    @date.zone_offset_minutes("America/Nassau", 1018162799000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1740276000000L),
-    Some(0),
+    @date.zone_offset_minutes("America/Nassau", 1018162800000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1743904799000L),
-    Some(0),
+    @date.zone_offset_minutes("America/Nassau", 1035698399000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1743904800000L),
-    Some(60),
+    @date.zone_offset_minutes("America/Nassau", 1035698400000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1771120799000L),
-    Some(60),
+    @date.zone_offset_minutes("America/Nassau", 1049612399000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1771120800000L),
-    Some(0),
+    @date.zone_offset_minutes("America/Nassau", 1049612400000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1774144799000L),
-    Some(0),
+    @date.zone_offset_minutes("America/Nassau", 1067147999000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1774144800000L),
-    Some(60),
+    @date.zone_offset_minutes("America/Nassau", 1067148000000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1801965599000L),
-    Some(60),
+    @date.zone_offset_minutes("America/Nassau", 1081061999000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1801965600000L),
-    Some(0),
+    @date.zone_offset_minutes("America/Nassau", 1081062000000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1804989599000L),
-    Some(0),
+    @date.zone_offset_minutes("America/Nassau", 1099202399000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1804989600000L),
-    Some(60),
+    @date.zone_offset_minutes("America/Nassau", 1099202400000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1832205599000L),
-    Some(60),
+    @date.zone_offset_minutes("America/Nassau", 1112511599000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1832205600000L),
-    Some(0),
+    @date.zone_offset_minutes("America/Nassau", 1112511600000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1835834399000L),
-    Some(0),
+    @date.zone_offset_minutes("America/Nassau", 1130651999000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1835834400000L),
-    Some(60),
+    @date.zone_offset_minutes("America/Nassau", 1130652000000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1863050399000L),
-    Some(60),
+    @date.zone_offset_minutes("America/Nassau", 1143961199000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1863050400000L),
-    Some(0),
+    @date.zone_offset_minutes("America/Nassau", 1143961200000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1866074399000L),
-    Some(0),
+    @date.zone_offset_minutes("America/Nassau", 1162101599000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1866074400000L),
-    Some(60),
+    @date.zone_offset_minutes("America/Nassau", 1162101600000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1893290399000L),
-    Some(60),
+    @date.zone_offset_minutes("America/Nassau", 1173596399000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1893290400000L),
-    Some(0),
+    @date.zone_offset_minutes("America/Nassau", 1173596400000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1896919199000L),
-    Some(0),
+    @date.zone_offset_minutes("America/Nassau", 1194155999000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1896919200000L),
-    Some(60),
+    @date.zone_offset_minutes("America/Nassau", 1194156000000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1924135199000L),
-    Some(60),
+    @date.zone_offset_minutes("America/Nassau", 1205045999000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1924135200000L),
-    Some(0),
+    @date.zone_offset_minutes("America/Nassau", 1205046000000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1927159199000L),
-    Some(0),
+    @date.zone_offset_minutes("America/Nassau", 1225605599000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1927159200000L),
-    Some(60),
+    @date.zone_offset_minutes("America/Nassau", 1225605600000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1954979999000L),
-    Some(60),
+    @date.zone_offset_minutes("America/New_York", 9961199000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1954980000000L),
-    Some(0),
+    @date.zone_offset_minutes("America/New_York", 9961200000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1958003999000L),
-    Some(0),
+    @date.zone_offset_minutes("America/New_York", 25682399000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1958004000000L),
-    Some(60),
+    @date.zone_offset_minutes("America/New_York", 25682400000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1985219999000L),
-    Some(60),
+    @date.zone_offset_minutes("America/New_York", 41410799000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1985220000000L),
-    Some(0),
+    @date.zone_offset_minutes("America/New_York", 41410800000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1988848799000L),
-    Some(0),
+    @date.zone_offset_minutes("America/New_York", 57736799000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 1988848800000L),
-    Some(60),
+    @date.zone_offset_minutes("America/New_York", 57736800000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 2016064799000L),
-    Some(60),
+    @date.zone_offset_minutes("America/New_York", 73465199000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 2016064800000L),
-    Some(0),
+    @date.zone_offset_minutes("America/New_York", 73465200000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 2019088799000L),
-    Some(0),
+    @date.zone_offset_minutes("America/New_York", 89186399000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 2019088800000L),
-    Some(60),
+    @date.zone_offset_minutes("America/New_York", 89186400000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 2046304799000L),
-    Some(60),
+    @date.zone_offset_minutes("America/New_York", 104914799000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 2046304800000L),
-    Some(0),
+    @date.zone_offset_minutes("America/New_York", 104914800000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 2049933599000L),
-    Some(0),
+    @date.zone_offset_minutes("America/New_York", 120635999000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 2049933600000L),
-    Some(60),
+    @date.zone_offset_minutes("America/New_York", 120636000000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 2077149599000L),
-    Some(60),
+    @date.zone_offset_minutes("America/New_York", 126687599000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 2077149600000L),
-    Some(0),
+    @date.zone_offset_minutes("America/New_York", 126687600000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 2080778399000L),
-    Some(0),
+    @date.zone_offset_minutes("America/New_York", 152085599000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 2080778400000L),
-    Some(60),
+    @date.zone_offset_minutes("America/New_York", 152085600000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 2107994399000L),
-    Some(60),
+    @date.zone_offset_minutes("America/New_York", 162370799000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 2107994400000L),
-    Some(0),
+    @date.zone_offset_minutes("America/New_York", 162370800000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 2111018399000L),
-    Some(0),
+    @date.zone_offset_minutes("America/New_York", 183535199000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 2111018400000L),
-    Some(60),
+    @date.zone_offset_minutes("America/New_York", 183535200000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 2138234399000L),
-    Some(60),
+    @date.zone_offset_minutes("America/New_York", 199263599000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 2138234400000L),
-    Some(0),
+    @date.zone_offset_minutes("America/New_York", 199263600000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 2141863199000L),
-    Some(0),
+    @date.zone_offset_minutes("America/New_York", 215589599000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 2141863200000L),
-    Some(60),
+    @date.zone_offset_minutes("America/New_York", 215589600000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 2169079199000L),
-    Some(60),
+    @date.zone_offset_minutes("America/New_York", 230713199000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 2169079200000L),
-    Some(0),
+    @date.zone_offset_minutes("America/New_York", 230713200000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 2172103199000L),
-    Some(0),
+    @date.zone_offset_minutes("America/New_York", 247039199000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 2172103200000L),
-    Some(60),
+    @date.zone_offset_minutes("America/New_York", 247039200000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 2199923999000L),
-    Some(60),
+    @date.zone_offset_minutes("America/New_York", 262767599000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 2199924000000L),
-    Some(0),
+    @date.zone_offset_minutes("America/New_York", 262767600000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 2202947999000L),
-    Some(0),
+    @date.zone_offset_minutes("America/New_York", 278488799000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 2202948000000L),
-    Some(60),
+    @date.zone_offset_minutes("America/New_York", 278488800000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 2230163999000L),
-    Some(60),
+    @date.zone_offset_minutes("America/New_York", 294217199000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 2230164000000L),
-    Some(0),
+    @date.zone_offset_minutes("America/New_York", 294217200000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 2233792799000L),
-    Some(0),
+    @date.zone_offset_minutes("America/New_York", 309938399000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 2233792800000L),
-    Some(60),
+    @date.zone_offset_minutes("America/New_York", 309938400000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 2261008799000L),
-    Some(60),
+    @date.zone_offset_minutes("America/New_York", 325666799000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 2261008800000L),
-    Some(0),
+    @date.zone_offset_minutes("America/New_York", 325666800000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 2264032799000L),
-    Some(0),
+    @date.zone_offset_minutes("America/New_York", 341387999000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 2264032800000L),
-    Some(60),
+    @date.zone_offset_minutes("America/New_York", 341388000000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 2291248799000L),
-    Some(60),
+    @date.zone_offset_minutes("America/New_York", 357116399000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 2291248800000L),
-    Some(0),
+    @date.zone_offset_minutes("America/New_York", 357116400000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 2294877599000L),
-    Some(0),
+    @date.zone_offset_minutes("America/New_York", 372837599000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 2294877600000L),
-    Some(60),
+    @date.zone_offset_minutes("America/New_York", 372837600000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 2322093599000L),
-    Some(60),
+    @date.zone_offset_minutes("America/New_York", 388565999000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 2322093600000L),
-    Some(0),
+    @date.zone_offset_minutes("America/New_York", 388566000000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 2325722399000L),
-    Some(0),
+    @date.zone_offset_minutes("America/New_York", 404891999000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 2325722400000L),
-    Some(60),
+    @date.zone_offset_minutes("America/New_York", 404892000000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 2352938399000L),
-    Some(60),
+    @date.zone_offset_minutes("America/New_York", 420015599000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 2352938400000L),
-    Some(0),
+    @date.zone_offset_minutes("America/New_York", 420015600000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 2355962399000L),
-    Some(0),
+    @date.zone_offset_minutes("America/New_York", 436341599000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 2355962400000L),
-    Some(60),
+    @date.zone_offset_minutes("America/New_York", 436341600000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 2383178399000L),
-    Some(60),
+    @date.zone_offset_minutes("America/New_York", 452069999000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 2383178400000L),
-    Some(0),
+    @date.zone_offset_minutes("America/New_York", 452070000000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 2386807199000L),
-    Some(0),
+    @date.zone_offset_minutes("America/New_York", 467791199000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 2386807200000L),
-    Some(60),
+    @date.zone_offset_minutes("America/New_York", 467791200000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 2414023199000L),
-    Some(60),
+    @date.zone_offset_minutes("America/New_York", 483519599000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 2414023200000L),
-    Some(0),
+    @date.zone_offset_minutes("America/New_York", 483519600000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 2417047199000L),
-    Some(0),
+    @date.zone_offset_minutes("America/New_York", 499240799000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 2417047200000L),
-    Some(60),
+    @date.zone_offset_minutes("America/New_York", 499240800000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 2444867999000L),
-    Some(60),
+    @date.zone_offset_minutes("America/New_York", 514969199000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 2444868000000L),
-    Some(0),
+    @date.zone_offset_minutes("America/New_York", 514969200000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 2447891999000L),
-    Some(0),
+    @date.zone_offset_minutes("America/New_York", 530690399000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 2447892000000L),
-    Some(60),
+    @date.zone_offset_minutes("America/New_York", 530690400000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 2475107999000L),
-    Some(60),
+    @date.zone_offset_minutes("America/New_York", 544604399000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 2475108000000L),
-    Some(0),
+    @date.zone_offset_minutes("America/New_York", 544604400000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 2478736799000L),
-    Some(0),
+    @date.zone_offset_minutes("America/New_York", 562139999000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 2478736800000L),
-    Some(60),
+    @date.zone_offset_minutes("America/New_York", 562140000000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 2505952799000L),
-    Some(60),
+    @date.zone_offset_minutes("America/New_York", 576053999000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 2505952800000L),
-    Some(0),
+    @date.zone_offset_minutes("America/New_York", 576054000000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 2508976799000L),
-    Some(0),
+    @date.zone_offset_minutes("America/New_York", 594194399000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/El_Aaiun", 2508976800000L),
-    Some(60),
+    @date.zone_offset_minutes("America/New_York", 594194400000L),
+    Some(-300),
   )
-  assert_eq(@date.zone_offset_minutes("Asia/Damascus", 10367999000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Damascus", 10368000000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Damascus", 23583599000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Damascus", 23583600000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Damascus", 41903999000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Damascus", 41904000000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Damascus", 55119599000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Damascus", 55119600000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Damascus", 73526399000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Asia/Damascus", 73526400000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Damascus", 86741999000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Asia/Damascus", 86742000000L), Some(120))
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 105062399000L),
-    Some(120),
+    @date.zone_offset_minutes("America/New_York", 607503599000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 105062400000L),
-    Some(180),
+    @date.zone_offset_minutes("America/New_York", 607503600000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 118277999000L),
-    Some(180),
+    @date.zone_offset_minutes("America/New_York", 625643999000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 118278000000L),
-    Some(120),
+    @date.zone_offset_minutes("America/New_York", 625644000000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 136598399000L),
-    Some(120),
+    @date.zone_offset_minutes("America/New_York", 638953199000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 136598400000L),
-    Some(180),
+    @date.zone_offset_minutes("America/New_York", 638953200000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 149813999000L),
-    Some(180),
+    @date.zone_offset_minutes("America/New_York", 657093599000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 149814000000L),
-    Some(120),
+    @date.zone_offset_minutes("America/New_York", 657093600000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 168134399000L),
-    Some(120),
+    @date.zone_offset_minutes("America/New_York", 671007599000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 168134400000L),
-    Some(180),
+    @date.zone_offset_minutes("America/New_York", 671007600000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 181349999000L),
-    Some(180),
+    @date.zone_offset_minutes("America/New_York", 688543199000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 181350000000L),
-    Some(120),
+    @date.zone_offset_minutes("America/New_York", 688543200000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 199756799000L),
-    Some(120),
+    @date.zone_offset_minutes("America/New_York", 702457199000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 199756800000L),
-    Some(180),
+    @date.zone_offset_minutes("America/New_York", 702457200000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 212972399000L),
-    Some(180),
+    @date.zone_offset_minutes("America/New_York", 719992799000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 212972400000L),
-    Some(120),
+    @date.zone_offset_minutes("America/New_York", 719992800000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 231292799000L),
-    Some(120),
+    @date.zone_offset_minutes("America/New_York", 733906799000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 231292800000L),
-    Some(180),
+    @date.zone_offset_minutes("America/New_York", 733906800000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 241916399000L),
-    Some(180),
+    @date.zone_offset_minutes("America/New_York", 752047199000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 241916400000L),
-    Some(120),
+    @date.zone_offset_minutes("America/New_York", 752047200000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 262828799000L),
-    Some(120),
+    @date.zone_offset_minutes("America/New_York", 765356399000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 262828800000L),
-    Some(180),
+    @date.zone_offset_minutes("America/New_York", 765356400000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 273452399000L),
-    Some(180),
+    @date.zone_offset_minutes("America/New_York", 783496799000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 273452400000L),
-    Some(120),
+    @date.zone_offset_minutes("America/New_York", 783496800000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 418694399000L),
-    Some(120),
+    @date.zone_offset_minutes("America/New_York", 796805999000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 418694400000L),
-    Some(180),
+    @date.zone_offset_minutes("America/New_York", 796806000000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 433810799000L),
-    Some(180),
+    @date.zone_offset_minutes("America/New_York", 814946399000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 433810800000L),
-    Some(120),
+    @date.zone_offset_minutes("America/New_York", 814946400000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 450316799000L),
-    Some(120),
+    @date.zone_offset_minutes("America/New_York", 828860399000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 450316800000L),
-    Some(180),
+    @date.zone_offset_minutes("America/New_York", 828860400000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 465433199000L),
-    Some(180),
+    @date.zone_offset_minutes("America/New_York", 846395999000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 465433200000L),
-    Some(120),
+    @date.zone_offset_minutes("America/New_York", 846396000000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 508895999000L),
-    Some(120),
+    @date.zone_offset_minutes("America/New_York", 860309999000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 508896000000L),
-    Some(180),
+    @date.zone_offset_minutes("America/New_York", 860310000000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 529196399000L),
-    Some(180),
+    @date.zone_offset_minutes("America/New_York", 877845599000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 529196400000L),
-    Some(120),
+    @date.zone_offset_minutes("America/New_York", 877845600000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 541555199000L),
-    Some(120),
+    @date.zone_offset_minutes("America/New_York", 891759599000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 541555200000L),
-    Some(180),
+    @date.zone_offset_minutes("America/New_York", 891759600000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 562633199000L),
-    Some(180),
+    @date.zone_offset_minutes("America/New_York", 909295199000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 562633200000L),
-    Some(120),
+    @date.zone_offset_minutes("America/New_York", 909295200000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 574387199000L),
-    Some(120),
+    @date.zone_offset_minutes("America/New_York", 923209199000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 574387200000L),
-    Some(180),
+    @date.zone_offset_minutes("America/New_York", 923209200000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 594255599000L),
-    Some(180),
+    @date.zone_offset_minutes("America/New_York", 941349599000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 594255600000L),
-    Some(120),
+    @date.zone_offset_minutes("America/New_York", 941349600000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 607305599000L),
-    Some(120),
+    @date.zone_offset_minutes("America/New_York", 954658799000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 607305600000L),
-    Some(180),
+    @date.zone_offset_minutes("America/New_York", 954658800000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 623199599000L),
-    Some(180),
+    @date.zone_offset_minutes("America/New_York", 972799199000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 623199600000L),
-    Some(120),
+    @date.zone_offset_minutes("America/New_York", 972799200000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 638927999000L),
-    Some(120),
+    @date.zone_offset_minutes("America/New_York", 986108399000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 638928000000L),
-    Some(180),
+    @date.zone_offset_minutes("America/New_York", 986108400000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 654649199000L),
-    Some(180),
+    @date.zone_offset_minutes("America/New_York", 1004248799000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 654649200000L),
-    Some(120),
+    @date.zone_offset_minutes("America/New_York", 1004248800000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 670456799000L),
-    Some(120),
+    @date.zone_offset_minutes("America/New_York", 1018162799000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 670456800000L),
-    Some(180),
+    @date.zone_offset_minutes("America/New_York", 1018162800000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 686264399000L),
-    Some(180),
+    @date.zone_offset_minutes("America/New_York", 1035698399000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 686264400000L),
-    Some(120),
+    @date.zone_offset_minutes("America/New_York", 1035698400000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 702683999000L),
-    Some(120),
+    @date.zone_offset_minutes("America/New_York", 1049612399000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 702684000000L),
-    Some(180),
+    @date.zone_offset_minutes("America/New_York", 1049612400000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 717886799000L),
-    Some(180),
+    @date.zone_offset_minutes("America/New_York", 1067147999000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 717886800000L),
-    Some(120),
+    @date.zone_offset_minutes("America/New_York", 1067148000000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 733096799000L),
-    Some(120),
+    @date.zone_offset_minutes("America/New_York", 1081061999000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 733096800000L),
-    Some(180),
+    @date.zone_offset_minutes("America/New_York", 1081062000000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 748904399000L),
-    Some(180),
+    @date.zone_offset_minutes("America/New_York", 1099202399000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 748904400000L),
-    Some(120),
+    @date.zone_offset_minutes("America/New_York", 1099202400000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 765151199000L),
-    Some(120),
+    @date.zone_offset_minutes("America/New_York", 1112511599000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 765151200000L),
-    Some(180),
+    @date.zone_offset_minutes("America/New_York", 1112511600000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 780958799000L),
-    Some(180),
+    @date.zone_offset_minutes("America/New_York", 1130651999000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 780958800000L),
-    Some(120),
+    @date.zone_offset_minutes("America/New_York", 1130652000000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 796687199000L),
-    Some(120),
+    @date.zone_offset_minutes("America/New_York", 1143961199000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 796687200000L),
-    Some(180),
+    @date.zone_offset_minutes("America/New_York", 1143961200000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 812494799000L),
-    Some(180),
+    @date.zone_offset_minutes("America/New_York", 1162101599000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 812494800000L),
-    Some(120),
+    @date.zone_offset_minutes("America/New_York", 1162101600000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 828309599000L),
-    Some(120),
+    @date.zone_offset_minutes("America/New_York", 1173596399000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 828309600000L),
-    Some(180),
+    @date.zone_offset_minutes("America/New_York", 1173596400000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 844117199000L),
-    Some(180),
+    @date.zone_offset_minutes("America/New_York", 1194155999000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 844117200000L),
-    Some(120),
+    @date.zone_offset_minutes("America/New_York", 1194156000000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 859759199000L),
-    Some(120),
+    @date.zone_offset_minutes("America/New_York", 1205045999000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 859759200000L),
-    Some(180),
+    @date.zone_offset_minutes("America/New_York", 1205046000000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 875653199000L),
-    Some(180),
+    @date.zone_offset_minutes("America/New_York", 1225605599000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 875653200000L),
-    Some(120),
+    @date.zone_offset_minutes("America/New_York", 1225605600000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 891208799000L),
-    Some(120),
+    @date.zone_offset_minutes("America/Nipigon", 9961199000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 891208800000L),
-    Some(180),
+    @date.zone_offset_minutes("America/Nipigon", 9961200000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 907189199000L),
-    Some(180),
+    @date.zone_offset_minutes("America/Nipigon", 25682399000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 907189200000L),
-    Some(120),
+    @date.zone_offset_minutes("America/Nipigon", 25682400000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 922917599000L),
-    Some(120),
+    @date.zone_offset_minutes("America/Nipigon", 41410799000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 922917600000L),
-    Some(180),
+    @date.zone_offset_minutes("America/Nipigon", 41410800000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 938725199000L),
-    Some(180),
+    @date.zone_offset_minutes("America/Nipigon", 57736799000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 938725200000L),
-    Some(120),
+    @date.zone_offset_minutes("America/Nipigon", 57736800000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 954539999000L),
-    Some(120),
+    @date.zone_offset_minutes("America/Nipigon", 73465199000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 954540000000L),
-    Some(180),
+    @date.zone_offset_minutes("America/Nipigon", 73465200000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 970347599000L),
-    Some(180),
+    @date.zone_offset_minutes("America/Nipigon", 89186399000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 970347600000L),
-    Some(120),
+    @date.zone_offset_minutes("America/Nipigon", 89186400000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 986075999000L),
-    Some(120),
+    @date.zone_offset_minutes("America/Nipigon", 104914799000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 986076000000L),
-    Some(180),
+    @date.zone_offset_minutes("America/Nipigon", 104914800000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 1001883599000L),
-    Some(180),
+    @date.zone_offset_minutes("America/Nipigon", 120635999000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 1001883600000L),
-    Some(120),
+    @date.zone_offset_minutes("America/Nipigon", 120636000000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 1017611999000L),
-    Some(120),
+    @date.zone_offset_minutes("America/Nipigon", 136364399000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 1017612000000L),
-    Some(180),
+    @date.zone_offset_minutes("America/Nipigon", 136364400000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 1033419599000L),
-    Some(180),
+    @date.zone_offset_minutes("America/Nipigon", 152085599000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 1033419600000L),
-    Some(120),
+    @date.zone_offset_minutes("America/Nipigon", 152085600000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 1049147999000L),
-    Some(120),
+    @date.zone_offset_minutes("America/Nipigon", 167813999000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 1049148000000L),
-    Some(180),
+    @date.zone_offset_minutes("America/Nipigon", 167814000000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 1064955599000L),
-    Some(180),
+    @date.zone_offset_minutes("America/Nipigon", 183535199000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 1064955600000L),
-    Some(120),
+    @date.zone_offset_minutes("America/Nipigon", 183535200000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 1080770399000L),
-    Some(120),
+    @date.zone_offset_minutes("America/Nipigon", 199263599000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 1080770400000L),
-    Some(180),
+    @date.zone_offset_minutes("America/Nipigon", 199263600000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 1096577999000L),
-    Some(180),
+    @date.zone_offset_minutes("America/Nipigon", 215589599000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 1096578000000L),
-    Some(120),
+    @date.zone_offset_minutes("America/Nipigon", 215589600000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 1112306399000L),
-    Some(120),
+    @date.zone_offset_minutes("America/Nipigon", 230713199000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 1112306400000L),
-    Some(180),
+    @date.zone_offset_minutes("America/Nipigon", 230713200000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 1128113999000L),
-    Some(180),
+    @date.zone_offset_minutes("America/Nipigon", 247039199000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 1128114000000L),
-    Some(120),
+    @date.zone_offset_minutes("America/Nipigon", 247039200000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 1143842399000L),
-    Some(120),
+    @date.zone_offset_minutes("America/Nipigon", 262767599000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 1143842400000L),
-    Some(180),
+    @date.zone_offset_minutes("America/Nipigon", 262767600000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 1158872399000L),
-    Some(180),
+    @date.zone_offset_minutes("America/Nipigon", 278488799000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 1158872400000L),
-    Some(120),
+    @date.zone_offset_minutes("America/Nipigon", 278488800000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 1175205599000L),
-    Some(120),
+    @date.zone_offset_minutes("America/Nipigon", 294217199000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 1175205600000L),
-    Some(180),
+    @date.zone_offset_minutes("America/Nipigon", 294217200000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 1193950799000L),
-    Some(180),
+    @date.zone_offset_minutes("America/Nipigon", 309938399000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 1193950800000L),
-    Some(120),
+    @date.zone_offset_minutes("America/Nipigon", 309938400000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 1207259999000L),
-    Some(120),
+    @date.zone_offset_minutes("America/Nipigon", 325666799000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 1207260000000L),
-    Some(180),
+    @date.zone_offset_minutes("America/Nipigon", 325666800000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 1225486799000L),
-    Some(180),
+    @date.zone_offset_minutes("America/Nipigon", 341387999000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 1225486800000L),
-    Some(120),
+    @date.zone_offset_minutes("America/Nipigon", 341388000000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 1238104799000L),
-    Some(120),
+    @date.zone_offset_minutes("America/Nipigon", 357116399000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 1238104800000L),
-    Some(180),
+    @date.zone_offset_minutes("America/Nipigon", 357116400000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 1256849999000L),
-    Some(180),
+    @date.zone_offset_minutes("America/Nipigon", 372837599000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 1256850000000L),
-    Some(120),
+    @date.zone_offset_minutes("America/Nipigon", 372837600000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 1270159199000L),
-    Some(120),
+    @date.zone_offset_minutes("America/Nipigon", 388565999000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 1270159200000L),
-    Some(180),
+    @date.zone_offset_minutes("America/Nipigon", 388566000000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 1288299599000L),
-    Some(180),
+    @date.zone_offset_minutes("America/Nipigon", 404891999000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 1288299600000L),
-    Some(120),
+    @date.zone_offset_minutes("America/Nipigon", 404892000000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 1301608799000L),
-    Some(120),
+    @date.zone_offset_minutes("America/Nipigon", 420015599000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 1301608800000L),
-    Some(180),
+    @date.zone_offset_minutes("America/Nipigon", 420015600000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 1319749199000L),
-    Some(180),
+    @date.zone_offset_minutes("America/Nipigon", 436341599000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 1319749200000L),
-    Some(120),
+    @date.zone_offset_minutes("America/Nipigon", 436341600000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 1333058399000L),
-    Some(120),
+    @date.zone_offset_minutes("America/Nipigon", 452069999000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 1333058400000L),
-    Some(180),
+    @date.zone_offset_minutes("America/Nipigon", 452070000000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 1351198799000L),
-    Some(180),
+    @date.zone_offset_minutes("America/Nipigon", 467791199000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 1351198800000L),
-    Some(120),
+    @date.zone_offset_minutes("America/Nipigon", 467791200000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 1364507999000L),
-    Some(120),
+    @date.zone_offset_minutes("America/Nipigon", 483519599000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 1364508000000L),
-    Some(180),
+    @date.zone_offset_minutes("America/Nipigon", 483519600000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 1382648399000L),
-    Some(180),
+    @date.zone_offset_minutes("America/Nipigon", 499240799000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 1382648400000L),
-    Some(120),
+    @date.zone_offset_minutes("America/Nipigon", 499240800000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 1395957599000L),
-    Some(120),
+    @date.zone_offset_minutes("America/Nipigon", 514969199000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 1395957600000L),
-    Some(180),
+    @date.zone_offset_minutes("America/Nipigon", 514969200000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 1414702799000L),
-    Some(180),
+    @date.zone_offset_minutes("America/Nipigon", 530690399000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 1414702800000L),
-    Some(120),
+    @date.zone_offset_minutes("America/Nipigon", 530690400000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 1427407199000L),
-    Some(120),
+    @date.zone_offset_minutes("America/Nipigon", 544604399000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 1427407200000L),
-    Some(180),
+    @date.zone_offset_minutes("America/Nipigon", 544604400000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 1446152399000L),
-    Some(180),
+    @date.zone_offset_minutes("America/Nipigon", 562139999000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 1446152400000L),
-    Some(120),
+    @date.zone_offset_minutes("America/Nipigon", 562140000000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 1458856799000L),
-    Some(120),
+    @date.zone_offset_minutes("America/Nipigon", 576053999000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 1458856800000L),
-    Some(180),
+    @date.zone_offset_minutes("America/Nipigon", 576054000000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 1477601999000L),
-    Some(180),
+    @date.zone_offset_minutes("America/Nipigon", 594194399000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 1477602000000L),
-    Some(120),
+    @date.zone_offset_minutes("America/Nipigon", 594194400000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 1490911199000L),
-    Some(120),
+    @date.zone_offset_minutes("America/Nipigon", 607503599000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 1490911200000L),
-    Some(180),
+    @date.zone_offset_minutes("America/Nipigon", 607503600000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 1509051599000L),
-    Some(180),
+    @date.zone_offset_minutes("America/Nipigon", 625643999000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 1509051600000L),
-    Some(120),
+    @date.zone_offset_minutes("America/Nipigon", 625644000000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 1522360799000L),
-    Some(120),
+    @date.zone_offset_minutes("America/Nipigon", 638953199000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 1522360800000L),
-    Some(180),
+    @date.zone_offset_minutes("America/Nipigon", 638953200000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 1540501199000L),
-    Some(180),
+    @date.zone_offset_minutes("America/Nipigon", 657093599000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 1540501200000L),
-    Some(120),
+    @date.zone_offset_minutes("America/Nipigon", 657093600000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 1553810399000L),
-    Some(120),
+    @date.zone_offset_minutes("America/Nipigon", 671007599000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 1553810400000L),
-    Some(180),
+    @date.zone_offset_minutes("America/Nipigon", 671007600000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 1571950799000L),
-    Some(180),
+    @date.zone_offset_minutes("America/Nipigon", 688543199000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 1571950800000L),
-    Some(120),
+    @date.zone_offset_minutes("America/Nipigon", 688543200000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 1585259999000L),
-    Some(120),
+    @date.zone_offset_minutes("America/Nipigon", 702457199000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 1585260000000L),
-    Some(180),
+    @date.zone_offset_minutes("America/Nipigon", 702457200000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 1604005199000L),
-    Some(180),
+    @date.zone_offset_minutes("America/Nipigon", 719992799000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 1604005200000L),
-    Some(120),
+    @date.zone_offset_minutes("America/Nipigon", 719992800000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 1616709599000L),
-    Some(120),
+    @date.zone_offset_minutes("America/Nipigon", 733906799000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 1616709600000L),
-    Some(180),
+    @date.zone_offset_minutes("America/Nipigon", 733906800000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 1635454799000L),
-    Some(180),
+    @date.zone_offset_minutes("America/Nipigon", 752047199000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 1635454800000L),
-    Some(120),
+    @date.zone_offset_minutes("America/Nipigon", 752047200000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 1648159199000L),
-    Some(120),
+    @date.zone_offset_minutes("America/Nipigon", 765356399000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Asia/Damascus", 1648159200000L),
-    Some(180),
+    @date.zone_offset_minutes("America/Nipigon", 765356400000L),
+    Some(-240),
   )
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 10364399000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 10364400000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 23587199000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 23587200000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 41900399000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 41900400000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 55123199000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 55123200000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 73522799000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 73522800000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 86745599000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 86745600000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 105058799000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 105058800000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 118281599000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 118281600000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 136594799000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 136594800000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 149817599000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 149817600000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 168130799000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 168130800000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 181353599000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 181353600000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 199753199000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 199753200000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 212975999000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 212976000000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 231289199000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 231289200000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 244511999000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 244512000000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 262825199000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 262825200000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 276047999000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 276048000000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 294361199000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 294361200000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 307583999000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 307584000000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 325983599000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 325983600000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 339206399000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 339206400000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 357519599000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 357519600000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 370742399000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 370742400000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 396399599000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 396399600000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 402278399000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 402278400000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 426812399000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 426812400000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 433814399000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 433814400000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 452213999000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 452214000000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 465436799000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 465436800000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 483749999000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 483750000000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 496972799000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 496972800000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 515285999000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 515286000000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 528508799000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 528508800000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 546821999000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 546822000000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 560044799000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 560044800000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 578444399000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 578444400000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 591667199000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 591667200000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 610412399000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 610412400000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 623203199000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 623203200000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 641516399000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 641516400000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 654739199000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 654739200000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 673052399000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 673052400000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 686275199000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 686275200000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 704674799000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 704674800000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 717897599000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 717897600000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 736210799000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 736210800000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 749433599000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 749433600000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 767746799000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 767746800000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 780969599000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 780969600000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 799019999000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 799020000000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 812321999000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 812322000000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 830469599000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 830469600000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 843771599000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 843771600000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 861919199000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 861919200000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 875221199000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 875221200000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 893368799000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 893368800000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 906670799000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 906670800000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 925423199000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 925423200000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 938725199000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 938725200000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 956872799000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 956872800000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 970174799000L), Some(180))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 970174800000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 988322399000L), Some(120))
-  assert_eq(@date.zone_offset_minutes("Africa/Cairo", 988322400000L), Some(180))
   assert_eq(
-    @date.zone_offset_minutes("Africa/Cairo", 1001624399000L),
-    Some(180),
+    @date.zone_offset_minutes("America/Nipigon", 783496799000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/Cairo", 1001624400000L),
-    Some(120),
+    @date.zone_offset_minutes("America/Nipigon", 783496800000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/Cairo", 1019771999000L),
-    Some(120),
+    @date.zone_offset_minutes("America/Nipigon", 796805999000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/Cairo", 1019772000000L),
-    Some(180),
+    @date.zone_offset_minutes("America/Nipigon", 796806000000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/Cairo", 1033073999000L),
-    Some(180),
+    @date.zone_offset_minutes("America/Nipigon", 814946399000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/Cairo", 1033074000000L),
-    Some(120),
+    @date.zone_offset_minutes("America/Nipigon", 814946400000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/Cairo", 1051221599000L),
-    Some(120),
+    @date.zone_offset_minutes("America/Nipigon", 828860399000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/Cairo", 1051221600000L),
-    Some(180),
+    @date.zone_offset_minutes("America/Nipigon", 828860400000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/Cairo", 1064523599000L),
-    Some(180),
+    @date.zone_offset_minutes("America/Nipigon", 846395999000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/Cairo", 1064523600000L),
-    Some(120),
+    @date.zone_offset_minutes("America/Nipigon", 846396000000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/Cairo", 1083275999000L),
-    Some(120),
+    @date.zone_offset_minutes("America/Nipigon", 860309999000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/Cairo", 1083276000000L),
-    Some(180),
+    @date.zone_offset_minutes("America/Nipigon", 860310000000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/Cairo", 1096577999000L),
-    Some(180),
+    @date.zone_offset_minutes("America/Nipigon", 877845599000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/Cairo", 1096578000000L),
-    Some(120),
+    @date.zone_offset_minutes("America/Nipigon", 877845600000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/Cairo", 1114725599000L),
-    Some(120),
+    @date.zone_offset_minutes("America/Nipigon", 891759599000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/Cairo", 1114725600000L),
-    Some(180),
+    @date.zone_offset_minutes("America/Nipigon", 891759600000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/Cairo", 1128027599000L),
-    Some(180),
+    @date.zone_offset_minutes("America/Nipigon", 909295199000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/Cairo", 1128027600000L),
-    Some(120),
+    @date.zone_offset_minutes("America/Nipigon", 909295200000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/Cairo", 1146175199000L),
-    Some(120),
+    @date.zone_offset_minutes("America/Nipigon", 923209199000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/Cairo", 1146175200000L),
-    Some(180),
+    @date.zone_offset_minutes("America/Nipigon", 923209200000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/Cairo", 1158872399000L),
-    Some(180),
+    @date.zone_offset_minutes("America/Nipigon", 941349599000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/Cairo", 1158872400000L),
-    Some(120),
+    @date.zone_offset_minutes("America/Nipigon", 941349600000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/Cairo", 1177624799000L),
-    Some(120),
+    @date.zone_offset_minutes("America/Nipigon", 954658799000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/Cairo", 1177624800000L),
-    Some(180),
+    @date.zone_offset_minutes("America/Nipigon", 954658800000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/Cairo", 1189112399000L),
-    Some(180),
+    @date.zone_offset_minutes("America/Nipigon", 972799199000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/Cairo", 1189112400000L),
-    Some(120),
+    @date.zone_offset_minutes("America/Nipigon", 972799200000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/Cairo", 1209074399000L),
-    Some(120),
+    @date.zone_offset_minutes("America/Nipigon", 986108399000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/Cairo", 1209074400000L),
-    Some(180),
+    @date.zone_offset_minutes("America/Nipigon", 986108400000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/Cairo", 1219957199000L),
-    Some(180),
+    @date.zone_offset_minutes("America/Nipigon", 1004248799000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/Cairo", 1219957200000L),
-    Some(120),
+    @date.zone_offset_minutes("America/Nipigon", 1004248800000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/Cairo", 1240523999000L),
-    Some(120),
+    @date.zone_offset_minutes("America/Nipigon", 1018162799000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/Cairo", 1240524000000L),
-    Some(180),
+    @date.zone_offset_minutes("America/Nipigon", 1018162800000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/Cairo", 1250801999000L),
-    Some(180),
+    @date.zone_offset_minutes("America/Nipigon", 1035698399000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/Cairo", 1250802000000L),
-    Some(120),
+    @date.zone_offset_minutes("America/Nipigon", 1035698400000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/Cairo", 1272578399000L),
-    Some(120),
+    @date.zone_offset_minutes("America/Nipigon", 1049612399000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/Cairo", 1272578400000L),
-    Some(180),
+    @date.zone_offset_minutes("America/Nipigon", 1049612400000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/Cairo", 1281473999000L),
-    Some(180),
+    @date.zone_offset_minutes("America/Nipigon", 1067147999000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/Cairo", 1281474000000L),
-    Some(120),
+    @date.zone_offset_minutes("America/Nipigon", 1067148000000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/Cairo", 1284069599000L),
-    Some(120),
+    @date.zone_offset_minutes("America/Nipigon", 1081061999000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/Cairo", 1284069600000L),
-    Some(180),
+    @date.zone_offset_minutes("America/Nipigon", 1081062000000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/Cairo", 1285880399000L),
-    Some(180),
+    @date.zone_offset_minutes("America/Nipigon", 1099202399000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/Cairo", 1285880400000L),
-    Some(120),
+    @date.zone_offset_minutes("America/Nipigon", 1099202400000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/Cairo", 1400191199000L),
-    Some(120),
+    @date.zone_offset_minutes("America/Nipigon", 1112511599000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/Cairo", 1400191200000L),
-    Some(180),
+    @date.zone_offset_minutes("America/Nipigon", 1112511600000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/Cairo", 1403816399000L),
-    Some(180),
+    @date.zone_offset_minutes("America/Nipigon", 1130651999000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/Cairo", 1403816400000L),
-    Some(120),
+    @date.zone_offset_minutes("America/Nipigon", 1130652000000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/Cairo", 1406843999000L),
-    Some(120),
+    @date.zone_offset_minutes("America/Nipigon", 1143961199000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/Cairo", 1406844000000L),
-    Some(180),
+    @date.zone_offset_minutes("America/Nipigon", 1143961200000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/Cairo", 1411678799000L),
-    Some(180),
+    @date.zone_offset_minutes("America/Nipigon", 1162101599000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/Cairo", 1411678800000L),
-    Some(120),
+    @date.zone_offset_minutes("America/Nipigon", 1162101600000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/Cairo", 1682632799000L),
-    Some(120),
+    @date.zone_offset_minutes("America/Nipigon", 1173596399000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/Cairo", 1682632800000L),
-    Some(180),
+    @date.zone_offset_minutes("America/Nipigon", 1173596400000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/Cairo", 1698353999000L),
-    Some(180),
+    @date.zone_offset_minutes("America/Nipigon", 1194155999000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/Cairo", 1698354000000L),
-    Some(120),
+    @date.zone_offset_minutes("America/Nipigon", 1194156000000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/Cairo", 1714082399000L),
-    Some(120),
+    @date.zone_offset_minutes("America/Nipigon", 1205045999000L),
+    Some(-300),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/Cairo", 1714082400000L),
-    Some(180),
+    @date.zone_offset_minutes("America/Nipigon", 1205046000000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/Cairo", 1730408399000L),
-    Some(180),
+    @date.zone_offset_minutes("America/Nipigon", 1225605599000L),
+    Some(-240),
   )
   assert_eq(
-    @date.zone_offset_minutes("Africa/Cairo", 1730408400000L),
-    Some(120),
+    @date.zone_offset_minutes("America/Nipigon", 1225605600000L),
+    Some(-300),
   )
 }
 

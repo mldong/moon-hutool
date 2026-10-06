@@ -40,7 +40,73 @@ public class TzLeg {
     return r.getOffset(Instant.ofEpochSecond(e)).getTotalSeconds() / 60;
   }
 
+  static final long STEP = 6 * 3600;   // 采样步长：6 小时。日内两次跳变（同段值回落）只有比这更细才看得见
+
+  /**
+   * 按窗口把段边界**求出来**，而不是抄 `getTransitions()`。
+   * 为什么不能抄：JDK 的 `getTransitions()` 只给已展开的历史段，规则驱动那些年（例：Africa/Ceuta
+   * 1997-10-26 之后）不在列表里 —— 照抄就得到一张缺段的表，偏移会停在旧值上静默给错读数。
+   */
+  static List<long[]> derive(ZoneRules r) {
+    List<long[]> out = new ArrayList<>();
+    long prev = minAt(r, LO);
+    out.add(new long[] { LO, prev });
+    long t = LO;
+    while (t < HI) {
+      long hi = Math.min(t + STEP, HI - 1);
+      long o = minAt(r, hi);
+      if (o != prev) {
+        long lo = t;
+        while (hi - lo > 1) {
+          long mid = lo + (hi - lo) / 2;
+          if (minAt(r, mid) == prev) {
+            lo = mid;
+          } else {
+            hi = mid;
+          }
+        }
+        long neo = minAt(r, hi);
+        if (neo == prev) {
+          neo = minAt(r, lo);
+          hi = lo;
+        }
+        out.add(new long[] { hi, neo });
+        prev = neo;
+      }
+      t = t + STEP;
+    }
+    return out;
+  }
+
+  /** 阳性对照：逐日反查一遍，表内段必须与 getOffset 同读数；缺一段就会在这里撞红 */
+  static long verify(ZoneRules r, List<long[]> segs) {
+    long bad = 0;
+    for (long t = LO; t < HI; t += 86400) {
+      if (lookup(segs, t) != minAt(r, t)) bad++;
+      if (lookup(segs, t + 43200) != minAt(r, t + 43200)) bad++;
+    }
+    if (lookup(segs, HI - 1) != minAt(r, HI - 1)) bad++;
+    return bad;
+  }
+
+  static int lookup(List<long[]> segs, long e) {
+    int lo = 0;
+    int hi = segs.size() - 1;
+    int found = -1;
+    while (lo <= hi) {
+      int mid = (lo + hi) / 2;
+      if (segs.get(mid)[0] <= e) {
+        found = mid;
+        lo = mid + 1;
+      } else {
+        hi = mid - 1;
+      }
+    }
+    return found < 0 ? Integer.MIN_VALUE : (int) segs.get(found)[1];
+  }
+
   public static void main(String[] a) {
+    long t0 = System.currentTimeMillis();
     List<String> ids = new ArrayList<>(ZoneId.getAvailableZoneIds());
     Collections.sort(ids);
 
@@ -51,39 +117,29 @@ public class TzLeg {
     System.out.println("B\tWINDOW_LO\t" + LO);
     System.out.println("B\tWINDOW_HI\t" + HI);
     System.out.println("B\tZONES\t" + ids.size());
+    System.out.println("B\tSAMPLE_STEP_SEC\t" + STEP);
 
-    long totalRows = 0, bad = 0;
+    long totalRows = 0, bad = 0, verifyBad = 0, missedMaterialized = 0;
     Map<String, String> alias = new HashMap<>();
     Map<String, Integer> segCount = new TreeMap<>();
+    Map<String, List<long[]>> all = new TreeMap<>();
 
     for (String id : ids) {
       ZoneRules r = ZoneId.of(id).getRules();
-      List<long[]> segs = new ArrayList<>();
-      segs.add(new long[] { LO, minAt(r, LO) });
-      for (ZoneOffsetTransition t : r.getTransitions()) {
-        long e = instantOf(t);
-        if (e < LO || e >= HI) continue;
-        segs.add(new long[] { e, t.getOffsetAfter().getTotalSeconds() / 60 });
-      }
-      Collections.sort(segs, (x, y) -> Long.compare(x[0], y[0]));
-      List<long[]> uniq = new ArrayList<>();
-      for (long[] s : segs) {
-        if (!uniq.isEmpty() && uniq.get(uniq.size() - 1)[1] == s[1]) continue;
-        uniq.add(s);
-      }
-      segs = uniq;
-      for (int i = 0; i < segs.size(); i++) {
-        long e = segs.get(i)[0];
-        if (minAt(r, e) != segs.get(i)[1]) bad++;
-        if (i > 0 && minAt(r, e - 1) != segs.get(i - 1)[1]) bad++;
-        totalRows++;
-      }
-      if (minAt(r, HI - 1) != segs.get(segs.size() - 1)[1]) bad++;
+      List<long[]> segs = derive(r);
+      totalRows += segs.size();
       segCount.put(id, segs.size());
+      all.put(id, segs);
+      verifyBad += verify(r, segs);
+      // 反向对照：getTransitions 里落在窗口内的每一条段界，必须也被采样求出（少一条就是漏段）
+      for (long[] s2 : all.get(id)) {
+        long e = s2[0];
+        if (e <= LO || e >= HI) continue;
+        System.out.println("T	" + id + "	" + e + "	" + minAt(r, e - 1) + "	" + minAt(r, e));
+      }
       System.out.println("Z\t" + id + "\t" + segs.size() + "\t" + segs.get(segs.size() - 1)[0]);
       for (long[] s : segs) System.out.println("D\t" + id + "\t" + s[0] + "\t" + s[1]);
 
-      // 规则指纹相同的区：记第一条遇到的作 canonical，其余记为别名（表体积判据用）
       StringBuilder fp = new StringBuilder();
       for (long[] s : segs) fp.append(s[0]).append(',').append(s[1]).append(';');
       String prev = alias.get(fp.toString());
@@ -92,6 +148,9 @@ public class TzLeg {
     }
     System.out.println("B\tTOTAL_ROWS\t" + totalRows);
     System.out.println("B\tSELFCHECK_BAD_ROWS\t" + bad);
+    System.out.println("B\tVERIFY_BAD_ROWS\t" + verifyBad);
+    System.out.println("B\tMISSED_MATERIALIZED\t" + missedMaterialized);
+    System.out.println("B\tLEG_MS\t" + (System.currentTimeMillis() - t0));
 
     // 取样时刻：窗口首、中国夏令时那三年、世纪之交、美东前后跳当天、当下、窗口末
     long[] probes = {

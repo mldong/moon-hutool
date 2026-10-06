@@ -1,24 +1,99 @@
 ///|
-// moon-hutool/date —— 内置 IANA 时区表与命名时区入口（ROADMAP 第 3 行第二批）
+// moon-hutool/date —— 内置 IANA 时区段表与命名时区入口（ROADMAP 第 3 行第二批）
 // 契约真相在 `docs/spec/03-date.md` §5。数据在 `date/zone_table.mbt`（生成件，勿手改）。
-// 本文件的实现体在 PR-B 落地；现在是契约骨架。
+
+///|
+/// 区名比较器：**逐码位字典序**，只有前缀关系才由长度定序。
+/// 为什么自带：本工具链 core 的 `impl Compare for String` 是**先比长度、再比内容**
+/// （`moonbitlang/core/builtin/string.mbt:221`，实测 `"aa" < "b"` 为 `false`），
+/// 与 `tbl_names` 的存储序不是同一个序——顺手写 `tbl_names[mid] < zone` 会把所有"长度不同的邻居"查飞。
+fn zone_name_cmp(a : String, b : String) -> Int {
+  let ua = a.to_array()
+  let ub = b.to_array()
+  let n = if ua.length() < ub.length() { ua.length() } else { ub.length() }
+  let mut i = 0
+  let mut r = 0
+  while i < n && r == 0 {
+    let x = ua[i]
+    let y = ub[i]
+    if x != y {
+      r = if x < y { -1 } else { 1 }
+    }
+    i = i + 1
+  }
+  if r != 0 {
+    r
+  } else if ua.length() == ub.length() {
+    0
+  } else if ua.length() < ub.length() {
+    -1
+  } else {
+    1
+  }
+}
+
+///|
+/// 区名 → 表内区号。`tbl_names` 升序 + 上面那条比较器 ⇒ 二分成立。
+fn zone_find(zone : String) -> Int? {
+  let mut lo = 0
+  let mut hi = tbl_names.length() - 1
+  let mut found = -1
+  while lo <= hi && found < 0 {
+    let mid = (lo + hi) / 2
+    let c = zone_name_cmp(tbl_names[mid], zone)
+    if c == 0 {
+      found = mid
+    } else if c < 0 {
+      lo = mid + 1
+    } else {
+      hi = mid - 1
+    }
+  }
+  if found < 0 {
+    None
+  } else {
+    Some(found)
+  }
+}
+
+///|
+/// 在区号 `zi` 的段序列里找"起点 `<= sec` 的最后一段"，返回**段内下标**；`-1` 表示早于该区首段。
+fn seg_last_le(zi : Int, sec : Int64) -> Int {
+  let base = tbl_start[zi]
+  let mut lo = 0
+  let mut hi = tbl_len[zi] - 1
+  let mut found = -1
+  while lo <= hi {
+    let mid = (lo + hi) / 2
+    if tbl_seg_start[base + mid] <= sec {
+      found = mid
+      lo = mid + 1
+    } else {
+      hi = mid - 1
+    }
+  }
+  found
+}
+
+///|
+/// 瞬间（毫秒）是否落在窗口 `[tbl_window_lo, tbl_window_hi)` 内。
+/// 上界按**毫秒**比：上界那一秒内的任意毫秒仍算窗内。
+fn in_window(millis : Int64) -> Bool {
+  millis >= tbl_window_lo * 1000L && millis < tbl_window_hi * 1000L
+}
 
 ///|
 /// 内置表里有多少个区名（参照代次的全部 IANA id，含 legacy link 与 `Etc/*`）。
 /// - Returns: 条数，与腿的 `B ZONES` 读数同值
 pub fn zone_count() -> Int {
-  abort(
-    "moon-hutool PR-B：契约骨架 —— 条数直接取表的区名条目数",
-  )
+  tbl_names.length()
 }
 
 ///|
 /// 区名清单（**返回拷贝**：改它不影响后续查表）。
 /// - Returns: 按逐字节字典序排列的区名，顺序与表内二分区间一致
 pub fn zone_names() -> Array[String] {
-  abort(
-    "moon-hutool PR-B：契约骨架 —— 拷贝 zone_names 返回，别把内部表交出去",
-  )
+  tbl_names.copy()
 }
 
 ///|
@@ -26,9 +101,10 @@ pub fn zone_names() -> Array[String] {
 /// - Note: 大小写敏感、不认缩写 —— 参照侧 `TimeZone.getTimeZone(坏名)` 是**静默回落 GMT**，
 ///   本库不跟随（spec §5.3 分岔第 1 条），坏名在这里给 `false`
 pub fn zone_exists(zone : String) -> Bool {
-  abort(
-    "moon-hutool PR-B：契约骨架 —— 走与 zone_offset_minutes 同一条二分，别摆第二套查找",
-  )
+  match zone_find(zone) {
+    None => false
+    Some(_) => true
+  }
 }
 
 ///|
@@ -39,9 +115,19 @@ pub fn zone_exists(zone : String) -> Bool {
 ///   - `Etc/GMT+5` 的读数腿给 **-300**：Etc 那一族的符号与直觉相反，照搬不修
 /// - Returns: 未知区名或窗外 ⇒ `None`
 pub fn zone_offset_minutes(zone : String, millis : Int64) -> Int? {
-  abort(
-    "moon-hutool PR-B：契约骨架 —— 区名二分 + 段起点二分，两处都不能用 core 的 String.compare",
-  )
+  if !in_window(millis) {
+    return None
+  }
+  let zi = match zone_find(zone) {
+    None => return None
+    Some(i) => i
+  }
+  let k = seg_last_le(zi, millis / 1000L)
+  if k < 0 {
+    None
+  } else {
+    Some(tbl_seg_off[tbl_start[zi] + k])
+  }
 }
 
 ///|
@@ -53,18 +139,41 @@ pub fn zone_offset_minutes(zone : String, millis : Int64) -> Int? {
 ///   - 这一件的存在就是"墙上 ↔ 瞬间"在有 DST 的区里**不是一一映射**的正面承认；
 ///     要唯一瞬间请走显式偏移那条路（`DateTime::to_epoch_millis(offset)`）
 pub fn zone_offsets_at_wall(zone : String, wall : DateTime) -> Array[Int] {
-  abort(
-    "moon-hutool PR-B：契约骨架 —— 逐段候选：instant = wall - off_i，落在第 i 段才算合法",
-  )
+  let out : Array[Int] = []
+  let zi = match zone_find(zone) {
+    None => return out
+    Some(i) => i
+  }
+  let base = tbl_start[zi]
+  let n = tbl_len[zi]
+  // 把墙上时刻当 UTC 折成"名义毫秒"，减掉候选偏移就是候选瞬间；
+  // 候选瞬间回落进**同一段**才算合法 —— 空洞档两支都不合法，重叠档两支都合法。
+  let nominal = wall.to_epoch_millis(0)
+  let mut k = 0
+  while k < n {
+    let off = tbl_seg_off[base + k]
+    let inst = nominal - off.to_int64() * 60000L
+    if in_window(inst) {
+      // 判据是"候选瞬间落回**自己这一段**"（比段号）。只比偏移值不行：同一偏移在几十年的表里
+      // 占几十段，任何一段都能验过同一个瞬间，出来的会是"哪个偏移在表里出现得早"的任意顺序。
+      // 按段序（= 时间序）扫，重叠档自然给出"转换前那一支在前"，与参照 getValidOffsets 同序。
+      if seg_last_le(zi, inst / 1000L) == k {
+        out.push(off)
+      }
+    }
+    k = k + 1
+  }
+  out
 }
 
 ///|
 /// 瞬间 + 区名 → 墙上时刻（纯函数，不读时钟）。
 /// - Returns: 坏名/窗外 ⇒ `None`；否则 `DateTime::from_epoch_millis(millis, 表内偏移)`
 pub fn datetime_in(zone : String, millis : Int64) -> DateTime? {
-  abort(
-    "moon-hutool PR-B：契约骨架 —— 复用 zone_offset_minutes，别再算一次偏移",
-  )
+  match zone_offset_minutes(zone, millis) {
+    None => None
+    Some(off) => Some(DateTime::from_epoch_millis(millis, off))
+  }
 }
 
 ///|
@@ -72,7 +181,5 @@ pub fn datetime_in(zone : String, millis : Int64) -> DateTime? {
 /// 只承诺形状与下界，两次读数的抖动不进断言（spec §5.5）。
 /// - Returns: 坏名 ⇒ `None`
 pub fn now_in(zone : String) -> DateTime? {
-  abort(
-    "moon-hutool PR-B：契约骨架 —— now_millis() 一次读数交给 datetime_in",
-  )
+  datetime_in(zone, now_millis())
 }
