@@ -116,6 +116,12 @@ pub fn idcard_is_valid_18(String, Int) -> Bool
 
 pub fn idcard_is_valid_18_case(String, Int, Bool) -> Bool
 
+pub fn idcard_is_valid_card(String, Int) -> Bool
+
+pub fn idcard_is_valid_hk_card(String) -> Bool
+
+pub fn idcard_is_valid_tw_card(String) -> Bool
+
 pub fn idcard_month(String) -> Int?
 
 pub fn idcard_province_code(String) -> String?
