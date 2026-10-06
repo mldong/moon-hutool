@@ -6,6 +6,12 @@ pub fn age(Date, Date) -> Int raise DateError
 
 pub fn between(DateTime, DateTime, TimeUnit) -> Int64
 
+pub fn clock_fixed(Int64) -> () -> Int64
+
+pub fn clock_system() -> () -> Int64
+
+pub fn date_of(String, Int64) -> Date?
+
 pub let date_pattern : String
 
 pub fn datetime_in(String, Int64) -> DateTime?
@@ -26,6 +32,8 @@ pub fn is_same_day(DateTime, DateTime) -> Bool
 
 pub fn now(Int) -> DateTime
 
+pub fn now_at(String, () -> Int64) -> DateTime?
+
 pub fn now_in(String) -> DateTime?
 
 pub fn now_millis() -> Int64
@@ -37,6 +45,8 @@ pub let pure_datetime_pattern : String
 pub let time_pattern : String
 
 pub fn to_rfc3339(Int64, Int) -> String
+
+pub fn today_at(String, () -> Int64) -> Date?
 
 pub fn zone_count() -> Int
 

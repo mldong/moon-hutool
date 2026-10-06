@@ -227,7 +227,7 @@ G12 只认函数体里的 `PR-B：契约骨架` 字样，所以这一行压不�
 
 ## 5. 内置 IANA 时区段表与命名时区入口（第二批）
 
-> 状态：**已实现**（10-06 两笔：契约 `85143d7` + 落地笔）。8 块冻结期望先按设计态红，落地轮修腿补回缺段后整表重生成，现在按 200 条切块成 31 块、全部转绿。数据件> `date/zone_test.mbt` 都由 `scripts/gen_zone_table.py` 从参照腿 `scripts/TzLeg.java` 的读数灌出来，
+> 状态：**第二批已收口**（10-06 两笔：契约 `85143d7` + `e60ee84`）。8 块冻结期望先按设计态红，落地轮修腿补回缺段后整表重生成，现在按 200 条切块成 31 块、全部转绿。数据件> `date/zone_test.mbt` 都由 `scripts/gen_zone_table.py` 从参照腿 `scripts/TzLeg.java` 的读数灌出来，
 > **一格都没有手打**；换窗口或换参照代次就整文件重生成，不逐条改。
 
 ### 5.1 参照代次与体积（全是现读）
@@ -356,3 +356,67 @@ hutool 的 `cn.hutool.core.date.SystemClock`（javap 现读公开面只有 `Syst
 > 另记一条工具链事实（§5.4 那条的直接影响面）：一个 test 块塞几千条断言会撞
 > `text_segment_excceed` 警告而破零警告门禁 ⇒ 生成器按 200 条切块（本轮 P/T 两大类各切成 19 + 12 块）。
 
+
+## 6. 可注入的时钟源（第三批，10-06 owner 点名）
+
+> 状态：**契约已冻结**（10-06 PR-A）。这一批补的是 §5.5 结尾挂着那条——"可注入时钟源"。
+
+### 6.1 先分清三层，免得又混着说
+
+| 层 | 管什么 | 本包落点 | 参照/宿主在哪 |
+|---|---|---|---|
+| 时钟源 | "现在的原始读数"从哪来 | `clock_system()`（唯一真读 OS 的口） | core 只有 `env.now()` 一条缝：epoch 毫秒。JS 档它落 `Date.now`，native 档落 libc——**每个目标都得自己开 extern**，这就是 core 至今没有 `time` 包的原因（现读：`moonbitlang/core` 主仓 56 个包，无 `time`/`date`/`calendar`） |
+| 时钟（可替换的"现在"） | 测试能不能把"现在"换成假的 | `clock_fixed(ms)` + 吃 `() -> Int64` 的 `now_at` / `today_at` | 语言不管这件事，纯设计问题 |
+| 时区 | 同一个瞬间显示成几点 | §5 那张内置表 | 参照代次自带 tzdb，不是算出来的 |
+
+### 6.2 公开面（新增五件）
+
+| 签名 | 语义 | 边界 / 错误 | hutool 对位 | 差异声明 | 读数来源 |
+|---|---|---|---|---|---|
+| `clock_system() -> () -> Int64` | 返回一个"每次调用读一次 OS 时钟"的函数 | 无参 | `SystemClock.now()` / `DateUtil.current()` | 参照 `SystemClock` 内部是**每 1 ms 刷 `volatile long` 的调度线程**，给的是缓存值；本库全同步起不了那条线程，也**不承诺**"同一毫秒内恒等读数"——本库这一件就是 `env.now()` 的一次读数（§5.5 那条"不收"仍然成立，这里收的是它去掉缓存后剩下的那一半） | 本库形状，无期望值可冻（见 §6.4） |
+| `clock_fixed(millis : Int64) -> () -> Int64` | 假钟：恒定给同一个读数 | 无（不校验窗外，窗外由查表那一步给 `None`） | 测试替身（参照无可注入口） | 本库新增。刻意**不校验**入参是否在窗口内：校验归 `now_at`/`today_at` 那一步，假钟只管给数 | 组合后的读数由腿 `W`/`P` 行冻 |
+| `date_of(zone : String, millis : Int64) -> Date?` | 瞬间 + 区名 → **日历日**（纯函数） | 坏名 / 窗外 ⇒ `None` | `DateUtil.date(.., tz)` 取日期那一半 | 与 `datetime_in` 同一条查表路，只是只要 `date` 那一半——这样 `today_at` 才是薄封装而不是第二套算法 | 腿 `W` 行的 `y-m-d` 列直读 |
+| `now_at(zone : String, clock : () -> Int64) -> DateTime?` | 用**注入的钟**取墙上时刻 | 坏名 / 窗外 ⇒ `None` | `DateUtil.date()` + 默认时区 | 参照吃进程默认时区；本库区名必填 + 时钟可换。`now_in(zone)` 保留但重定义为 `now_at(zone, clock_system())`，签名与已冻用例一字不动 | `clock_fixed(T)` 时等价于 `datetime_in(zone, T)`，读数即 §5 已冻的那批 |
+| `today_at(zone : String, clock : () -> Int64) -> Date?` | 用注入的钟取**日历日** | 同上 | `DateUtil.today()`（参照返回 `"yyyy-MM-dd"` **串**且吃默认时区） | 本库返回 `Date` 而不是串（要串自己 `.to_iso_string()`），区名必填 | 腿 `W` 行的 `y-m-d` 列直读 |
+
+### 6.3 为什么形状是"传函数"而不是"设全局"
+
+反面例子在本生态里就有现成的：`jeeflow-moon/core/model/clock.mbt:5` 用的是
+`let clock_ref : Ref[((() -> String))?]` + `pub fn set_clock(f)` 全局可变槽，
+实测后果是**并发/async 用例互相盖住对方的钟**。本包全同步、也没有跨模块状态，
+把"现在"做成**首参之后的显式实参**（`() -> Int64`）就完全没有那类耦合：
+一条用例一个钟，读数还是纯函数、期望照样能冻。附带好处——`clock_fixed` 让"跨夏令时边界的
+换算"这类用例第一次变得可写：§5.2 那 3618 条读数原本就得靠"直接给瞬间"才测得动。
+
+### 6.4 时钟源本身怎么测（不写计时依赖）
+
+`clock_system()` 是唯一没有外部读数的一条：**它的正确性不能靠断一个具体时刻**，
+否则 CI 慢一点就假红。判据只有三条，且都是形状级的：
+① `clock_system()` 给的读数 `> 1700000000000L`（绝对下界，同 #2.10 那条口径）；
+② 同一个钟函数**连取两次**，`第二次 >= 第一次` 不进断言（本包 `Int64` 档不承诺单调，
+   wasm 宿主的 `Date.now` 可被系统时间调整往回拨），只断"两次读数各自都能查出一个偏移"；
+③ `now_at(zone, clock_system())` 与 `date_of(zone, clock_system()())` 允许来自两次不同的读数
+   ⇒ 这一条**也不许互比相等**。能互比的只有 `clock_fixed`：`now_at(zone, clock_fixed(T))`
+   必须逐位等于 `datetime_in(zone, T)`（腿读数，已冻）。
+
+### 6.5 不收（本批范围内）
+
+| # | 不收 | 理由 |
+|---|---|---|
+| 1 | `SystemClock` 的缓存那一半（同毫秒恒等、1 ms 刷新） | 参照内部是 `ScheduledExecutorService` 线程；本库零 extern、全同步，既起不了线程，也无法冻结"同毫秒恒等"这种只能在并发下才成立的判据 |
+| 2 | 单调钟 / 秒表（`DateUtil.timer()`、`StopWatch`、`elapsed`） | 需要 monotonic 源。core 的 `env` 只给墙上毫秒；`core/bench` 里那三份 `monotonic_clock_{js,native,wasm}.mbt` 是 bench 自用、没做成公开包，而本库契约禁 extern ⇒ 没有可信的单调源，硬做就是拿墙上钟假装单调（NTP 往回拨就错） |
+| 3 | `nowDate()`（参照 `new Timestamp(ms).toString()`，形如 `2026-10-06 12:00:00.123`） | 参照吃默认时区 + 依赖 `Timestamp.toString` 的定宽格式；本库区名必填，而"要串"这一步 `DateTime::format` 已经能做 |
+| 4 | 时钟的时区自适应（"本机时区"隐式档） | 与 §0.1 冲突且 wasm 取不到宿主偏移 |
+| 5 | `Clock` 结构体 / 枚举抽象 | 一个 `() -> Int64` 就够，套一层类型要多一个公开类型与一份 `.mbti` 面，收益只有好看 |
+
+### 6.6 变异计划（PR-B 填读数；隔离 `tar` 副本 + 基线断言 + `flush/fsync/回读断言` + `finally` 还原 + 收尾字节比对）
+
+| 号 | 变异 | 计划打的档 |
+|---|---|---|
+| C1 | `clock_fixed(millis)` 返回的闭包里读 `clock_system()`（假钟变真钟） | 所有 `now_at` / `today_at` 用 `clock_fixed` 的档——它们与 §5 已冻读数逐位对照，必红 |
+| C2 | `now_at` 不等 clock，自己另读一次 `env.now()` | 同上一族（注入失效 ⇒ 与 `datetime_in(zone, T)` 不再相等） |
+| C3 | `date_of` 用 UTC 偏移而不是表内偏移 | 所有 `today_at` / `date_of` 的非 UTC 区档 |
+| C4 | `date_of` 的偏移符号反了（`+ off` 当 `- off`） | 东西半球两侧各一档（`Asia/Shanghai` vs `America/New_York` 同瞬间的日历日不同） |
+| C5 | `today_at` 走进程式默认档（写死偏移 480） | 除中国外的全部区 |
+| C6 | `now_in(zone)` 的薄封装改成"自己读钟 + 自己算偏移" | `now_in` 那一块的形状断言 + 与 `now_at(zone, clock_system())` 的同形断言 |
+| C7 | `clock_system()` 里加一层"同毫秒去重缓存"（往参照 `SystemClock` 靠） | **预期等价**——判据见 §6.4：本批刻意不断"同毫秒恒等"，也没有可冻的期望值打得到它。这条挂出来是为了把"为什么它注定测不到"写清楚，而不是当夹具缺口 |

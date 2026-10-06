@@ -195,6 +195,19 @@ public class TzLeg {
     }
 
     // 墙上时刻的合法偏移个数：0（前跳空洞）/ 1（正常）/ 2（回拨重叠）三档
+    // 逐区日历日读数（date_of / today_at 的期望底本）：全部 603 区 x 两个瞬间。
+    // 1970-01-01T00:00Z 与当下——同一天在不同区可以差一天，这正是"日界要按表内偏移算"的判据档。
+    long[] dprobes = { LO, Instant.parse("2026-10-06T00:00:00Z").getEpochSecond() };
+    for (String id : ids) {
+      java.time.ZoneId zi = ZoneId.of(id);
+      for (long p2 : dprobes) {
+        java.time.LocalDateTime ldt = java.time.LocalDateTime.ofInstant(
+            Instant.ofEpochSecond(p2), zi);
+        System.out.println("E	" + id + "	" + p2 + "	" + ldt.toLocalDate() + "	"
+            + String.format("%02d:%02d:%02d", ldt.getHour(), ldt.getMinute(), ldt.getSecond()));
+      }
+    }
+
     String[][] walls = {
         { "America/New_York", "2024-11-03T01:30" },
         { "America/New_York", "2024-03-10T02:30" },
