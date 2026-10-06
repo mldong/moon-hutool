@@ -31,7 +31,7 @@ fn fmt(d : @date.DateTime) -> String {
 }
 
 ///|
-// 六档全覆盖，不留 wildcard
+// 七档全覆盖，不留 wildcard（第二批加 `BadRange`，spec §11 第 7 行）
 fn tag(e : @cron.CronError) -> String {
   match e {
     @cron.BadParts(s) => "BadParts[" + s + "]"
@@ -40,6 +40,8 @@ fn tag(e : @cron.CronError) -> String {
     @cron.OutOfRange(f, v) => "OutOfRange[" + f + "," + v.to_string() + "]"
     @cron.NonPositiveStep(s) => "NonPositiveStep[" + s + "]"
     @cron.BadSyntax(s) => "BadSyntax[" + s + "]"
+    @cron.BadRange(s, e2) =>
+      "BadRange[" + s.to_string() + "," + e2.to_string() + "]"
   }
 }
 
@@ -131,7 +133,11 @@ test "cron 解析档：50 个表达式的接受/报错与原文本" {
   assert_eq(parse_text("* * *"), "BadParts[* * *]") // 腿新读 3 段|CronException:Pattern [* * *] is invalid, it must be 5-7 parts!
   assert_eq(parse_text("* * * * * * * *"), "BadParts[* * * * * * * *]") // 腿新读 8 段|CronException:Pattern [* * * * * * * *] is invalid, it must be 5-7 parts!
   assert_eq(parse_text("* * * * * * * * *"), "BadParts[* * * * * * * * *]") // 腿新读 9 段|CronException:Pattern [* * * * * * * * *] is invalid, it must be 5-7 parts!
-  assert_eq(parse_text("0 12 * * * * * *"), "BadParts[0 12 * * * * * *]") // 腿新读 8 段（带值）|CronException:Pattern [0 12 * * * * * *] is invalid, it must be 5-7 parts!  assert_eq(parse_text("* * * * * * *"), "OK:* * * * * * *") // ok.41|OK:* * * * * * *
+  assert_eq(parse_text("0 12 * * * * * *"), "BadParts[0 12 * * * * * *]") // 腿新读 8 段（带值）|CronException:Pattern [0 12 * * * * * *] is invalid, it must be 5-7 parts!
+  // 第二批反抽时抓到的一条**死断言**：上面这行的行注释把下一条 `assert_eq` 整个吞进了注释里
+  // （生成脚本当年把两条断言拼在同一行），所以 7 段式的阳性格从未跑过——`grep -c 'parse_text("\* \* \* \* \* \* \")' 现读 0 条**活**命中`为凭。
+  // 期望文本本来就是腿 ok.41 的原读数，这里只是把它搬回自己的行上（不改期望，只让它真跑）
+  assert_eq(parse_text("* * * * * * *"), "OK:* * * * * * *") // ok.41|OK:* * * * * * *
   assert_eq(parse_text(""), "BadParts[]") // ok.42|OK: —— 本库改判（参照侧接受该输入，读数原样留在标签里）
   assert_eq(parse_text("   "), "BadParts[   ]") // ok.43|OK:    —— 本库改判（参照侧接受该输入，读数原样留在标签里）
   assert_eq(parse_text("0 12 * * 1-7"), "OK:0 12 * * 1-7") // ok.44|OK:0 12 * * 1-7

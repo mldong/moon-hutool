@@ -13,13 +13,15 @@
 |---|---|---|
 | **本批落地** | `CronPattern` 的公开面：解析（5/6/7 段 + `\\|` 多选表达式）、`match`、`nextMatchAfter`、`nextMatch`、`toString` | 纯计算，期望值全部可由参照腿逐条直读（1386 行） |
 | **不做（整族）** | `CronUtil`/`TaskTable`/`Scheduler`/`CronTask`/`InvokeTask`/`CronTimer`/`CronConfig`/`timingwheel/*`/`listener/*` | 行内早写的"**只算不调度**"：调度要有线程/定时器，本库全同步、零 OS 能力（`AGENTS` 零依赖四条）；`CronConfig` 还读 `settings` 文件 |
-| 第二批（排期） | `CronPatternBuilder`、`CronPatternUtil`（`nextMatchAfter(pattern, zone, n)` 一次取 N 个、`describe` 人类可读化、`TimeZone` 档） | 建造器与"取 N 个"是聚合层，`describe` 要一整套文案表，`TimeZone` 档与本库"偏移显式传"的口径要先拍 |
+| 第二批（本批） | `CronPatternBuilder`、`CronPatternUtil`（`nextDateAfter`/`matchedDates`）、`Part` 七档、`CronPattern.nextMatch(Calendar)` 的带区名版 | 公开面与判据在 §8~§11；**早先写的"`describe` 人类可读化"要更正：5.8.35 的 `CronPatternUtil` 没有这件**（`javap` 现读），不是决定不做；`TimeZone` 档这一批收（第一批不收它的那条理由"本库不带 tzdb"已被 `date` §5 的内置表推翻，见 §11 第 6 行） |
 | **不在本包** | 日期算术（月末、闰年、epoch 换算） | 全部委托 `date` 包（`Date::of`、`DateTime::of`、`days_in_month`、`is_leap_year`、`add_*`），本包不重算 |
 
 **时刻的输入形状**：参照侧有四个入口，其中 `match(long millis, bool)` 与 `match(TimeZone, ...)` 依赖 `TimeZone.getDefault()`——
 本机默认是 `Asia/Shanghai`（腿里 `sys.default_tz` 为凭），同一毫秒数在两台机器上会给两个读数。
-本库**只做无时区的本地时刻**：入口收 `@date.DateTime`（`date` 包的形状，偏移由调用方决定），
+第一批**只做无时区的本地时刻**：入口收 `@date.DateTime`（`date` 包的形状，偏移由调用方决定），
 参照腿因此全程钉在 UTC 上（`sys.tz|UTC`），只取 `match(LocalDateTime, bool)` / `nextMatchAfter(Calendar(UTC))` / `nextMatch(Calendar(UTC))` 三条不随默认时区变的路径。
+**第二批把"带区名的瞬间档"补上了**（#19.17~#19.19）——当初不补的那条理由是"本库不带 tzdb"，这条前提已被 `date` §5 的内置表推翻；
+第一批那三条本地时刻入口一字不动，两档并排（判据与五区五读数见 §9 第 12 条、§11 第 6 行）。
 
 ---
 
@@ -89,13 +91,13 @@ pub fn cron_pattern_text(c : Cron) -> String                                    
 
 | # | 分岔 | 参照 | 本库 | 依据 |
 |---|---|---|---|---|
-| 1 | 时区 | `match(long millis, …)` 与 `match(TimeZone, …)` 存在且默认档走 `TimeZone.getDefault()` | 只收 `@date.DateTime`（本地时刻 + 显式偏移），无毫秒/时区入口 | 同输入两机两读；本库全同步且不带 tzdb（`date` 包同一口径） |
+| 1 | 时区 | `match(long millis, …)` 与 `match(TimeZone, …)` 存在且默认档走 `TimeZone.getDefault()` | ~~只收 `@date.DateTime`~~ → **第二批起两档都收**：无区名的 `@date.DateTime` 档（本行原样保留，第一批 1062 条期望一字不动）+ 带区名的瞬间档（#19.17~#19.19，见 §8） | 原依据的后半句"本库不带 tzdb"**已被 `date` §5 的内置表推翻**（603 区 36701 段），本行由第二批 §11 第 6 行改写；"同输入两机两读"这条判据不变，反而更强——腿 C 的 `M`/`N`/`N2` 三个家族就是五区五读数的机器证据 |
 | 2 | 空表达式 | 解析通过、`match` 恒 false、`nextMatchAfter` 抛 NPE（`CollUtil.min` 返回 null） | 解析期 `raise BadParts("")` | `ok.42`/`nx.42.0` 两条读数为凭；"能构造但一用就 NPE"不算可观测语义 |
 | 3 | 星期侧的 `L`/`#` | `IllegalArgumentException: No enum constant …Week.5L`（枚举查找漏到外面，且**不是** `CronException`） | `raise BadAlias("5L")`——异常种类收进本包错误面 | 消息原文照留在 `ok.14`/`ok.15`/`ok.16`；跟随一个 `IllegalArgumentException` 等于把 Java 枚举机制漏给调用方 |
 | 4 | 报错消息 | `"{} value {} out of range: [{} , {}]"` 等模板 | 错误变体带**档名 + offending 文本/值**，不复制模板 | 消息文案随 hutool 版本变；契约要钉的是"哪一档、哪一段、哪个值" |
 | 5 | `-1 * * * *` | 接受并参与匹配（`length()<=2` 分支绕过 `checkValue`） | `raise OutOfRange("MINUTE", -1)` | 第 7 条两侧读数；与 `60 * * * *` 报错这条同族规则相矛盾，取"可推导"的一侧 |
 | 6 | 第 7 段年份 | 年档**参与匹配**（`Part.YEAR` 的 1970~2099 只在解析时校验；5/6 段压根没有年档） | 跟随 | 第 2 条 + 第 14 条 + `m.33.*`/`nx.33.*` 读数 |
-| 7 | `describe`/`CronPatternBuilder`/`nextMany` | 有 | 第二批 | 第 1 节 |
+| 7 | `describe`/`CronPatternBuilder`/`nextMany` | `CronPatternBuilder` 与"取 N 个"有；**`describe` 在 5.8.35 不存在** | 建造器与 `matched_dates` 第二批落地（§8）；`describe` 不进契约（参照没有这件，不是决定不做） | 第 1 节 + §8 那张"不收"表 |
 | 8 | 调度族 | 有（含时间轮） | **整族不做** | 第 1 节"只算不调度" |
 | 9 | 年档无未来解 | `getMin` 没考虑 `YearValueMatcher` ⇒ `IllegalArgumentException:Invalid matcher: cn.hutool.cron.pattern.matcher.YearValueMatcher`（6 个基准实测全部如此） | 按参照自己"置最小值"的同一规矩回绕到年集合最小值，保住 #19.3/#19.4 是总函数 | §3 第 16 条；两侧读数都在案（`nx.34.*`/`nm.34.*` 标签原文即参照值） |
 | 10 | 星期中文别名 | `Week.of` 另认 `星期X`/`周X`（issue#3637） | 不跟随（只认三字母与全名，大小写不敏感） | 本库不引中文码表；夹具不覆盖，遇到再议 |
@@ -120,7 +122,130 @@ pub fn cron_pattern_text(c : Cron) -> String                                    
 
 ---
 
-## 7. 状态
+## 7. 状态（逐批）
 
-`docs/ROADMAP.md` 第 19 行的状态与本节同步（`scripts/sync_status.py --write` 生成，勿手改）：
-**已实现**（10-05，两笔：`49d2973` 期望落盘 → PR-B 逻辑落地）。三档一致 425 = 绿 425/红 0；§6 十条变异逐条实跑（7 条抓到、1 条不收敛、1 条不可挂载；「段数 ≥5 即放行」当时是等价变异，已按腿新读的 3/8/9 段读数补四条断言把判据做成可达并重跑成红 ⇒ 抓到）；落地轮另完成 1112 条用例的逐条反抽重跑对账，抓到并改正 PR-A 四处夹具缺陷（见 §4）。用例总数不变（8 块），断言数 1058 → 1062。
+第一批：**契约已冻结的面上已落地**（10-05 两笔：`49d2973` 期望落盘 → PR-B 逻辑落地），§6 十条变异逐条实跑（7 条抓到、1 条不收敛、1 条不可挂载；「段数 ≥5 即放行」当时是等价变异，已按腿新读的 3/8/9 段读数补四条断言把判据做成可达并重跑成红 ⇒ 抓到）；落地轮另完成 1112 条用例的逐条反抽重跑对账，抓到并改正 PR-A 四处夹具缺陷（见 §4）。用例总数不变（8 块），断言数 1058 → 1062。
+
+第二批：见 §12（本批 §8~§11 冻结，函数体是 `abort` 骨架）。
+
+---
+
+## 8. 第二批公开面（段枚举 / 表达式建造器 / 带区名的三个入口）
+
+```
+pub enum CronPart { Second Minute Hour DayOfMonth Month DayOfWeek Year }         // #19.6
+pub fn cron_part_name(p : CronPart) -> String                                     // #19.7
+pub fn cron_part_min(p : CronPart) -> Int                                         // #19.8
+pub fn cron_part_max(p : CronPart) -> Int                                         // #19.9
+pub fn cron_part_check_value(p : CronPart, value : Int) -> Int raise CronError    // #19.10
+pub struct CronBuilder                                                            // #19.11
+pub fn cron_builder_new() -> CronBuilder                                          // #19.12
+pub fn cron_builder_set(b : CronBuilder, part : CronPart, value : String) -> CronBuilder
+      // #19.13（不校验）
+pub fn cron_builder_set_values(b : CronBuilder, part : CronPart,
+                               values : Array[Int]) -> CronBuilder raise CronError
+      // #19.14（设置期逐值校验）
+pub fn cron_builder_set_range(b : CronBuilder, part : CronPart,
+                              begin : Int, end : Int) -> CronBuilder raise CronError
+      // #19.15（设置期两端校验，不比大小）
+pub fn cron_builder_build(b : CronBuilder) -> String                              // #19.16
+pub fn cron_next_match_after_in(
+  c : Cron, zone : String, millis : Int64) -> Int64?                              // #19.17
+pub fn cron_next_match_in(
+  c : Cron, zone : String, millis : Int64) -> Int64?                              // #19.18
+pub fn cron_matched_dates(
+  c : Cron, zone : String, start : Int64, end : Int64,
+  count : Int, match_second : Bool) -> Array[Int64]? raise CronError              // #19.19
+pub suberror CronError { ... BadRange(Int64, Int64) }                             // 新增变体（additive）
+```
+
+件归属（`javap` + 源码现读 hutool-cron 5.8.35，不是猜的）：
+
+| 参照件 | 行数 | 本批收的东西 |
+|---|---|---|
+| `pattern/Part.java` | 105 | 七档的名字、`min`/`max`、`checkValue` 的判据 |
+| `pattern/CronPatternBuilder.java` | 85 | `of`/`set`/`setValues`/`setRange`/`build`——`build()` 返回的是**串**而不是 `CronPattern`（实现 `Builder<String>`） |
+| `pattern/CronPatternUtil.java` | 113 | `nextDateAfter`(2 参)、`matchedDates`(带 end 的那一族) |
+| `pattern/CronPattern.java` | 215 | `nextMatch(Calendar)`（5.8.30 才有的一件，本批给它带区名的版本） |
+
+**第二批不收的，逐条给理由**（三条是"参照的类型机制漏到接口上"，两条是"本库已有更好的形状"）：
+
+| 不收 | 参照侧 | 理由 |
+|---|---|---|
+| `Part.getCalendarField()` | 返回 `java.util.Calendar.SECOND` 那套字段号（13/12/11/5/2/7/1，腿 O 行） | 本库没有 `Calendar`，那个整数是调用方拿不去的邻居物；腿的读数只用来证明"段序与 `Calendar` 字段号是两回事" |
+| `Part.of(int)` | `ENUMS[i]`，越界给 `ArrayIndexOutOfBoundsException`（腿 O 行 -1/7/99 三条） | 参照的整数就是枚举声明序，Java 枚举的 `ordinal()` 本来也不该进公开契约；本库调用方要哪段就写哪个枚举值，不导出"按下标取段" |
+| `nextDateAfter(pattern, start, isMatchSecond)` | `@Deprecated`，javadoc 自己写"isMatchSecond 无效" | 腿 D3 三组实测二参与三参**逐字节同值**（`1710050460000`/`1730655000000`/`1835366400000`）——那个布尔参数确实是死的；已废弃且无效的参数不进契约 |
+| `matchedDates(patternStr, start, count, isMatchSecond)`（4 参，无 end） | 源码 `matchedDates(patternStr, start, DateUtil.endOfYear(start), …)` | 让调用方自己给 `end`：窗口是业务决定而不是库决定，且"到起始日年底"那一档在带区名版还要先定"年底按哪个区"，那是第二层语义 |
+| `describe` | **5.8.35 没有这件**（`javap cn.hutool.cron.pattern.CronPatternUtil` 现读公开面只有上面那几条） | 第一批 §1 与 ROADMAP 那句"第二批含 `describe`"是照旧版本写的，本批更正——不是"决定不做"，是参照根本没有 |
+
+一处口径要先说明：本包给 `Part` 开的是 `pub enum`，与 typex 那两格的"档位收串"先例不同。判据是这件**带行为**（`min`/`max`/`checkValue` 是按档不同的规则，且建造器的三个 setter 对它的校验时机不同），当串传就得自带一档"坏档名"错误；而 `DataSize` 那 15 档只是查表的键。参照侧它本来也是公开枚举，开枚举不是自创形状。
+
+---
+
+## 9. 第二批语义条目（每条给腿 C 的行标签，标签是 §10 那张表的行首）
+
+| # | 判据 | 参照读数 |
+|---|---|---|
+| 1 | 七档的界：`SECOND 0~59`、`MINUTE 0~59`、`HOUR 0~23`、`DAY_OF_MONTH 1~31`、`MONTH 1~12`、`DAY_OF_WEEK 0~6`、`YEAR 1970~2099` | `P.*` 七条（腿 C 行首 `P`）——注意周日是 **0~6**，`7` 不在界里（第 3 条解释它为什么还能用） |
+| 2 | `checkValue` **只判不改**：合法就原样返回，越界抛带档名与区间的消息 | `C.*` 77 条：`C|SECOND|7|RET|7`（不归一）、`C|MINUTE|60|ERR|MINUTE value 60 out of range: [0 , 59]`。消息模板里的空格位置照抄留在标签里，本库错误面**不复制模板**（沿用 §5 第 4 行） |
+| 3 | 建造器的 `set(part, String)` **完全不校验**：文本原样进槽，坏文本要到解析期才报 | `K.junk_minute RET abc * * * *` 配 `RT.junk_minute ERR CronException\|Invalid alias value: [abc]`；`K.dow_seven RET * * * * 7` 配 `RT.dow_seven RET`（7 合法是因为解析侧把周日 `0`/`7` 同义，见 §3 第 8 条，而不是因为 `DAY_OF_WEEK` 的界里有 7） |
+| 4 | `setValues`/`setRange` **在设置期**逐值 `checkValue`，不是到 `build()` 才报 | `K.values_out_of_range`、`K.range_out_of_range`、`K.second_out_of_range` 三条都是 `ERR_...CronException`，且 `RT.* = ERR_NoBuild`（根本没走到 build） |
+| 5 | `build()` 的默认值只补"分~周"四段；**秒与年未设置就整段省略** ⇒ 段数随设置变 | `K.empty RET * * * * *`（5 段）、`K.second_set RET 30 * * * * *`（6 段）、`K.second_and_year RET 0 * * * * * 2030`（7 段） |
+| 6 | 空白视同未设置；空值数组也视同未设置 | `K.blank_minute`/`K.space_minute`/`K.null_minute` 三条同给 `* * * * *`；`K.values_empty RET * * * * *`（`ArrayUtil.join(空数组)` 给 null） |
+| 7 | `setRange` 不校验 `begin <= end`：反向区间照建 | `K.range_reversed RET * * 20-5 * *` 配 `RT.range_reversed RET`——与 §3 第 12 条（解析侧照收反向区间）同族，不矛盾 |
+| 8 | **只设年不设秒 ⇒ 参照产出它自己解析不了的串** | `K.year_only_no_second RET * * * * * 2030`（6 段）配 `RT.year_only_no_second ERR CronException\|DAY_OF_WEEK value 2030 out of range: [0 , 6]`。6 段式第一位是秒 ⇒ `2030` 落到周档。本库在这一格补秒为 `*`（分岔见 §11 第 1 条） |
+| 9 | `matchedDates` 的 `count` 是 **add-then-check**，且直接当 `ArrayList` 初始容量 | `CB.count 0 RET 1`（要 0 条却给 1 条）、`CB.count -1 ERR java.lang.IllegalArgumentException\|Illegal Capacity: -1`（Java 容器内部件漏到调用方）、`CB.count 1 RET 1`、`CB.count 2 RET 2`；`M.count_zero.*` 五区都给一条。本库 `count <= 0 ⇒ 空表`（§11 第 2 条） |
+| 10 | 窗口 `[start, end)`：**起算瞬间含、终止瞬间不含**；`start >= end` 报错 | `M.dow_mon`（`count=3`：UTC/纽约各只给 2 条，因为 `2024-03-25 00:00` 那一瞬**不含**；上海/加德满达/洛德豪斯给 3 条，因为它们的"当地周一 00:00"落在 `03-24 16:00Z`/`18:15Z`/`13:00Z`，仍在窗内）；`E.start_gt_end`/`E.start_eq_end` 两条 `IllegalArgumentException\|Start date is later than end !` ⇒ 本库留变体 `BadRange(start, end)`（参照主动抛且带文案，按本仓规矩不并成空表） |
+| 11 | 区名必填、瞬间进瞬间出：坏区名或落点窗外 ⇒ 无读数（`Int64?` / `Array[Int64]?`），与"窗内但没命中"（`Some([])`）**两条通道分开判** | 形状判据，来源是 `date` §5 那张表只承诺 `[1970-01-01, 2050-01-01)`：`M.*.<zone>.<none>` 是"窗内无命中"这一档（腿给 `<none>` 的格有 `count_more_than_avail` 的 Kathmandu/Lord_Howe 两格），窗外这一档参照**照样给值**（`N.year_2099.* RET 4070952000000`、`N.leap_only` 从 2098 基准给 `4233686400000`＝2104-02-29）⇒ 本库给 `None`，见 §11 第 4 条 |
+| 12 | 同一瞬间在不同区下两读 ⇒ 区必须是入参，不能留"进程默认时区"这条路 | `M.daily SEC 6` 五区五组首条互不相同：UTC `1730424600000…`、上海 `1730482200000…`、纽约 `1730439000000…`、加德满达 `1730490300000…`、洛德豪斯 `1730471400000…`（同一条"当地 01:30"，差在各自的偏移）；`N.daily_0130` 同一基准（`1730548800000`）五区给 `1730597400000`/`1730568600000`/`1730615400000`/`1730576700000`/`1730561400000`。**这一条推翻第一批 §5 第 1 行"不收毫秒/时区入口"的那条理由**（原文写"本库不带 tzdb"——`date` §5 已经内置了），改写见 §11 第 6 行 |
+| 13 | 重叠（回拨）档取**转换后那一支**偏移 | `N.daily_0130 0 30 1 * * * 1730548800000 America/New_York → 1730615400000`（纽约 11-03 01:30 有 EDT/EST 两支，转换前那支是 `1730611800000`，参照给的是**后**一支）；`N.daily_0230` 同基准同区 → `1730619000000`（02:30 也是后一支）。与 `date` §7 `parse_in` 的"取末支"是同一条规矩，**两个独立家族各自证一次** |
+| 14 | 空洞（前跳）档那堵墙上时刻**整天跳过**，不做"往后挪一小时"的回落 | `N.daily_0230 1709985600000 America/New_York → 1710138600000`（纽约 2024-03-10 02:30 不存在，参照不给 03:30 那一瞬，而是跳到 03-11 02:30）；`N.daily_0230 515505600000 Asia/Shanghai → 515611800000`（1986-05-04 02:30 同样跳过）；同档在 UTC/无 DST 的区则正常给（`N.daily_0230 1709985600000 UTC → 1710037800000`）。机制在参照源码：`Calendar.set` 落在空洞里会滚出该墙上时刻，随后的 `match(next, true)` 读回字段不等 ⇒ 走 `nextMatch` 的"+1 天再试"那条递归 |
+| 15 | `next_match_after_in` 与 `next_match_in` 在**已匹配**的输入上分岔，且回拨日分岔得更狠 | 成对读数以 `1730611800000`（纽约 11-03 01:30 **EDT**，本身匹配）为凭：`N.daily_0130 → 1730701800000`（11-04 01:30，**直接跳过当天的第二支**）、`N2.daily_0130 → 1730615400000`（11-03 01:30 **EST**，原地换到后一支）。两族必须各留一条腿，第 13 条与 §3 第 13 条靠这对读数才抓得住变异 |
+| 16 | `matched_dates` 与"下一个时刻"在回拨日**不同形**：前者两支都收，后者只走一支 | `M.daily SEC 6 America/New_York → 1730439000000\\|1730525400000\\|1730611800000\\|1730615400000\\|1730701800000\\|1730788200000`（11-03 的 `1730611800000` 与 `1730615400000` 两支都在表里）对 `N.daily_0130` 同区同模式只给一支。原因在参照自己：`matchedDates` 是按步长**线性扫瞬间**，`nextDateAfter` 是**字段进位**。本库两条各自跟随自己那一族的读数，不许互相"对齐"（§11 第 3 条） |
+| 17 | 45 分与 30 分偏移的区照样能算，采样栅格按**瞬间**折算而非"墙上秒为 0" | `M.every_min SEC 4 Asia/Kathmandu → 1710051300000\|1710054900000\|1710058500000`（整点在 UTC 是 :15，因为 `+05:45`）、`M.daily SEC 6 Australia/Lord_Howe → 1730471400000…`（DST 只挪 30 分那一族，`+10:30`/`+11:00`）；`M.m_star MIN 3` 五区起点都是 `1710050400000`（步长按 60 000 ms 折在瞬间上，与区无关）。这一条是 §10 那条算法注的判据来源 |
+| 18 | **无解的模式参照不报错，是崩**：`0 0 0 30 2 *`（2 月 30 日）解析通过，取下一时刻把 Java 栈打爆 | `N.feb30`/`N2.feb30` 五区 × 十一个基准共 55 条，落点在表内的 **50 条**全部 `ERR_java.lang.StackOverflowError\|null`（其余 5 条基准在 2098，本库在算之前就先给 `None`）。⇒ §3 第 10 条"每个合法模式都有解、`next_match_after` 是总函数"那句**说过头了**，本批收窄：夹月末只保证"日档含 31 或 `L`"那一族有解；`30 2`、`31 2`（平年）这类"日档不含月末却大于当月天数"的模式两侧都无界。不进期望值，理由见 §11 第 5 条 |
+
+---
+
+## 10. 第二批参照腿
+
+| 腿 | 载体 | 读数 | 备注 |
+|---|---|---|---|
+| C 实测 | `scripts/Cron2Leg.java`（v3）× 真 `hutool-cron-5.8.35.jar` + `hutool-core-5.8.35.jar` + JDK 17.0.14（`lib/tzdb.dat` 101731 bytes，与 `date` §5 同代）；**每个用例前 `TimeZone.setDefault(...)` 逐个区跑**，因为这一批要测的正是"默认区改变读数"这件事 | **1407 行**：`B` 4（守卫自检）+ `T` 4（代次）+ `P` 7 + `C` 77 + `O` 10 + `K` 18 + `RT` 18 + `CB` 4 + `D3` 3 + `M` 50 + `N` 605 + `N2` 605 + `E` 2 | 五个区刻意取 `UTC`（零偏移基线）、`Asia/Shanghai`（1986 那次前跳）、`America/New_York`（回拨重叠）、`Asia/Kathmandu`（**+05:45** 那种 45 分偏移）、`Australia/Lord_Howe`（**DST 只挪 30 分**）——只跑前三个会把第 17 条那两件事藏住 |
+| D 源码 | `CronPatternBuilder.java`（85）+ `CronPatternUtil.java`（113）+ `CronPattern.java`（215）+ `Part.java`（105）+ `matcher/PatternMatcher.java` 的 `nextMatchValuesAfter` | 秒/年"不设就忽略"在 `build()` 的 `StrJoiner.setNullMode(IGNORE)`；`count` 的 add-then-check 在 `matchedDates` 的循环体；`+1 秒` 在 `nextMatchAfter`；"读回字段不等就 +1 天再试"在 `nextMatch`；`Part` 构造器在 `min > max` 时对调（实测七档没有一档触发） | 报错模板只用来对号，本库不复制（§5 第 4 行） |
+
+**守卫自检（阳性对照）**：`B.GUARD_THROW`/`B.GUARD_OVERFLOW`/`B.GUARD_SLOW`/`B.GUARD_DISTINCT` 四行证明"抛错 / 线程死掉 / 仍在跑"三档出口各有自己的串。这一条是本轮自己踩出来的：v2 只 `catch (Exception)`，`feb30` 那 21 条被 `StackOverflowError`（`Error` 不是 `Exception`）打死的线程没设结果，腿把它们**报成了 `ERR_Timeout`**——判据本身坏过一次，就在这里钉住，别让下一个读者再信一次"超时就等于还在跑"。同轮的另一个教训：`GUARD_MS` 从 4 s 放到 20 s，因为 `M.leap_feb`（SEC 档跨一年 ≈ 3.2×10^7 次匹配）是真在算而不是挂住，4 s 会把一条合法读数误记成无读数。
+
+**算法注（PR-B 的验收对象，读数面由 `M`/`N`/`N2` 钉）**：本库 `matched_dates` **不逐秒线性步进**。参照那一档跨年会跑三千万次（腿里那一格实测要几秒），wasm 档不可接受。形状改成：用第一批已冻的字段进位引擎取**候选墙上时刻**，把每个候选墙上时刻按内置表展开成 0/1/2 支瞬间（空洞 0 支自然跳过、重叠 2 支都收），再按 `(瞬间 − start) mod 步长 == 0` 折回参照的采样栅格、排序去重、截到 `count`。三条判据分别钉住这件事：第 17 条（栅格折在瞬间上不折在墙上秒）、第 14 条（0 支 ⇒ 不回落）、第 16 条（2 支 ⇒ 都收）。这条注里唯一"参照没有"的东西是**速度**，不是语义。
+
+---
+
+## 11. 第二批分岔与不跟随（逐条给两侧读数）
+
+| # | 分岔 | 参照 | 本库 | 依据 |
+|---|---|---|---|---|
+| 1 | 只设年不设秒 | `build()` 给 `* * * * * 2030`，喂回 `new CronPattern(…)` 报 `DAY_OF_WEEK value 2030 out of range: [0 , 6]` | 秒补 `*` ⇒ `* * * * * * 2030`（7 段式，解析通过） | `K.year_only_no_second` 与 `RT.year_only_no_second` 两条读数都在案。参照在这格自相矛盾（自家的建造器产出自家的解析器收不了的串），按 §5 第 5 行同一条规矩取"可推导"那一侧；只动坏的那一格，第 5 条"不设就省略"在其余格照留 |
+| 2 | `count <= 0` | `count=0` 给 1 条（add-then-check）；`count=-1` 抛 `IllegalArgumentException: Illegal Capacity: -1` | 一律 `Some([])` | `CB.count` 四条。参照同一件的两个读数互相矛盾，且负数那抛的是 Java 容器内部件；"要 0 条就给 0 条"是可推导那一侧 |
+| 3 | 回拨日的两支 | `matchedDates` 两支都给（线性扫瞬间）、`nextDateAfter`/`nextMatch` 只给一支（字段进位） | 两条各自跟随：`cron_matched_dates` 两支都收，两个 `*_in` 只给转换后那一支 | 第 16 条 + 第 13 条。这里**不许**"顺手统一"——统一成哪一侧都会让另一侧的 605 条读数作废，而两侧都是参照的真读数 |
+| 4 | 落点出表窗（`[1970, 2050)` 之外） | 照给：`N.year_2099 RET 4070952000000`、`N.leap_only`（2098 基准）`RET 4233686400000`＝2104-02-29 | `None`（基准出窗、或搜索途中出窗，都不猜未来） | `date` §5 那张表的承诺窗口就是 `[1970-01-01, 2050-01-01)`；同一条判据在 `date` §7 `format_in`/`parse_in` 已经冻过 |
+| 5 | 无解模式（`0 0 0 30 2 *`） | `StackOverflowError`（50 条读数） | **同样不承诺返回**，且这一档**不进期望值** | 本库跟随参照的引擎，无界递推会把 wasm 侧一并挂住；把一条"会挂住的用例"塞进测试等于把整套件判死，抓不到任何东西。要界请调用方自带 deadline（本库不发明"最多试 N 天"那种参照没有的常数）。第一批 §3 第 10 条那句"每个合法模式都有解"本批就地收窄 |
+| 6 | 时区入口（**改写第一批 §5 第 1 行**） | 有 `match(long millis, …)`/`match(TimeZone, …)`，默认档吃 `TimeZone.getDefault()` | 两档都收：无区名的 `@date.DateTime` 档（第一批已冻，一字不动）+ 带区名的瞬间档（本批 #19.17~#19.19） | 原文那条理由是"本库全同步且**不带 tzdb**"——`date` §5 已内置 603 区 36701 段的表，前提没了；第 12 条的五区五读数就是"默认区这条路必须堵掉"的机器证据 |
+| 7 | `CronError` 加变体 | 参照抛 `IllegalArgumentException`（`Assert.isTrue`） | 新增 `BadRange(Int64, Int64)`（additive） | `E.*` 两条。异常种类收进本包错误面这条规矩同 §5 第 3 行；带两个整数而不是抄文案，同 §5 第 4 行 |
+| 8 | `Part` 的 `getCalendarField`/`of(int)`/`describe`/4 参 `matchedDates`/3 参 `nextDateAfter` | 有（`describe` 例外：5.8.35 没有） | 不收 | 逐条理由在 §8 那张"不收"表 |
+
+---
+
+## 12. 第二批状态
+
+契约已冻结（本笔）：`cron/part_builder.mbt` + `cron/zone_util.mbt` 的函数体是 PR-B 骨架，`cron/part_builder_test.mbt`（15 块中的 4 块）+ `cron/zone_util_test.mbt`（11 块）的期望全部由 `scripts/gen_cron2_test.py` 从腿 C 的 **1407 行**读数灌入——**1289 条断言，手打零条**。当前读数：全仓 593 块 = 绿 579 / 红 14（14 块红 = 本批 15 块里除了"三参同值留案"那一块，其余每一块都撞在骨架 `abort` 上，正是设计态）。
+
+**故意不进夹具的 100 格**（50 条 `N` + 50 条 `N2`）全是 `feb30` 那一族——见 §11 第 5 行；同一族的另外 10 格（基准已在 2098，本库在算之前就 `None`）**进了夹具**，它们不碰引擎，所以既留住了"窗外先判"这条判据，又不会把件挂住。
+
+落地轮（下一笔）要做的事：① 红转绿且**不改期望**；② §11 第 5 条那一档确认没进夹具；③ §10 那条算法注的三件事各挂一条变异——
+栅格折算（改成"按墙上秒 == 0 折"应当被 `M.every_min` 的 Kathmandu 那格抓红）、
+0 支跳过（改成"往前挪一小时"应当被 `N.daily_0230` 的纽约/上海两格抓红）、
+2 支都收（`cron_matched_dates` 只取第一支应当被 `M.daily` 的纽约那格抓红，而 `*_in` 两件取末支应当被 `N`/`N2` 那对同基准格抓红）；
+④ 删掉 `cron/moon.pkg` 那行骨架豁免（G12 会盯着骨架文案）。
+
+**本轮反抽时抓到的一条死断言（第一批遗留）**：`cron/cron_test.mbt` 第 134 行把 `assert_eq(parse_text("* * * * * * *"), "OK:* * * * * * *")` 拼在上一条的行注释里，7 段式那格从未跑过（`grep -c` 活命中为 0 为凭）。期望文本本来就是腿 `ok.41` 的原读数，这一笔只把它搬回自己的行上——**不改期望，只让它真跑**。教训与 §4 那四条同族：**行注释会吞断言，生成脚本把两条断言拼一行就会静默少一格；判"某格跑没跑"要数活命中，不能只数标签。**
+

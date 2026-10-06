@@ -1,3 +1,10 @@
+// 第二批骨架期（PR-A）：`part_builder.mbt` / `zone_util.mbt` 的体全是 abort ⇒
+// 结构体没人构造、字段没人读、新变体 `BadRange` 没人构造、raise 没人抛、参数没人用，
+// 那五类警告是"未实现"的机械后果，按 G12 压掉（键只出现一次、flag 连写不带空格/逗号）；
+// 落地笔整行删除（G12 会盯着骨架文案，删不掉的是实现已落地却还藏着豁免这种状态）。
+
+warnings = "-unused_value-struct_never_constructed-unused_constructor-unused_error_type-unused_field"
+
 // 时刻与日期算术全部委托 date 包（本包不重算月末/闰年/epoch，spec §1 末行）
 import {
   "mldong/moon-hutool/date",

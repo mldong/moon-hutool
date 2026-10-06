@@ -32,6 +32,10 @@ pub suberror CronError {
   NonPositiveStep(String)
   /// 语法形状错（多于一个 `/` 等）：参照 `Invalid syntax of field: [{}]`
   BadSyntax(String)
+  /// #19.19 的窗口判据：`start >= end`。参照 `Assert.isTrue(start < end, "Start date is later than end !")`
+  /// 抛的是 `IllegalArgumentException`（不是 `CronException`），文案里没有值 ⇒ 本库带两个瞬间进来。
+  /// 第二批新增（additive，spec §11 第 7 行）
+  BadRange(Int64, Int64)
 }
 
 ///|
