@@ -990,3 +990,86 @@ M7 暴露的是"查找式与锚定在旧样本上不可分辨"。补的 6 条样
 `CAR_LICENSE`（判据改码位）、`BANK_CARD` 三条（blank 出口 / 末段恒 4 / 空格位置——含调度器档共 2 红）、
 `IPV4`（引入第二张校验嘴）、`DP_ID_CARD`、`DP_ADDRESS`、`DP_USER_ID`、`DP_CLEAR_TO_NULL`、调度器空白前置闸。
 
+## 17. 第四批第二格 `CoordinateUtil`（#23.97–#23.105）
+
+### 17.1 边界（收与不收，逐条带理由）
+
+**收 9 件**（§17.2）。参照还有四枚公开常量与一个 `Coordinate` bean：
+
+| 参照面 | 判据 |
+|---|---|
+| `X_PI` / `PI` / `RADIUS` / `CORRECTION_PARAM` 四枚 `public static final double` | 不作公开项：它们是算法系数，暴露出去只会诱导调用方手改（一改就不是火星坐标系了）。腿把四枚值都读出来了（`X_PI=52.35987755982988`、`PI=3.141592653589793`、`RADIUS=6378245.0`、`CORRECTION_PARAM=0.006693421622965943`），实现按包内常量写 |
+| `Coordinate` bean（含 `setLng`/`setLat`/`offset(Coordinate)`/`equals`/`hashCode`）| **不移植**：参照的 bean 是可变对象，`offset` 会原地改自身；本库把坐标摊平成 `(Float, Float)`（与 #23.64–#23.82 把 `DataSize` 摊平成 `Int64` 同一处置）。`equals` 用的是 `Double.compare(...) == 0`，与 `==` 在 `-0.0` / `NaN` 两档不同（腿 `EQ_CHK` 有读数：`0.0` vs `-0.0` 给 `false`、`NaN` vs `NaN` 给 `true`）——**这一档在本库没有对应件**，因为二元组的相等由 `==` 逐位定，不引入参照那套比较语义 |
+| `bd09toWgs84` 的小写 `to` | 拼写照抄进 Note，不改齐（改了就不是对位同一件） |
+
+### 17.2 公开面（9 件）
+
+| 件 | 参照 | 返回 |
+|---|---|---|
+| #23.97 `coord_out_of_china(lng, lat)` | `outOfChina` | `Bool` |
+| #23.98 `coord_wgs84_to_gcj02(lng, lat)` | `wgs84ToGcj02` | `(Float, Float)` |
+| #23.99 `coord_gcj02_to_wgs84(lng, lat)` | `gcj02ToWgs84` | `(Float, Float)` |
+| #23.100 `coord_gcj02_to_bd09(lng, lat)` | `gcj02ToBd09` | `(Float, Float)` |
+| #23.101 `coord_bd09_to_gcj02(lng, lat)` | `bd09ToGcj02` | `(Float, Float)` |
+| #23.102 `coord_wgs84_to_bd09(lng, lat)` | `wgs84ToBd09` | `(Float, Float)` |
+| #23.103 `coord_bd09_to_wgs84(lng, lat)` | `bd09toWgs84` | `(Float, Float)` |
+| #23.104 `coord_wgs84_to_mercator(lng, lat)` | `wgs84ToMercator` | `(Float, Float)` |
+| #23.105 `coord_mercator_to_wgs84(x, y)` | `mercatorToWgs84` | `(Float, Float)` |
+
+### 17.3 判据（标签 `<字段>|<样本>`；样本一律腿现读）
+
+1. **转换件不查 `outOfChina`**：`WGS84_GCJ02|-73.985428,40.748817` 给 `(-73.94686302816342, 40.7459476153335)`——
+   国外点照偏移。`OUT_OF_CHINA|0.0,0.0` 给 `true` 而 `WGS84_GCJ02|0.0,0.0` 仍给非零偏移，两条并存说明两者毫无调用关系。
+2. `outOfChina` 的边界用 `<` / `>` ⇒ **正好落在边界值上算国内**：
+   `OUT_OF_CHINA|72.004,0.8293` = `false`、`|137.8347,55.8271` = `false`，而越线的
+   `|72.003,0.8292` 与 `|137.8348,55.8272` = `true`。四角都要有，写成 `<=` 只会红两条。
+3. **`gcj02ToWgs84` 不是逆变换**，是同一偏移取负：`GCJ02_WGS84` 与 `WGS84_GCJ02` 的读数互不为逆
+   （腿对同一样本各给一条，来回复合得到的不是原值——这是参照的"非精确"注记的真实含义）。
+4. 复合两档 `wgs84ToBd09` / `bd09toWgs84` 各自经过 GCJ-02 中转，逐位对得上"先转 GCJ-02 再转 BD-09"的两步结果，
+   所以实现必须是同一份算式两步走，不许另写一套直达公式。
+5. 墨卡托那一对的量纲：`WGS84_MERCATOR|116.397428,39.90923` 给 `(1.2957302414606724E7… , 4852760.584444312…)`（腿现读，期望文件里是最短可往返的完整位数），`MERCATOR_WGS84` 的样本对同一组数取反算回原量级。
+6. `PI` 与 `Math.PI`：腿 `CONST_CHK|PI_eq_math` = `true` ⇒ 类内字面量与 `Math.PI` 在 double 上同值，
+   实现里两处来源统一取一个不会分岔（这条是判定不是假设，证据就是那一行读数）。
+
+### 17.4 腿与对撞
+
+腿 `Temp/convsrc/coord/CoordinateLeg.java`，116 行读数、零 ERR；期望 **4 块 108 条**（14 组样本 × 9 件 − 边界外不重复）。
+值两端的写法：腿打 `String.valueOf(double)`（Java 保证可往返），生成器用 `repr(float(s))` 重新序列化成
+MoonBit 字面量（Python 同为最短可往返表示）⇒ 两边解回同一个 double，**不是手打期望**。
+非有限读数（`NaN` / `±Infinity`）在生成器里直接 `SystemExit`，本批样本没触发。
+**本批真正的风险是三档 libm 位数**：`sin/cos/atan2/log/exp/sqrt` 在 wasm 与 js 都落到宿主实现、
+native 走 C 运行时，逐位一致并非天然成立。PR-A 冻结后必须由三档实测说话（`moon test --target wasm/js/wasm-gc`），
+若 native 档在 CI 上报红，按分岔记录而不是改期望迁就——这一条留给落地笔与 CI 读数定案。
+
+### 17.5 与参照的分岔
+
+| 参照 | 本库 | 依据 |
+|---|---|---|
+| 返回可变 `Coordinate` bean | `(Float, Float)` | bean 只有两个字段 + 原地改的 setter；摊平后 `equals` 语义不再需要（§17.1） |
+| `outOfChina` 与转换件的关系 | 无关系（照抄） | 腿读数 3 条 |
+| 四枚公开常量 | 包内常量 | §17.1 |
+| `bd09toWgs84` 小写命名 | 件名按本库规律 `coord_bd09_to_wgs84`，Note 里保留参照原名 | 命名一致性只在本库内部；对位关系靠 Note 钉 |
+| `String.valueOf(double)` 打印 | 不落打印，比的是数值 | 打印族（`Coordinate#toString`）没有格式化规则可言，且 bean 不移植 |
+
+### 17.6 变异对照（PR-B 填读数；同一套隔离副本纪律）
+
+| 号 | 变异 | 计划打的档 |
+|---|---|---|
+| C1 | `outOfChina` 的 `<` 改成 `<=` | 边界两角 4 条 |
+| C2 | 转换件加上 `outOfChina` 短路（国外原样返回） | `WGS84_GCJ02|-73.985428,…`、`|0.0,0.0` |
+| C3 | `gcj02ToWgs84` 写成"对 GCJ-02 再走一次正向"（不取负） | 整块 `GCJ02_WGS84` |
+| C4 | 复合两档改成直接公式（不中转 GCJ-02） | `WGS84_BD09` / `BD09_WGS84` 两块 |
+| C5 | `transLng` 里 `0.1 * sqrt(|lng|)` 换成 `0.1 * |lng|` | 所有国内点的偏移量 |
+| C6 | `X_PI` 的 `3000.0/180.0` 改成 `3000.0/180.0` 之外的系数（如按 π 直接算） | `GCJ02_BD09` / `BD09_GCJ02` |
+| C7 | 墨卡托的 `Math.PI` 改成类内 `PI` 之外的近似值（截断到 3.14159） | 墨卡托两块 |
+| C8 | `offset` 的正负号分支判反（`isPlus` 语义取反） | `WGS84_GCJ02` 与 `GCJ02_WGS84` 两块 |
+| C9 | 纬度公式里 `320 * sin(lat*PI/30)` 的括号写成 `(320*sin(lat*PI))/30` | `WGS84_GCJ02` 等所有走 transLat 的档 |
+
+### 17.7 状态
+
+第四批第二格（`CoordinateUtil` 9 件）**契约冻结在案**：4 块 108 条期望全部来自腿的现读读数（手打零条），
+当场 `Total tests: 503, passed: 499, failed: 4`（那 4 红就是本格 4 块设计态）。
+骨架期同样只压一行 `warnings = "-unused_value"`，落地笔整行删除。
+**这一格的落地笔必须先回答 §17.4 末那个三档位数问题**：三档实测若有一档与期望逐位不同，
+就按分岔记录并把那一档的判定写回本节，不悄悄放宽成"近似相等"。
+

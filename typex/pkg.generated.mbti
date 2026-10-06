@@ -2,6 +2,24 @@
 package "mldong/moon-hutool/typex"
 
 // Values
+pub fn coord_bd09_to_gcj02(Float, Float) -> (Float, Float)
+
+pub fn coord_bd09_to_wgs84(Float, Float) -> (Float, Float)
+
+pub fn coord_gcj02_to_bd09(Float, Float) -> (Float, Float)
+
+pub fn coord_gcj02_to_wgs84(Float, Float) -> (Float, Float)
+
+pub fn coord_mercator_to_wgs84(Float, Float) -> (Float, Float)
+
+pub fn coord_out_of_china(Float, Float) -> Bool
+
+pub fn coord_wgs84_to_bd09(Float, Float) -> (Float, Float)
+
+pub fn coord_wgs84_to_gcj02(Float, Float) -> (Float, Float)
+
+pub fn coord_wgs84_to_mercator(Float, Float) -> (Float, Float)
+
 pub fn count_by_ip_range(String, String) -> Int raise Ipv4Error
 
 pub fn count_by_mask_bit(Int, Bool) -> Int
