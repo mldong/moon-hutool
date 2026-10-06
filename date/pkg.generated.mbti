@@ -24,6 +24,8 @@ pub fn days_in_month(Int, Int) -> Int raise DateError
 
 pub fn difference(DateTime, DateTime, TimeUnit) -> Int64
 
+pub fn format_in(Int64, String, String) -> String? raise DateError
+
 pub fn from_rfc3339(String) -> Int64 raise DateError
 
 pub fn is_leap_year(Int) -> Bool
@@ -38,6 +40,8 @@ pub fn now_in(String) -> DateTime?
 
 pub fn now_millis() -> Int64
 
+pub fn parse_in(String, String, String) -> Int64? raise DateError
+
 pub let pure_date_pattern : String
 
 pub let pure_datetime_pattern : String
@@ -45,6 +49,8 @@ pub let pure_datetime_pattern : String
 pub let time_pattern : String
 
 pub fn to_rfc3339(Int64, Int) -> String
+
+pub fn to_rfc3339_in(Int64, String) -> String?
 
 pub fn today_at(String, () -> Int64) -> Date?
 
@@ -66,6 +72,7 @@ pub suberror DateError {
   UnknownPatternToken(String)
   ParseFailed(String, Int)
   FutureBirth
+  ZoneGap(String)
 }
 
 // Types and methods

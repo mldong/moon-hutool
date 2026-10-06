@@ -4,7 +4,7 @@ hutool `DateUtil` / `CalendarUtil` / `DatePattern` / `DateUnit` 的 MoonBit 对�
 
 MoonBit 的 `moonbitlang/core` **没有任何时间能力**（没有 `time`/`date`/`calendar` 包；全树 `grep ZonedDateTime|weekday|leap_year` 在非测试代码命中 0），所以本包整包自研，唯一能借的 OS 窗口是 `env.now()`。完整边界矩阵与逐条读数来源见 [`docs/spec/03-date.md`](https://github.com/mldong/moon-hutool/blob/master/docs/spec/03-date.md)。
 
-> 状态：**两批都已收口（首批 10-05；第二批 10-06 内置 IANA 时区段表 + 命名时区入口七件，本文件的文档块仍只覆盖首批，第二批的用例面在 `zone_test.mbt`）**——下面每个块都是真被执行并被断言的用例（`moon test` 从本文件收 16 条）。期望串与 `date_test.mbt` 同受"期望值冻结"约束：改任何期望须单独一笔并给外部读数来源（门禁 G5）。
+> 状态：**前三批已收口、第四批契约已冻结**（首批 10-05；第二批内置 IANA 时区段表 + 命名时区入口七件；第三批可注入时钟源；第四批命名时区版 format/parse 见 spec §7）——本文件的文档块仍只覆盖首批，其余用例面在各批自己的 `*_test.mbt`。
 
 ## 两条先决口径
 

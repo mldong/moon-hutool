@@ -1,7 +1,7 @@
 // moon-hutool/date 契约用例（黑盒）。
 //
 // 状态：**首批已收口**（10-05，47 条；wasm / js / wasm-gc 三档读数一致，native 档由 CI 出证）。
-// 第二批（`zone_test.mbt`，内置时区表）10-06 PR-B 转绿，553 条三档一致；第三批（`clock_test.mbt`）10-06 PR-B 转绿，566 条三档一致。
+// 第二批（`zone_test.mbt`，内置时区表）与第三批（`clock_test.mbt`，可注入时钟源）10-06 都已收口；第四批（`format_test.mbt`）契约已冻结，12 块预期红。
 // 期望值先冻结、后实现；改任何期望串 = 门禁 G5 拦下，须单独一笔并给外部读数来源。
 // 本轮实现落地后**期望串一字未改**，只改掉实现里的一处算错（两位年窗口 `70..99` 那档写成 `1970+v`）。
 //
@@ -51,6 +51,7 @@ fn show(err : @date.DateError) -> String {
     @date.UnknownPatternToken(t) => "UnknownPatternToken \{t}"
     @date.ParseFailed(input, at) => "ParseFailed \{input} @\{at}"
     @date.FutureBirth => "FutureBirth"
+    @date.ZoneGap(w) => "ZoneGap \{w}"
   }
 }
 

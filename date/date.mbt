@@ -71,6 +71,8 @@ pub suberror DateError {
   ParseFailed(String, Int)
   /// `age(birth, on)` 里 `on` 早于 `birth`：年龄不存在，不做负数猜测
   FutureBirth
+  /// 墙上时刻在该区**不存在**（前跳空洞）：携带那个不存在的墙上时刻的 ISO 串
+  ZoneGap(String)
 }
 
 ///|
