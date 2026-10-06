@@ -968,3 +968,25 @@ M7 暴露的是"查找式与锚定在旧样本上不可分辨"。补的 6 条样
 骨架期包内 `warnings` 只压一行 `-unused_value`（本版 `moon.pkg` 容不下多个助记符，见 §15.7），落地笔整行删除。
 `CoordinateUtil` 排在下一格；`DesensitizedUtil` 的 15 档之外参照没有更多公开面（现读 `grep -c "public static"` = 16）。
 
+### 16.8 落地笔（PR-B）实测与状态
+
+**当场读数**：`Total tests: 499, passed: 499, failed: 0`，wasm / js / wasm-gc 三档一致、`moon check` 零警告；
+骨架期的 `warnings` 豁免整行删除（G12：体里已无 `abort`）。
+
+**落地笔改了一条冻结期望，走"PR-A 缺陷补档"通道而不是悄悄改**：腿的 `row()` 用 `String.valueOf(v)` 打值，
+把参照真正的 `null` 印成了字面量串 `null`，于是 `DP_CLEAR_TO_NULL|abc` 被冻成了 `Some("null")`（实现给 `None` 才是要的）。
+机器证据三条：① 参照源码 `clearToNull()` 是 `return null;`；② 腿修成 `esc(v == null ? null : String.valueOf(v))` 后
+该行读数为 `<null>`（全腿 `<null>` 恰 2 行：`CLEAR_TO_NULL` 与 `DP_CLEAR_TO_NULL`，另一行按 §16.1 被 DROP）；
+③ 期望文件重灌后语句级差分**删除 0、新增 0**，语义变动只有这一条（`Some("null")` → `None`）。
+
+**变异对照**：计划 13 条按锚点拆成 17 条执行（编号以本节为准），结果 **14 红 3 等价**。
+三条等价全部给构造推导、不记成"已覆盖"：
+① `email` 的 `index <= 1` 改成 `index < 1`——`index == 1` 那支落到 `hide(email, 1, 1)`，空区间恒等，
+   所以 `EMAIL|a@b.com` 在两种写法下同值，**没有能打到的样本**；
+② `address` 的负起始钳 0——`@text.hide` 自身就把越界钳进区间（与参照同口径），钳与不钳在全部 119 条上同值；
+③ `chineseName` 不走委托、自带一份按码位的 end——end 超串长时被同一个长度上限吸收，
+   `CHINESE_NAME|🍎🍎x` 的码元 5 与码位 3 不可分辨。
+其余 14 条各打到的字段：`PASSWORD`（星号数改码位）、`EMAIL`（索引改码位）、`ID_CARD` 两条（长度闸改码位 / 去掉负数闸）、
+`CAR_LICENSE`（判据改码位）、`BANK_CARD` 三条（blank 出口 / 末段恒 4 / 空格位置——含调度器档共 2 红）、
+`IPV4`（引入第二张校验嘴）、`DP_ID_CARD`、`DP_ADDRESS`、`DP_USER_ID`、`DP_CLEAR_TO_NULL`、调度器空白前置闸。
+

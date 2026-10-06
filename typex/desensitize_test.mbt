@@ -295,7 +295,7 @@ test "\u{8c03}\u{5ea6}\u{5668} 15 \u{6863} + user_id \u{4e22}\u{5165}\u{53c2}\u{
     Some("1********"),
   ) // DP_FIRST_MASK|123456789
 
-  assert_eq(@typex.desensitize_kind("abc", "CLEAR_TO_NULL"), Some("null")) // DP_CLEAR_TO_NULL|abc
+  assert_eq(@typex.desensitize_kind("abc", "CLEAR_TO_NULL"), None) // DP_CLEAR_TO_NULL|abc
 
   assert_eq(@typex.desensitize_kind("abc", "CLEAR_TO_EMPTY"), Some("")) // DP_CLEAR_TO_EMPTY|abc
   assert_eq(@typex.desensitize_kind("  ", "CLEAR_TO_EMPTY"), Some("")) // DP_CLEAR_TO_EMPTY|  
