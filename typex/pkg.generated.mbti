@@ -80,6 +80,10 @@ pub fn phone_sub_tel_after(String) -> String?
 
 pub fn phone_sub_tel_before(String) -> String?
 
+pub fn typex_credit_code_is_simple(String) -> Bool
+
+pub fn typex_credit_code_is_valid(String) -> Bool
+
 pub fn typex_first_page_no() -> Int
 
 pub fn typex_set_first_page_no(Int) -> Unit
