@@ -7,6 +7,8 @@
 // （`@string.Regex` 是本批判定档的底座）。零依赖契约没破——只用 `moonbitlang/core` 与本仓自己的包、
 // 零 extern、全同步（`conv`→`text` 同先例）。
 import {
+  "moonbitlang/core/math",
+  "mldong/moon-hutool/num",
   "mldong/moon-hutool/text",
   "mldong/moon-hutool/valid",
   "moonbitlang/core/string",
