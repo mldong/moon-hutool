@@ -866,3 +866,105 @@ M7 暴露的是"查找式与锚定在旧样本上不可分辨"。补的 6 条样
 
 `format` / `format(…, unit)` 两族按 §15.1 留另批，腿里 150 条读数存着等 core 侧对撞。
 
+## 16. 第四批第一格 `DesensitizedUtil`（#23.83–#23.96）
+
+件在 `cn.hutool.core.util.DesensitizedUtil`，枚举 `DesensitizedType` 是**同文件内嵌**（第 29 行起，15 档），
+不在别的包——这一点现读源码确认过，别再按 `lang` 那类包名去猜。
+
+### 16.1 边界（收与不收，逐条带理由）
+
+**收 14 件**：13 件具体脱敏 + 1 件调度器，列在 §16.2。
+
+| 参照件 | 判据 |
+|---|---|
+| `clear()` / `clearToNull()` | **不立公开件**：两者是无入参的常量出口（`""` 与 `null`），本库的出口形状在 §16.2 里是 `String` / `String?`，为常量立两件公开面等于把"参照的 switch 尾巴"当 API。两档行为仍由 #23.96 的 `CLEAR_TO_EMPTY` / `CLEAR_TO_NULL` 覆盖，腿里那 2 行读数因此**不进契约**（生成器 `DROP` 记账，收尾对得上：121 行 − 2 = 119 条断言） |
+| `desensitized(CharSequence, …)` 的入参类型 | 收 `String`（全仓一致），不额外收 `CharSequence` 面 |
+| 枚举本身 | 收**档位串**（照 §15.1 先例：本仓零 `pub enum`，不为本格新开跨包取值形状）。15 档名逐字照 `DesensitizedType.name()`：`USER_ID` `CHINESE_NAME` `ID_CARD` `FIXED_PHONE` `MOBILE_PHONE` `ADDRESS` `EMAIL` `PASSWORD` `CAR_LICENSE` `BANK_CARD` `IPV4` `IPV6` `FIRST_MASK` `CLEAR_TO_NULL` `CLEAR_TO_EMPTY` |
+
+### 16.2 公开面（14 件）
+
+| 件 | 参照 | 返回 | 备注 |
+|---|---|---|---|
+| #23.83 `desensitize_first_mask(str)` | `firstMask` | `String` | |
+| #23.84 `desensitize_chinese_name(full_name)` | `chineseName` | `String` | 参照是 #23.83 的一行委托 ⇒ 件留、嘴不留（§11.6 先例） |
+| #23.85 `desensitize_id_card(id_card, front, end)` | `idCardNum` | `String` | 三道闸，见 §16.3 第 2 条 |
+| #23.86 `desensitize_fixed_phone(num)` | `fixedPhone` | `String` | `hide(num, 4, len-2)` |
+| #23.87 `desensitize_mobile_phone(num)` | `mobilePhone` | `String` | `hide(num, 3, len-4)` |
+| #23.88 `desensitize_address(address, sensitive_size)` | `address` | `String` | `hide(a, len-n, len)`，起始位可为负 |
+| #23.89 `desensitize_email(email)` | `email` | `String` | `index <= 1` 原样返回 |
+| #23.90 `desensitize_password(password)` | `password` | `String` | 星号数按**码元** |
+| #23.91 `desensitize_car_license(car_license)` | `carLicense` | `String` | 只动码元长度 7 / 8 |
+| #23.92 `desensitize_bank_card(bank_card_no)` | `bankCard` | `String` | blank **原样返回入参** |
+| #23.93 `desensitize_ipv4(ipv4)` | `ipv4` | `String` | 不校验 |
+| #23.94 `desensitize_ipv6(ipv6)` | `ipv6` | `String` | 不校验 |
+| #23.95 `desensitize_user_id()` | `userId` | `Int64` | 恒 `0` |
+| #23.96 `desensitize_kind(text, kind)` | `desensitized` | `String?` | 只有 `CLEAR_TO_NULL` 档给 `None` |
+
+### 16.3 判据（标签 `<字段>|<样本>`；样本一律腿现读，不手打）
+
+1. **两域混用是本批的主线**：参照的闸与计数走 `String.length()`＝UTF-16 码元，遮蔽走 `StrUtil.hide`＝码位。
+   `PASSWORD|🍎ab` 给 `****`（4 个星＝码元数，不是码位数 3）、`EMAIL|🍎🍎@x.com` 给 `🍎***.com`
+   （`'@'` 的码元索引是 4，遮蔽按码位从 1 掩到 4）、`ID_CARD|🍎51343620000320711X,1,2` 给 `🍎` + 17 个 `*` + `X`
+   （长度闸按码元 20 过闸，遮蔽在 19 个码位上走 `[1, 18)`）。
+   `CAR_LICENSE|京A1234🍎` 码元 8 / 码位 7 ⇒ 走的是**新能源那支** `hide(…, 3, 7)`，读数 `京A1****`；
+   `CAR_LICENSE|ABCDEFGH`（码元 8）给 `ABC****H`，而 `京A123`（码元 6）原样返回——**只动 7 与 8**。
+2. `idCardNum` 三道闸**先后是**：空白 → `front + end > 码元长度` → `front < 0 || end < 0`，三者都给空串。
+   读数成对钉住先后：`ID_CARD|12345,3,3` 与 `|12345,6,0` 都被"长度"闸拦下给空串，
+   `|12345,-1,2` 与 `|12345,1,-2` 都因负数闸给空串——把两道闸互换在这四条上看不出来，变异 D4 专打。
+3. **短号与负起始的三种形状**都出现在腿里、实现不许"顺手统一"：`FIXED_PHONE|12345` 与 `MOBILE_PHONE|12345`
+   都**原样返回**（`hide` 的 `start > end` 档），`ADDRESS|北京,8` 与 `|北京,99` 给 `**`（起始位为负 ⇒ 整串掩掉），
+   而 `ADDRESS|北京,0` 原样给 `北京`；`ADDRESS|🍎🍎号街道,2`（码元 7、码位 6）也原样——负数与越界在两个域里落到不同档。
+4. **`bankCard` 两处独一份**：blank 原样返回**入参本身**（不是空串，`BANK_CARD|  ` → 两个空格原样）；
+   清洗后 `< 9` 位原样返回清洗结果；否则末段长度是 `len % 4 == 0 ? 4 : len % 4`，中段每满 4 位**先插一个空格再插 `*`**
+   （`BANK_CARD|12342222333344449` → `1234 **** **** **** 9`，读数在腿里；这条也是腿的自检项之一）。
+5. `ipv4` / `ipv6` **完全不校验**：`IPV4|abc` → `abc.*.*.*`、`IPV4|`（空串）→ `.*.*.*`。
+   ⇒ 本件与第二批 `Ipv4Util`、`valid.is_ipv4` **没有任何关系**，实现里不许出现第二张嘴。
+6. 调度器三处内联参数：`DP_ID_CARD` 用 `(1, 2)`（`51343620000320711X` → `5***************1X`）、
+   `DP_ADDRESS` 用 `8`、`DP_USER_ID` **丢弃入参**给 `0`（`DP_USER_ID|100` → `0`）；
+   `DP_CLEAR_TO_NULL|abc` → `None`，`DP_CLEAR_TO_EMPTY|abc` → `Some("")`；
+   空白入参在调度器最前面一道闸统一给 `Some("")`（`DP_ID_CARD|` → `Some("")`）。
+
+### 16.4 腿与对撞
+
+腿 `Temp/convsrc/desens/DesensitizedLeg.java`（121 行读数、**零 ERR**——这批参照不抛）。
+两枚自检项在腿里跑（`password` 的码元数、`bankCard` 的分段形状），读数变了会先打印 `SELFCHK` 而不是静默进期望。
+期望由 `gen_desens_test.py` 灌入：**10 块 119 条**，同键冲突即 `SystemExit`，未登记字段即 `SystemExit`；
+`CLEAR` / `CLEAR_TO_NULL` 两行按 §16.1 判不收、由生成器显式 `DROP` 计数（121 − 2 = 119，账面闭合）。
+代理项 `\ud83c\udf4e` 在生成器里合成码位再落 `\u{…}` 字面量（本仓 `lit()` 形状）。
+
+### 16.5 与参照的分岔
+
+| 参照 | 本库 | 依据 |
+|---|---|---|
+| `DesensitizedType` 枚举当参数 | 档位串 `String` | §15.1 先例（本仓零 `pub enum`） |
+| 未列出的档位串 | 走不到（枚举穷尽、`default` 空分支返回原串）| 本库按 `default` 的构造**给原串**，无腿读数，是构造解释不是新语义 |
+| `desensitized` 返回 `null`（`CLEAR_TO_NULL` 档）| `None`，返回类型 `String?` | 与第二批"参照给 null 的地方本库给 Option"同形 |
+| `clear()` / `clearToNull()` 两件常量出口 | 不立公开件 | §16.1 |
+| `CharUtil.SPACE`、`StrUtil.hide` 的 `*` 与空格 | 复用 `@text.hide(..., '*')` 与包内 `ds_clean_blank` | 不留第二张掩码表 / 第二张空白表 |
+| `String.length()`（码元）与 `StrUtil.hide`（码位）混用 | **照抄这种混用**，不"抹平"成单域 | 腿里 astral 夹具逐条钉住；这是移植的一致性，不是缺陷 |
+
+### 16.6 变异对照（PR-B 填读数；隔离副本，基线 0 红 + 写盘 `flush/fsync/回读断言` + `finally` 还原 + 收尾字节比对）
+
+| 号 | 变异 | 计划打的档 |
+|---|---|---|
+| D1 | 把码元长度改用码位数（`password` 星号数） | `PASSWORD|🍎ab`、`|🍎🍎` |
+| D2 | `email` 的 `'@'` 索引改用码位 | `EMAIL|🍎🍎@x.com`、`|x🍎@y.com` |
+| D3 | `idCardNum` 的长度闸改用码位 | `ID_CARD|🍎51343620000320711X,1,2` |
+| D4 | `idCardNum` 两道闸互换先后 | `ID_CARD|12345,1,-2`（负数 vs 长度） |
+| D5 | `carLicense` 的长度判据改用码位 | `CAR_LICENSE|京A1234🍎` |
+| D6 | `bankCard` blank 改给空串 | `BANK_CARD|  ` |
+| D7 | `bankCard` 末段长度改成恒 4 | `|…17 位`、`|…10 位` 等非 4 倍数档 |
+| D8 | `bankCard` 中段空格改成**每 4 位之后**插 | 全部 `BANK_CARD` 非空读数 |
+| D9 | `ipv4` 改成先校验 IP 合法性（引入第二张嘴） | `IPV4|abc`、`IPV4|`（空串） |
+| D10 | 调度器 `ID_CARD` 档改成 `(1, 1)` / `ADDRESS` 改成 6 | `DP_ID_CARD|…`、`DP_ADDRESS|…` |
+| D11 | 调度器 `USER_ID` 档改成返回入参 | `DP_USER_ID|100` |
+| D12 | `CLEAR_TO_NULL` 档给 `Some("")` | `DP_CLEAR_TO_NULL|abc` |
+| D13 | 空白前置闸从调度器去掉（各件自带） | `DP_ID_CARD|`（空串）、`DP_CLEAR_TO_EMPTY|  ` |
+
+### 16.7 状态
+
+第四批第一格（`DesensitizedUtil` 14 件）**契约冻结在案**：骨架 14 件、10 块 119 条冻结期望全部来自腿的现读读数
+（手打零条），当场 `Total tests: 499, passed: 489, failed: 10`（那 10 红就是本格的设计态）。
+骨架期包内 `warnings` 只压一行 `-unused_value`（本版 `moon.pkg` 容不下多个助记符，见 §15.7），落地笔整行删除。
+`CoordinateUtil` 排在下一格；`DesensitizedUtil` 的 15 档之外参照没有更多公开面（现读 `grep -c "public static"` = 16）。
+

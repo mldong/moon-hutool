@@ -44,6 +44,34 @@ pub fn data_unit_bytes_by_suffix(String) -> Int64?
 
 pub fn data_unit_suffixes() -> Array[String]
 
+pub fn desensitize_address(String, Int) -> String
+
+pub fn desensitize_bank_card(String) -> String
+
+pub fn desensitize_car_license(String) -> String
+
+pub fn desensitize_chinese_name(String) -> String
+
+pub fn desensitize_email(String) -> String
+
+pub fn desensitize_first_mask(String) -> String
+
+pub fn desensitize_fixed_phone(String) -> String
+
+pub fn desensitize_id_card(String, Int, Int) -> String
+
+pub fn desensitize_ipv4(String) -> String
+
+pub fn desensitize_ipv6(String) -> String
+
+pub fn desensitize_kind(String, String) -> String?
+
+pub fn desensitize_mobile_phone(String) -> String
+
+pub fn desensitize_password(String) -> String
+
+pub fn desensitize_user_id() -> Int64
+
 pub fn idcard_birth(String) -> String?
 
 pub fn idcard_city_code(String) -> String?
