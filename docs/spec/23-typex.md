@@ -762,8 +762,10 @@ M7 暴露的是"查找式与锚定在旧样本上不可分辨"。补的 6 条样
    `PARSE|\uff11\uff12KB`、`PARSE|\u0663KB`、`PARSE|3\u0663KB`、`PARSE|\u0663\u0662` 四条都 `BadText`。
    符号只允许**开头一个** `[+-]?`：`PARSE|+7MB` 给 `7340032`，而 `PARSE|1e3` / `PARSE|0x10` / `PARSE|.5KB` / `PARSE|5.` /
    `PARSE|1B B` / `PARSE|1.2.3KB` / `PARSE|KB` / `PARSE|`（空串）/ `PARSE| `（纯空格）九条 `BadText`。
-3. **后缀最多两字母**，于是 `PARSE|1ZB` 被正则挡下；`PARSE|1PB` 过正则、死在 `fromSuffix`——
-   **两条不同来源、同一个出口**（参照把内层任何异常都包成同一个 `IllegalArgumentException`），故都记 `BadText`。
+3. **后缀最多两字母**（正则那一档）与**后缀不认**（`fromSuffix` 那一档）是两个不同来源、同一个出口：
+   `PARSE|1ZB` 与 `PARSE|1PB` 都**过了正则**（都是两字母后缀）、都死在 `fromSuffix`，参照把内层一切异常包成
+   同一个 `IllegalArgumentException` ⇒ 两条都记 `BadText`。（PR-A 这里原写"1ZB 被正则挡下"是因果写错，
+   落地轮的 N7 把它翻出来——正则的长度上限与 `fromSuffix` 的不认在**结果**上分不出彼此，推导见 §15.6 末。）
 4. **`fromSuffix` 是前缀匹配**（`candidate.suffix` 以入参**开头**即命中，忽略大小写）：
    `FROM_SUFFIX|K`→KB、`|M`→MB、`|G`→GB、`|T`→TB、`|b`→B、`|g`→GB、`|kb`、`|Kb` 都命中；
    `FROM_SUFFIX|`（空串）命中**第一枚** ⇒ B（`startWith*` 对空前缀恒真）；
@@ -823,14 +825,39 @@ M7 暴露的是"查找式与锚定在旧样本上不可分辨"。补的 6 条样
 | N11 | `to_string` 漏掉尾 `B` | 16 条 `TO_STRING` |
 | N12 | `compare` 写 `a - b` 差值 | `CMP_VS_ZERO\|9223372036854775807`、`\|-9223372036854775808` |
 
+**落地轮实测**（隔离副本 `tar` 出来的第三份工作树，开局基线 `red=0`、收尾还原后复跑仍 0 红；
+每条变异写盘都过 `flush + fsync + 回读断言`，"编不过"单列成 `MUTATION-DID-NOT-COMPILE` 而不是被当成等价）：
+
+| N1 | N2 | N3 | N4 | N5 | N6 | N7 | N8 | N9 | N10 | N11 | N12 |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| 3 红 | 2 红 | 3 红 | 3 红 | 1 红 | 1 红 | **0 红（等价）** | 1 红 | 1 红 | 3 红 | 1 红 | 1 红 |
+
+十一条报红、一条等价。**N7 这条等价不用补夹具，因为在参照那一侧也观测不到差别**：
+把 `[a-zA-Z]{0,2}` 放开成不限长度，只影响"三个字母以上的后缀"，而 `fromSuffix` 的条件是
+**候选后缀以入参开头**——五枚候选最长两字母，任何三字母以上的入参必然全不命中、照样抛，
+两条路的出口同为 `BadText`（参照的包装文案也一样）。这不是"夹具没打到"，是"没有能打得到的样本"，
+所以照 §14.6 R4 的先例记成构造等价并把推导写在原地，而不是硬造一条读数出来。
+
+一处取证件工装的不足留话在此：见证样本串被取样正则 `(\S+)` 在空格/中文括号处截断（打印出来像 `PARSE|1`），
+**红条数是准的、样本串不作数**——要精确样本就按行号回 `typex/datasize_test.mbt` 读原行。
+
 ### 15.7 状态
 
-第三批 E（`DataSize` / `DataSizeUtil` / `DataUnit` 安全档 19 件）**契约冻结在案**：骨架 19 件，
-360 条期望全部来自腿的现读读数（手打零条），实现等 PR-B。
-骨架期的警告只压**一行** `warnings = "-unused_value"`（签名参数在体被 `abort` 短路后必然 unused）；
-另两类（`unused_constructor` / `unused_error_type`）不靠豁免——这一版 `moon.pkg` 的 `warnings` 字段只容一个助记符
-（数组形报 `[4192] Invalid configuration`、空格形与逗号形被 `moonc` 判 `Ill-formed list of warnings`），
-压不下三条，于是骨架里加一件包私有 `datasize_unimplemented(what)`：七件 `raise` 位都经它，两枚变体也各在其中构造一次，
-它自己 `abort("moon-hutool PR-B…")`。落地笔把这件整体删除，十九件签名与两枚变体已在 `.mbti` 冻住。
-`format` 两族按 §15.1 留另批。
+第三批 E（`DataSize` / `DataSizeUtil` / `DataUnit` 安全档 19 件）**已落地收口**：当场读数
+`Total tests: 489, passed: 489, failed: 0`，wasm / js / wasm-gc 三档一致、`moon check` 零警告；
+6 块 360 条冻结期望一条未改来迁就实现（`.mbti` 与 PR-A 同签名）。骨架期那一行 `warnings = "-unused_value"`
+豁免整行删除、包私有 `datasize_unimplemented` 整件删除（G12：体里已无 `abort`）——
+顺带留一条工装读数：本版 `moon.pkg` 的 `warnings` **只容一个助记符**（数组形报 `[4192] Invalid configuration`、
+空格形与逗号形被 `moonc` 判 `Ill-formed list of warnings`、写两行同键报 `Duplicate key`），
+所以骨架期另两类警告只能靠"真的构造变体、真的 raise"消掉，不能靠豁免。
+
+落地笔翻出一条 PR-A 没写到的实现约束，与 §15.3 第 5 条并记：**"十进制精确乘"若照公式直算
+`(整数段 * 10^k + 小数段) * unit / 10^k`，在 `PARSE|1.9999999999999999KB` 这一档中间量是 `2.05e19`，
+冲出 `Int64` 后环绕成 `203`**——当场只这一条红、三档同值 ⇒ 不是平台差异，是算术宽度。
+参照那边是 `BigDecimal` 乘完才 `longValue()`，没有这一步可炸。正解写在 `ds_frac_bytes`：
+先把 `unit` 与 `10^k` 的 2 的公因子约掉（五枚单位恒是 2 的幂），再用 `(f/s)*u + ((f%s)*u)/s` 拆开，
+拆开后两段中间量分别 `≤ frac` 与 `< s*u`，都不出 `Int64`。
+一句话：**"不许换成浮点"的另一半是"也不许换成看着精确、实则窄化在错误一步的整型直算"**。
+
+`format` / `format(…, unit)` 两族按 §15.1 留另批，腿里 150 条读数存着等 core 侧对撞。
 
