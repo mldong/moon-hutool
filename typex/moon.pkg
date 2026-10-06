@@ -1,7 +1,3 @@
-// 第三批 B 的骨架期豁免（`credit.mbt` 两件体是 abort ⇒ 参数值没人用）：
-// G12 判据取体里还有没有 `abort("moon-hutool`，所以这一行只在骨架期合法，落地笔整行删。
-warnings = "-unused_value"
-
 // 第三批 A 落地笔：骨架期的 `warnings = "-unused_value"` 豁免整行删除（G12：体里已无 abort）。
 //
 // 非测试侧多两件事：`valid`（IP 合法性与手机号判据必须同源，spec §10.3 第 2 条 / §11.3 第 3 条）、
