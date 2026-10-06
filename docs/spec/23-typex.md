@@ -12,7 +12,12 @@
 - **分批**：第 23 行注里的九件按可移植性分四批——
   第一批 `Version` + `PageUtil`（本文件）；第二批 `Ipv4Util`（纯算式档：`ipv4ToLong`/`longToIpv4`/`getMask*`/`countBy*`/`isMaskValid`）；
   第三批 `DataSize`/`DataSizeUtil`、`PhoneUtil`、`IdcardUtil`（校验位 + `province_code()`）、`CreditCodeUtil`（只校验）；
-  第四批 `DesensitizedUtil`（要一个脱敏类型枚举，形状先拍）、`CoordinateUtil`、`PageUtil` 的 `Segment`/迭代器面。
+  第四批 `DesensitizedUtil`（脱敏类型枚举的形状照 §15.1 那条先例办——公开面收档位串，不新开 `pub enum`）、`CoordinateUtil`。
+  `PageUtil` 的 `Segment` 面已判**不收**（10-06 现读源码：`toSegment(pageNo, pageSize)` 就是
+  `new DefaultSegment<>(transToStartEnd(...)[0], transToStartEnd(...)[1])`，`Segment<T>` 只有
+  `getStartIndex()` / `getEndIndex()` 与一个默认 `getRange()`——两个数本库已由 #23.10 `page_trans_to_start_end`
+  以 `(Int, Int)` 交出，再立一件等于给同一个数对套壳；`setOneAsFirstPageNo()` 同理是
+  `typex_set_first_page_no(1)` 的别名，照 §13.2 的"同一条实现只留一件"先例不收）。
 - 参照的 `PageUtil.setFirstPageNo(int)` 是**全局静态可变**，本库跟随（`typex_set_first_page_no`），
   代价是"跨用例互盖"——测试里每条用到它的断言都先显式设档再读，这一点在 §3 第 6 条挂两档读数（0 档与 1 档）。
 
