@@ -17,5 +17,3 @@ import {
 import {
   "mldong/moon-hutool/typex",
 } for "test"
-
-warnings = "-unused_value"
