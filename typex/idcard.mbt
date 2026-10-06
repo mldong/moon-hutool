@@ -212,6 +212,15 @@ pub fn idcard_convert_15_to_18(id : String) -> String? {
   if cs.length() != 15 || !idcard_all_digits(cs, 0, 15) {
     return None
   }
+  // 参照在这一档**抛** `DateException: Parse [650229] with format [yyMMdd] error!`（1965 年 2 月 29 日不存在、
+  // 13 月、00-00-00、99-99-99 同理）⇒ 本库把它并入 `None`（映射表见 spec §13.5，读数出处见 §13.8）。
+  // 这一条是第三批 D 的切片腿当场翻出来的缺档：落地时只按"闭式 + 数字闸"实现，没管日期有效性。
+  if !idcard_birthday_ok(
+      ("19" + String::from_array(idcard_sub(cs, 6, 12))).to_array(),
+      1999,
+    ) {
+    return None
+  }
   let yy = idcard_num(cs, 6, 2)
   let s_year = if yy == 0 { 2000 } else { 1900 + yy }
   let body = String::from_array(idcard_sub(cs, 0, 6)) +

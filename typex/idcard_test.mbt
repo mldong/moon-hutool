@@ -2474,3 +2474,23 @@ test "Idcard \u{5341}\u{516b}\u{8f6c}\u{5341}\u{4e94}\u{ff08}\u{975e}\u{6cd5}\u{
     "140203196503125243",
   ) // CONVERT_18_15|140203196503125243
 }
+
+///|
+test "Idcard 十五转十八的日期无效档（参照抛 DateException，本库并入 None）" {
+  assert_eq(@typex.idcard_convert_15_to_18("110101650229523"), None) // CONVERT_15_18|110101650229523
+  assert_eq(@typex.idcard_convert_15_to_18("110101651331523"), None) // CONVERT_15_18|110101651331523
+  assert_eq(@typex.idcard_convert_15_to_18("110101000000001"), None) // CONVERT_15_18|110101000000001
+  assert_eq(@typex.idcard_convert_15_to_18("110101999999999"), None) // CONVERT_15_18|110101999999999
+  assert_eq(
+    @typex.idcard_convert_15_to_18("110101650312523"),
+    Some("110101196503125230"),
+  ) // CONVERT_15_18|对照：日期有效
+  assert_eq(
+    @typex.idcard_convert_15_to_18("990101650312523"),
+    Some("990101196503125234"),
+  ) // CONVERT_15_18|对照：省码不在表内也不管（参照不管）
+  assert_eq(
+    @typex.idcard_convert_15_to_18("110101000101001"),
+    Some("110101200001010010"),
+  ) // CONVERT_15_18|世纪档 yy=00 → 2000
+}
