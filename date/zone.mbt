@@ -131,14 +131,11 @@ pub fn zone_offset_minutes(zone : String, millis : Int64) -> Int? {
 }
 
 ///|
-/// 墙上时刻 → 该区内所有合法偏移（分钟），顺序照参照 `getValidOffsets`。
-/// - Notes:
-///   - 0 档 = 前跳空洞（`America/New_York|2024-03-10T02:30`、`Asia/Shanghai|1986-05-04T02:30`）
-///   - 2 档 = 回拨重叠（`America/New_York|2024-11-03T01:30` ⇒ `-240|-300`）
-///   - 1 档 = 平常
-///   - 这一件的存在就是"墙上 ↔ 瞬间"在有 DST 的区里**不是一一映射**的正面承认；
-///     要唯一瞬间请走显式偏移那条路（`DateTime::to_epoch_millis(offset)`）
-pub fn zone_offsets_at_wall(zone : String, wall : DateTime) -> Array[Int] {
+/// 墙上候选偏移的内部版。`by_window=true` 就是公开件 `zone_offsets_at_wall` 的已冻语义（窗外一律不收）；
+/// `by_window=false` 只多给 `parse_in` 用一次：把首段向窗口以前延伸，好把
+/// "这个墙上时刻在该区不存在"（真空洞）与"这个时刻超出表的覆盖窗口"两种空表分开——
+/// 两者都返回空数组，但不该给同一个出口（§7.3 第 3 行）。
+fn wall_offsets(zone : String, wall : DateTime, by_window : Bool) -> Array[Int] {
   let out : Array[Int] = []
   let zi = match zone_find(zone) {
     None => return out
@@ -153,17 +150,29 @@ pub fn zone_offsets_at_wall(zone : String, wall : DateTime) -> Array[Int] {
   while k < n {
     let off = tbl_seg_off[base + k]
     let inst = nominal - off.to_int64() * 60000L
-    if in_window(inst) {
-      // 判据是"候选瞬间落回**自己这一段**"（比段号）。只比偏移值不行：同一偏移在几十年的表里
-      // 占几十段，任何一段都能验过同一个瞬间，出来的会是"哪个偏移在表里出现得早"的任意顺序。
-      // 按段序（= 时间序）扫，重叠档自然给出"转换前那一支在前"，与参照 getValidOffsets 同序。
-      if seg_last_le(zi, inst / 1000L) == k {
-        out.push(off)
-      }
+    let j = seg_last_le(zi, inst / 1000L)
+    // 判据是"候选瞬间落回**自己这一段**"（比段号）。只比偏移值不行：同一偏移在几十年的表里
+    // 占几十段，任何一段都能验过同一个瞬间，出来的会是"哪个偏移在表里出现得早"的任意顺序。
+    // 按段序（= 时间序）扫，重叠档自然给出"转换前那一支在前"，与参照 getValidOffsets 同序。
+    let jj = if j < 0 && !by_window { 0 } else { j }
+    if jj == k && !(by_window && !in_window(inst)) {
+      out.push(off)
     }
     k = k + 1
   }
   out
+}
+
+///|
+/// 墙上时刻 → 该区内所有合法偏移（分钟），顺序照参照 `getValidOffsets`。
+/// - Notes:
+///   - 0 档 = 前跳空洞（`America/New_York|2024-03-10T02:30`、`Asia/Shanghai|1986-05-04T02:30`）
+///   - 2 档 = 回拨重叠（`America/New_York|2024-11-03T01:30` ⇒ `-240|-300`）
+///   - 1 档 = 平常
+///   - 这一件的存在就是"墙上 ↔ 瞬间"在有 DST 的区里**不是一一映射**的正面承认；
+///     要唯一瞬间请走显式偏移那条路（`DateTime::to_epoch_millis(offset)`）
+pub fn zone_offsets_at_wall(zone : String, wall : DateTime) -> Array[Int] {
+  wall_offsets(zone, wall, true)
 }
 
 ///|

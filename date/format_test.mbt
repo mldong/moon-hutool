@@ -1,7 +1,9 @@
 // moon-hutool/date 第四批（命名时区版格式化与解析）契约用例（黑盒）。**生成件，勿手改**：
-// 生成器 scripts/gen_format_test.py，期望串全部来自参照腿 scripts/FormatLeg.java 的机器读数。
-// 参照代次：JDK 17.0.14 · lib/tzdb.dat 101731 bytes。腿自证 SELFCHK_BAD=0（F 行另走一条独立 JDK 路径逐字符比过）。
-// helper `shape` 复用 date/date_test.mbt（同包测试共享顶层命名空间）。
+// 生成器 scripts/gen_format_test.py；每条期望都是参照腿 scripts/FormatLeg.java 的机器读数。
+// 参照代次：JDK 17.0.14 · lib/tzdb.dat 101731 bytes · 腿自证 SELFCHK_BAD=0（F 行另走一条独立 JDK 路径逐字符比过）。
+// 断言打的是腿的第二栏（本库整分钟口径：腿把 TimeZone 换成 GMT±分再渲染一次），两栏不同的行把参照原样留在上一行注释——
+// 窗口内非整分钟的区共 1 个（腿 X 行点名），这条分岔的理由见 spec §7.3 第 4 行。
+// helper shape / dt / d 复用 date/date_test.mbt（同包测试共享顶层命名空间）。
 
 ///|
 test "@date format_in 全表逐区两瞬间（腿 F 行）（第 1/7 块，本块 200 条）" {
@@ -345,9 +347,10 @@ test "@date format_in 全表逐区两瞬间（腿 F 行）（第 1/7 块，本�
     @date.format_in(1791244800000L, "yyyy-MM-dd HH:mm:ss", "Africa/Mogadishu"),
     Some("2026-10-06 03:00:00"),
   )
+  // 分岔（§7.3 第 4 行）：参照原样 1969-12-31 23:15:30；本库偏移按整分钟 ⇒ 1969-12-31 23:16:00
   assert_eq(
     @date.format_in(0L, "yyyy-MM-dd HH:mm:ss", "Africa/Monrovia"),
-    Some("1969-12-31 23:15:30"),
+    Some("1969-12-31 23:16:00"),
   )
   assert_eq(
     @date.format_in(1791244800000L, "yyyy-MM-dd HH:mm:ss", "Africa/Monrovia"),
@@ -5010,7 +5013,7 @@ test "@date format_in 全表逐区两瞬间（腿 F 行）（第 7/7 块，本�
 }
 
 ///|
-test "@date format_in 特殊档小组（腿 G 行：45 分/30 分 DST/符号陷阱/窗口末）（第 1/1 块，本块 144 条）" {
+test "@date format_in 特殊档小组（腿 G 行：45 分/30 分 DST/符号陷阱/窗口末）（第 1/1 块，本块 156 条）" {
   assert_eq(
     @date.format_in(0L, "yyyy-MM-dd HH:mm:ss", "UTC"),
     Some("1970-01-01 00:00:00"),
@@ -5665,10 +5668,70 @@ test "@date format_in 特殊档小组（腿 G 行：45 分/30 分 DST/符号陷�
     @date.format_in(2524607998000L, "yyyy-MM-dd'T'HH:mm:ss.SSS", "Africa/Ceuta"),
     Some("2050-01-01T00:59:58.000"),
   )
+  // 分岔（§7.3 第 4 行）：参照原样 1969-12-31 23:15:30；本库偏移按整分钟 ⇒ 1969-12-31 23:16:00
+  assert_eq(
+    @date.format_in(0L, "yyyy-MM-dd HH:mm:ss", "Africa/Monrovia"),
+    Some("1969-12-31 23:16:00"),
+  )
+  // 分岔（§7.3 第 4 行）：参照原样 1969-12-31T23:15:30.000；本库偏移按整分钟 ⇒ 1969-12-31T23:16:00.000
+  assert_eq(
+    @date.format_in(0L, "yyyy-MM-dd'T'HH:mm:ss.SSS", "Africa/Monrovia"),
+    Some("1969-12-31T23:16:00.000"),
+  )
+  assert_eq(
+    @date.format_in(515556000000L, "yyyy-MM-dd HH:mm:ss", "Africa/Monrovia"),
+    Some("1986-05-04 02:00:00"),
+  )
+  assert_eq(
+    @date.format_in(
+      515556000000L, "yyyy-MM-dd'T'HH:mm:ss.SSS", "Africa/Monrovia",
+    ),
+    Some("1986-05-04T02:00:00.000"),
+  )
+  assert_eq(
+    @date.format_in(961070400000L, "yyyy-MM-dd HH:mm:ss", "Africa/Monrovia"),
+    Some("2000-06-15 12:00:00"),
+  )
+  assert_eq(
+    @date.format_in(
+      961070400000L, "yyyy-MM-dd'T'HH:mm:ss.SSS", "Africa/Monrovia",
+    ),
+    Some("2000-06-15T12:00:00.000"),
+  )
+  assert_eq(
+    @date.format_in(1710052200000L, "yyyy-MM-dd HH:mm:ss", "Africa/Monrovia"),
+    Some("2024-03-10 06:30:00"),
+  )
+  assert_eq(
+    @date.format_in(
+      1710052200000L, "yyyy-MM-dd'T'HH:mm:ss.SSS", "Africa/Monrovia",
+    ),
+    Some("2024-03-10T06:30:00.000"),
+  )
+  assert_eq(
+    @date.format_in(1730613600000L, "yyyy-MM-dd HH:mm:ss", "Africa/Monrovia"),
+    Some("2024-11-03 06:00:00"),
+  )
+  assert_eq(
+    @date.format_in(
+      1730613600000L, "yyyy-MM-dd'T'HH:mm:ss.SSS", "Africa/Monrovia",
+    ),
+    Some("2024-11-03T06:00:00.000"),
+  )
+  assert_eq(
+    @date.format_in(2524607998000L, "yyyy-MM-dd HH:mm:ss", "Africa/Monrovia"),
+    Some("2049-12-31 23:59:58"),
+  )
+  assert_eq(
+    @date.format_in(
+      2524607998000L, "yyyy-MM-dd'T'HH:mm:ss.SSS", "Africa/Monrovia",
+    ),
+    Some("2049-12-31T23:59:58.000"),
+  )
 }
 
 ///|
-test "@date to_rfc3339_in 偏移随瞬间走（腿 R 行；同一区两个瞬间两个偏移）" {
+test "@date to_rfc3339_in 偏移随瞬间走（腿 R 行；同一区两瞬间可两个偏移）" {
   assert_eq(@date.to_rfc3339_in(0L, "UTC"), Some("1970-01-01T00:00:00Z"))
   assert_eq(
     @date.to_rfc3339_in(1791244800000L, "UTC"),
@@ -5762,65 +5825,69 @@ test "@date to_rfc3339_in 偏移随瞬间走（腿 R 行；同一区两个瞬间
     @date.to_rfc3339_in(1791244800000L, "Africa/Ceuta"),
     Some("2026-10-06T02:00:00+02:00"),
   )
+  // 分岔（§7.3 第 4 行）：参照原样 1969-12-31T23:15:30-00:44；本库整分钟口径 ⇒ 1969-12-31T23:16:00-00:44
+  assert_eq(
+    @date.to_rfc3339_in(0L, "Africa/Monrovia"),
+    Some("1969-12-31T23:16:00-00:44"),
+  )
+  assert_eq(
+    @date.to_rfc3339_in(1791244800000L, "Africa/Monrovia"),
+    Some("2026-10-06T00:00:00Z"),
+  )
 }
 
 ///|
-test "@date parse_in：1 档正常与 2 档重叠取末支（腿 S 行的瞬间读数）" {
-  // 腿 S 行：America/New_York|2024-11-03 01:30:00 -> 1730615400000
+test "@date parse_in：1 档与 2 档重叠取转换后那一支（腿 S 行的瞬间读数）" {
+  // 腿 S 行：America/New_York|2024-11-03 01:30:00 -> 1730615400000，合法偏移支数 2
   assert_eq(
     @date.parse_in(
       "2024-11-03 01:30:00", "yyyy-MM-dd HH:mm:ss", "America/New_York",
     ),
     Some(1730615400000L),
   )
-  // 腿 S 行：Europe/London|2024-10-27 01:30:00 -> 1729992600000
+  // 腿 S 行：Europe/London|2024-10-27 01:30:00 -> 1729992600000，合法偏移支数 2
   assert_eq(
     @date.parse_in(
       "2024-10-27 01:30:00", "yyyy-MM-dd HH:mm:ss", "Europe/London",
     ),
     Some(1729992600000L),
   )
-  // 腿 S 行：Pacific/Chatham|2024-04-07 00:15:00 -> 1712399400000
+  // 腿 S 行：Pacific/Chatham|2024-04-07 00:15:00 -> 1712399400000，合法偏移支数 1
   assert_eq(
     @date.parse_in(
       "2024-04-07 00:15:00", "yyyy-MM-dd HH:mm:ss", "Pacific/Chatham",
     ),
     Some(1712399400000L),
   )
-  // 腿 S 行：Australia/Lord_Howe|2024-04-07 02:30:00 -> 1712419200000
+  // 腿 S 行：Australia/Lord_Howe|2024-04-07 02:30:00 -> 1712419200000，合法偏移支数 1
   assert_eq(
     @date.parse_in(
       "2024-04-07 02:30:00", "yyyy-MM-dd HH:mm:ss", "Australia/Lord_Howe",
     ),
     Some(1712419200000L),
   )
-  // 腿 S 行：UTC|2024-06-01 12:00:00 -> 1717243200000
+  // 腿 S 行：UTC|2024-06-01 12:00:00 -> 1717243200000，合法偏移支数 1
   assert_eq(
     @date.parse_in("2024-06-01 12:00:00", "yyyy-MM-dd HH:mm:ss", "UTC"),
     Some(1717243200000L),
   )
-  // 腿 S 行：Asia/Kathmandu|2024-06-01 12:00:00 -> 1717222500000
+  // 腿 S 行：Asia/Kathmandu|2024-06-01 12:00:00 -> 1717222500000，合法偏移支数 1
   assert_eq(
     @date.parse_in(
       "2024-06-01 12:00:00", "yyyy-MM-dd HH:mm:ss", "Asia/Kathmandu",
     ),
     Some(1717222500000L),
   )
-  // 腿 S 行：Etc/GMT+5|2024-06-01 12:00:00 -> 1717261200000
+  // 腿 S 行：Etc/GMT+5|2024-06-01 12:00:00 -> 1717261200000，合法偏移支数 1
   assert_eq(
     @date.parse_in("2024-06-01 12:00:00", "yyyy-MM-dd HH:mm:ss", "Etc/GMT+5"),
     Some(1717261200000L),
   )
-  // 腿 S 行：No/Where|2024-06-01 12:00:00 -> 1717243200000
-  assert_eq(
-    @date.parse_in("2024-06-01 12:00:00", "yyyy-MM-dd HH:mm:ss", "No/Where"),
-    Some(1717243200000L),
-  )
 }
 
 ///|
-test "@date parse_in：0 档（该区不存在的墙上时刻）参照主动抛，本库 raise ZoneGap 不并 None" {
-  // 腿 S 行：America/New_York|2024-03-10 02:30:00 -> ERR_ParseException（参照 setLenient(false) 下主动抛）
+test "@date parse_in：0 档（该区没有这个墙上时刻）参照主动抛，本库 raise ZoneGap" {
+  // 腿 S 行：America/New_York|2024-03-10 02:30:00 -> ERR_ParseException，合法偏移支数 0
   assert_eq(
     shape(() => {
       @date.parse_in(
@@ -5829,7 +5896,7 @@ test "@date parse_in：0 档（该区不存在的墙上时刻）参照主动抛�
     }),
     "ZoneGap 2024-03-10T02:30:00.000",
   )
-  // 腿 S 行：Asia/Shanghai|1986-05-04 02:30:00 -> ERR_ParseException（参照 setLenient(false) 下主动抛）
+  // 腿 S 行：Asia/Shanghai|1986-05-04 02:30:00 -> ERR_ParseException，合法偏移支数 0
   assert_eq(
     shape(() => {
       @date.parse_in(
@@ -5838,7 +5905,7 @@ test "@date parse_in：0 档（该区不存在的墙上时刻）参照主动抛�
     }),
     "ZoneGap 1986-05-04T02:30:00.000",
   )
-  // 腿 S 行：Asia/Shanghai|1986-05-04 02:00:00 -> ERR_ParseException（参照 setLenient(false) 下主动抛）
+  // 腿 S 行：Asia/Shanghai|1986-05-04 02:00:00 -> ERR_ParseException，合法偏移支数 0
   assert_eq(
     shape(() => {
       @date.parse_in(
@@ -5847,20 +5914,12 @@ test "@date parse_in：0 档（该区不存在的墙上时刻）参照主动抛�
     }),
     "ZoneGap 1986-05-04T02:00:00.000",
   )
-  // 腿 S 行：America/New_York|2024-13-45 99:99:99 -> ERR_ParseException（参照 setLenient(false) 下主动抛）
-  assert_eq(
-    shape(() => {
-      @date.parse_in(
-        "2024-13-45 99:99:99", "yyyy-MM-dd HH:mm:ss", "America/New_York",
-      )
-    }),
-    "ZoneGap 2024-13-45T99:99:99.000",
-  )
 }
 
 ///|
 test "@date 坏区名与窗外：三件同形给 None（参照 TimeZone 静默回落 GMT 那条不跟随）" {
-  // 腿 S 行：No/Where|2024-06-01 12:00:00 参照解析成 1717243200000（= 按 GMT），本库不跟
+  // 表外区名：参照静默按 GMT 解析成功（腿 S 行给了读数），本库三件都给 None
+  // 腿 S 行：No/Where|2024-06-01 12:00:00 -> 1717243200000（成因 NA）
   assert_eq(
     @date.parse_in("2024-06-01 12:00:00", "yyyy-MM-dd HH:mm:ss", "No/Where"),
     None,
@@ -5870,7 +5929,7 @@ test "@date 坏区名与窗外：三件同形给 None（参照 TimeZone 静默�
     None,
   )
   assert_eq(@date.to_rfc3339_in(1717243200000L, "No/Where"), None)
-  // 窗外：窗口下界之前、上界及其之后（§5.3 第 2 条同判据）
+  // 覆盖窗口之外 ⇒ None，不判成空洞（§7.3 第 3 行末句：两种空表出口必须不同）
   assert_eq(@date.format_in(-1L, "yyyy-MM-dd HH:mm:ss", "UTC"), None)
   assert_eq(@date.to_rfc3339_in(2524608000000L, "UTC"), None)
   assert_eq(

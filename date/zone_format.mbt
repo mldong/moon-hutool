@@ -18,9 +18,10 @@ pub fn format_in(
   pattern : String,
   zone : String,
 ) -> String? raise DateError {
-  abort(
-    "moon-hutool PR-B：契约骨架 —— 先取表内偏移，再走 datetime_in + 已冻的 format，别另起一条格式化",
-  )
+  match zone_offset_minutes(zone, millis) {
+    None => None
+    Some(off) => Some(DateTime::from_epoch_millis(millis, off).format(pattern))
+  }
 }
 
 ///|
@@ -43,9 +44,22 @@ pub fn parse_in(
   pattern : String,
   zone : String,
 ) -> Int64? raise DateError {
-  abort(
-    "moon-hutool PR-B：契约骨架 —— 墙上时刻交给已冻的 parse，偏移用 zone_offsets_at_wall 第一支，空档给 ZoneGap",
-  )
+  if !zone_exists(zone) {
+    return None
+  }
+  // 串与 pattern 的判据一律沿用 §2.7 已冻那套，本件不改它
+  let wall = DateTime::parse(text, pattern)
+  let offs = wall_offsets(zone, wall, true)
+  if offs.length() == 0 {
+    // 空表有两种成因，出口必须不同：真的不存在（前跳空洞）⇒ 参照在这里主动抛，本库留变体；
+    // 只是超出表的覆盖窗口 ⇒ 与 §5 同形给 None（参照那边还能往 1900 前 / 2050 后查，本库不外推）
+    if wall_offsets(zone, wall, false).length() == 0 {
+      raise ZoneGap(wall.to_iso_string())
+    }
+    return None
+  }
+  // 末支 = 转换后那一支：参照 Calendar 在重叠档就是这么取的，三区读数同证（§7.3 第 2 行）
+  Some(wall.to_epoch_millis(offs[offs.length() - 1]))
 }
 
 ///|
@@ -54,7 +68,8 @@ pub fn parse_in(
 /// - Note: 偏移的数字部分**不自己拼**——腿 R 行给了参照形状：`Asia/Kathmandu` 在 1970 是 `+05:30`、
 ///   当下是 `+05:45`（同一区两个瞬间不同偏移，正是 §5 那张表必须按瞬间取值的那件事）
 pub fn to_rfc3339_in(millis : Int64, zone : String) -> String? {
-  abort(
-    "moon-hutool PR-B：契约骨架 —— 查一次偏移交给 to_rfc3339，别在这里重排时分秒",
-  )
+  match zone_offset_minutes(zone, millis) {
+    None => None
+    Some(off) => Some(to_rfc3339(millis, off))
+  }
 }
