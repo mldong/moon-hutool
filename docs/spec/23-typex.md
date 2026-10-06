@@ -619,3 +619,83 @@ M7 暴露的是"查找式与锚定在旧样本上不可分辨"。补的 6 条样
 下一批开工把上一批的边界样本再喂一遍，是便宜的回归手段（本轮就是靠它当场抓到 #23.53 的缺档）。
 补档轮的变异对照：M10 删掉这条日期有效性闸 ⇒ 红 1 块，见证 `CONVERT_15_18|110101650229523`
 （新加的 4 条 `None` 档确有区分力，不是"为覆盖率写的断言"；基线 0 红 + 写盘回读断言 + 收尾字节比对同批执行）。
+
+## 14. 第三批 D `IdcardUtil` 切片族（#23.55–#23.63）
+
+对位参照的九件取数件（`getBirth` / `getBirthByIdCard` / `getYear` / `getMonth` / `getDay` / `getGender` /
+`getProvinceCode` / `getCityCode` / `getDistrictCode` / `hide`）。**本批收 9 件**：参照的
+`getBirthByIdCard` 与 `getBirth` 是同一条实现（前者直接委托后者）⇒ 本库只留一件，不留别名。
+
+### 14.1 边界
+
+- 不收：`getBirthDate`（出口 `DateTime`）、`getAgeByIdCard` 两件（读时钟 / 要 `java.util.Date`）、
+  `getProvinceByIdCard`（码→省名查表）、`getIdcardInfo`（返回内部类）——理由同 §13.1。
+- **本批把 §13.1 挂账的"四种失败形状"扩成五种**（腿现读多出一类 `DateException`），并给出映射口径（§14.4）：
+  九件一律**不 raise**，取不到给 `None`。
+
+### 14.2 公开面（9 件）
+
+| # | 项 | 参照 | 出口 |
+|---|---|---|---|
+| 23.55 | `idcard_birth(id)` | `getBirthByIdCard` / `getBirth` | `String?` |
+| 23.56–23.58 | `idcard_year` / `_month` / `_day(id)` | `getYear` / `getMonth` / `getDay`（`Short`） | `Int?` |
+| 23.59 | `idcard_gender(id)` | `getGenderByIdCard`（`int`） | `Int?` |
+| 23.60–23.62 | `idcard_province_code` / `_city_code` / `_district_code(id)` | 同名三件 | `String?` |
+| 23.63 | `idcard_hide(id, start, end)` | `hide(String, int, int)`（转委托 `StrUtil.hide`） | `String`（参照从不给 `null`） |
+
+### 14.3 判据（腿现读，标签 `<字段>|<样本>`）
+
+1. **15 位入参先转 18 位**：#23.55–#23.59 都走这条路 ⇒ 继承 §13.8 那条 `DateException` 档
+   （腿在 `110101650229523` / `110101651331523` / `110101000000001` / `110101999999999` 上读到的就是这一崩），
+   也继承"15 位含非数字 ⇒ `null` 喂进 `requireNonNull` ⇒ NPE"这一档（`110101650312X23`）。
+2. **三件编码切片只看长度**：`getProvinceCodeByIdCard` 等只判 `len == 15 || len == 18` 就 `substring(0,2/4/6)`，
+   **不校验省码、不校验日期、不校验是不是数字** ⇒ 18 位乱码串照给 `"ab"`（腿 `abcdefghijklmnopqrst` 长度 20 才出局）。
+   这是三件与 #23.55/#23.59 的闸集合差异，别抹平。
+3. **参照的空白闸本身不对称**：`getBirth`/`getGender` 有 `Assert.notBlank`（空白**抛** `IllegalArgumentException`，
+   且两件文案不同：`"id card must be not blank!"` vs `"[Assertion failed] - this String argument must have text…"`），
+   `getYear`/`getMonth`/`getDay` 和三件编码切片**没有**这一判（空白走长度门直接给 `null`）。
+   本库照这个不对称实现（有空白闸的件先判空白给 `None`；没有的不加），抹平会让"参照给 null 与参照崩"两档混成一条。
+4. **`idcard_gender` 是码位奇偶**：参照 `char charAt(16)` 再 `% 2` ⇒ 第 17 位为 `'A'`(65)/`'B'`(66)/`'C'`(67) 时
+   参照分别给 `0/0/1`（腿有这一族），**不是**数字奇偶；数字档上两者同值，所以必须留非数字夹具才分得开。
+5. **`idcard_hide` 走码位**（参照委托 `StrUtil.hide`，与 #23.40–#23.42 同族），越界夹紧、不校验号型，
+   掩码字符固定 `*`；参照的出口在九件里唯一**永不为 `null`** ⇒ 本件出口 `String` 而非 `String?`。
+
+### 14.4 失败形状映射表（本批的设计决定，逐条对号）
+
+| 参照形状 | 出现条件（腿现读） | 本库 |
+|---|---|---|
+| 给 `null` | 长度 <15（`getBirth` 系）/ 长度非 15、18（三件编码切片、`getGender`） | `None` |
+| `NullPointerException` | 15 位号 `convert15To18` 返回 `null` 后被 `Objects.requireNonNull` 崩 | `None` |
+| `NumberFormatException` | `Short.valueOf(substring(6,10 / 10,12 / 12,14))` 遇非数字切片 | `None` |
+| `IllegalArgumentException`（两种文案） | `Assert.notBlank` 在空白档；`getGender` 的长度门 | `None` |
+| `DateException` | 15 位号的 `yyMMdd` 不是合法日期（`convert15To18` 内） | `None` |
+
+**信息损失要写明**：五类形状在本库都收敛成同一个 `None`，调用方**无法**再分辨"参照会说 null"与"参照会崩"。
+选择这样做的理由：这些崩是参照的实现副产物（把 `null` 喂进后续调用），不是设计出来的错误面；
+第二批 `Ipv4Util` 的 `BadIp/BadMask` 那套是参照**主动抛带文案**的判据，两者形状不同才一个留错误面、一个并 `None`。
+判据侧的成本由 §14.3 的闸集合差异承担（三件编码切片与 #23.55/#23.59 的闸不同，映射后仍可从期望里看出）。
+
+### 14.5 腿与对撞
+
+- 腿 `IdcardSliceLeg.java`：**357 行读数（310 VAL + 47 ERR）**，生成 **5 块 351 条**期望；
+  其中 **47 条是 ERR 行按 §14.4 映射成 `None`** 的断言——行尾保留原始异常类名，
+  让"这条期望来自映射而不是参照返回值"在测试文件里看得见，不冒充 VAL 读数。
+  样本族：有效 18 位 6 枚（校验位由参照判定穷举，hits=1）、合法 15 位 6 枚、15 位非法 6 枚、
+  长度 14/15/16/17/18/19/20 各档、第 17 位非数字的奇偶族、空白与全数字坏形状。
+- **先对撞再冻结**：实现先在隔离副本跑，`Total tests: 483, passed: 483, failed: 0` 后才冻进仓。
+  对撞抓到两处形状误写（都是本体的错，不是期望的错）：`Int` 返回值没包 `Some`（本版不做隐式升 `Option`）、
+  以及 `idcard_hide` 的期望一度被生成器写成 `Some(…)`——参照这一件**永不给 null**，出口该是 `String`，
+  生成器按此改回明文字符串（这是生成器自身的形状错，不是腿读数错）。
+
+### 14.6 变异对照（PR-B 填读数）
+
+七条：① 三件编码切片补上"必须是数字"的额外校验（参照没有 ⇒ 该档期望会变，测"别自作聪明加闸"）；
+② 删掉 `idcard_birth`/`idcard_gender` 的空白闸（这两件参照是抛，本库给 None）；
+③ `idcard_year` 系不加 `Some` 而直接给 0（测非数字切片档）；④ `idcard_gender` 改成数字奇偶（测 §14.3 第 4 条族）；
+⑤ `idcard_gender` 的索引从 16 改 17；⑥ `idcard_birth` 对 15 位号不做转换（直接切原串）；
+⑦ `idcard_hide` 改成码元域或掩码字符换掉。
+
+### 14.7 状态
+
+`契约已冻结`（第三批 D PR-A：9 件签名骨架 + 5 块 351 条冻结期望就位；腿 357 行读数（含 47 行 ERR 证据），
+core 侧对撞先跑过且零分歧；包内当场读数 `Total tests: 483, passed: 478, failed: 5` —— 5 红是本批设计态）。

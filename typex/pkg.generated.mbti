@@ -6,15 +6,33 @@ pub fn count_by_ip_range(String, String) -> Int raise Ipv4Error
 
 pub fn count_by_mask_bit(Int, Bool) -> Int
 
+pub fn idcard_birth(String) -> String?
+
+pub fn idcard_city_code(String) -> String?
+
 pub fn idcard_convert_15_to_18(String) -> String?
 
 pub fn idcard_convert_18_to_15(String, Int) -> String
+
+pub fn idcard_day(String) -> Int?
+
+pub fn idcard_district_code(String) -> String?
+
+pub fn idcard_gender(String) -> Int?
+
+pub fn idcard_hide(String, Int, Int) -> String
 
 pub fn idcard_is_valid_15(String) -> Bool
 
 pub fn idcard_is_valid_18(String, Int) -> Bool
 
 pub fn idcard_is_valid_18_case(String, Int, Bool) -> Bool
+
+pub fn idcard_month(String) -> Int?
+
+pub fn idcard_province_code(String) -> String?
+
+pub fn idcard_year(String) -> Int?
 
 pub fn ipv4_begin_ip_long(String, Int) -> Int64 raise Ipv4Error
 
