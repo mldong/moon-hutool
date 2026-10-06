@@ -1,3 +1,7 @@
+// 契约骨架期（第二批 ipv4.mbt 体全是 abort）：值/构造器/错误类型/字段没人用是"未实现"的机械后果，
+// 按 G12 压掉；第二批落地笔整行删除。
+warnings = "-unused_value-struct_never_constructed-unused_constructor-unused_error_type-unused_trait_bound-unused_field"
+
 import {
   "mldong/moon-hutool/typex",
 } for "test"

@@ -125,11 +125,130 @@
 
 ## 7. 状态
 
-`已实现（第一批）`：14 件公开面全部落地（体里零 `abort`，G12 骨架豁免随落地笔整行删除），
-6 块 **172 条**冻结期望在 **wasm / js / wasm-gc 三档全绿**（当场读数：Total tests 459，passed 459，failed 0），
+**第一批那一格已收口**：14 件公开面全部落地（体里零 `abort`，G12 骨架豁免随落地笔整行删除），
+6 块 **172 条**冻结期望在 **wasm / js / wasm-gc 三档同一读数**（落地当场：Total tests 459，passed 459，failed 0），
 `moon check` 三档零警告，`.mbti` 只多出内部段型的类型名 `type Token`（抽象呈现、不暴露 case），公开 14 件签名一字未动。
 参照源码三件（`PageUtil.java` 274 行、`Version.java` 281 行、`CompareUtil.compare` + `CharUtil.isNumber` 两条委托）逐档对照后移植，
 其中"首段无条件 `takeNumber`"、"`pre` 空的一侧更大"、"`getEnd` 不减 1"、"码元序且大小写敏感"四条是靠读数与源码双证钉住的，不按语义直觉实现。
 native 档本机无 C 编译器（`moon test --target native` 报 `no system C compiler found`），由 CI 覆盖；
 `wrap32` 那条位宽处置（§5 第 7 行）正是为 native 与 wasm 同值而设。
-第二批 `Ipv4Util` 待开工（§1 分批）。
+
+## 10. 第二批 `Ipv4Util`（#23.15–#23.32）
+
+对位 `cn.hutool.core.net.Ipv4Util`（件在 **`core/net`**，不在 `core/util`；`unzip -l hutool-core.jar | grep -i ipv4` 现读
+`cn/hutool/core/net/Ipv4Util.class` 10,123 字节，源码 439 行 + 依赖的 `MaskBit.java` 76 行）。
+`javap` 现读公开面 4 常量 + 20 静态件，本批改**收 17 件纯算式**。
+
+### 10.1 边界（不收的与为什么）
+
+- `list(...)` 三件：把 IP 段展开成 `List<String>`（`maskBit == 32` 才短路，其余按段生成，规模可到 2^31，是分配型 API）。
+- `NetUtil` 全系与 `LOCAL_IP` 之外的主机探测：网卡/本机地址是宿主态。
+- 参照的四枚常量不进公开面：`LOCAL_IP`（`"127.0.0.1"`，只服务 `isInnerIP`）、`IP_SPLIT_MARK`(`-`)、
+  `IP_MASK_SPLIT_MARK`(`/`) 是纯拼串细节；`IP_MASK_MAX`(`32`) 的定义域由 `mask_bit_is_valid(32)`=真 与
+  `(33)`=假 两条读数钉住，不再复制一个数（四枚常量的腿读数都留在 §10.4 里当证据，不产断言）。
+
+### 10.2 公开面（第二批 18 件 = 1 错误面 + 17 函数）
+
+| # | 项 | 参照 | raise |
+|---|---|---|---|
+| 23.15 | `pub suberror Ipv4Error { BadIp BadMask BadMaskBit BadRange }`（四变体都不带载荷） | 见 §10.5 映射表 | — |
+| 23.16 | `long_to_ipv4(v : Int64) -> String` | `static String longToIpv4(long)` | 无 |
+| 23.17 | `ipv4_to_long(text : String) -> Int64` | `static long ipv4ToLong(String)` | `BadIp` |
+| 23.18 | `ipv4_to_long_or(text : String, default : Int64) -> Int64` | `static long ipv4ToLong(String, long)` | 无 |
+| 23.19 | `ipv4_begin_ip_str(ip, mask_bit) -> String` | `static String getBeginIpStr(String, int)` | `BadIp`/`BadMaskBit` |
+| 23.20 | `ipv4_begin_ip_long(ip, mask_bit) -> Int64` | `static Long getBeginIpLong(String, int)` | 同上 |
+| 23.21 | `ipv4_end_ip_str(ip, mask_bit) -> String` | `static String getEndIpStr(String, int)` | 同上 |
+| 23.22 | `ipv4_end_ip_long(ip, mask_bit) -> Int64` | `static Long getEndIpLong(String, int)` | 同上 |
+| 23.23 | `mask_bit_by_mask(mask : String) -> Int` | `static int getMaskBitByMask(String)` | `BadMask` |
+| 23.24 | `mask_by_mask_bit(mask_bit : Int) -> String?` | `static String getMaskByMaskBit(int)`（`null`→`None`） | 无 |
+| 23.25 | `count_by_mask_bit(mask_bit : Int, all : Bool) -> Int` | `static int countByMaskBit(int, boolean)` | 无 |
+| 23.26 | `mask_by_ip_range(from_ip, to_ip) -> String` | `static String getMaskByIpRange(String, String)` | `BadIp`/`BadRange` |
+| 23.27 | `count_by_ip_range(from_ip, to_ip) -> Int` | `static int countByIpRange(String, String)` | `BadIp`/`BadRange` |
+| 23.28 | `mask_is_valid(mask : String) -> Bool` | `static boolean isMaskValid(String)` | 无 |
+| 23.29 | `mask_bit_is_valid(mask_bit : Int) -> Bool` | `static boolean isMaskBitValid(int)` | 无 |
+| 23.30 | `ipv4_is_inner(ip : String) -> Bool` | `static boolean isInnerIP(String)` | `BadIp` |
+| 23.31 | `ipv4_matches(wildcard, ip) -> Bool` | `static boolean matches(String, String)` | 无 |
+| 23.32 | `ipv4_format_block(ip, mask) -> String` | `static String formatIpBlock(String, String)` | `BadMask` |
+
+**`Int64` 不是可选的**：`ipv4_to_long` 的值域到 `2^32-1`，而 wasm/js/wasm-gc 的 `Int` 是 32 位有符号（装不下
+`4294967295`，`TOL|255.255.255.255` 那条读数就地否决了 `Int` 出口）。
+
+### 10.3 判据（每条挂腿读数标签，标签形如 `<字段>|<参数>`）
+
+1. **`long_to_ipv4` 只取低 32 位、按四段拆**：`4294967296`→`0.0.0.0`、`-1`→`255.255.255.255`、
+   `-2`→`255.255.255.254`、`Long.MIN_VALUE`→`0.0.0.0`、`Long.MAX_VALUE`→`255.255.255.255`（`L2I|*` 13 条）。
+2. **合法性判据 = `@valid.is_ipv4`**（三方命中集同喂 33 个样本零分歧：参照 `Validator.isIpv4`、`PatternPool.IPV4`、
+   本库 `is_ipv4`；阳性对照挂过——把 `256.1.1.1` 的期望翻一条就立即报红）：前导零照收且同值
+   （`TOL|01.2.3.4`、`TOL|001.002.003.004`、`TOL|1.2.3.04` 都给 `16909060`），但每段最多 3 位
+   （`TOL|1.2.3.0000004` 非法），段数、空格、越界、非 ASCII 数字、BOM、尾随换行全非法（`TOL|*` 14 条 ERR）。
+   `ipv4_to_long_or` 同判据但**永不抛**，非法给默认值（`TOLD|*` 28 条两两对读）。
+3. **网段起止**：`ip & mask` 与 `begin + ~mask` 的经典算式（`BSTR|218.240.38.69|24`→`218.240.38.0`、
+   `ESTR|218.240.38.69|8`→`218.255.255.255`）；掩码位定义域**只有 1..32**，`0`/负数/`33`/`64` 五档 × 三个 IP × 四个件
+   = 60 条 `BadMaskBit` 读数（`BSTR|0.0.0.0|0` 等）；`1` 档的 `ELNG` 给 `4294967295`（参照那句"此接口返回负数"
+   在实测档不成立，以读数为准）。
+4. **错误优先序**：IP 与掩码位同时非法时先报 `BadIp`——参照算式 `ipv4ToLong(ip) & ipv4ToLong(getMaskByMaskBit(b))`
+   左操作数先算，`BSTR|256.1.1.1|0` 这条读数就是专门钉它的（若是反过来的实现会报 `BadMaskBit`）。
+5. **掩码表只 1..32，且掩码必须连续**：`MBMB|0`→`None`、`MBMB|33`→`None`；`IMV|255.0.255.0`→假、
+   `IMV|0.0.0.0`→假（0.0.0.0 不在表内）、`IMV|255.255.255.255.0`→假；`MBM|<32 条>` 全部命中且与 `MBMB` 双向互逆
+   （32 档全表，正反各一遍）。
+6. **`count_by_mask_bit` 跟随参照的 double→int 饱和窄化**：`CBMB|0|true`、`CBMB|-1|true`、`CBMB|-2|true`、
+   `CBMB|1|true` 都给 `2147483647`（`(int) 2^32` 与 `2^31` 越界饱和，**不是回绕**），
+   `CBMB|33|true`、`CBMB|64|true` 给 `0`（`2^-1`、`2^-32` 截断为 0）；
+   `all=false` 时参照先短路 `maskBit<=0 || maskBit>=32` ⇒ `CBMB|0|false` 与 `CBMB|32|false` 都给 `0`，
+   而 `CBMB|31|false` 的 `0` 走的是另一条路（不短路，`2 - 2`）——两条形同实不同，都钉住；
+   `CBMB|1|false` = `2147483647 - 2 = 2147483645` ⇒ **饱和发生在减 2 之前**。
+7. **`mask_by_ip_range` 不是真 CIDR**：逐段 `255 - to + from` 拼串，读数里有 `MBIR|1.2.3.4|1.2.3.10`→`255.255.255.249`
+   与 `MBIR|0.0.0.0|255.255.255.255`→`0.0.0.0`；且 `Assert.isTrue(from < to)` ⇒ **相等也非法**
+   （`MBIR|1.2.3.4|1.2.3.4`→`BadRange`）。
+8. **`count_by_ip_range` 的相等边界与上一条相反**：`CBIR|1.2.3.4|1.2.3.4`→`1`（只有 `from > to` 才 `BadRange`）；
+   出口 `int` 走复合赋值窄化 ⇒ `CBIR|0.0.0.0|255.255.255.255`→`2147483647`（真值 `2^32`，饱和而不是回绕）、
+   `CBIR|1.2.3.4|1.2.4.4`→`257`、`CBIR|1.2.3.4|1.2.3.10`→`7`。
+9. **内网判定认字面 `127.0.0.1`**：`IIIP|127.0.0.1`→真 而 `IIIP|127.0.0.2`、`IIIP|127.255.255.255`→假
+   （环回那一档是 `LOCAL_IP.equals(ipAddress)` 串比较）；A/B/C 三类各钉内外两侧
+   （`10.0.0.0`真 / `9.255.255.255`假 / `172.16.0.0`真 / `172.15.255.255`假 / `172.32.0.0`假 /
+   `192.168.255.255`真 / `192.169.0.0`假）；非法 IP 在这里**抛** `BadIp`。
+10. **`matches` 三件事**：非法 IP **不抛给假**（`MAT|192.168.*.1|bad`→假，与第 9 条同包两副面孔）；
+    `*` 必须占满整段（`MAT|*1.2.3.4|1.2.3.4`→假、`MAT|**.*.*.*|1.2.3.4`→假、`MAT|1.2.3.*|1.2.3.4`→真）；
+    段内是**字符串相等**（`MAT|1.2.3.4|01.2.3.4`→假、`MAT|192.168.3.1|192.168.03.1`→假，
+    而 `MAT|192.168.*.1|192.168.03.1`→真——星号那段根本不比）。
+11. **`format_ip_block` 不校验 IP 只校验掩码**：`FIB|bad ip|255.255.255.0`→`"bad ip/24"`、
+    `FIB|256.1.1.1|255.255.255.0`→`"256.1.1.1/24"`（参照是 `ip + "/" + getMaskBitByMask(mask)`，串都不看内容）；
+    掩码非连续或为 `0.0.0.0` ⇒ `BadMask`。
+
+### 10.4 腿
+
+- `Ipv4ContractLeg.java`：真 `hutool-core-5.8.35.jar` + JDK 17.0.14，`javac -encoding UTF-8`；
+  形状 `I <字段> <参数(多参用 | 连)> <VAL|ERR> <值>`，非 ASCII 一律 `\uXXXX`；**415 行读数**，其中
+  四枚常量 4 行只作 §10.1 的证据、不进断言 ⇒ 生成 **7 块 411 条**冻结期望（`typex/ipv4_test.mbt`，手打零条）。
+- ERR 行读的是 `异常类简名 + ":" + message`（不是期望串）：同一个 `IllegalArgumentException` 在参照里背着三种语义，
+  只能靠 message 分流，映射见 §10.5。
+- 生成器 `gen_ipv4_test.py` 带三条自证：唯一键（同字段同参数重复即报错）、未登记字段报错、
+  **不抛错的件却读到 ERR 就报错**；收尾断言每块断言数 > 0（零断言块静默计绿的教训）。
+- 非法 IP 与非法掩码位同时在场的档（§10.3 第 4 条）是**专为优先序补的夹具**，不是顺手多跑的。
+
+### 10.5 与参照的分岔（含异常映射表）
+
+| 参照（类 + message，腿现读） | 本库 | 说明 |
+|---|---|---|
+| `IllegalArgumentException: Invalid IPv4 address!` | `raise BadIp` | 出口 23.17/23.19–23.22/23.26–23.27/23.30 |
+| `IllegalArgumentException: Invalid netmask <输入>` | `raise BadMask` | 参照 message 带输入，本库变体**不带载荷**（输入调用方自己有） |
+| `IllegalArgumentException: to IP must be greater than from IP!` | `raise BadRange` | 23.26 与 23.27 的可达条件不同（§10.3 第 7/8 条） |
+| `NullPointerException: Cannot invoke "java.lang.CharSequence.length()" because "this.text" is null` | `raise BadMaskBit` | 参照把 `null` 喂进正则的崩溃形状，**不复制崩溃**，改显式变体 |
+| `getMaskByMaskBit` 给 `null` | `mask_by_mask_bit` 给 `None` | 唯一一处 `null`→`Option` |
+| `countByMaskBit`/`countByIpRange` 的 `int` 饱和 | 同值跟随（显式饱和） | 本库若给 `Int64` 真值就是分岔，这里选**跟随**；与 §5 第 7 行的 `wrap32` 处置并列：那一条管回绕域，这一条管窄化域 |
+| `getEndIpLong` 注释"此接口返回负数" | 跟随算式不跟随注释 | `ELNG|218.240.38.69|1` 实测 `4294967295` 为正 |
+| 四枚 `public static final` 常量 | 不进公开面 | §10.1 |
+
+### 10.6 变异对照（PR-B 填读数）
+
+计划十一条，每条要么报红要么如实记等价/未挂载：`long_to_ipv4` 取满 32 位不掩码、`ipv4_to_long` 段序反接、
+合法性判据换成"每段 ≤ 255 但禁前导零"（测第 2 条判据是不是真钉住）、`begin/end` 先算掩码位再算 IP（测优先序）、
+掩码表补上 0 档、`count_by_mask_bit` 走真值不窄化、`all=false` 的短路条件写成 `<=0 || >=31`、
+`mask_by_ip_range` 改成 `from <= to`（测与 23.27 的相等边界相反那条）、`count_by_ip_range` 改成相等也抛、
+`matches` 的段内比较改数值比较、`ipv4_is_inner` 的环回档改成 `startsWith("127.")`。
+
+### 10.7 状态
+
+`契约已冻结`（第二批 PR-A：18 件签名骨架 + 7 块 411 条冻结期望就位，腿 415 行读数、98 行 ERR 全部有映射归属；
+第一批那 6 块 172 条仍绿，包内当场读数 `Total tests: 466, passed: 459, failed: 7` —— 7 红就是本批的设计态）。
+§10.3 的判据行已按读数逐条落文，PR-B 只许把红变绿、不许动期望值（G5）。

@@ -2,6 +2,40 @@
 package "mldong/moon-hutool/typex"
 
 // Values
+pub fn count_by_ip_range(String, String) -> Int raise Ipv4Error
+
+pub fn count_by_mask_bit(Int, Bool) -> Int
+
+pub fn ipv4_begin_ip_long(String, Int) -> Int64 raise Ipv4Error
+
+pub fn ipv4_begin_ip_str(String, Int) -> String raise Ipv4Error
+
+pub fn ipv4_end_ip_long(String, Int) -> Int64 raise Ipv4Error
+
+pub fn ipv4_end_ip_str(String, Int) -> String raise Ipv4Error
+
+pub fn ipv4_format_block(String, String) -> String raise Ipv4Error
+
+pub fn ipv4_is_inner(String) -> Bool raise Ipv4Error
+
+pub fn ipv4_matches(String, String) -> Bool
+
+pub fn ipv4_to_long(String) -> Int64 raise Ipv4Error
+
+pub fn ipv4_to_long_or(String, Int64) -> Int64
+
+pub fn long_to_ipv4(Int64) -> String
+
+pub fn mask_bit_by_mask(String) -> Int raise Ipv4Error
+
+pub fn mask_bit_is_valid(Int) -> Bool
+
+pub fn mask_by_ip_range(String, String) -> String raise Ipv4Error
+
+pub fn mask_by_mask_bit(Int) -> String?
+
+pub fn mask_is_valid(String) -> Bool
+
 pub fn page_get_end(Int, Int) -> Int
 
 pub fn page_get_start(Int, Int) -> Int
@@ -29,6 +63,12 @@ pub fn version_of(String) -> Version
 pub fn version_to_string(Version) -> String
 
 // Errors
+pub suberror Ipv4Error {
+  BadIp
+  BadMask
+  BadMaskBit
+  BadRange
+}
 
 // Types and methods
 type Token
