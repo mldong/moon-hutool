@@ -294,7 +294,7 @@ pub fn idcard_is_valid_card(id : String, this_year : Int) -> Bool {
   } else if cs.length() == 15 {
     idcard_is_valid_15(id)
   } else if cs.length() == 10 {
-    idc_valid_10(cs)
+    idc_valid_10(id)
   } else {
     false
   }
@@ -303,24 +303,11 @@ pub fn idcard_is_valid_card(id : String, this_year : Int) -> Bool {
 ///|
 /// 参照 `isValidCard10` 里**只被用来判真/假**的那一半：能否拿到信息数组、且第 `[2]` 槽是 `"true"`。
 /// 地区名与性别槽参照在 `isValidCard` 上并不返回，所以本库把这一半留在包内（公开与否见 §19.2）。
-fn idc_valid_10(cs : Array[Char]) -> Bool {
-  let stripped = idc_strip_parens(cs)
-  // 参照的闸：`card.length() != 8 && card.length() != 9 && idcard.length() != 10` ⇒ 返回 null
-  if stripped.length() != 8 && stripped.length() != 9 && cs.length() != 10 {
-    return false
-  }
-  if idc_tw_grammar(cs) {
-    // 台湾档第 2 位必须是 1 或 2（性别），否则参照把第 [2] 槽写成 false 直接返回
-    let c2 = cs[1]
-    if c2 != '1' && c2 != '2' {
-      return false
-    }
-    idcard_is_valid_tw_card(String::from_array(cs))
-  } else if idc_mo_grammar(cs) {
-    true
-  } else if idc_hk_grammar(cs) {
-    idcard_is_valid_hk_card(String::from_array(cs))
-  } else {
-    false
+fn idc_valid_10(id : String) -> Bool {
+  // 参照 `isValidCard` 的十位那一支就是 `cardVal != null && "true".equals(cardVal[2])`：
+  // 判据与 #23.111 同源，只取 `valid` 槽，不再摆第二张文法表。
+  match idcard_info_10(id) {
+    None => false
+    Some(info) => info.valid
   }
 }
