@@ -181,5 +181,5 @@ pub fn datetime_in(zone : String, millis : Int64) -> DateTime? {
 /// 只承诺形状与下界，两次读数的抖动不进断言（spec §5.5）。
 /// - Returns: 坏名 ⇒ `None`
 pub fn now_in(zone : String) -> DateTime? {
-  datetime_in(zone, now_millis())
+  now_at(zone, clock_system())
 }

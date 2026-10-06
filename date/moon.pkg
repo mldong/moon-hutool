@@ -5,7 +5,3 @@ import {
 import {
   "mldong/moon-hutool/date",
 } for "test"
-
-// 骨架期：第三批五个入口的 clock 形参与新增件都还没人读（PR-B 落地后删掉这两行）
-
-warnings = "-unused_value"
