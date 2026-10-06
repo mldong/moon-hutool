@@ -8,6 +8,8 @@ pub fn between(DateTime, DateTime, TimeUnit) -> Int64
 
 pub let date_pattern : String
 
+pub fn datetime_in(String, Int64) -> DateTime?
+
 pub let datetime_millis_pattern : String
 
 pub let datetime_pattern : String
@@ -24,6 +26,8 @@ pub fn is_same_day(DateTime, DateTime) -> Bool
 
 pub fn now(Int) -> DateTime
 
+pub fn now_in(String) -> DateTime?
+
 pub fn now_millis() -> Int64
 
 pub let pure_date_pattern : String
@@ -33,6 +37,16 @@ pub let pure_datetime_pattern : String
 pub let time_pattern : String
 
 pub fn to_rfc3339(Int64, Int) -> String
+
+pub fn zone_count() -> Int
+
+pub fn zone_exists(String) -> Bool
+
+pub fn zone_names() -> Array[String]
+
+pub fn zone_offset_minutes(String, Int64) -> Int?
+
+pub fn zone_offsets_at_wall(String, DateTime) -> Array[Int]
 
 // Errors
 pub suberror DateError {

@@ -1,9 +1,12 @@
 # 契约 03 · date（日期时间）
 
-> 状态：**已实现**（10-05）。实现在 `date/date.mbt`，公开接口在 `date/pkg.generated.mbti`（契约先行到实现落地
-> **`.mbti` 零漂移**——公开签名一字未动），期望值在 `date/date_test.mbt` 与 `date/README.mbt.md`：47 条全绿，
-> wasm / js / wasm-gc 三档读数一致，native 档由 CI 出证。改任何期望串须单独一笔并给出外部读数来源（门禁 G5）；
-> 本轮落地时**期望串一字未改**，改掉的是一处实现算错（两位年窗口 `70..99` 那档）。
+> 状态：**首批已收口（10-05）· 第二批契约已冻结（10-06，§5 那 8 块现在是设计态红）**。
+> 首批实现在 `date/date.mbt`，公开接口在 `date/pkg.generated.mbti`（契约先行到落地 **`.mbti` 零漂移**——
+> 公开签名一字未动），首批期望值在 `date/date_test.mbt` 与 `date/README.mbt.md`：47 条读数在
+> wasm / js / wasm-gc 三档一致，native 档由 CI 出证。第二批的数据与期望在 `date/zone_table.mbt` 与
+> `date/zone_test.mbt`，两件都是生成件（`scripts/gen_zone_table.py`）。
+> 改任何期望串须单独一笔并给出外部读数来源（门禁 G5）；首批落地那一笔**期望串一字未改**，
+> 改掉的是一处实现算错（两位年窗口 `70..99` 那档）。
 >
 > core **没有任何时间能力**：没有 `time`/`date`/`calendar` 包，全树 `grep ZonedDateTime|Instant|calendar|weekday|leap_year`
 > 在非测试代码命中 0（本机 `G:\dev-tools\moon\lib\core` 实测）。能借的只有 `env.now()`（epoch 毫秒）。
@@ -17,7 +20,7 @@
 
 | # | 规则 | 为什么必须这么定 |
 |---|---|---|
-| 0.1 | **没有时区库**：`DateTime` 是墙上时钟，不带偏移；凡"瞬间 ↔ 墙上时钟"的换算都显式吃 `offset_minutes` | hutool/JDK 靠进程默认时区（`TimeZone.getDefault()`）。那是个隐式全局量：同一份代码在两台机器上给出不同的 `begin_of_day`。本库零依赖也零 tzdb，索性把它做成必填参数；不做命名时区，也因此**没有 DST 歧义**（一个墙上时刻恒等于一个瞬间） |
+| 0.1 | **偏移一律显式**：`DateTime` 是墙上时钟，不带偏移；"瞬间 ↔ 墙上时钟"的换算显式吃 `offset_minutes`，新增的命名时区入口则显式吃**区名** | hutool/JDK 靠进程默认时区（`TimeZone.getDefault()`）。那是个隐式全局量：同一份代码在两台机器上给出不同的 `begin_of_day`。本库零依赖，索性把"在哪算"做成必填参数。<br>**10-06 第二批就地更正**：这一行后半句原先写的"不做命名时区、也因此没有 DST 歧义"**已被 §5 推翻**——本库现在自带一张 IANA 段表，命名时区与 DST 都收，而 `zone_offsets_at_wall` 的 0 / 1 / 2 三档正是"墙上时刻可以对应多个瞬间"的正面承认。"不跟随进程默认时区"这一半没变，变的是一整块能力从"不做"挪到"做了"。（当时那句是按"零依赖就装不下 tzdb"推的，现读发现参照代次自己就是完整的 tzdb，展开成段存下来并不需要 FFI） |
 | 0.2 | **proleptic Gregorian + 天文纪年**：1582-10-15 之前照公历规则往前推，且存在公元 0 年（= 公元前 1 年） | JDK `GregorianCalendar` 默认有 1582-10-15 切换点（之前按儒略历），同一个 `epoch_days` 会算出不同日期；切换点前后的历史日期对工具库没有价值，规则一致才有可复现的期望值 |
 | 0.3 | **向下取整**：epoch 相关的除法/取模一律向下取整（floor） | 本版编译器的 `/` 与 `%` 对负数**向零截断**（本机实测 `-5 % 100 = -5`、`-1000L / 86400000L = 0`）。不自己造 floor 档，`-1L` 毫秒就会算成 1970-01-01T-00:00:00 这一类坏读数。用例 #2.5 与 #2.6 各钉一档 |
 | 0.4 | **pattern 是封闭子集**：表外字母显式 `raise`，不当字面量吞掉 | hutool `FastDateFormat`（真上游 Apache Commons Lang3）未识别的字母按其规则原样输出，拼错 `EEEE` 会静默变成字面量 `EEEE` 出现在报表里。本库宁可让它在第一次调用就炸 |
@@ -202,13 +205,113 @@
 
 ## 3. 明确不做（本包范围内）
 
-命名时区与 DST（tzdb 是要 FFI 或大表的东西）、`java.text` 全套 pattern（`EEEE`/`MMM`/`a`/`Z`/`X`/`ww`/`W`/`D`/`F`/`G`）、JDK 的 lenient 滚动与"猜格式"、闰秒、微秒/纳秒精度、农历/节气/生肖、调休与法定节假日表、RFC 7231 IMF 日期（要英文星期/月名表，随 `EEE`/`MMM` 一起再定，见 `docs/ROADMAP.md`）。
+`java.text` 全套 pattern（`EEEE`/`MMM`/`a`/`Z`/`X`/`ww`/`W`/`D`/`F`/`G`）、JDK 的 lenient 滚动与"猜格式"、闰秒、微秒/纳秒精度、农历/节气/生肖、调休与法定节假日表、RFC 7231 IMF 日期（要英文星期/月名表，随 `EEE`/`MMM` 一起再定，见 `docs/ROADMAP.md`）。
 
-## 4. 骨架期那三条警告豁免：PR-B 已删
+> **10-06 就地更正**：这一条原先首位挂着「命名时区与 DST（tzdb 是要 FFI 或大表的东西）」，
+> 现由 **§5 收了**（内置 IANA 段表，603 区 / 18713 段，纯 MoonBit 数据、零 FFI），从本条删掉。
+> 其余七件仍是不做的原样。§5.6 记的是第二批**新增**的不收档，与本条不重叠。
+
+## 4. 骨架期的 `warnings` 豁免（首批已删；第二批 PR-A 又压上一行）
 
 `date/moon.pkg` 在骨架期压过一行 `warnings`，把 `struct_never_constructed` / `unused_constructor` /
 `unused_error_type` 三类压掉——它们全是"实现还没写"的机械后果（类型没人构造、错误变体没人构造、签名写了
 `raise` 而体里没 `raise`），为了消警告去写假实现才是本末倒置。
 
-**PR-B 落地那一笔已把整行删掉**（门禁 G12 的棘轮就是拦"豁免活得比 `abort` 久"，带阳性对照）。
-现在这个包的零警告是真读数：`moon check` 0 警告、`moon info` 后 `.mbti` 无 diff、47 条用例全绿。
+**首批 PR-B 落地那一笔已把整行删掉**（门禁 G12 的棘轮就是拦"豁免活得比 `abort` 久"，带阳性对照），
+删掉之后 `moon check` 0 警告、`moon info` 后 `.mbti` 无 diff、47 条用例逐档对上。
+
+**第二批 PR-A 重新压了一行** `warnings = "-unused_value"`，理由不同但同类：整张段表在骨架期没人读——
+`zone.mbt` 七个入口全是 `abort`，那五个 `let` 数组就是纯粹的未用值。PR-B 落地时删，
+G12 只认函数体里的 `PR-B：契约骨架` 字样，所以这一行压不过去第二次换代。
+
+
+## 5. 内置 IANA 时区段表与命名时区入口（第二批）
+
+> 状态：**契约已冻结**（10-06 PR-A，本批 8 块是设计态红）。数据件 `date/zone_table.mbt` 与期望件
+> `date/zone_test.mbt` 都由 `scripts/gen_zone_table.py` 从参照腿 `scripts/TzLeg.java` 的读数灌出来，
+> **一格都没有手打**；换窗口或换参照代次就整文件重生成，不逐条改。
+
+### 5.1 参照代次与体积（全是现读）
+
+| 读数 | 值 | 怎么取的 |
+|---|---|---|
+| 参照 | JDK 17.0.14（Oracle）· `lib/tzdb.dat` **101731 bytes** | 腿的 `B` 行。tzdb 的版本名这版 JDK 不吐（反射 `sun.util.calendar.ZoneInfoFile.VERSION` 撞 `InaccessibleObjectException`），所以代次改用「JDK 版本 + tzdb.dat 字节数」钉 |
+| 区数 | **603** | `ZoneId.getAvailableZoneIds()` 全量，含 legacy link 与 `Etc/*` |
+| 段数 | **18713** | 窗口 `[1970-01-01, 2050-01-01)` 内：每区首段 + 每次跳变一段 |
+| 腿自证 | `SELFCHECK_BAD_ROWS = 0` | 每条段界都要 `getOffset(e) == 段值` 且 `getOffset(e-1) == 上一段值`，逐条反查 |
+| 别名普查 | 603 个区只有 **318 套**不同规则（285 个区与别的区逐段同读数） | 规则指纹分组；本轮不去重，理由见 §5.6 第 3 条 |
+| 成本 | 表源 349 KB · `moon check` 424 ms · 期望 8 块 5080 条 | 本机隔离副本实测：全表逐区那一块单独把 `moon test --target wasm` 从 2.2 s 抬到 8.5 s、测试 wasm 从 194 KB 抬到 1.7 MB。三档（wasm / js / wasm-gc）读数一致性由门禁 G3 逐档核 |
+
+### 5.2 公开面七件
+
+| 签名 | 语义 | 边界 / 错误 | hutool 对位 | 差异声明 | 读数来源 |
+|---|---|---|---|---|---|
+| `zone_count() -> Int` | 表内区数 | 无 | — | 本库新增出口，让"覆盖范围"可被调用方数出来 | 腿 `B ZONES` = 603 |
+| `zone_names() -> Array[String]` | 区名清单，**返回拷贝** | 无 | — | 返回内部表就是允许调用方把表改坏；拷贝这一条有独立用例（改 `[0]` 再读，仍是原值） | 腿 `Z` 行逐区名 |
+| `zone_exists(String) -> Bool` | 认不认这个区名 | 大小写敏感、不认缩写 | `ZoneUtil.exists`（旧版有，5.8.35 的 javap 现读只剩两件、无 `exists`） | 参照没有的档，本库补在"查表前先问一句"这个位置 | 由 `D` 行区名集合决定 |
+| `zone_offset_minutes(String, Int64) -> Int?` | **瞬间 → 偏移**（分钟） | 坏名 / 窗外 ⇒ `None` | hutool 全程隐式走 `TimeZone.getDefault()` | 一个瞬间在一个区里恒一个偏移 ⇒ 这一件除坏名窗外是全函数；非整点偏移真实存在（`Asia/Kathmandu` = 345、`Pacific/Chatham` = 825）；`Etc/GMT+5` 腿给 **-300**，符号与直觉相反、照搬不修 | 腿 `P` 行 603×6 + `T` 行段界 1150 条 |
+| `zone_offsets_at_wall(String, DateTime) -> Array[Int]` | **墙上 → 合法偏移集合**，0 / 1 / 2 档 | 坏名 ⇒ `[]` | — | 这一件的存在就是"有 DST 之后墙上↔瞬间不是一一映射"的正面承认；要唯一瞬间仍走显式 `offset_minutes` 那条老路 | 腿 `V` 行 10 条：`America/New_York|2024-11-03T01:30 ⇒ -240\|-300`（2 档）、`America/New_York|2024-03-10T02:30 ⇒ 空`（0 档）、`Asia/Shanghai|1986-05-04T02:30 ⇒ 空`（**中国 1986 年那回前跳**） |
+| `datetime_in(String, Int64) -> DateTime?` | 瞬间 + 区名 ⇒ 墙上时刻（**纯函数**，不读时钟） | 坏名 / 窗外 ⇒ `None` | `DateUtil.date(.., TimeZone)` 一类 | 纯函数版先立住，才谈得上把它的读数冻进契约 | 腿 `W` 行 42 条（`LocalDateTime.ofInstant`） |
+| `now_in(String) -> DateTime?` | 读一次时钟 + 查一次表 | 坏名 ⇒ `None` | `DateUtil.now()` / `DateUtil.date()` | 参照吃进程默认时区，本库把区名做成必填；纪律同 #2.10 | 见 §5.5 |
+
+### 5.3 三条分岔（明写的取舍，不是漏）
+
+| # | 分岔 | 参照那一侧 | 本库 | 代价 |
+|---|---|---|---|---|
+| 1 | 坏区名 | 腿 `U` 行五条：`TimeZone.getTimeZone` 对 `Nowhere/Nowhere`、空串、`asia/shanghai`（大小写错）一律**静默回落 GMT=0**，`GMT+8:00` 这种怪写法反而**被接受**=480；`ZoneId.of` 全部抛 | `None` / `false` | 调用方拿不到"参照那种悄悄给个 0"的行为。错名早炸比晚炸好，这条不留 |
+| 2 | 窗口外 | 参照还能查（1900 前的历史段、2050 后的预测都在 JDK 里） | 一律 `None`，**不外推** | 2050 之后这张表过期。取舍是"过期就取不到"而不是"过期还给个旧偏移"——后者是静默错值 |
+| 3 | 表序 | Java 侧无所谓（没有查表） | 表按**逐字节字典序**存，配 `date/zone.mbt` 自带比较器 | 见 §5.4，这条是本轮撞出来的工具链事实 |
+
+### 5.4 表序判据（本工具链的 `String.compare` 不是字典序）
+
+`moonbitlang/core/builtin/string.mbt:221` 的 `impl Compare for String` 写的是**先比长度、长度相同才逐字符比**，
+与 Java `String.compareTo` 的字典序**不是同一个序**。三条实测（本机 wasm 真跑）：
+
+| 表达式 | 字典序应当 | 本工具链实际 |
+|---|---|---|
+| `"abc" < "abd"` | true | true |
+| `"Abidjan" < "Accra"` | true | **false**（7 字 vs 5 字，先比长度就判大了） |
+| `"aa" < "b"` | true | **false**（2 字 vs 1 字） |
+
+⇒ 后果与判据：
+1. 表序与查找必须用**同一个比较器**。`zone.mbt` 里自带的 `zone_name_cmp` 是字典序实现；不许顺手写成 `xs[mid] < v`——那会把 603 个区里所有"长度不同"的相邻区查飞。
+2. 表序对不对不需要专门的元测试来兜：**§5.2 那 603×6 条逐区读数本身就是表序证明**，序一对不上某区就给 `None`，那一整块当场红。变异 Z2 打的就是"把比较器换成 core 的 `<`"。
+3. 对已交付包的影响已现读查过：`coll.maximum` / `minimum` 的用例只在 `Int` 上跑，`String` 那条走 `char_length()` 键，没踩到这条；但泛型实例化到 `String` 时它给的是**"取最长"而不是"字典序最大"**，这属本仓未承诺的行为，记在这里免得下一轮误当成缺陷。
+
+### 5.5 时钟面：只补"命名时区的现在"，不补缓存时钟
+
+hutool 的 `cn.hutool.core.date.SystemClock`（javap 现读公开面只有 `SystemClock(long)` / `now()` / `nowDate()`）
+内部是一条 `ScheduledExecutorService` 每 1 ms 刷一个 `volatile long now`——**`now()` 给的是缓存值不是当下值**；
+`nowDate()` 是 `new Timestamp(now).toString()`，吃默认时区。本库全同步、零依赖、起不了那条线程，
+也起不了"同一毫秒内恒等读数"这种只能在并发下才成立的判据 ⇒ **整件判不收**，`now_in` 就是一次 `env.now()`
+加一次查表。这一件"没有实现"的判据不是猜的：先前对撞过一次——`now()` 缓存语义与 `System.currentTimeMillis()`
+在同一条腿里就是两个读数，本轮把腿源读全后按"无对应可冻形状"处置。
+
+`now_in` 的用例沿用 #2.10 的纪律：只断**同一次时钟读数的等价式**（`datetime_in(zone, ms)` 与
+`DateTime::from_epoch_millis(ms, 表内偏移)` 同值）与形状下界（年份下界、时分秒字段范围），
+不断两次读时钟之间的大小关系——那是计时依赖，CI 一慢就假红。
+
+### 5.6 不收（本批范围内）
+
+| # | 不收 | 理由 |
+|---|---|---|
+| 1 | RRULE / 规则压缩（"3 月最后一个周日"那种） | 只存展开段。存规则就得自己实现规则解释器，判据立刻从"抄腿读数"变成"我算对了没" |
+| 2 | 1970 前与 2050 后 | 见 §5.3 第 2 条 |
+| 3 | 285 个别名区去重（可省 38% 行数） | 不改公开面的纯体积优化，多一套"名字→规则号"间接层就多一处能错的地方 |
+| 4 | `ZoneUtil.toTimeZone` / `toZoneId` | javap 现读 5.8.35 的 `ZoneUtil` 只有这两件；参照那两个类型 `java.util.TimeZone` / `java.time.ZoneId` 在本库**都没有对应物**，翻译等于同一张表查两遍。`conv` 当年推到 date 的那件 `toTimeZone` 一并结在这条 |
+| 5 | `is_dst` 位 | 参照侧 `ZoneRules.isDaylightSaving` 要 JDK 12+，本腿在 JDK 8 API 上跑；且段表已含偏移，DST 与否可由"该段 != 该区标准段"推出但不承诺 |
+| 6 | 三字母缩写区名（`CST`/`EST` 这类本就歧义） | 不进表；`zone_exists` 给 `false` |
+| 7 | 命名时区版 `format` / `parse`（`DateTime::format` 带区名重载） | 先让查表面站稳；重载会把 §2.6~2.7 那套 pattern 表再拖一遍 |
+
+### 5.7 变异计划（PR-B 填读数；隔离副本 + 基线断言 + 写盘 `flush/fsync/回读断言` + `finally` 还原 + 收尾字节比对）
+
+| 号 | 变异 | 计划打的档 |
+|---|---|---|
+| Z1 | 段起点二分边界从"最后一个 `<=`"改成"第一个 `<`" | 每条段界 ±1 秒（`T` 行 1150 条里至少一跳就红） |
+| Z2 | 区名比较器换成 core 的 `<`（先比长度那条） | 表序判据：603 区里长度不同的邻居当场给 `None` |
+| Z3 | 窗外判据去掉（负 millis 也去查表） | 窗口下/上界四条 |
+| Z4 | `zone_names()` 直接返回内部表 | 拷贝那条用例（改 `[0]` 后还能查回原区名） |
+| Z5 | `zone_offsets_at_wall` 命中 0 档时改给"前一段偏移"（把空洞当正常） | `America/New_York|2024-03-10T02:30` 与 `Asia/Shanghai|1986-05-04T02:30` |
+| Z6 | 2 档重叠时只回第一个 | `America/New_York|2024-11-03T01:30`、`Europe/London|2024-10-27T01:30` |
+| Z7 | `zone_offset_minutes` 里偏移取首段而非末段 | 所有有 DST 的区在非标准时段 |
+| Z8 | `datetime_in` 的偏移符号反了（`millis + off*60000` 写成 `-`） | 全部 `W` 行 42 条 |
