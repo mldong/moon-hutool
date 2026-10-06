@@ -1,3 +1,9 @@
+// 第三批 E 的骨架期豁免（`datasize.mbt` 十九件体未实现 ⇒ 签名参数全 unused）：落地笔整行删。
+// 只压得住这一条：本版 `warnings` 字段容不下多个助记符（数组形报 `[4192] Invalid configuration`、
+// 空格形与逗号形被 `moonc` 判 `Ill-formed list of warnings`），所以 `unused_constructor` 与 `unused_error_type`
+// 改由骨架里的 `datasize_unimplemented` 真实构造/抛出消掉，不留警告、也不留第二条豁免。
+warnings = "-unused_value"
+
 // 第三批 A 落地笔：骨架期的 `warnings = "-unused_value"` 豁免整行删除（G12：体里已无 abort）。
 //
 // 非测试侧多两件事：`valid`（IP 合法性与手机号判据必须同源，spec §10.3 第 2 条 / §11.3 第 3 条）、

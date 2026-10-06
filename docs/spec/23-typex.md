@@ -710,3 +710,127 @@ M7 暴露的是"查找式与锚定在旧样本上不可分辨"。补的 6 条样
 三档 wasm / js / wasm-gc 一致、`moon check` 零警告；5 块 351 条冻结期望一条未改来迁就实现，
 `.mbti` 与 PR-A 相同（签名是契约冻的）。骨架期 `warnings` 豁免整行删除（G12）。
 两条等价按"构造解释"入档，其中 R4 顺手改写了 §14.3 第 4 条的一处错判。
+
+## 15. 第三批 E `DataSize` / `DataSizeUtil` / `DataUnit`（#23.64–#23.82）
+
+件在 `cn.hutool.core.io.unit`（**不在 `cn.hutool.core.util`**——`DataSizeUtil` 才在 `util`，
+两个包名要分清，腿是按现读包名 import 的）。参照那一族是个**只有一个 `long bytes` 字段的值对象**
+加一个五常量枚举，其余方法全是对那个字段的纯函数 ⇒ 本批把"数据量"直接摊平成 `Int64` 字节数，
+不引对象层。
+
+### 15.1 边界（收与不收，逐条带理由）
+
+**收 19 件**（解析 2 / 构造 6 / 出口 7 / 比较 2 / 单位表 2），列在 §15.2。
+
+**不收的，逐条**：
+
+| 参照件 | 判据 |
+|---|---|
+| `DataSize.format(long)` / `format(long, DataUnit)` / `toUnit(…)` 一族 | 选档靠 `Math.log10(size) / Math.log10(1024)` 的**浮点边界**，印数靠 `DecimalFormat("#,##0.##")` 的千分位 + `HALF_EVEN`。两件事都要先在 core 侧做出同语义的实现才能冻期望，**另批做**；腿里 150 条读数（`FMT` 25 + `FMT_AT_*` 5×25）已存着，届时直接灌 |
+| `DataSize.of(BigDecimal, DataUnit)` / `of(String, DataUnit)` | 是 `parse` 的中间站，公开面由 `data_size_parse_bytes` 覆盖；`of(long, DataUnit)` 那档由 #23.71 覆盖 |
+| `DataSizeUtil` 的 `format` / `convertToMaxUnit` | 同上，都属 `format` 族 |
+| `DataSize` 的实例 API（`compareTo` / `equals` / `hashCode` / `toString`）| 已摊平成 #23.78–#23.80 三件纯函数；`hashCode` 是 `Long.hashCode(bytes)`，值对象已被字节数完全代表 ⇒ 不单立件 |
+| `DataUnit.getSuffix()` | 后缀就是查表的键，没有第二个来源；`UNIT_NAMES` 的原序由 #23.82 钉 |
+
+**腿 512 行（424 VAL + 88 ERR）里进了契约的 360 条**，其余 151 条 + 1 条重样本的去处：150 条属 `format` 族（上一行）、
+`OF_NULL_UNIT` 1 条见 §15.5 末两行、`PARSE|1ZB` 与首批那条重样本同键折叠（生成器对"同键不同读数"直接报错，对重样本只留一条）。
+
+### 15.2 公开面（19 件）
+
+| 件 | 参照 | 返回 | Raises |
+|---|---|---|---|
+| #23.64 `data_size_parse_bytes(text)` | `DataSize.parse(CharSequence)` | `Int64` | `BadText` |
+| #23.65 `data_size_parse_bytes_with(text, suffix)` | `DataSize.parse(CharSequence, DataUnit)` | `Int64` | `BadText` |
+| #23.66 `data_size_of_bytes(b)` | `ofBytes(long)` | `Int64` | 无（**参照不查重**） |
+| #23.67–70 `data_size_of_{kilobytes,megabytes,gigabytes,terabytes}(n)` | `ofKilobytes` 等 | `Int64` | `Overflow` |
+| #23.71 `data_size_of_amount_suffix(n, suffix)` | `of(long, DataUnit)` | `Int64` | `BadText` / `Overflow` |
+| #23.72–76 `data_size_to_{bytes,kilobytes,megabytes,gigabytes,terabytes}(n)` | `toBytes()` 等 | `Int64` | 无 |
+| #23.77 `data_size_is_negative(n)` | `isNegative()` | `Bool` | 无 |
+| #23.78 `data_size_to_string(n)` | `toString()` | `String` | 无 |
+| #23.79 `data_size_compare(a, b)` | `compareTo(DataSize)` | `Int` | 无 |
+| #23.80 `data_size_equal(a, b)` | `equals(Object)` | `Bool` | 无 |
+| #23.81 `data_unit_bytes_by_suffix(suffix)` | `DataUnit.fromSuffix(String)` + `size()` | `Int64?` | 无 |
+| #23.82 `data_unit_suffixes()` | `DataUnit.UNIT_NAMES`（公开静态数组，反射读） | `Array[String]` | 无 |
+
+`DataSizeUtil.parse(CharSequence)` ≡ `DataSize.parse(text).toBytes()`，与本库 #23.64 是同一条腿 ⇒ 不单立件；
+但腿里 `UTIL_PARSE` 那 34 条读数**单独成块留着**，作用是钉"参照的两个入口读数一致"这件事，实现只有一份。
+
+### 15.3 判据（标签 `<字段>|<样本>`；样本一律腿现读，不手打）
+
+1. **整串清空白**在正则之前：`PARSE|1 2 KB` 与 `PARSE|  8  GB  ` 分别给 `12288` / `8589934592`。
+2. **数值段只认 ASCII 数字**（参照正则 `^([+-]?\d+(\.\d+)?)([a-zA-Z]{0,2})$`，`\d` 不带 `UNICODE_CHARACTER_CLASS`）：
+   `PARSE|\uff11\uff12KB`、`PARSE|\u0663KB`、`PARSE|3\u0663KB`、`PARSE|\u0663\u0662` 四条都 `BadText`。
+   符号只允许**开头一个** `[+-]?`：`PARSE|+7MB` 给 `7340032`，而 `PARSE|1e3` / `PARSE|0x10` / `PARSE|.5KB` / `PARSE|5.` /
+   `PARSE|1B B` / `PARSE|1.2.3KB` / `PARSE|KB` / `PARSE|`（空串）/ `PARSE| `（纯空格）九条 `BadText`。
+3. **后缀最多两字母**，于是 `PARSE|1ZB` 被正则挡下；`PARSE|1PB` 过正则、死在 `fromSuffix`——
+   **两条不同来源、同一个出口**（参照把内层任何异常都包成同一个 `IllegalArgumentException`），故都记 `BadText`。
+4. **`fromSuffix` 是前缀匹配**（`candidate.suffix` 以入参**开头**即命中，忽略大小写）：
+   `FROM_SUFFIX|K`→KB、`|M`→MB、`|G`→GB、`|T`→TB、`|b`→B、`|g`→GB、`|kb`、`|Kb` 都命中；
+   `FROM_SUFFIX|`（空串）命中**第一枚** ⇒ B（`startWith*` 对空前缀恒真）；
+   而比候选更长的 `|kBB`、`|BBB`，以及带空白的 `|TB ` 全不认（空白档只在 `parse` 里被清掉，反查件不清）。
+   这条决定 #23.71 / #23.65 的后缀解析必须**共用**#23.81 那张表，不能各写一份。
+5. **小数段是十进制精确乘，不是浮点**：`PARSE|1.9999999999999999KB` 给 `2047`（`double` 会把这串读成 `2.0`，乘完给 `2048`）、
+   `PARSE|0.0009765625KB` 给 `1`、`PARSE|9007199254740993B` 原样给回（超出 `double` 精确整数域）。
+   加上 `PARSE|1.1KB`=`1126`、`PARSE|0.9KB`=`921`、`PARSE|1.999MB`=`2096103` 一起钉住"乘完向零截断"。
+6. **截断方向**：`PARSE|-1.5KB`=`-1536`、`PARSE|-0.5KB`=`-512`、`PARSE|0.5B`=`0`（`BigDecimal#longValue` 向零）。
+7. **`of*(long)` 的精确溢出边界**（参照 `Math.multiplyExact`，每条单位各有上下两档）：
+   `OF_KB|9007199254740991` 是值、`|9007199254740992` 溢出；`OF_MB|9007199254740991` 溢出；
+   `OF_GB|1099511627776`、`OF_TB|1099511627777`、`OF_MB|9223372036854` 溢出；
+   正负两端都查（`OF_*|-9223372036854775808` 全溢出）；`OF_UNIT_BIG` 块用 `9223372036854775807` 乘五枚单位，只有 `|B` 活着。
+8. **`ofBytes` 不查重**：`OF_BYTES|9223372036854775807` 与 `| -9223372036854775808` 都是值。
+9. **`toXxx` 是 Java 整除**（向零截断、不是 floor）：`TO_KB|-1023`=`0`、`TO_KB|-1536`=`-1`、`TO_TB|1099511627775`=`0`。
+10. **表自身的不对称**：`SRC_UNIT_NAMES` 给七枚 `B,KB,MB,GB,TB,PB,EB`，而 `FROM_SUFFIX|PB` / `|EB` 反查 `None`——
+    表里有、枚举里没有，这两条读数必须同时成立才算抄对。
+11. **`compare` 用 `Long.compare` 语义**：`CMP_VS_ZERO|9223372036854775807`=`1`、`|-9223372036854775808`=`-1`。
+    写差值会在这一档炸（见 §15.6 M12）。
+12. **`is_negative` 不含 0**（`IS_NEG|0`=`false`），**`to_string` 恒带 `B`**（`TO_STRING|-1023`=`-1023B`）。
+
+### 15.4 腿与对撞
+
+腿 `Temp/convsrc/datasize/DataSizeLeg.java`（491 行）+ `DataSizeLeg2.java`（21 行，专钉 §15.3 第 4、5 条），
+真 `hutool-core-5.8.35.jar` + JDK 17.0.14，`-Dfile.encoding=UTF-8`，跑完 `grep -c ERR` 读数 88。
+表面两件事走反射现读：`DataUnit.UNIT_NAMES`（公开字段）与每枚常量的 `size().toBytes()`（`size()` 是包私有，
+故用 `DataSize.of(1, unit)` 这条公开路取）。
+期望文件由 `gen_ds_test2.py` 灌入，`assert_eq` 360 条 / 6 块；生成器对同键样本冲突直接 `SystemExit`。
+形状预检在隔离副本做完：`moon check` **0 错误**，23 条警告全属 stub 自身（骨架文件零警告来自真实签名）。
+
+### 15.5 与参照的分岔
+
+| 参照 | 本库 | 依据 |
+|---|---|---|
+| `DataSize` 值对象 / `DataUnit` 枚举当参数 | `Int64` 字节数 / 后缀 `String` | 值对象只有一个 `long` 字段；枚举值在本仓取不到（22 个包零 `pub enum`），不为一次移植新开跨包取值形状 |
+| `parse` 把内层一切异常包成 `IllegalArgumentException` | `raise BadText` | 参照在 `catch (Exception ex)` 里统一重抛，文案 `'…' is not a valid data size` 不分子档 ⇒ 单档够 |
+| `of*(long)` 抛 `ArithmeticException: long overflow` | `raise Overflow` | 腿 22 条 ERR 读数 |
+| `fromSuffix` 未知后缀**抛** | `data_unit_bytes_by_suffix` 给 `None` | 纯查表面，调用方大多只想知道"认不认"；构造面（#23.71 / #23.65）仍 `raise BadText` |
+| `parse(cs, DataUnit)` 的默认单位在类型上不可能非法 | 兜底后缀非法 ⇒ `BadText` | **本库新增档，无腿读数**（把单位降成串就多出这一档），是设计决定 |
+| `of(3, null)` 按 `BYTES` 给 `3`（腿 `OF_NULL_UNIT|‑` = `5` 那类）| 无对应件 | 后缀串给不出 `null`；空串走 §15.3 第 4 条命中 B，两件事在参照里是同一枚 BYTES |
+| `StrUtil.cleanBlank` / `PatternPool` / `Assert` 内部件 | 包内实现细节 | 不进公开面 |
+
+### 15.6 变异对照（PR-B 填读数；隔离副本，基线 0 红 + 写盘 `flush/fsync/回读断言` + `finally` 还原 + 收尾字节比对）
+
+| 号 | 变异 | 计划打的档 |
+|---|---|---|
+| N1 | 不做 `cleanBlank`（只在正则里允许空格） | `PARSE\|1 2 KB`、`\|  8  GB  ` |
+| N2 | 后缀匹配"前缀"改"全等" | `FROM_SUFFIX\|K`/`\|M`/`\|G`/`\|T`/`\|b`/`\|g`/`\|`（空串）与 `PARSE\|12K` |
+| N3 | 小数段改 `double` 乘 | `PARSE\|1.9999999999999999KB`（2047→2048）、`\|0.0009765625KB`、`\|9007199254740993B` |
+| N4 | 截断改四舍五入 | `PARSE\|1.1KB`、`\|0.5B`、`\|-0.5KB`、`TO_KB\|1535` 类 |
+| N5 | `of*` 不做溢出查重 | `OF_KB\|9007199254740992` 等 22 条 ERR 档 + `OF_UNIT_BIG` 四条 |
+| N6 | `ofBytes` 加查重 | `OF_BYTES\|9223372036854775807`（VAL 变红） |
+| N7 | 后缀长度上限放开（正则 `{0,2}` 改 `{0,}`） | `PARSE\|1ZB`、`\|1B B`、`\|1.2.3KB` |
+| N8 | `toXxx` 用 floor 除或移位 | `TO_KB\|-1023`、`TO_KB\|-1536`、`TO_TB\|1099511627775` |
+| N9 | 单位表只出枚举里的五枚 | `SRC_UNIT_NAMES`（七枚）与 `FROM_SUFFIX\|PB`/`\|EB` 的不对称 |
+| N10 | `BadText` / `Overflow` 变体互换 | 87 条 `ERR:` 期望（两条 catch 腿各自报红） |
+| N11 | `to_string` 漏掉尾 `B` | 16 条 `TO_STRING` |
+| N12 | `compare` 写 `a - b` 差值 | `CMP_VS_ZERO\|9223372036854775807`、`\|-9223372036854775808` |
+
+### 15.7 状态
+
+第三批 E（`DataSize` / `DataSizeUtil` / `DataUnit` 安全档 19 件）**契约冻结在案**：骨架 19 件，
+360 条期望全部来自腿的现读读数（手打零条），实现等 PR-B。
+骨架期的警告只压**一行** `warnings = "-unused_value"`（签名参数在体被 `abort` 短路后必然 unused）；
+另两类（`unused_constructor` / `unused_error_type`）不靠豁免——这一版 `moon.pkg` 的 `warnings` 字段只容一个助记符
+（数组形报 `[4192] Invalid configuration`、空格形与逗号形被 `moonc` 判 `Ill-formed list of warnings`），
+压不下三条，于是骨架里加一件包私有 `datasize_unimplemented(what)`：七件 `raise` 位都经它，两枚变体也各在其中构造一次，
+它自己 `abort("moon-hutool PR-B…")`。落地笔把这件整体删除，十九件签名与两枚变体已在 `.mbti` 冻住。
+`format` 两族按 §15.1 留另批。
+

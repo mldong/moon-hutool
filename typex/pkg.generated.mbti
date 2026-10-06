@@ -6,6 +6,44 @@ pub fn count_by_ip_range(String, String) -> Int raise Ipv4Error
 
 pub fn count_by_mask_bit(Int, Bool) -> Int
 
+pub fn data_size_compare(Int64, Int64) -> Int
+
+pub fn data_size_equal(Int64, Int64) -> Bool
+
+pub fn data_size_is_negative(Int64) -> Bool
+
+pub fn data_size_of_amount_suffix(Int64, String) -> Int64 raise DataSizeError
+
+pub fn data_size_of_bytes(Int64) -> Int64
+
+pub fn data_size_of_gigabytes(Int64) -> Int64 raise DataSizeError
+
+pub fn data_size_of_kilobytes(Int64) -> Int64 raise DataSizeError
+
+pub fn data_size_of_megabytes(Int64) -> Int64 raise DataSizeError
+
+pub fn data_size_of_terabytes(Int64) -> Int64 raise DataSizeError
+
+pub fn data_size_parse_bytes(String) -> Int64 raise DataSizeError
+
+pub fn data_size_parse_bytes_with(String, String) -> Int64 raise DataSizeError
+
+pub fn data_size_to_bytes(Int64) -> Int64
+
+pub fn data_size_to_gigabytes(Int64) -> Int64
+
+pub fn data_size_to_kilobytes(Int64) -> Int64
+
+pub fn data_size_to_megabytes(Int64) -> Int64
+
+pub fn data_size_to_string(Int64) -> String
+
+pub fn data_size_to_terabytes(Int64) -> Int64
+
+pub fn data_unit_bytes_by_suffix(String) -> Int64?
+
+pub fn data_unit_suffixes() -> Array[String]
+
 pub fn idcard_birth(String) -> String?
 
 pub fn idcard_city_code(String) -> String?
@@ -125,6 +163,11 @@ pub fn version_of(String) -> Version
 pub fn version_to_string(Version) -> String
 
 // Errors
+pub suberror DataSizeError {
+  BadText
+  Overflow
+}
+
 pub suberror Ipv4Error {
   BadIp
   BadMask
