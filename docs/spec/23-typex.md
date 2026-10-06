@@ -486,3 +486,93 @@ M7 暴露的是"查找式与锚定在旧样本上不可分辨"。补的 6 条样
 第三批 B（`CreditCodeUtil`）**已落地收口**：2 件全部填体，包内当场读数 `Total tests: 472, passed: 472, failed: 0`，
 三档 wasm / js / wasm-gc 一致、`moon check` 零警告；2 块 228 条冻结期望一条未改来迁就实现，
 `.mbti` 相对 PR-A 那一笔只多了两个新签名（PR-A 已登记）。骨架期 `warnings` 豁免整行删除（G12）。
+
+## 13. 第三批 C `IdcardUtil`（#23.50–#23.54）
+
+对位 `cn.hutool.core.util.IdcardUtil`（GB11643-1999 居民身份证号），`javap -public` 现读 **24 个 `public static`**；
+**本批只收 5 件**（校验两件 + `ignore_case` 档一件 + 两件 convert），其余按可移植性分档挂账，见 §13.1。
+
+### 13.1 边界（不收的逐条带理由）
+
+- **切片族不收**（`getBirth/getBirthByIdCard/getYear/getMonth/getDay/getGender/getProvinceCode/getCityCode/
+  getDistrictCode/hide`）：参照在这些件上的失败形状是 `null` / `NullPointerException` /
+  `NumberFormatException` / `IllegalArgumentException` **四种混用**（腿 v1 现读：`getBirthByIdCard("")` 抛
+  `id card must be not blank!`、`getBirthByIdCard(15 位含非数字)` 抛 NPE——参照把 `convert15To18` 的 `null`
+  直接喂进 `Objects.requireNonNull`、`getYearByIdCard` 对非数字切片抛 `NumberFormatException`），
+  映射口径要先单独拍一轮，别和校验算式挤在同一笔里换代。
+- **不收** `getBirthDate`（出口 `DateTime`）、`getAgeByIdCard` 两件（读时钟 / 要 `java.util.Date`）、
+  `getProvinceByIdCard`（码→省名的查表出口）、`getIdcardInfo`（返回内部类 `Idcard`）、
+  `isValidCard`（按长度 18/15/**10** 分派，10 位那一支的出口是 `String[]`，与 P2 一起判）。
+- **`CITY_CODES` 只收键集**（36 枚两位省码）——它是省码闸的语义；值（省名）不进本批。
+
+### 13.2 公开面（5 件）
+
+| # | 项 | 参照 | 关键依赖 |
+|---|---|---|---|
+| 23.50 | `idcard_is_valid_18(id, this_year)` | `isValidCard18(String)` | 省码键集 + 生日判据 + 权重/余数表 |
+| 23.51 | `idcard_is_valid_18_case(id, this_year, ignore_case)` | `isValidCard18(String, boolean)` | 同上 + `CharUtil.equals` 的大小写档 |
+| 23.52 | `idcard_is_valid_15(id)` | `isValidCard15(String)` | 同上，但年份恒 19xx ⇒ **不设 `this_year`** |
+| 23.53 | `idcard_convert_15_to_18(id) -> String?` | `convert15To18(String)` | 世纪闭式 + 校验位；非法给 `None` |
+| 23.54 | `idcard_convert_18_to_15(id, this_year) -> String` | `convert18To15(String)` | 内部走 #23.50；**非法原样返回入参** |
+
+### 13.3 判据（标签形如 `<字段>|<样本>`；样本一律腿现读，不手打）
+
+1. **省码闸在生日闸之前**，且 `startsWith("9")` 那一支取第 2~3 位当省码（新版外国人永居证）。
+   专用夹具：`911010` 开头 + 生日 `19880203` 的号码可造出有效码（省码取 `"11"`），
+   而 `910101` 开头（第 2~3 位是 `"10"`，不在键集）**任何**校验位都判 false——腿对该 17 位本体读出 `hits=0`。
+2. **生日判据的四条子规则都要单变量夹具**：年 ∈ [1900, `this_year`]、月 ∈ [1,12]、日 ∈ [1,31]、
+   4/6/9/11 月不吃 31 日、2 月只吃 ≤28（闰年 29）。腿用反射调参照自己的 private `getCheckCode18`
+   拿到**正确校验位**再换生日段，于是"校验位对、生日错"的样本能隔离出这一判
+   （若校验位随便挑，两种实现都回 false ⇒ 又是一条假等价——这正是第三批 A 那轮学的）。
+   读数含 `1900 年 2 月 29 日 = false`、`1966 非闰 = false`、`1996 闰 = true`、`04/06/09/11 月的 31 日 = false`、
+   `13 月 / 00 月 / 00 日 / 32 日 = false`。
+3. **年份那一判（`year > this_year`）走显式参数**：腿在执行当年（2026）读数，故
+   `20251231`/`20260101`/`20261231` 为 true、`20270101`/`20310615` 为 false（后两条校验位是参照自己算出的正确值，
+   所以判 false 只能来自年份那一判）。**跨年不外推**：`this_year` 传别的值时本库按参照同一条判据行事，
+   但没有另一年的参照读数，这一点在此写明而不是假装覆盖。
+4. **`is_valid_15` 不设参数**：15 位号的年份区间是 1900..1999，`year > thisYear` 对任何 ≥1999 的执行当年恒不触发
+   ⇒ 内部把上界钉成 1999 与参照逐档同值（腿对该族有读数）。
+5. **世纪闭式**：`convert15To18` 对 yy=00..99 的 100 条读数给出 **yy=00 → 2000，其余 → 1900+yy**。
+   参照那两条（`DateUtil.parse(·,"yyMMdd")` 的两位年基准年随执行当年移动、随后 `if (sYear > 2000) sYear -= 100`）
+   合起来把基准年的影响整体吸收 ⇒ 该闭式**与执行当年无关**，故 #23.53 不需要 `this_year`。
+6. **`NUMBERS` 整串匹配改写**成"全档数字且非空"（参照 `\d+` 无 `UNICODE_CHARACTER_CLASS` ⇒ 就是 `[0-9]`），
+   这条改写逐字符可核对，不走正则。
+7. **两件 convert 的失败形状相反**：`convert_15_to_18` 非法给 `None`（参照 `null`），
+   `convert_18_to_15` 非法**原样返回入参**（腿：`"1101011965031252x"` → 同串）。
+   `isNotBlank` 那一前置本库不抄：空白串走 `is_valid_18` 必为 false ⇒ 两支同结果（可证，省一条判据）。
+
+### 13.4 腿与对撞
+
+- 腿 `IdcardLeg.java`（真 hutool-core-5.8.35 + JDK 17.0.14）：**1071 行读数、0 ERR**，生成 **5 块 980 条**冻结期望。
+  有效码**由参照自己造**：17 位本体在第 18 位候选 `0-9 + X` 上穷举，取参照判 `isValidCard18=true` 的那枚，
+  11 个本体全部 `hits=1`；生日被拒的档另用反射 private `getCheckCode18` 取正确校验位（§13.3 第 2/3 条）。
+  腐蚀族：2 枚有效码 × 18 位逐位换成下一候选字符（36 条）。
+- **先对撞再冻结**：实现先在隔离副本跑，`Total tests: 477, passed: 477, failed: 0` 后才把期望冻进仓。
+  对撞当场抓到两处本版 API 误写（`Char` 没有 `sub`/`add` 方法、`u'x'` 字面量不合法 ⇒ 一律走 `to_int()` 比较；
+  以及**行延续必须把运算符留在行尾**，第三批 A 记过的那条本轮又踩），另抓到一条真缺陷：
+  把 `'9'` 的码位误写成 49（那是 `'1'`），于是所有 1 开头省码被判 false——**5 个块首轮全红**，
+  正是这批夹具密度该有的反应。
+
+### 13.5 与参照的分岔
+
+| 参照 | 本库 | 依据 |
+|---|---|---|
+| `isValidCard18` 读宿主当年 | 显式参数 `this_year`，夹具传腿执行当年 2026 | §13.3 第 3 条（跨年不外推） |
+| `isValidCard15` 内部也读宿主当年 | 不设参数（上界钉 1999 同值） | §13.3 第 4 条 |
+| `String` 出口、非法给 `null` | `String?` | 全仓一致 |
+| 切片族四种异常形状混用 | **本批不收** | §13.1 |
+| `isValidCard` 含 10 位档 | **本批不收**（与 P2 同判） | §13.1 |
+| 长度/切片按 UTF-16 码元 | 按码位（`to_array`） | 本批五件要走到非 false 的出口，前 18 位必全为 ASCII 数字或 `X` ⇒ 两域逐位同一；非 ASCII 一律在数字/省码/生日闸出局（腿里空格档、字母档、超长档都是 false） |
+
+### 13.6 变异对照（PR-B 填读数）
+
+八条，每条要么报红要么如实记等价（判"等价"前先证变异真进了编译）：
+① 省码闸挪到校验位之后；② `startsWith("9")` 那一支删掉（永居证档）；③ 生日判据删掉"年 ∈ [1900, this_year]"；
+④ 4/6/9/11 月吃 31 日（少那条特例）；⑤ 闰年判据写成"只 `%4`"（1900 会被误判闰）；
+⑥ 权重表换成第三批 B 的 mod-31 那族（测"两张表别复用"）；⑦ 世纪闭式改成 `yy < 50 → 2000+yy` 的朴素版
+（测 yy=01..45 那 44 条读数）；⑧ `convert_18_to_15` 的非法档改成给 `None`（测两件失败形状相反）。
+
+### 13.7 状态
+
+`契约已冻结`（第三批 C PR-A：5 件签名骨架 + 5 块 980 条冻结期望就位；腿 1071 行读数 0 ERR，
+core 侧对撞先跑过且零分歧；包内当场读数 `Total tests: 477, passed: 472, failed: 5` —— 5 红是本批设计态）。

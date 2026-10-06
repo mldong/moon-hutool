@@ -1,3 +1,6 @@
+// 第三批 C 的骨架期豁免（`idcard.mbt` 五件体是 abort ⇒ 参数值没人用）：落地笔整行删。
+warnings = "-unused_value"
+
 // 第三批 A 落地笔：骨架期的 `warnings = "-unused_value"` 豁免整行删除（G12：体里已无 abort）。
 //
 // 非测试侧多两件事：`valid`（IP 合法性与手机号判据必须同源，spec §10.3 第 2 条 / §11.3 第 3 条）、
