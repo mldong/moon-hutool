@@ -1,6 +1,9 @@
-// 契约骨架期（第二批 ipv4.mbt 体全是 abort）：值/构造器/错误类型/字段没人用是"未实现"的机械后果，
-// 按 G12 压掉；第二批落地笔整行删除。
-warnings = "-unused_value-struct_never_constructed-unused_constructor-unused_error_type-unused_trait_bound-unused_field"
+// 非测试侧只多一个本仓自己的 `valid`：IP 合法性判据必须与 `valid.is_ipv4` 同源（spec §10.3 第 2 条）。
+// 零依赖契约没破——只用 `moonbitlang/core` 与本仓自己的包、零 extern、全同步（`conv`→`text` 同先例）。
+// 第二批落地笔已删掉骨架期的 `warnings` 豁免行（G12：体里没了 abort 就不许再压）。
+import {
+  "mldong/moon-hutool/valid",
+}
 
 import {
   "mldong/moon-hutool/typex",
