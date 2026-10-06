@@ -731,7 +731,7 @@ M7 暴露的是"查找式与锚定在旧样本上不可分辨"。补的 6 条样
 
 | 参照件 | 判据 |
 |---|---|
-| `DataSize.format(long)` / `format(long, DataUnit)` / `toUnit(…)` 一族 | 选档靠 `Math.log10(size) / Math.log10(1024)` 的**浮点边界**，印数靠 `DecimalFormat("#,##0.##")` 的千分位 + `HALF_EVEN`。两件事都要先在 core 侧做出同语义的实现才能冻期望，**另批做**；腿里 150 条读数（`FMT` 25 + `FMT_AT_*` 5×25）已存着，届时直接灌 |
+| `DataSizeUtil.format(long)` / `format(Long, DataUnit)` 两族（现读更正：这两件在 `cn/hutool/core/io/unit/DataSizeUtil`，**不是 `DataSize` 的方法**，也不在 `core.util`；参照**没有 `toUnit(…)` 一族**，该包 `grep toUnit` 零命中——原条目把它写作 `DataSize.*` 并多列了 `toUnit`，详见 §17.8 末） | 选档靠 `Math.log10(size) / Math.log10(1024)` 的**浮点边界**，印数靠 `DecimalFormat("#,##0.##")` 的千分位 + `HALF_EVEN`。两件事都要先在 core 侧做出同语义的实现才能冻期望，**另批做**；腿里 150 条读数（`FMT` 25 + `FMT_AT_*` 5×25）已存着，届时直接灌 |
 | `DataSize.of(BigDecimal, DataUnit)` / `of(String, DataUnit)` | 是 `parse` 的中间站，公开面由 `data_size_parse_bytes` 覆盖；`of(long, DataUnit)` 那档由 #23.71 覆盖 |
 | `DataSizeUtil` 的 `format` / `convertToMaxUnit` | 同上，都属 `format` 族 |
 | `DataSize` 的实例 API（`compareTo` / `equals` / `hashCode` / `toString`）| 已摊平成 #23.78–#23.80 三件纯函数；`hashCode` 是 `Long.hashCode(bytes)`，值对象已被字节数完全代表 ⇒ 不单立件 |
