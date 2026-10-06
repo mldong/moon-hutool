@@ -16,7 +16,7 @@ ok()  { echo "  PASS $*"; }
 bad() { echo "  FAIL $*"; FAILS=$((FAILS+1)); }
 skip(){ echo "  SKIP $*"; SKIPS=$((SKIPS+1)); }
 GATE_TARGETS="${GATE_TARGETS:-wasm js}"
-BASELINE_TESTS="${BASELINE_TESTS:-515}"
+BASELINE_TESTS="${BASELINE_TESTS:-516}"
 
 echo "== G1 零依赖（moon tree 无第三方节点 + moon.mod 无 deps）=="
 if tree_json=$(moon tree --json 2>/dev/null) && [ -n "$tree_json" ]; then
@@ -138,7 +138,11 @@ fi
 echo "== G12 骨架豁免棘轮（只有还没实现的包才许压掉那三类警告）=="
 # 契约骨架期的包，函数体全是 abort ⇒ 类型没人构造、错误变体没人构造、签名写了 raise 而体里没 raise。
 # 这三类警告是"未实现"的机械后果，只能在骨架期用 moon.pkg 的 warnings 豁免。
-# 合法性判据取**函数体还是不是 abort**，不取"用例绿没绿"——后者要再跑一遍逐包测试，慢且与 G11 重复。
+# 合法性判据取**函数体还是不是 PR-A 骨架的 abort**，不取"用例绿没绿"——后者要再跑一遍逐包测试，慢且与 G11 重复。
+# ⚠ 判据必须认骨架那句固定文案（`PR-B：契约骨架`），不能只认 `abort("moon-hutool` 前缀：
+# 落地后的包里允许留"不可达分支"的不变量 abort（`typex/phone.mbt` 就有），只认前缀会让这类包
+# 把早已该删的骨架豁免一路藏下去——10-06 实测就是这样藏过了第五批落地笔（当时用例全绿、`moon check`
+# 也零警告，因为那条豁免顺手压掉了真信号，只是恰好没有真信号被压）。
 skel_check() {  # $1 = 待查目录；打印违规的包（无输出即无违规）
   python - "$1" <<'PYEOF'
 import glob, io, os, sys
@@ -152,23 +156,29 @@ for pkg in sorted(glob.glob(os.path.join(root, "*", "moon.pkg"))):
         continue
     bodies = [f for f in glob.glob(os.path.join(d, "*.mbt"))
               if not f.endswith(("_test.mbt", "_wbtest.mbt"))]
-    still_abort = any('abort("moon-hutool' in io.open(f, encoding="utf-8", errors="replace").read()
-                      for f in bodies)
-    if not still_abort:
+    still_skeleton = any('PR-B：契约骨架' in io.open(f, encoding="utf-8", errors="replace").read()
+                         for f in bodies)
+    if not still_skeleton:
         bad.append(os.path.relpath(pkg, root))
 print(" ".join(bad))
 PYEOF
 }
 viol=$(skel_check .)
 if [ -z "$viol" ]; then ok "在用的 warnings 豁免都对应还没实现的包"; else bad "实现已落地却还压着骨架豁免：$viol"; fi
-# 阳性对照：造一个"体里已无 abort 却仍带豁免"的假包，必须被抓到
+# 阳性对照两条：① 体里已无 abort 却仍带豁免；② 体里只有"不变量 abort"（前缀像骨架、但不是 PR-A 骨架）却仍带豁免
 fx=$(mktemp -d ./_g12_fixture_XXXXXX 2>/dev/null || echo ./_g12_fixture)
-mkdir -p "$fx/fakepkg"
+mkdir -p "$fx/fakepkg" "$fx/fakepkg2"
 printf 'warnings = "-unused_constructor"\n' > "$fx/fakepkg/moon.pkg"
 printf 'pub fn a() -> Int { 1 }\n' > "$fx/fakepkg/a.mbt"
+printf 'warnings = "-unused_value"\n' > "$fx/fakepkg2/moon.pkg"
+printf 'pub fn b(x : Int) -> Int { abort("moon-hutool/typex 内部码表编译失败：" + "b") }\n' > "$fx/fakepkg2/b.mbt"
 caught=$(skel_check "$fx")
 rm -rf "$fx"
-[ -n "$caught" ] && ok "阳性对照正常（假包的豁免被抓到：$caught）" || bad "G12 自身失效：坏样本没抓到，这条判据不可信"
+if [ -n "$caught" ] && echo "$caught" | grep -q "fakepkg2"; then
+  ok "阳性对照正常，且不变量 abort 也骗不过 G12（两类假包都被点名：$caught）"
+else
+  bad "G12 自身失效：坏样本没被抓到（抓到的是「$caught」），这条判据不可信"
+fi
 
 echo "== G13 spec 序号 == 逐包表行号（号是稳定 ID，不许与表各漂各的）=="
 if python scripts/sync_status.py --numbers >/tmp/mh_numbers.log 2>&1; then

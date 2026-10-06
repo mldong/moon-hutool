@@ -16,6 +16,6 @@ import {
   "mldong/moon-hutool/typex",
 } for "test"
 
-// 第五批骨架期豁免（`idcard_region.mbt` 三件体是 abort ⇒ 参数 unused）：落地笔整行删（G12）。
+// 第六批骨架期豁免（`idcard_info10.mbt` 体是 abort ⇒ 参数 unused、结构体没人构造）：落地笔整行删（G12）。
 
-warnings = "-unused_value"
+warnings = "-unused_value-struct_never_constructed"

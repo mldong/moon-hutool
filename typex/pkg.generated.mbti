@@ -110,6 +110,8 @@ pub fn idcard_gender(String) -> Int?
 
 pub fn idcard_hide(String, Int, Int) -> String
 
+pub fn idcard_info_10(String) -> IdcardInfo10?
+
 pub fn idcard_is_valid_15(String) -> Bool
 
 pub fn idcard_is_valid_18(String, Int) -> Bool
@@ -232,6 +234,12 @@ pub suberror Ipv4Error {
 }
 
 // Types and methods
+pub struct IdcardInfo10 {
+  region : String
+  gender : String
+  valid : Bool
+}
+
 type Token
 
 pub struct Version {
