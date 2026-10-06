@@ -1,12 +1,13 @@
-// 第三批 A 的骨架期豁免（`ipv4.mbt` 已落地，但 `phone.mbt` 15 件体是 abort ⇒ 参数值没人用）：
-// G12 判据取的是体里还有没有 `abort("moon-hutool`，所以这一行只在这一批骨架期合法，落地笔整行删。
-warnings = "-unused_value"
-
-// 非测试侧只多一个本仓自己的 `valid`：IP 合法性判据必须与 `valid.is_ipv4` 同源（spec §10.3 第 2 条）。
-// 零依赖契约没破——只用 `moonbitlang/core` 与本仓自己的包、零 extern、全同步（`conv`→`text` 同先例）。
-// 第二批落地笔已删掉骨架期的 `warnings` 豁免行（G12：体里没了 abort 就不许再压）。
+// 第三批 A 落地笔：骨架期的 `warnings = "-unused_value"` 豁免整行删除（G12：体里已无 abort）。
+//
+// 非测试侧多两件事：`valid`（IP 合法性与手机号判据必须同源，spec §10.3 第 2 条 / §11.3 第 3 条）、
+// `text`（`hide_*` 三件按**码位**掩，与 `@text.hide` 同一口径，不留第二张掩码表）+ `core/string`
+// （`@string.Regex` 是本批判定档的底座）。零依赖契约没破——只用 `moonbitlang/core` 与本仓自己的包、
+// 零 extern、全同步（`conv`→`text` 同先例）。
 import {
+  "mldong/moon-hutool/text",
   "mldong/moon-hutool/valid",
+  "moonbitlang/core/string",
 }
 
 import {
