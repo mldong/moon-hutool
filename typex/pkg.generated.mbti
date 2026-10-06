@@ -28,6 +28,10 @@ pub fn data_size_compare(Int64, Int64) -> Int
 
 pub fn data_size_equal(Int64, Int64) -> Bool
 
+pub fn data_size_format(Int64) -> String
+
+pub fn data_size_format_at(Int64, String) -> String raise DataSizeError
+
 pub fn data_size_is_negative(Int64) -> Bool
 
 pub fn data_size_of_amount_suffix(Int64, String) -> Int64 raise DataSizeError
