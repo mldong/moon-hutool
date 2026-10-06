@@ -273,3 +273,83 @@ native 档本机无 C 编译器（`moon test --target native` 报 `no system C c
 7 块 **411 条**冻结期望在 **wasm / js / wasm-gc 三档同一读数**（当场：`Total tests: 466, passed: 466, failed: 0`），
 `moon check` 三档零警告，`.mbti` 与 PR-A 那一笔逐字节相同（实现没有改动任何签名）。
 期望值一条未动、一条未加（G5 走授权通道只因 spec 与 `moon.pkg` 同笔换代，`*_test.mbt` 逐字节未变）。
+
+## 11. 第三批 A `PhoneUtil`（#23.33–#23.47）
+
+对位 `cn.hutool.core.util.PhoneUtil`，`javap` 现读 **15 件公开静态**（7 判定 + 3 掩码 + 3 取串 + 2 固话取组）。
+本批全收（无 IO、无时钟、无码表外依赖）。
+
+### 11.1 边界
+
+- 判定档一律 `String -> Bool`、**不 raise**（码表是包内常量，与 `valid` 包同口径）。
+- 掩码/取串**不校验号型**（参照就是定长下标切串，`"12345"` 也照样掩），所以这两族也不 raise；
+  参照的负下标档（`sub(-4,-1)` 从尾部数、`hide(-4,-1)` 原样返回）**本批不覆盖**——六件用的都是固定非负下标，
+  写清楚而不假装是全量移植 `StrUtil.sub`。
+- `sub_tel_*` 无匹配时参照给 `null` ⇒ 本库出口 `String?`。
+
+### 11.2 公开面（15 件）
+
+| # | 项 | 参照 | 码表来源 |
+|---|---|---|---|
+| 23.33 | `phone_is_mobile` | `isMobile` | **委托 `@valid.is_mobile`**（同码表，见 §11.4） |
+| 23.34 | `phone_is_mobile_hk` | `isMobileHk` | `PatternPool.MOBILE_HK` |
+| 23.35 | `phone_is_mobile_tw` | `isMobileTw` | `PatternPool.MOBILE_TW` |
+| 23.36 | `phone_is_mobile_mo` | `isMobileMo` | `PatternPool.MOBILE_MO` |
+| 23.37 | `phone_is_tel` | `isTel` | `PatternPool.TEL` |
+| 23.38 | `phone_is_tel400800` | `isTel400800` | `PatternPool.TEL_400_800` |
+| 23.39 | `phone_is_phone` | `isPhone` | 五路之或 |
+| 23.40–23.42 | `phone_hide_before` / `_between` / `_after` | `hideBefore/hideBetween/hideAfter` | `StrUtil.hide(·,0,7 / 3,7 / 7,11)`，**码位** |
+| 23.43–23.45 | `phone_sub_before` / `_between` / `_after` | `subBefore/subBetween/subAfter` | `StrUtil.sub(·,0,3 / 3,7 / 7,11)`，**码元** |
+| 23.46–23.47 | `phone_sub_tel_before` / `_after` | `subTelBefore/subTelAfter` | `ReUtil.getGroup1(TEL,·)` / `get(TEL,·,2)` |
+
+### 11.3 判据（标签形如 `<字段>|<样本>`，字段名用腿里的 `IS_*` / `HIDE_*` / `SUB_*`）
+
+1. **两族索引域不同，且同一条样本同时能看出两侧**：`"1380013🍎8000"`（13 码元 / 12 码位）——
+   `SUB_AFTER` 给 `🍎80`（码元 7..11 = 高代理、低代理、`8`、`0`），而 `HIDE_AFTER` 给 `1380013****0`
+   （码位 7..11 = 🍎 + 三个 `8` 被掩，尾码位 `0` 留下，**输出比输入少一个码元**）。
+   `HIDE_BEFORE`/`HIDE_BETWEEN` 两条也对得上码位模型（`*******🍎8000`、`138****🍎8000`）
+   ⇒ 落地时 `hide` 三件复用 `@text.hide`（它就是码位、就地替换、越界夹紧），`sub` 三件自带码元切片。
+2. **区号白名单式**：`TEL` 是 `(010|02\d|0[3-9]\d{2})-?(\d{6,8})`——`02x` 只允许两位、`0[3-9]` 必须三位，
+   `IS_TEL|0755-1234567` 真而 `IS_TEL|01012345678`（区号后无分隔也吃，但整串要占满）另有 `IS_TEL_400_800` 真。
+3. **`is_phone` 五路或不含固话**：`IS_PHONE|010-12345678` = `false` 而 `IS_TEL|010-12345678` = `true`
+   （成对夹具；把固话"顺手补进"is_phone 是本包最容易的自我发明，变异要专门打它）。
+4. **`TEL_400_800` 的分隔符是可选的**：`IS_TEL_400_800|01012345678` = `true`。
+   这条正是**方言对撞抓出来的**：把 `[\- ]?` 写成 `(-| )` 时丢了 `?`，本库给 `false` ⇒ 契约里既留 Java 读数也留改写规则。
+5. **台湾/澳门的号段前缀是硬要求**：`IS_MOBILE_TW` 要 `09` 开头、`IS_MOBILE_MO` 要 `6` 开头，
+   前缀 `0`/`886`/`+886` 与 `0`/`853`/`+853` 都可选，中间可有一个 `-`（`(-|)?`）。
+6. **`sub_tel_*` 是查找式**：`SUB_TEL_BEFORE|13800138000` 给 `null`（手机号里没有区号段），
+   `SUB_TEL_BEFORE|010-12345678` 给 `010`、`SUB_TEL_AFTER|…` 给 `12345678`；`400-123-4567` 也给 `null`
+   （`TEL` 的第一段不接受 `400`）。
+7. **越界一律夹紧不报错**：`HIDE_AFTER|1380013800`（10 位）给 `1380013***`、`SUB_AFTER|1380013800` 给 `800`。
+
+### 11.4 腿与对撞
+
+- 腿 `PhoneLeg.java`（真 hutool-core-5.8.35 + JDK 17.0.14，`javac -encoding UTF-8`）：**六枚码表的源文与 flags
+  由反射读 `PatternPool`**（`flags` 全是 0，故本库不做大小写不敏感档），33 个样本 × 7 判定 + 9 个样本 × 8 取串 =
+  **303 行读数、0 ERR**，生成 **4 块 296 条**冻结期望（`typex/phone_test.mbt`，手打零条）。
+- **先对撞再冻结**（`re`/`valid` 轮的规矩）：core 侧方言改写先在同一份样本上跑探针（隔离副本，不进仓），
+  探针差异用 `assert_eq` 出口（本工具链的 wasm 驱动不打印 `abort` 载荷）。第 4 条那条丢 `?` 就是这么抓到的；
+  `MOBILE` 改写结果与 `valid` 包已冻结的 `is_mobile` 模式**逐字符相同** ⇒ 直接委托，不留第二张表。
+- 生成器自证四条：唯一键、未登记字段报错、判定档读到非布尔就报错、每块断言数 > 0。
+
+### 11.5 与参照的分岔
+
+| 参照 | 本库 | 依据 |
+|---|---|---|
+| 入参 `CharSequence`、出口 `CharSequence` | `String` → `String` | 全仓一致（`.mbti` 里不许出现 `CharSequence`） |
+| `hideBefore` 等出口 `CharSequence`（实测都是 `String`） | `String` | 腿读数值即 `String` |
+| `StrUtil.sub` 支持负下标（`sub(-4,-1)` 从尾部数） | 本批六件不涉及负下标，**该档不进契约** | 腿有 `A_SUB_NEG` 读数，写"未覆盖"而不是"已跟随" |
+| `Validator.isMatchRegex` = 整串匹配 | `^(?:P)$` 包裹（同 `valid` 包 §0.3 的底座） | `re` 轮实测：`execute` 判"占满"不等价于整串匹配 |
+| 6 枚模式带 `[\- ]` 字符类 | core 方言写 `(-| )`（类内并列 `-` 在本版非法） | `re`/`valid` 轮同一条改写规则 |
+
+### 11.6 变异对照（PR-B 填读数）
+
+八条，每条要么报红要么如实记等价/未挂载：`hide` 三件改成码元切片（测两族索引域不串）、`sub` 三件改成码位、
+`is_phone` 补进 `is_tel`（测五路或）、`TEL_400_800` 的分隔符 `?` 去掉（回归第 4 条判据）、
+`MOBILE_TW` 去掉 `09` 硬前缀、`hide` 的越界改成截断而非夹紧、`sub_tel_*` 改成锚定整串匹配、
+`phone_is_mobile` 不走委托而自带第二张表（测同源）。
+
+### 11.7 状态
+
+`契约已冻结`（第三批 A PR-A：15 件签名骨架 + 4 块 296 条冻结期望就位，腿 303 行读数 0 ERR，
+core 侧对撞先跑过并抓到一条改写错档；包内当场读数 `Total tests: 470, passed: 466, failed: 4` —— 4 红是本批设计态）。

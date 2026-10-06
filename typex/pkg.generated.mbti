@@ -50,6 +50,36 @@ pub fn page_total_page_long(Int64, Int) -> Int
 
 pub fn page_trans_to_start_end(Int, Int) -> (Int, Int)
 
+pub fn phone_hide_after(String) -> String
+
+pub fn phone_hide_before(String) -> String
+
+pub fn phone_hide_between(String) -> String
+
+pub fn phone_is_mobile(String) -> Bool
+
+pub fn phone_is_mobile_hk(String) -> Bool
+
+pub fn phone_is_mobile_mo(String) -> Bool
+
+pub fn phone_is_mobile_tw(String) -> Bool
+
+pub fn phone_is_phone(String) -> Bool
+
+pub fn phone_is_tel(String) -> Bool
+
+pub fn phone_is_tel400800(String) -> Bool
+
+pub fn phone_sub_after(String) -> String
+
+pub fn phone_sub_before(String) -> String
+
+pub fn phone_sub_between(String) -> String
+
+pub fn phone_sub_tel_after(String) -> String?
+
+pub fn phone_sub_tel_before(String) -> String?
+
 pub fn typex_first_page_no() -> Int
 
 pub fn typex_set_first_page_no(Int) -> Unit

@@ -1,3 +1,7 @@
+// 第三批 A 的骨架期豁免（`ipv4.mbt` 已落地，但 `phone.mbt` 15 件体是 abort ⇒ 参数值没人用）：
+// G12 判据取的是体里还有没有 `abort("moon-hutool`，所以这一行只在这一批骨架期合法，落地笔整行删。
+warnings = "-unused_value"
+
 // 非测试侧只多一个本仓自己的 `valid`：IP 合法性判据必须与 `valid.is_ipv4` 同源（spec §10.3 第 2 条）。
 // 零依赖契约没破——只用 `moonbitlang/core` 与本仓自己的包、零 extern、全同步（`conv`→`text` 同先例）。
 // 第二批落地笔已删掉骨架期的 `warnings` 豁免行（G12：体里没了 abort 就不许再压）。
