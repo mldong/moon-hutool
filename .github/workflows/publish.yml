@@ -50,8 +50,18 @@ jobs:
       - name: Write mooncakes credentials
         if: ${{ !inputs.validate_only }}
         run: |
+          # 两个 secret 少一个就直接点名"secrets 没配"——不写空文件：
+          # {"token":"","username":""} 长得像有效凭据，moon publish 会拿一个服务端报错来
+          # 告诉你"认证失败"，看不出是没配。少一步判读，第一次发版就少一次误判。
+          if [ -z "${MOON_TOKEN}" ] || [ -z "${MOON_USERNAME}" ]; then
+            echo "::error::secrets MOON_TOKEN / MOON_USERNAME 未配置（或其中一个是空串）⇒ 无法发布"
+            exit 1
+          fi
           mkdir -p ~/.moon
-          printf '{"token":"%s","username":"%s"}\n' "${{ secrets.MOON_TOKEN }}" "${{ secrets.MOON_USERNAME }}" > ~/.moon/credentials.json
+          printf '{"token":"%s","username":"%s"}\n' "${MOON_TOKEN}" "${MOON_USERNAME}" > ~/.moon/credentials.json
+        env:
+          MOON_TOKEN: ${{ secrets.MOON_TOKEN }}
+          MOON_USERNAME: ${{ secrets.MOON_USERNAME }}
 
       - name: Update registry index + install dependencies
         run: |

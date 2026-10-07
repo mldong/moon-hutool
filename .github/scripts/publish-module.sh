@@ -37,6 +37,12 @@ if [ -n "$DRY" ]; then
   echo "DRY   moon publish --dry-run（$mod@$ver，不上传）"
   moon publish --dry-run >"$out" 2>&1
 else
+  # 真发前先看凭据：缺文件或缺 token 字段就当场点名，别让服务端 401 去当"上传失败"读
+  cred="${MOON_HOME:-$HOME/.moon}/credentials.json"
+  if [ ! -s "$cred" ] || ! grep -q '"token":"[^"]' "$cred"; then
+    echo "❌ 没有可用凭据（$cred 不存在或 token 为空）⇒ 发布通道没配好，不进入上传"
+    rm -f "$out"; exit 1
+  fi
   echo "PUB   moon publish（$mod@$ver）"
   moon publish >"$out" 2>&1
 fi
