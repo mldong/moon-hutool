@@ -141,7 +141,7 @@ pub fn cron_next_match(c : Cron, dt : @date.DateTime) -> @date.DateTime {
   let mut cand = earliest(c, fields_of(cur, true))
   // 参照 nextMatch：候选不成立就"次日 00:00:00"重来（周段不参与字段推进，只能靠这一条兜）
   while !cron_match(c, cand, match_second=true) {
-    cur = day_start(cand.date.add_days(1))
+    cur = day_start(cand.date.offset_day(1))
     cand = earliest(c, fields_of(cur, true))
   }
   cand
@@ -590,7 +590,7 @@ fn parse_single(text : String) -> Sub raise CronError {
 ///|
 fn fields_of(dt : @date.DateTime, match_second : Bool) -> Array[Int] {
   // 参照 PatternUtil.getFields：不匹配秒时秒位给 -1（match 里 `second < 0` 直接放行）
-  let w = dt.date.weekday() // date 包是 ISO：周一 1 … 周日 7
+  let w = dt.date.day_of_week() // date 包是 ISO：周一 1 … 周日 7
   [
     if match_second {
       dt.second
@@ -735,7 +735,7 @@ fn from_values(v : Array[Int]) -> @date.DateTime {
     m += 12
     y -= 1
   }
-  let d = date_safe(y, m, 1).add_days(v[3] - 1)
+  let d = date_safe(y, m, 1).offset_day(v[3] - 1)
   let secs = ((v[2] * 60 + v[1]) * 60 + v[0]).to_int64()
   @date.DateTime::from_epoch_millis(
     d.epoch_days() * 86400000L + secs * 1000L,

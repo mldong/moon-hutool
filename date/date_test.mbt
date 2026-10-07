@@ -141,12 +141,12 @@ test "@date #2.1 Date::of 是唯一的构造闸门（非法值不滚、不夹）
 
 ///|
 test "@date #2.2 weekday 是 ISO 档（周一=1…周日=7），不是 JDK 的周日=1" {
-  assert_eq(d(1970, 1, 1).weekday(), 4)
-  assert_eq(d(2026, 10, 4).weekday(), 7)
-  assert_eq(d(2026, 10, 5).weekday(), 1)
-  assert_eq(d(2024, 2, 29).weekday(), 4)
-  assert_eq(d(1, 1, 1).weekday(), 1)
-  assert_eq(d(-45, 1, 1).weekday(), 6)
+  assert_eq(d(1970, 1, 1).day_of_week(), 4)
+  assert_eq(d(2026, 10, 4).day_of_week(), 7)
+  assert_eq(d(2026, 10, 5).day_of_week(), 1)
+  assert_eq(d(2024, 2, 29).day_of_week(), 4)
+  assert_eq(d(1, 1, 1).day_of_week(), 1)
+  assert_eq(d(-45, 1, 1).day_of_week(), 6)
   assert_eq(d(2026, 10, 3).is_weekend(), true)
   assert_eq(d(2026, 10, 4).is_weekend(), true)
   assert_eq(d(2026, 10, 5).is_weekend(), false)
@@ -213,45 +213,45 @@ test "@date #2.3 Date 的 begin/end 家族" {
 
 ///|
 test "@date #2.4 add_days 跨月跨年跨世纪" {
-  assert_eq(d(2024, 2, 28).add_days(1).to_iso_string(), "2024-02-29")
-  assert_eq(d(2023, 2, 28).add_days(1).to_iso_string(), "2023-03-01")
-  assert_eq(d(2024, 12, 31).add_days(1).to_iso_string(), "2025-01-01")
-  assert_eq(d(2025, 1, 1).add_days(-366).to_iso_string(), "2024-01-01")
-  assert_eq(d(2026, 10, 4).add_days(0).to_iso_string(), "2026-10-04")
-  assert_eq(d(1970, 1, 1).add_days(-1).to_iso_string(), "1969-12-31")
-  assert_eq(d(2000, 3, 1).add_days(-60).to_iso_string(), "2000-01-01")
+  assert_eq(d(2024, 2, 28).offset_day(1).to_iso_string(), "2024-02-29")
+  assert_eq(d(2023, 2, 28).offset_day(1).to_iso_string(), "2023-03-01")
+  assert_eq(d(2024, 12, 31).offset_day(1).to_iso_string(), "2025-01-01")
+  assert_eq(d(2025, 1, 1).offset_day(-366).to_iso_string(), "2024-01-01")
+  assert_eq(d(2026, 10, 4).offset_day(0).to_iso_string(), "2026-10-04")
+  assert_eq(d(1970, 1, 1).offset_day(-1).to_iso_string(), "1969-12-31")
+  assert_eq(d(2000, 3, 1).offset_day(-60).to_iso_string(), "2000-01-01")
 }
 
 ///|
 test "@date #2.4 add_months 夹紧到月末（不滚到下个月）" {
-  assert_eq(d(2024, 1, 31).add_months(1).to_iso_string(), "2024-02-29")
-  assert_eq(d(2023, 1, 31).add_months(1).to_iso_string(), "2023-02-28")
-  assert_eq(d(2024, 3, 31).add_months(-1).to_iso_string(), "2024-02-29")
-  assert_eq(d(2024, 1, 30).add_months(1).to_iso_string(), "2024-02-29")
-  assert_eq(d(2025, 1, 31).add_months(13).to_iso_string(), "2026-02-28")
-  assert_eq(d(2024, 5, 31).add_months(1).to_iso_string(), "2024-06-30")
-  assert_eq(d(2026, 10, 4).add_months(12).to_iso_string(), "2027-10-04")
-  assert_eq(d(2026, 10, 4).add_months(0).to_iso_string(), "2026-10-04")
-  assert_eq(d(2024, 2, 29).add_months(-1).to_iso_string(), "2024-01-29")
-  assert_eq(d(2026, 3, 31).add_months(-1).to_iso_string(), "2026-02-28")
+  assert_eq(d(2024, 1, 31).offset_month(1).to_iso_string(), "2024-02-29")
+  assert_eq(d(2023, 1, 31).offset_month(1).to_iso_string(), "2023-02-28")
+  assert_eq(d(2024, 3, 31).offset_month(-1).to_iso_string(), "2024-02-29")
+  assert_eq(d(2024, 1, 30).offset_month(1).to_iso_string(), "2024-02-29")
+  assert_eq(d(2025, 1, 31).offset_month(13).to_iso_string(), "2026-02-28")
+  assert_eq(d(2024, 5, 31).offset_month(1).to_iso_string(), "2024-06-30")
+  assert_eq(d(2026, 10, 4).offset_month(12).to_iso_string(), "2027-10-04")
+  assert_eq(d(2026, 10, 4).offset_month(0).to_iso_string(), "2026-10-04")
+  assert_eq(d(2024, 2, 29).offset_month(-1).to_iso_string(), "2024-01-29")
+  assert_eq(d(2026, 3, 31).offset_month(-1).to_iso_string(), "2026-02-28")
 }
 
 ///|
 test "@date #2.4 add_years 同理（2 月 29 日在平年夹到 28 日）" {
-  assert_eq(d(2024, 2, 29).add_years(1).to_iso_string(), "2025-02-28")
-  assert_eq(d(2024, 2, 29).add_years(4).to_iso_string(), "2028-02-29")
-  assert_eq(d(2023, 2, 28).add_years(1).to_iso_string(), "2024-02-28")
-  assert_eq(d(2026, 10, 4).add_years(-1).to_iso_string(), "2025-10-04")
-  assert_eq(d(2000, 2, 29).add_years(4).to_iso_string(), "2004-02-29")
+  assert_eq(d(2024, 2, 29).offset_year(1).to_iso_string(), "2025-02-28")
+  assert_eq(d(2024, 2, 29).offset_year(4).to_iso_string(), "2028-02-29")
+  assert_eq(d(2023, 2, 28).offset_year(1).to_iso_string(), "2024-02-28")
+  assert_eq(d(2026, 10, 4).offset_year(-1).to_iso_string(), "2025-10-04")
+  assert_eq(d(2000, 2, 29).offset_year(4).to_iso_string(), "2004-02-29")
 }
 
 ///|
 test "@date #2.4 days_between 是有符号的 other - self" {
-  assert_eq(d(2024, 1, 1).days_between(d(2024, 3, 1)), 60)
-  assert_eq(d(2024, 3, 1).days_between(d(2024, 1, 1)), -60)
-  assert_eq(d(2026, 10, 4).days_between(d(2026, 10, 4)), 0)
-  assert_eq(d(1969, 12, 31).days_between(d(1970, 1, 1)), 1)
-  assert_eq(d(2000, 2, 28).days_between(d(2000, 3, 1)), 2)
+  assert_eq(d(2024, 1, 1).between_day(d(2024, 3, 1)), 60)
+  assert_eq(d(2024, 3, 1).between_day(d(2024, 1, 1)), -60)
+  assert_eq(d(2026, 10, 4).between_day(d(2026, 10, 4)), 0)
+  assert_eq(d(1969, 12, 31).between_day(d(1970, 1, 1)), 1)
+  assert_eq(d(2000, 2, 28).between_day(d(2000, 3, 1)), 2)
 }
 
 ///|
@@ -378,25 +378,27 @@ test "@date #2.3 DateTime 的 begin/end 家族（end 档毫秒封顶 .999）" {
 ///|
 test "@date #2.5 DateTime::add 走固定长度单位，跨日跨月进位" {
   let x = dt(2026, 10, 4, 12, 34, 56, 789)
-  assert_eq(x.add(@date.Hour, 2L).to_iso_string(), "2026-10-04T14:34:56.789")
-  assert_eq(x.add(@date.Day, -1L).to_iso_string(), "2026-10-03T12:34:56.789")
-  assert_eq(x.add(@date.Week, 1L).to_iso_string(), "2026-10-11T12:34:56.789")
+  assert_eq(x.offset(@date.Hour, 2L).to_iso_string(), "2026-10-04T14:34:56.789")
+  assert_eq(x.offset(@date.Day, -1L).to_iso_string(), "2026-10-03T12:34:56.789")
+  assert_eq(x.offset(@date.Week, 1L).to_iso_string(), "2026-10-11T12:34:56.789")
   // 毫秒溢出进位到秒
   assert_eq(
-    x.add(@date.Millisecond, 213L).to_iso_string(),
+    x.offset(@date.Millisecond, 213L).to_iso_string(),
     "2026-10-04T12:34:57.002",
   )
   assert_eq(
-    dt(2024, 1, 31, 23, 59, 59, 999).add(@date.Millisecond, 1L).to_iso_string(),
+    dt(2024, 1, 31, 23, 59, 59, 999)
+    .offset(@date.Millisecond, 1L)
+    .to_iso_string(),
     "2024-02-01T00:00:00.000",
   )
   assert_eq(
-    dt(2024, 2, 29, 23, 59, 59, 999).add(@date.Day, 1L).to_iso_string(),
+    dt(2024, 2, 29, 23, 59, 59, 999).offset(@date.Day, 1L).to_iso_string(),
     "2024-03-01T23:59:59.999",
   )
-  assert_eq(x.add_months(4).to_iso_string(), "2027-02-04T12:34:56.789")
+  assert_eq(x.offset_month(4).to_iso_string(), "2027-02-04T12:34:56.789")
   assert_eq(
-    dt(2024, 1, 31, 12, 0, 0, 0).add_months(1).to_iso_string(),
+    dt(2024, 1, 31, 12, 0, 0, 0).offset_month(1).to_iso_string(),
     "2024-02-29T12:00:00.000",
   )
 }

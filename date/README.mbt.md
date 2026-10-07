@@ -81,8 +81,8 @@ test "非法日期到不了下一步" {
 test "ISO 档" {
   let sunday = @date.Date::from_epoch_days(20730L)
   let monday = @date.Date::from_epoch_days(20731L)
-  assert_eq(sunday.weekday(), 7)
-  assert_eq(monday.weekday(), 1)
+  assert_eq(sunday.day_of_week(), 7)
+  assert_eq(monday.day_of_week(), 1)
   assert_eq(sunday.is_weekend(), true)
   assert_eq(monday.is_weekend(), false)
   assert_eq(sunday.day_of_year(), 277)
@@ -95,7 +95,7 @@ test "ISO 档" {
 test "跨年那一周归上一年" {
   let d = @date.Date::from_epoch_days(18628L) // 2021-01-01
   assert_eq(d.to_iso_string(), "2021-01-01")
-  assert_eq(d.weekday(), 5)
+  assert_eq(d.day_of_week(), 5)
   assert_eq(d.week_of_year(), 53)
   assert_eq(d.week_based_year(), 2020)
 }
@@ -123,23 +123,23 @@ test "端点" {
 ///|
 test "月末夹紧" {
   assert_eq(
-    @date.Date::from_epoch_days(19753L).add_months(1).to_iso_string(), // 2024-01-31
+    @date.Date::from_epoch_days(19753L).offset_month(1).to_iso_string(), // 2024-01-31
     "2024-02-29",
   )
   assert_eq(
-    @date.Date::from_epoch_days(19388L).add_months(1).to_iso_string(), // 2023-01-31
+    @date.Date::from_epoch_days(19388L).offset_month(1).to_iso_string(), // 2023-01-31
     "2023-02-28",
   )
   assert_eq(
-    @date.Date::from_epoch_days(19753L).add_months(-1).to_iso_string(),
+    @date.Date::from_epoch_days(19753L).offset_month(-1).to_iso_string(),
     "2023-12-31",
   )
   assert_eq(
-    @date.Date::from_epoch_days(20730L).add_days(1).to_iso_string(),
+    @date.Date::from_epoch_days(20730L).offset_day(1).to_iso_string(),
     "2026-10-05",
   )
   assert_eq(
-    @date.Date::from_epoch_days(19782L).add_years(1).to_iso_string(), // 2024-02-29
+    @date.Date::from_epoch_days(19782L).offset_year(1).to_iso_string(), // 2024-02-29
     "2025-02-28",
   )
 }
@@ -283,7 +283,7 @@ test "输入（RFC 3339 §5.6 正文里的示例串）" {
 
 ## 时间差与周岁
 
-`TimeUnit` **刻意没有月/年**：它们长度不固定，一旦能换算成毫秒就等于承诺"1 个月 = N 毫秒"。月/年走 `add_months`/`add_years`。
+`TimeUnit` **刻意没有月/年**：它们长度不固定，一旦能换算成毫秒就等于承诺"1 个月 = N 毫秒"。月/年走 `offset_month`/`offset_year`。
 
 ```mbt check
 ///|

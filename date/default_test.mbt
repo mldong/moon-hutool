@@ -1464,7 +1464,7 @@ test "@date now_local/today_local 与假钟等价式 + 形状下界（本块 17 
   assert_true(dflt_today.month >= 1 && dflt_today.month <= 12)
   assert_true(dflt_today.day >= 1 && dflt_today.day <= 31)
   // 两次读钟之间可以跨日界，但不可能跨出 1 天之外——这条挡的是"今天返回了个别的年份"
-  assert_true(dflt_now.date.days_between(dflt_today).abs() <= 1)
+  assert_true(dflt_now.date.between_day(dflt_today).abs() <= 1)
   // 区名有效 ⇒ 便捷件不该因为区名给 None（§8.2 第 3 行的不变式落到出口上）
   assert_eq(@date.to_rfc3339_local(0L), Some("1970-01-01T08:00:00+08:00"))
   assert_eq(

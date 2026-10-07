@@ -158,7 +158,7 @@ pub fn cron_matched_dates(
     } else {
       @date.TimeUnit::Minute
     }
-    wall = cand.add(unit, 1L)
+    wall = cand.offset(unit, 1L)
     // 停止：已经攒够且后来的排不进了，或墙上时刻过了窗内最后一瞬。
     // 空洞档（0 支）那一轮不做前一条判定——没有瞬间可比，只靠墙上时刻那条兜住
     let done_enough = has &&
@@ -284,7 +284,7 @@ fn znext_in(c : Cron, zone : String, from : Int64, skip_self : Bool) -> Int64? {
     } else if offs.length() == 0 {
       // 空洞档：这堵墙上时刻在本区不存在 ⇒ 整档跳过，不做"往后挪一小时"的回落。
       // 参照是靠 Calendar 滚出去后读回字段不等，走同一条"次日重来"（腿 N.daily_0230 纽约/上海）
-      wall = day_start(cand.date.add_days(1))
+      wall = day_start(cand.date.offset_day(1))
     } else {
       // 重叠档取**末支**=转换后那一支（腿 N 与 N2 两个家族各证一次，spec §9 第 13 条）
       let ms = cand.to_epoch_millis(offs[offs.length() - 1])
@@ -301,7 +301,7 @@ fn znext_in(c : Cron, zone : String, from : Int64, skip_self : Bool) -> Int64? {
           answer = Some(ms)
           done = true
         } else {
-          wall = day_start(cand.date.add_days(1))
+          wall = day_start(cand.date.offset_day(1))
         }
       }
     }

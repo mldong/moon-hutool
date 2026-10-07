@@ -44,7 +44,7 @@ pub struct DateTime {
 /// 固定长度的时间单位（hutool `DateUnit` 对位）
 ///
 /// **刻意没有 `Month`/`Year`**：它们的长度不固定（28~31 天 / 365~366 天），一旦允许
-/// `to_millis()` 就等于承诺"1 个月 = N 毫秒"，那是错的。月/年加减走 `add_months`/`add_years`。
+/// `to_millis()` 就等于承诺"1 个月 = N 毫秒"，那是错的。月/年加减走 `offset_month`/`offset_year`。
 pub(all) enum TimeUnit {
   Millisecond
   Second
@@ -162,7 +162,7 @@ pub fn Date::from_epoch_days(days : Int64) -> Date {
 
 ///|
 /// 加减天数（跨月/跨年/跨世纪自动进位，`0` 原样返回）
-pub fn Date::add_days(self : Self, days : Int) -> Date {
+pub fn Date::offset_day(self : Self, days : Int) -> Date {
   Date::from_epoch_days(self.epoch_days() + days.to_int64())
 }
 
@@ -172,7 +172,7 @@ pub fn Date::add_days(self : Self, days : Int) -> Date {
 /// - `2024-01-31 +1 → 2024-02-29`、`2023-01-31 +1 → 2023-02-28`、`2024-05-31 +1 → 2024-06-30`
 /// - Note: 夹紧而不是滚到 3 月 2/3 日，这是 hutool `DateUtil.offsetMonth`（= JDK
 ///   `Calendar.add(MONTH)`）的行为，也是业务最不容易出错的一档
-pub fn Date::add_months(self : Self, months : Int) -> Date {
+pub fn Date::offset_month(self : Self, months : Int) -> Date {
   let total = self.month - 1 + months
   let y = self.year + floor_div_i(total, 12)
   let m = floor_mod_i(total, 12) + 1
@@ -182,24 +182,24 @@ pub fn Date::add_months(self : Self, months : Int) -> Date {
 
 ///|
 /// 加减年数，2 月 29 日在平年夹紧到 2 月 28 日
-pub fn Date::add_years(self : Self, years : Int) -> Date {
-  self.add_months(years * 12)
+pub fn Date::offset_year(self : Self, years : Int) -> Date {
+  self.offset_month(years * 12)
 }
 
 ///|
 /// ISO 8601 星期：周一 = 1 … 周日 = 7
 ///
 /// - Note: **不是** JDK `Calendar.DAY_OF_WEEK`（那套周日 = 1）。选 ISO 的理由与差异见 spec 2.2
-pub fn Date::weekday(self : Self) -> Int {
+pub fn Date::day_of_week(self : Self) -> Int {
   floor_mod(self.epoch_days() + 3L, 7L).to_int() + 1
 }
 
 ///|
-/// 是否周末（按 `weekday` ∈ {6, 7}，即周六/周日）
+/// 是否周末（按 `day_of_week` ∈ {6, 7}，即周六/周日）
 ///
 /// - Note: 不做调休/法定节假日（那是逐年数据表，见 `docs/ROADMAP.md` 的「暂不做」）
 pub fn Date::is_weekend(self : Self) -> Bool {
-  let w = self.weekday()
+  let w = self.day_of_week()
   w == 6 || w == 7
 }
 
@@ -237,9 +237,9 @@ pub fn Date::week_based_year(self : Self) -> Int {
 }
 
 ///|
-/// 所在周的周一（周首固定为周一，与 `weekday` 同一套 ISO 口径）
+/// 所在周的周一（周首固定为周一，与 `day_of_week` 同一套 ISO 口径）
 pub fn Date::begin_of_week(self : Self) -> Date {
-  Date::from_epoch_days(self.epoch_days() - (self.weekday() - 1).to_int64())
+  Date::from_epoch_days(self.epoch_days() - (self.day_of_week() - 1).to_int64())
 }
 
 ///|
@@ -316,7 +316,7 @@ pub fn Date::to_datetime(self : Self) -> DateTime {
 
 ///|
 /// `other - self` 的天数（有符号；`self == other` 为 0）
-pub fn Date::days_between(self : Self, other : Date) -> Int {
+pub fn Date::between_day(self : Self, other : Date) -> Int {
   (other.epoch_days() - self.epoch_days()).to_int()
 }
 
@@ -383,19 +383,19 @@ pub fn DateTime::to_epoch_millis(self : Self, offset_minutes : Int) -> Int64 {
 ///|
 /// 加减固定长度单位（`TimeUnit` 无月/年，理由见该类型文档）
 ///
-/// - Note: 跨日/跨月/跨年进位全部由内部按 epoch 毫秒换算完成；无 DST，故 `add(Day, 1)`
+/// - Note: 跨日/跨月/跨年进位全部由内部按 epoch 毫秒换算完成；无 DST，故 `offset(Day, 1)`
 ///   恒等于"墙上时钟 +24 小时"
-pub fn DateTime::add(self : Self, unit : TimeUnit, n : Int64) -> DateTime {
-  // 偏移取 0：这一档是纯墙上时钟算术（无 DST，故 add(Day,1) 恒等于 +24 小时）
+pub fn DateTime::offset(self : Self, unit : TimeUnit, n : Int64) -> DateTime {
+  // 偏移取 0：这一档是纯墙上时钟算术（无 DST，故 offset(Day,1) 恒等于 +24 小时）
   let ms = self.to_epoch_millis(0) + n * unit.to_millis()
   DateTime::from_epoch_millis(ms, 0)
 }
 
 ///|
 /// 加减月数（日夹紧到月末，时刻部分原样保留）
-pub fn DateTime::add_months(self : Self, months : Int) -> DateTime {
+pub fn DateTime::offset_month(self : Self, months : Int) -> DateTime {
   {
-    date: self.date.add_months(months),
+    date: self.date.offset_month(months),
     hour: self.hour,
     minute: self.minute,
     second: self.second,
@@ -720,10 +720,10 @@ fn month_len(year : Int, month : Int) -> Int {
 /// 先取本周的**周四**定"归属年"，再从"含该年 1 月 4 日那一周的周一"数周——
 /// 这样 2021-01-01 归 2020 年第 53 周是靠定义算出来的，不是靠分支猜出来的
 fn iso_week_parts(date : Date) -> (Int, Int) {
-  let thu = date.epoch_days() + (4L - date.weekday().to_int64())
+  let thu = date.epoch_days() + (4L - date.day_of_week().to_int64())
   let wby = Date::from_epoch_days(thu).year
   let jan4 = Date::{ year: wby, month: 1, day: 4, }
-  let week1_monday = jan4.epoch_days() - (jan4.weekday() - 1).to_int64()
+  let week1_monday = jan4.epoch_days() - (jan4.day_of_week() - 1).to_int64()
   let week = floor_div(thu - week1_monday, 7L).to_int() + 1
   (wby, week)
 }

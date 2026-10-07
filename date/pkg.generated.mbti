@@ -101,16 +101,14 @@ pub struct Date {
   month : Int
   day : Int
 } derive(Compare, Eq)
-pub fn Date::add_days(Self, Int) -> Self
-pub fn Date::add_months(Self, Int) -> Self
-pub fn Date::add_years(Self, Int) -> Self
 pub fn Date::begin_of_month(Self) -> Self
 pub fn Date::begin_of_quarter(Self) -> Self
 pub fn Date::begin_of_week(Self) -> Self
 pub fn Date::begin_of_year(Self) -> Self
+pub fn Date::between_day(Self, Self) -> Int
 pub fn Date::compare(Self, Self) -> Int
+pub fn Date::day_of_week(Self) -> Int
 pub fn Date::day_of_year(Self) -> Int
-pub fn Date::days_between(Self, Self) -> Int
 pub fn Date::end_of_month(Self) -> Self
 pub fn Date::end_of_quarter(Self) -> Self
 pub fn Date::end_of_year(Self) -> Self
@@ -121,6 +119,9 @@ pub fn Date::from_epoch_days(Int64) -> Self
 pub fn Date::is_weekend(Self) -> Bool
 pub fn Date::not_equal(Self, Self) -> Bool
 pub fn Date::of(Int, Int, Int) -> Self raise DateError
+pub fn Date::offset_day(Self, Int) -> Self
+pub fn Date::offset_month(Self, Int) -> Self
+pub fn Date::offset_year(Self, Int) -> Self
 pub fn Date::op_ge(Self, Self) -> Bool
 pub fn Date::op_gt(Self, Self) -> Bool
 pub fn Date::op_le(Self, Self) -> Bool
@@ -131,7 +132,6 @@ pub fn Date::to_datetime(Self) -> DateTime
 pub fn Date::to_iso_string(Self) -> String
 pub fn Date::week_based_year(Self) -> Int
 pub fn Date::week_of_year(Self) -> Int
-pub fn Date::weekday(Self) -> Int
 
 pub struct DateTime {
   date : Date
@@ -140,8 +140,6 @@ pub struct DateTime {
   second : Int
   milli : Int
 } derive(Compare, Eq)
-pub fn DateTime::add(Self, TimeUnit, Int64) -> Self
-pub fn DateTime::add_months(Self, Int) -> Self
 pub fn DateTime::begin_of_day(Self) -> Self
 pub fn DateTime::begin_of_month(Self) -> Self
 pub fn DateTime::begin_of_quarter(Self) -> Self
@@ -157,6 +155,8 @@ pub fn DateTime::format(Self, String) -> String raise DateError
 pub fn DateTime::from_epoch_millis(Int64, Int) -> Self
 pub fn DateTime::not_equal(Self, Self) -> Bool
 pub fn DateTime::of(Date, Int, Int, Int, Int) -> Self raise DateError
+pub fn DateTime::offset(Self, TimeUnit, Int64) -> Self
+pub fn DateTime::offset_month(Self, Int) -> Self
 pub fn DateTime::op_ge(Self, Self) -> Bool
 pub fn DateTime::op_gt(Self, Self) -> Bool
 pub fn DateTime::op_le(Self, Self) -> Bool
