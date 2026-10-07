@@ -22,9 +22,17 @@ pub let datetime_pattern : String
 
 pub fn days_in_month(Int, Int) -> Int raise DateError
 
+pub fn default_zone() -> String
+
+pub fn default_zone_source() -> ZoneSource
+
 pub fn difference(DateTime, DateTime, TimeUnit) -> Int64
 
+pub let fallback_zone : String
+
 pub fn format_in(Int64, String, String) -> String? raise DateError
+
+pub fn format_local(Int64, String) -> String? raise DateError
 
 pub fn from_rfc3339(String) -> Int64 raise DateError
 
@@ -38,13 +46,21 @@ pub fn now_at(String, () -> Int64) -> DateTime?
 
 pub fn now_in(String) -> DateTime?
 
+pub fn now_local() -> DateTime?
+
 pub fn now_millis() -> Int64
 
 pub fn parse_in(String, String, String) -> Int64? raise DateError
 
+pub fn parse_local(String, String) -> Int64? raise DateError
+
 pub let pure_date_pattern : String
 
 pub let pure_datetime_pattern : String
+
+pub fn reset_default_zone() -> Unit
+
+pub fn set_default_zone(String) -> Bool
 
 pub let time_pattern : String
 
@@ -52,7 +68,11 @@ pub fn to_rfc3339(Int64, Int) -> String
 
 pub fn to_rfc3339_in(Int64, String) -> String?
 
+pub fn to_rfc3339_local(Int64) -> String?
+
 pub fn today_at(String, () -> Int64) -> Date?
+
+pub fn today_local() -> Date?
 
 pub fn zone_count() -> Int
 
@@ -154,6 +174,12 @@ pub(all) enum TimeUnit {
   Week
 }
 pub fn TimeUnit::to_millis(Self) -> Int64
+
+pub(all) enum ZoneSource {
+  FromOverride
+  FromEnv
+  Fallback
+}
 
 // Type aliases
 

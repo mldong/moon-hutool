@@ -4,11 +4,12 @@ hutool `DateUtil` / `CalendarUtil` / `DatePattern` / `DateUnit` 的 MoonBit 对�
 
 MoonBit 的 `moonbitlang/core` **没有任何时间能力**（没有 `time`/`date`/`calendar` 包；全树 `grep ZonedDateTime|weekday|leap_year` 在非测试代码命中 0），所以本包整包自研，唯一能借的 OS 窗口是 `env.now()`。完整边界矩阵与逐条读数来源见 [`docs/spec/03-date.md`](https://github.com/mldong/moon-hutool/blob/master/docs/spec/03-date.md)。
 
-> 状态：**四批都已收口**（首批 10-05；第二批内置 IANA 时区段表 + 命名时区入口七件；第三批可注入时钟源；第四批命名时区版 format/parse 见 spec §7）——本文件的文档块仍只覆盖首批，其余用例面在各批自己的 `*_test.mbt`。
+> 状态：**前四批都已收口，第五批契约已冻结**（首批 10-05；第二批 内置 IANA 时区段表 + 命名时区入口七件；第三批 可注入时钟源；第四批 命名时区版 format/parse 见 spec §7；第五批 默认区与无参便捷入口见 spec §8）——本文件的文档块仍只覆盖首批，其余用例面在各批自己的 `*_test.mbt`。
 
 ## 两条先决口径
 
-**一、没有时区库，偏移一律显式传。** `DateTime` 是**墙上时钟**（读表结果），本身不带偏移；同一瞬间在 `+00:00` 与 `+08:00` 下是两个不同的 `DateTime`。JDK/hutool 靠进程默认时区，那个隐式全局量在这里不存在，所以换算函数都吃 `offset_minutes`。不做命名时区，也因此不做 DST。
+**一、没有宿主时区可探测，所以偏移要么显式传、要么走默认区那一层。** `DateTime` 是**墙上时钟**（读表结果），本身不带偏移；同一瞬间在 `+00:00` 与 `+08:00` 下是两个不同的 `DateTime`。参照靠进程默认时区（`TimeZone.getDefault()`），而 `moonbitlang/core` **没有任何时间/时区能力**（全树 grep `timezone|utc_offset|localtime` 在非测试代码命中 0，`@env` 也没有"取宿主偏移"的出口），那个隐式全局量在这里没有对应物。
+第二批之后本库自带一张 IANA 段表，所以**命名时区与 DST 都做**（`now_in(zone)` / `format_in(ms, pattern, zone)` / `zone_offsets_at_wall`，见 spec §5 与 §7）；第五批补的是"不必每次传"的默认区一层（`TZ` 环境变量优先、否则取兜底常量，`default_zone_source()` 可查来源，见 spec §8）。**先写这段时那句"不做命名时区、也因此不做 DST"是过期承诺，10-07 就地删改**。
 
 **二、proleptic Gregorian + 天文纪年。** 1582-10-15 之前照公历规则往前算，并且存在公元 0 年（`= 公元前 1 年`）。JDK `GregorianCalendar` 有 1582 切换点，本库没有。
 
@@ -331,4 +332,4 @@ test "只做单调下界断言" {
 
 ## 这一层不做的事
 
-命名时区与 DST、`java.text` 全套 pattern（`EEEE`/`MMM`/`a`/`Z`/`X`/`ww`/`D`）、JDK 的 lenient 滚动语义、闰秒、农历/节气/生肖、调休与法定节假日表、微秒/纳秒精度、RFC 7231 IMF 日期（要英文星期/月名表，随 `EEE`/`MMM` 一起再定）。逐条理由见 [`docs/ROADMAP.md`](https://github.com/mldong/moon-hutool/blob/master/docs/ROADMAP.md) 的「暂不做」「不做」两节。
+命名时区与 DST 已由内置表支持（见上，spec §5/§7）；本层仍不做的是：`java.text` 全套 pattern（`EEEE`/`MMM`/`a`/`Z`/`X`/`ww`/`D`）、JDK 的 lenient 滚动语义、闰秒、农历/节气/生肖、调休与法定节假日表、微秒/纳秒精度、RFC 7231 IMF 日期（要英文星期/月名表，随 `EEE`/`MMM` 一起再定）。逐条理由见 [`docs/ROADMAP.md`](https://github.com/mldong/moon-hutool/blob/master/docs/ROADMAP.md) 的「暂不做」「不做」两节。

@@ -1,6 +1,12 @@
+// 第五批契约骨架期（PR-A）：`format_local` / `parse_local` 标了 `raise DateError` 而体子是 abort，
+// 编译器报 unused_error_type——这是"还没实现"的机械后果，按 AGENTS 的规矩就地豁免，
+// 落地那一笔整行删除（门禁 G12 认 `PR-B：契约骨架` 这个字面串判骨架在不在）。
+
 import {
   "moonbitlang/core/env",
 }
+
+warnings = "-unused_error_type"
 
 import {
   "mldong/moon-hutool/date",
