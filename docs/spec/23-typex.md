@@ -1472,6 +1472,20 @@ owner 点头后另起一笔收口。腿仍是 `Temp/convsrc/hktw_rows.tsv`（同
 ——`e7386c1` 那次"整行删除"其实只删掉了提到它的注释行，门禁照样报 PASS，本笔起判据改认骨架那句固定文案
 `PR-B：契约骨架`，阳性对照也补了"只有不变量 abort 却带豁免"这一类假包。
 
+## 21. Version 族补档（10-07 第二批：`typex_version_test.mbt`）
 
+18 对输入 × 两个出口（`version_compare` / `version_equals`）= 36 条断言，期望全部由 `TypexLeg3.java` 现读灌入（hutool-all 5.8.37 · JDK 17），**手打零条**；`equals` 的期望由同一条 `compareTo` 读数推（`==0` 才等），不开第二个真相源。
 
+| 判据 | 现读 |
+|---|---|
+| 分岔 | **0 条**（18 对与参照逐条同判） |
+| 参照入口交叉核对 | `new Version().compareTo` == `Version.of().compareTo` == `VersionComparator.compare` 三形全一致 ⇒ 对位取 `compareTo` 一支 |
+| 参照**内部**不一致 | `lead-space`（`" 1.2"` vs `"1.2"`）：`compareTo` 给 `-1`，而 `VersionUtil` 的四个布尔判据给 `ge+le`（即视作相等）⇒ 布尔族与 `compareTo` 不同路，本库跟 `compareTo`；这条不写成"我们对"，写成"参照自己两半不一致" |
+| 档位覆盖 | 增补平面（代理对）4 对、大小写 2 对、空 pre-release 双向 3 对、前导零/多位数字/`v` 前缀/空格起算 4 对、段数不等、`int` 溢出两对、完全相等 1 对 |
 
+两条普查自证又一次各自抓到假结论（都记在这里，因为它们比"补了几条"更值钱）：
+
+1. 探针件写成 `typex_ver_probe_test.mbt` 之前先误用过非 `_test.mbt` 后缀 ⇒ 整件编译失败、`Total tests=0`，而收割脚本会照样报「0 条分岔」。脚本先断 `Total tests >= 66 + 36` 才允许给结论，这一条把假绿拦在出口前。
+2. 腿给的 Java 代理对转义 `\ud83d\ude80` 直接抄进 MoonBit 字面量判 **`Invalid unicode escape sequence \u{d83d}`** ——本版 MoonBit 的串字面量**不接受代理对**，增补平面字符要么写合成后的码位，要么按本仓既有惯例直接写真实字符（`typex` 里 `1380013🍎8000` 那条就是这么写的）。生成器改成先按 UTF-16 合成码位再落字符。
+
+**typex 那一格的未覆盖行没动（41 → 41）**：这 36 条钉住的是"比较行为"，而 41 行里的 13 行在 `units_to_string` / `take_string` / `cmp_units` 的**内部支路**（含代理对合成那两行），本轮输入没走到——说明"补一批同族断言"与"消一格未覆盖行"是两件事，别混着报。下一批按这三个函数的入口反推判别样本；另有约 11 行是 `abort("moon-hutool/typex 内部…")` 型不变量守卫（`datasize_format.mbt` 4 处 + `dsfmt_impossible` 3 处 + `phone.mbt` 码表编译失败 2 处 + `ipv4.mbt` 1 处），按"按构造不可达"处置：逐条写推导，不追夹具。
