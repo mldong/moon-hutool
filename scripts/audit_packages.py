@@ -64,9 +64,12 @@ def raise_sites(pkg):
         if f.endswith(("_test.mbt", "_wbtest.mbt")):
             continue
         s = io.open(f, encoding="utf-8", errors="replace").read()
-        for m in re.finditer(r"\braise\s+([A-Z][A-Za-z0-9_]*)", s):
+        for m in re.finditer(r"\braise\s+(?:([A-Z][A-Za-z0-9_]*)::)?([A-Z][A-Za-z0-9_]*)", s):
             impl += 1
-            variants.add(m.group(1))
+            # `raise NumError::NegativeFactorial(...)` 抓出来的是**变体**；旧版把限定名整段当一个变体，
+            # 于是错误**类型名**也被计入变体总数（10-07 实测 typex 报 8/9，那"没点名的第 9 个"就是
+            # NumError 这个类型，不是任何一条错误通道）——假红会指着一个不存在缺陷让人补用例。
+            variants.add(m.group(2))
     tsrc = ""
     for f in glob.glob(os.path.join(pkg, "*_test.mbt")) + glob.glob(os.path.join(pkg, "README.mbt.md")):
         tsrc += io.open(f, encoding="utf-8", errors="replace").read()

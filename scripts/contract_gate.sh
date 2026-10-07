@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# moon-hutool 契约门禁 G1~G14
+# moon-hutool 契约门禁 G1~G15
 #
 # 原则：每条判据都必须"真跑过且敢报红"。凡当前环境跑不了的项，显式打 SKIP + 理由，
 # 绝不伪装成 PASS（恒绿但没测的套件比红灯更危险）。
@@ -210,6 +210,23 @@ if python scripts/claim_audit.py --selftest >/tmp/mh_claims_self.log 2>&1; then
   fi
 else
   bad "G14 自身失效：三档对照没全过——这条判据不可信（见下）"; sed -n '1,10p' /tmp/mh_claims_self.log | sed 's/^/    /'
+fi
+
+echo "== G15 未覆盖行棘轮（基线提交进仓，只许收紧不许放松）=="
+# rc=0 判据成立 / rc=1 超基线或自证失效 / rc=2 没有覆盖率数据（显式 SKIP，绝不当通过）
+python scripts/coverage_ratchet.py --selftest >/tmp/mh_ratchet_self.log 2>&1; rc=$?
+if [ "$rc" = "2" ]; then
+  skip "G15 没有覆盖率数据 ⇒ 棘轮本轮不判（跑法：moon test --target wasm --enable-coverage 后再 analyze）"
+elif [ "$rc" = "0" ]; then
+  grep -E "^  PASS" /tmp/mh_ratchet_self.log
+  python scripts/coverage_ratchet.py >/tmp/mh_ratchet.log 2>&1; rc2=$?
+  if [ "$rc2" = "0" ]; then
+    grep -E "^  (PASS|INFO)" /tmp/mh_ratchet.log
+  else
+    bad "未覆盖行数超基线或基线缺失（见下）："; sed -n '1,14p' /tmp/mh_ratchet.log | sed 's/^/    /'
+  fi
+else
+  bad "G15 自身失效：三档对照没全过——这条判据不可信（见下）"; sed -n '1,14p' /tmp/mh_ratchet_self.log | sed 's/^/    /'
 fi
 
 echo
