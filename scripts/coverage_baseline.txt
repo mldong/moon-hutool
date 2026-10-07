@@ -1,7 +1,7 @@
 # 未覆盖行棘轮基线 —— 由 `python scripts/coverage_ratchet.py --write` 生成，勿手改
 # 现读命令：moon coverage analyze（要先 moon test --target wasm --enable-coverage）
 # 收紧（数字变小）随时可以；放宽或新增包的条目必须单独一笔并写明是哪条通道补/加了
-cache = 12
+cache = 9
 codec = 9
 conv = 13
 cron = 12
