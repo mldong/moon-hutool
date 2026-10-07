@@ -74,12 +74,22 @@ fi
 
 echo "== G5 期望值冻结（PR-B）=="
 if [ -n "${GATE_FREEZE_BASE:-}" ]; then
-  ch=$(git diff --name-only "$GATE_FREEZE_BASE" -- '*_test.mbt' 'docs/spec/*' 2>/dev/null)
-  if [ -z "$ch" ]; then ok "测试与 spec 未被实现 PR 触碰"
-  elif [ "${ALLOW_EXPECTATION_CHANGE:-0}" = "1" ]; then skip "已授权改动：$(echo "$ch" | tr '\n' ' ')"
-  else bad "实现期改了期望值/契约，须单独一笔并给外部读数来源：$ch"; fi
+  # 基准号写错时 `git diff` 只会静默给空集 ⇒ 整条检查会变成"永远通过"的空转，
+  # 而空转比红更难发现（10-07 实测：一个手打错的 sha 就让 G5 报了 ok）。先钉住它是个可解析的 rev。
+  if ! git rev-parse --verify "${GATE_FREEZE_BASE}^{commit}" >/dev/null 2>&1; then
+    bad "GATE_FREEZE_BASE=${GATE_FREEZE_BASE} 不是一个可解析的 commit —— G5 拒绝在空转状态下给 ok"
+  else
+    ch=$(git diff --name-only "$GATE_FREEZE_BASE" -- '*_test.mbt' 'docs/spec/*' 2>/dev/null)
+    if [ -z "$ch" ]; then ok "测试与 spec 未被实现 PR 触碰"
+    elif [ "${ALLOW_EXPECTATION_CHANGE:-0}" = "1" ]; then skip "已授权改动：$(echo "$ch" | tr '\n' ' ')"
+    else bad "实现期改了期望值/契约，须单独一笔并给外部读数来源：$ch"; fi
+  fi
 else skip "未给 GATE_FREEZE_BASE（仅 CI 的 PR-B job 与该检查有关）"
 fi
+# 阳性对照：假基准号必须被识别为不可解析（否则上面那条校验就是摆设）。
+# 只在校验过 rev 的分支上跑，比对结果本身不参与判定。
+bogus=$(GATE_FREEZE_BASE=deadbeefdeadbeef bash -c 'git rev-parse --verify "deadbeefdeadbeef^{commit}" >/dev/null 2>&1; echo $?')
+[ "$bogus" != "0" ] && ok "G5 能识别不可解析的基准号（不会空转）" || bad "G5 基准校验失效：假 sha 竟可解析"
 
 echo "== G6 官方向量在位 =="
 vc=$(grep -ohE "RFC [0-9]{4}|FIPS 180-4" docs/spec/*.md 2>/dev/null | sort -u | wc -l | tr -d ' ')
