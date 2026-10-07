@@ -19,9 +19,11 @@
 // - `isValidCard` 只对长度恰为 18/15/10 的串分派：腿现读 `A1234563`（`isValidHKCard` 为真的 8 位串）
 //   在 `isValidCard` 上给 false——"某个校验件通过"与"总派发通过"是两件事。
 //
-// 一处与本库出口形状的取舍（写进 §19.3 末）：参照在算式中段遇到非数字走 `Integer.parseInt` 而抛
-// `NumberFormatException`，本库三件都不设错误面——文法不合就当假。两案在本批全部夹具上不可分辨：
-// 能走到那一步的串（长度对、首字母对、中段夹字母）参照从不给真，只会抛。
+// 一处与本库出口形状的取舍（写进 §19.3 末，读数补在 §19.5）：参照在算式中段遇到非数字走
+// `Integer.parseInt` 而抛 `NumberFormatException`（腿 `TW_EDGE_midLetter10/B4/B5` 三条现读都是
+// `For input string: "B"`），本库三件都不设错误面——文法不合就当假。两侧出口形状不同（抛 vs 假），
+// 但在"给不给真"上从不分岔：能走到那一步的串参照从不给真。`typex/idcard_midletter_test.mbt`
+// 里那两条判别夹具（被替换位的「数字 × 权重」是 10 的倍数）钉的就是这一档。
 
 ///|
 /// 反射读自 `IdcardUtil.TW_FIRST_CODE` 的 26 枚（下标 `A`..`Z`）。值不等差，别按等差生成。
