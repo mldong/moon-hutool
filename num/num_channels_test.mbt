@@ -20,7 +20,8 @@ fn chan_tag(e : @num.NumError) -> String {
     @num.InvalidModulus(n) => "InvalidModulus " + n.to_string()
     @num.NonCoprime(a, b) => "NonCoprime " + a.to_string() + "/" + b.to_string()
     @num.NegativeFactorial(n) => "NegativeFactorial " + n.to_string()
-    @num.NegativeCount(a, b) => "NegativeCount " + a.to_string() + "/" + b.to_string()
+    @num.NegativeCount(a, b) =>
+      "NegativeCount " + a.to_string() + "/" + b.to_string()
     @num.NotDecimal(t) => "NotDecimal " + t
     @num.NonPositiveTargets(n) => "NonPositiveTargets " + n.to_string()
     @num.NegativeRatio(n) => "NegativeRatio " + n.to_string()
@@ -28,7 +29,7 @@ fn chan_tag(e : @num.NumError) -> String {
     @num.MoneyOverflow => "MoneyOverflow"
     @num.OutOfRange(t) => "OutOfRange " + t
     @num.UnknownChineseUnit(c, i) =>
-      "UnknownChineseUnit " + (c.to_int()).to_string() + "/" + i.to_string()
+      "UnknownChineseUnit " + c.to_int().to_string() + "/" + i.to_string()
     @num.BadChineseNumber(t, i) => "BadChineseNumber " + t + "/" + i.to_string()
     @num.BadExpression(t) => "BadExpression " + t
     @num.DivZero => "DivZero"
@@ -49,25 +50,43 @@ fn[A] chan_run(g : () -> A raise @num.NumError) -> String {
 
 ///|
 test "@num 失败通道 #8.19：Money 的元构造收到 ±Infinity 判 NotFinite（NaN 与它同档）" {
-  assert_eq(chan_run(() => @num.Money::from_yuan(@double.infinity)), "NotFinite")
-  assert_eq(chan_run(() => @num.Money::from_yuan(@double.neg_infinity)), "NotFinite")
+  assert_eq(
+    chan_run(() => @num.Money::from_yuan(@double.infinity)),
+    "NotFinite",
+  )
+  assert_eq(
+    chan_run(() => @num.Money::from_yuan(@double.neg_infinity)),
+    "NotFinite",
+  )
 }
 
 ///|
 test "@num 失败通道 #8.15：format_percent 收到非有限值判 NotFinite，与 #8.11 同一套报错" {
-  assert_eq(chan_run(() => @num.format_percent(@double.infinity, 2)), "NotFinite")
-  assert_eq(chan_run(() => @num.format_percent(@double.neg_infinity, 0)), "NotFinite")
+  assert_eq(
+    chan_run(() => @num.format_percent(@double.infinity, 2)),
+    "NotFinite",
+  )
+  assert_eq(
+    chan_run(() => @num.format_percent(@double.neg_infinity, 0)),
+    "NotFinite",
+  )
 }
 
 ///|
 test "@num 失败通道 #8.16：trim_trailing_zeros 的非法串两条，NotDecimal 带原串" {
   assert_eq(chan_run(() => @num.trim_trailing_zeros("abc")), "NotDecimal abc")
-  assert_eq(chan_run(() => @num.trim_trailing_zeros("1.2.3")), "NotDecimal 1.2.3")
+  assert_eq(
+    chan_run(() => @num.trim_trailing_zeros("1.2.3")),
+    "NotDecimal 1.2.3",
+  )
 }
 
 ///|
 test "@num 失败通道 #8.36：中文金额三个键都没内容 ⇒ NotDecimal（腿的三条现读）" {
-  assert_eq(chan_run(() => @num.money_of_chinese("元整")), "NotDecimal 元整")
+  assert_eq(
+    chan_run(() => @num.money_of_chinese("元整")),
+    "NotDecimal 元整",
+  )
   assert_eq(chan_run(() => @num.money_of_chinese("元")), "NotDecimal 元")
   assert_eq(chan_run(() => @num.money_of_chinese("分")), "NotDecimal 分")
 }
