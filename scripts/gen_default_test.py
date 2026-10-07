@@ -337,6 +337,9 @@ def main():
         ls.append('  @env.set_env_var("TZ", "%s")' % y)
         ls.append('  let dflt_y = @date.format_local(%s, "%s")' % (MS_DAY, P_MAIN))
         ls.append("  assert_true(dflt_x != dflt_y)")
+        # 裸 let 后面必须还有一条断言，否则吃 unused_variable（本版是 Error Warning，零警告是门禁）
+        ls.append("  assert_true(dflt_x is Some(_))")
+        ls.append("  assert_true(dflt_y is Some(_))")
     blocks.append(block("@date 成对判别：同一瞬间不同默认区必给不同串", ls))
 
     # ---- 块 11 to_rfc3339_local 对撞 §7 R 行 ----
@@ -419,6 +422,8 @@ def main():
             "dflt_dt(@date.now_at(@date.default_zone(), @date.clock_fixed(%s)))" % MS_DAY,
             "dflt_dt(@date.datetime_in(@date.default_zone(), %s))" % MS_DAY,
         ),
+        "  // 块内换过档就必须复位再往下测——上一段把 TZ 留在了 Chatham，那两条期望上海串的断言就红了",
+        '  @env.set_env_var("TZ", "Asia/Shanghai")',
         "  // 真钟那一族只断形状与下界——断两次读数的大小关系是计时依赖，慢机器会假红（§5.5 同纪律）",
         at("@date.now_local() is Some(_)"),
         at("@date.today_local() is Some(_)"),
@@ -462,7 +467,8 @@ def main():
 // 实测 set_env_var 之后立即读得到、unset 之后回到 <absent>（wasm/js/wasm-gc 三档一致）。
 // helper dflt_tag 带前缀（同包多个 _test.mbt 共享顶层命名空间）；错误形状复用 date_test.mbt 的 shape。
 //
-// 状态：**契约已冻结**（PR-A），下列各块当前是预期红——函数体是 `abort`，PR-B 只许把红变绿。
+// 状态：**契约已落地**（PR-A `dcc6bad` 冻结 → PR-B 转绿）。15 块 305 条冻结期望全部为真；
+// 期望串逐条与 §5/§7 已冻读数同源，落地笔一字未改（要改须另走"补档"通道并给三条机器证据）。
 
 ///|
 fn dflt_tag(s : @date.ZoneSource) -> String {

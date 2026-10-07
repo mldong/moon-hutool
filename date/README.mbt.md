@@ -4,11 +4,11 @@ hutool `DateUtil` / `CalendarUtil` / `DatePattern` / `DateUnit` 的 MoonBit 对�
 
 MoonBit 的 `moonbitlang/core` **没有任何时间能力**（没有 `time`/`date`/`calendar` 包；全树 `grep ZonedDateTime|weekday|leap_year` 在非测试代码命中 0），所以本包整包自研，唯一能借的 OS 窗口是 `env.now()`。完整边界矩阵与逐条读数来源见 [`docs/spec/03-date.md`](https://github.com/mldong/moon-hutool/blob/master/docs/spec/03-date.md)。
 
-> 状态：**前四批都已收口，第五批契约已冻结**（首批 10-05；第二批 内置 IANA 时区段表 + 命名时区入口七件；第三批 可注入时钟源；第四批 命名时区版 format/parse 见 spec §7；第五批 默认区与无参便捷入口见 spec §8）——本文件的文档块仍只覆盖首批，其余用例面在各批自己的 `*_test.mbt`。
+> 状态：**五批都已收口**（首批 10-05；第二批 内置 IANA 时区段表 + 命名时区入口七件；第三批 可注入时钟源；第四批 命名时区版 format/parse 见 spec §7；第五批 默认区与无参便捷入口见 spec §8）——本文件的文档块覆盖首批与第五批，第二/三/四批的用例面在各批自己的 `*_test.mbt`。
 
 ## 两条先决口径
 
-**一、没有宿主时区可探测，所以偏移要么显式传、要么走默认区那一层。** `DateTime` 是**墙上时钟**（读表结果），本身不带偏移；同一瞬间在 `+00:00` 与 `+08:00` 下是两个不同的 `DateTime`。参照靠进程默认时区（`TimeZone.getDefault()`），而 `moonbitlang/core` **没有任何时间/时区能力**（全树 grep `timezone|utc_offset|localtime` 在非测试代码命中 0，`@env` 也没有"取宿主偏移"的出口），那个隐式全局量在这里没有对应物。
+**一、没有宿主时区可探测，所以偏移要么显式传、要么走默认区那一层。** `DateTime` 是**墙上时钟**（读表结果），本身不带偏移；同一瞬间在 `+00:00` 与 `+08:00` 下是两个不同的 `DateTime`。参照靠进程默认时区（`TimeZone.getDefault()`），而 `moonbitlang/core` **没有任何时间/时区能力**（全树 grep `timezone|utc_offset|localtime` 在非测试代码命中 0，`@env` 也没有"取宿主偏移"的出口），参照那个隐式全局量在这里没有对应物——宿主只能给区名（`TZ`），给不了偏移。
 第二批之后本库自带一张 IANA 段表，所以**命名时区与 DST 都做**（`now_in(zone)` / `format_in(ms, pattern, zone)` / `zone_offsets_at_wall`，见 spec §5 与 §7）；第五批补的是"不必每次传"的默认区一层（`TZ` 环境变量优先、否则取兜底常量，`default_zone_source()` 可查来源，见 spec §8）。**先写这段时那句"不做命名时区、也因此不做 DST"是过期承诺，10-07 就地删改**。
 
 **二、proleptic Gregorian + 天文纪年。** 1582-10-15 之前照公历规则往前算，并且存在公元 0 年（`= 公元前 1 年`）。JDK `GregorianCalendar` 有 1582 切换点，本库没有。
@@ -327,6 +327,118 @@ test "只做单调下界断言" {
   assert_true(@date.now_millis() > 1700000000000L)
   let ms = @date.now_millis()
   assert_eq(@date.DateTime::from_epoch_millis(ms, 480).to_epoch_millis(480), ms)
+}
+```
+
+## 默认区：不想每次传区名的一档
+
+`now_in(zone)` / `format_in(ms, pattern, zone)` 那批显式件一字未动；这一层只解决"我这个进程就固定用某个区"。
+三级降级：**显式覆盖 → 环境变量 `TZ` → `fallback_zone`**，而 `default_zone_source()` 能问出这一次到底来自哪一级——
+参照那边 `TimeZone.getDefault()` 是个查不到来源的进程级全局量，本库把它做成可查询、可覆盖、可复位。
+
+```mbt check
+///|
+test "三级降级与它的来源" {
+  // 一、谁都没设 ⇒ 兜底值（本库自订，判据见 spec §8.3 第 1 行）
+  @date.reset_default_zone()
+  @env.unset_env_var("TZ")
+  assert_eq(@date.default_zone(), @date.fallback_zone)
+  assert_true(@date.default_zone_source() is @date.Fallback)
+  // 二、TZ 给了表内区名 ⇒ 跟着走（实测 js/wasm/wasm-gc 三档都读得到环境变量）
+  @env.set_env_var("TZ", "Asia/Kathmandu")
+  assert_eq(@date.default_zone(), "Asia/Kathmandu")
+  assert_true(@date.default_zone_source() is @date.FromEnv)
+  // 三、显式覆盖压过 TZ
+  assert_true(@date.set_default_zone("Europe/Berlin"))
+  assert_eq(@date.default_zone(), "Europe/Berlin")
+  assert_true(@date.default_zone_source() is @date.FromOverride)
+  @date.reset_default_zone()
+  assert_eq(@date.default_zone(), "Asia/Kathmandu")
+}
+```
+
+**表外的 `TZ` 值不会漏到下游**：参照侧 `TimeZone.getTimeZone(坏名)` 是静默按 GMT 解析成功，本库不跟随——
+坏名一律回落兜底值，且来源如实报 `Fallback`。POSIX 规则串（`UTC-8`）与路径式
+（`/usr/share/zoneinfo/…`）都在表外，同样回落（不收的理由见 spec §8.3 第 3 行）。
+
+```mbt check
+///|
+test "坏的环境变量值给兜底值，而不是给个 0 偏移" {
+  @date.reset_default_zone()
+  for
+    bad in [
+      "", " ", "asia/shanghai", "UTC-8", "/usr/share/zoneinfo/Asia/Shanghai", "No/Where",
+    ] {
+    @env.set_env_var("TZ", bad)
+    assert_eq(@date.default_zone(), @date.fallback_zone)
+    assert_true(@date.default_zone_source() is @date.Fallback)
+    // 这条才是要害：偏移仍是 +08:00 的 480，不是参照那个静默的 0
+    assert_eq(
+      @date.zone_offset_minutes(@date.default_zone(), 1710052200000L),
+      Some(480),
+    )
+  }
+  @env.unset_env_var("TZ")
+}
+```
+
+`default_zone()` **恒为表内区名**，这条不变式就是下面五个便捷件不会因为区名给 `None` 的全部依据
+（唯一剩下的失败原因是瞬间落出表的覆盖窗口 `[1970, 2050)`）：
+
+```mbt check
+///|
+test "五个便捷件都是显式件的薄封装，判据不新增" {
+  @date.reset_default_zone()
+  @env.set_env_var("TZ", "Asia/Shanghai")
+  assert_true(@date.zone_exists(@date.default_zone()))
+  let ms = 1791244800000L
+  // format_local ≡ format_in(…, default_zone())，串与 §7 已冻读数同值
+  assert_eq(
+    @date.format_local(ms, "yyyy-MM-dd HH:mm:ss"),
+    @date.format_in(ms, "yyyy-MM-dd HH:mm:ss", @date.default_zone()),
+  )
+  assert_eq(
+    @date.format_local(ms, "yyyy-MM-dd HH:mm:ss"),
+    Some("2026-10-06 08:00:00"),
+  )
+  assert_eq(@date.to_rfc3339_local(ms), Some("2026-10-06T08:00:00+08:00"))
+  // parse_local 的空洞档仍 raise ZoneGap，不并成 None（"这个时间不存在" ≠ "这个区名我不认"）
+  let gap = try {
+    let _ = @date.parse_local("1986-05-04 02:30:00", "yyyy-MM-dd HH:mm:ss")
+    "未抛错"
+  } catch {
+    @date.ZoneGap(w) => "ZoneGap \{w}"
+    _ => "错种"
+  }
+  assert_eq(gap, "ZoneGap 1986-05-04T02:30:00.000")
+  // 真钟那一族只断形状与下界；可冻的等价式挂在"毫秒作参数"的那批上（计时依赖不进契约）
+  assert_true(@date.now_local() is Some(_))
+  // Option[DateTime] 进 assert_eq 要 Debug，本包只给 Eq/Compare ⇒ 落成串再比，失败时两边都看得见
+  let show = (v : @date.DateTime) => v.to_iso_string()
+  assert_eq(
+    @date.now_at(@date.default_zone(), @date.clock_fixed(ms)).map(show),
+    @date.datetime_in(@date.default_zone(), ms).map(show),
+  )
+}
+```
+
+业务侧最常见的用法就是"一个进程一个区"，写在启动处即可，其余调用不带区名：
+
+```mbt check
+///|
+test "启动时设一次，之后到处不带区名" {
+  assert_true(@date.set_default_zone("Asia/Shanghai"))
+  let d = match @date.today_local() {
+    None => abort("表窗内必有值")
+    Some(v) => v
+  }
+  assert_true(d.year >= 2020)
+  let now = match @date.now_local() {
+    None => abort("表窗内必有值")
+    Some(v) => v
+  }
+  assert_eq(now.to_iso_string().length(), 23)
+  @date.reset_default_zone()
 }
 ```
 

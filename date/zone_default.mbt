@@ -30,6 +30,20 @@ pub(all) enum ZoneSource {
 let override_slot : Array[String?] = [None]
 
 ///|
+// 三级降级**只有这一处**（§8.2 末行：两件必须同源，一次降级只能有一个出口）。
+// 覆盖值 → `TZ`（且必须表内）→ 兜底常量。表外值不收，POSIX 规则串与路径式因此进不来。
+fn resolve_default() -> (String, ZoneSource) {
+  match override_slot[0] {
+    Some(z) => (z, FromOverride)
+    None =>
+      match @env.get_env_var("TZ") {
+        Some(v) if zone_exists(v) => (v, FromEnv)
+        _ => (fallback_zone, Fallback)
+      }
+  }
+}
+
+///|
 /// 当前生效的默认区名。三级降级：`set_default_zone` 的覆盖值 → 环境变量 `TZ` → `fallback_zone`。
 ///
 /// - Returns: **恒为内置表认得的区名**（`zone_exists` 必给 `true`）。这是这一件的核心承诺：
@@ -39,8 +53,8 @@ let override_slot : Array[String?] = [None]
 /// - Note: 不跟随参照的静默回落：JDK 的 `TimeZone.getTimeZone` 对坏名给 GMT=0，本库给 `fallback_zone`。
 /// - 示例见 `docs/spec/03-date.md` §8.5。
 pub fn default_zone() -> String {
-  let _ = override_slot
-  abort("moon-hutool/date PR-B：契约骨架 —— default_zone")
+  let (z, _) = resolve_default()
+  z
 }
 
 ///|
@@ -48,7 +62,8 @@ pub fn default_zone() -> String {
 /// - Returns: `FromOverride` / `FromEnv` / `Fallback` 之一，与 `default_zone()` 同一次降级结果对应
 /// - Note: 两件必须走同一条判据，不许各读一遍环境后给出互相矛盾的一对读数（spec §8.2 第 2 行）
 pub fn default_zone_source() -> ZoneSource {
-  abort("moon-hutool/date PR-B：契约骨架 —— default_zone_source")
+  let (_, s) = resolve_default()
+  s
 }
 
 ///|
@@ -60,15 +75,19 @@ pub fn default_zone_source() -> ZoneSource {
 /// - Note: 返回 `Bool` 而不是 `raise`——参照没有对应件，这是本库自订档；新增一个 `DateError` 变体
 ///   会撞上"设置一次配置"的手感，也会让既有的穷尽 `match` 当场报缺档。取舍见 spec §8.3 第 3 行。
 pub fn set_default_zone(zone : String) -> Bool {
-  let _ = zone
-  abort("moon-hutool/date PR-B：契约骨架 —— set_default_zone")
+  if !zone_exists(zone) {
+    false
+  } else {
+    override_slot[0] = Some(zone)
+    true
+  }
 }
 
 ///|
 /// 撤销 `set_default_zone` 的覆盖值，回到"`TZ` → `fallback_zone`"那条降级路。
 /// - Note: 没有它，覆盖就不可逆——测试现场与多实例场景都需要这个复位口（spec §8.2 第 5 行）
 pub fn reset_default_zone() -> Unit {
-  abort("moon-hutool/date PR-B：契约骨架 —— reset_default_zone")
+  override_slot[0] = None
 }
 
 ///|
@@ -78,14 +97,14 @@ pub fn reset_default_zone() -> Unit {
 /// - Note: 用例只断形状与下界，不断两次读时钟之间的大小关系——计时依赖会在慢机器上假红，
 ///   这条纪律沿用 §5.5 与第三批 #C 系列（spec §8.4 第 2 行）
 pub fn now_local() -> DateTime? {
-  abort("moon-hutool/date PR-B：契约骨架 —— now_local")
+  now_in(default_zone())
 }
 
 ///|
 /// 默认区下的当前日历日。`today_at(default_zone(), clock_system())` 的薄封装。
 /// - Returns: 同 `now_local`，只有窗外给 `None`
 pub fn today_local() -> Date? {
-  abort("moon-hutool/date PR-B：契约骨架 —— today_local")
+  today_at(default_zone(), clock_system())
 }
 
 ///|
@@ -100,8 +119,7 @@ pub fn format_local(
   millis : Int64,
   pattern : String,
 ) -> String? raise DateError {
-  let _ = (millis, pattern)
-  abort("moon-hutool/date PR-B：契约骨架 —— format_local")
+  format_in(millis, pattern, default_zone())
 }
 
 ///|
@@ -110,8 +128,7 @@ pub fn format_local(
 /// - Note: 偏移数字仍由 §5 那张表按**瞬间**取，所以同一区在不同瞬间可以给不同偏移
 ///   （`Asia/Kathmandu` 在 1970 是 `+05:30`、当下 `+05:45`），这条不是笔误
 pub fn to_rfc3339_local(millis : Int64) -> String? {
-  let _ = millis
-  abort("moon-hutool/date PR-B：契约骨架 —— to_rfc3339_local")
+  to_rfc3339_in(millis, default_zone())
 }
 
 ///|
@@ -123,6 +140,5 @@ pub fn to_rfc3339_local(millis : Int64) -> String? {
 ///   - `DateError` 家族的 pattern/字段档，沿用 §2.7 已冻判据
 /// - Note: 回拨重叠档取**转换后那一支**偏移，同 §7.3 第 2 行——这条判据本批原样继承，不重述也不改
 pub fn parse_local(text : String, pattern : String) -> Int64? raise DateError {
-  let _ = (text, pattern)
-  abort("moon-hutool/date PR-B：契约骨架 —— parse_local")
+  parse_in(text, pattern, default_zone())
 }

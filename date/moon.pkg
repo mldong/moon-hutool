@@ -1,12 +1,10 @@
-// 第五批契约骨架期（PR-A）：`format_local` / `parse_local` 标了 `raise DateError` 而体子是 abort，
-// 编译器报 unused_error_type——这是"还没实现"的机械后果，按 AGENTS 的规矩就地豁免，
-// 落地那一笔整行删除（门禁 G12 认 `PR-B：契约骨架` 这个字面串判骨架在不在）。
+// 第五批落地笔（PR-B）：骨架期的 `warnings = "-unused_error_type"` 豁免整行删除（G12 棘轮），
+// 因为 `format_local` / `parse_local` 的体子已是真实现、raise 真被走到。
+// 依赖在此声明：实现侧只要 `env`（`@env.get_env_var("TZ")` 是本包第三个 OS 口，见 spec §8.1 与 AGENTS 的零依赖四条）。
 
 import {
   "moonbitlang/core/env",
 }
-
-warnings = "-unused_error_type"
 
 import {
   "mldong/moon-hutool/date",
