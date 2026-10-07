@@ -640,6 +640,30 @@ fn index_of_pair(s : String, pair : String) -> Int {
 }
 
 ///|
+/// 把 `{...}` 折叠成 1 个字符之后的长度（参照 `PatternInfo.getLength()` 里
+/// `VARIABLE_PATTERN.matcher(pattern).replaceAll("#").length()` 那一档）。
+fn collapsed_len(p : String) -> Int {
+  let cs = p.to_array()
+  let n = cs.length()
+  let mut i = 0
+  let mut len = 0
+  while i < n {
+    if cs[i] == '{' {
+      let mut j = i + 1
+      while j < n && cs[j] != '}' {
+        j = j + 1
+      }
+      i = if j < n { j + 1 } else { i + 1 }
+      len = len + 1
+    } else {
+      i = i + 1
+      len = len + 1
+    }
+  }
+  len
+}
+
+///|
 // PatternInfo：`{` 计变量、`**` 计跨段、单个 `*` 计段内通配（`.*` 这种"点+星"不算，参照实现那条
 // 判据原样搬）。`length` 只在没有变量时参与比较，有变量时给 -1 让后面几级裁决。
 priv struct PatInfo {
@@ -654,6 +678,7 @@ priv struct PatInfo {
 ///|
 fn pat_info(p : String) -> PatInfo {
   let cs = p.to_array()
+  let n_of_p = cs.length()
   let mut vars = 0
   let mut single = 0
   let mut doubles = 0
@@ -667,7 +692,7 @@ fn pat_info(p : String) -> PatInfo {
       if i + 1 < cs.length() && cs[i + 1] == '*' {
         doubles = doubles + 1
         i = i + 2
-      } else if i > 0 && !(slice_units(p, i - 1, i + 1) == ".*") {
+      } else if i > 0 && !(slice_units(p, i - 1, n_of_p) == ".*") {
         single = single + 1
         i = i + 1
       } else {
@@ -679,7 +704,9 @@ fn pat_info(p : String) -> PatInfo {
   }
   let catch_all = p == "/**"
   let prefix_pat = !catch_all && ends_with_pair(p, "/**")
-  let len = if vars == 0 { p.length() } else { -1 }
+  // 参照的 `getLength()`：没有变量时是串长，有变量时把每个 `{...}` 折成 1 字符再取长
+  // （`{.*?}` 整段换 `#`；未闭合的 `{` 不被匹配、按普通字符计数）
+  let len = if vars == 0 { p.length() } else { collapsed_len(p) }
   PatInfo::{
     uri_vars: vars,
     single,
@@ -719,8 +746,10 @@ fn compare_pat(against : String, p1 : String, p2 : String) -> Int {
   } else if i2.prefix_pat && i1.doubles == 0 {
     return -1
   }
-  let t1 = i1.single + i1.doubles + i1.uri_vars
-  let t2 = i2.single + i2.doubles + i2.uri_vars
+  // 参照的 getTotalCount() 是 `uriVars + singleWildcards + 2 * doubleWildcards`——
+  // 双星按**两个**计数，这一档就是六条已登记分岔里"量级也差"的来源
+  let t1 = i1.uri_vars + i1.single + 2 * i1.doubles
+  let t2 = i2.uri_vars + i2.single + 2 * i2.doubles
   if t1 != t2 {
     return t1 - t2
   }

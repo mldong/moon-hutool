@@ -1,0 +1,79 @@
+// moon-hutool/path —— 比较器修复笔的参照腿（PR-B 前置：先把"参照怎么判"逐对取全）。
+// 参照件：hutool-core 5.8.35 的 `AntPathMatcher.getPatternComparator(path)`（**公开方法**，
+// 返回 Comparator<String>，其 compare 就是本库 `compare_patterns` 的对位物），本机 JDK 17.0.14。
+// 夹具形状是照 `AntPatternComparator` 源码里七级判定的**每一条出口**配的（含 catch-all、
+// 与 path 相等、双前缀、单前缀×无双星、总数差、长度差、单星差、变量差、同级给 0），
+// 外加 spec §7.1 表里那六条已登记分岔的原始配对——修复笔要用这张表当判据，不能拿实现输出当期望。
+// 行形状：C|<against>|<p1>|<p2>|<读数>   ｜抛错 ⇒ ERR:<类名>
+import cn.hutool.core.text.AntPathMatcher;
+import java.util.Comparator;
+
+public class PathLeg3 {
+  static String[][] P = {
+    {"/x", "/**", "/**"},
+    {"/x", "/**", "/a/*"},
+    {"/x", "/a/*", "/**"},
+    {"/a/b", "/a/b", "/a/x"},
+    {"/a/b", "/a/x", "/a/b"},
+    {"/a/b", "/a/b", "/a/b"},
+    {"/a/b", "/x/**", "/y/**"},
+    {"/a/b", "/x/**", "/a/*"},
+    {"/a/b", "/a/*", "/x/**"},
+    {"/a/b", "/**/b", "/a/*"},
+    {"/a/b", "/**/b", "/a/?"},
+    {"/a/b", "/**/b", "a/*"},
+    {"/a/b", "/a/*", "/a/**/b"},
+    {"/a/b", "/a/?", "/a/**/b"},
+    {"/a/b", "a/*", "/a/**/b"},
+    {"/a/b", "/**/y", "/*/*/b"},
+    {"/a/b", "/**/xy", "/*/*/b"},
+    {"/a/b", "/*/*/b", "/**/xy"},
+    {"/a/b", "/{a}/{b}", "/**b"},
+    {"/a/b", "/**b", "/{a}/{b}"},
+    {"/a/b", "a.*", "/x/*"},
+    {"/a/b", "/x/*", "a.*"},
+    {"/a/b", "/a/*", "/a/*"},
+    {"/a/b", "/*", "/*"},
+    // 三条专打 PatternInfo 的两处细节：`.*` 那条判据比的是**从 pos-1 起的整个尾巴**（不是两字符窗口），
+    // 以及"有变量时 length 走 `{...}` 折叠成 1 字符"那档（未闭合的 `{` 不被折叠）
+    {"/a/b", ".*x", "/x/*"},
+    {"/a/b", ".*", "/x/*"},
+    {"/a/b", "/{a", "/x/*"},
+    {"/a/b", "/{a}x", "/x/*y"},
+    {"/a/b", null, "/a/*"},
+    {"/a/b", "/a/*", null},
+  };
+
+  public static void main(String[] args) {
+    AntPathMatcher m = new AntPathMatcher();
+    Comparator<String> c = m.getPatternComparator("/a/b");
+    String g1 = cmp(c, "/**", "/a/*"), g2 = cmp(c, "/a/b", "/a/x"), g3 = cmp(c, "/a/*", "/a/*");
+    System.out.println("G|guard|" + g1 + "|" + g2 + "|" + g3);
+    boolean ok = !g1.equals(g2) && !g2.equals(g3) && !g1.equals(g3);
+    System.out.println(ok ? "G|GUARD_OK|distinct3" : "G|GUARD_FAIL|same-reading");
+    for (String[] r : P) {
+      // 比较器绑的是"当前流程要匹配的那条路径"，每对都要按各自的 against 现取
+      Comparator<String> cc = m.getPatternComparator(r[0]);
+      System.out.println("C|" + r[0] + "|" + esc(r[1]) + "|" + esc(r[2]) + "|" + cmp(cc, r[1], r[2]));
+    }
+  }
+
+  static String cmp(Comparator<String> c, String a, String b) {
+    try {
+      return String.valueOf(c.compare(a, b));
+    } catch (Throwable t) {
+      return "ERR:" + t.getClass().getSimpleName();
+    }
+  }
+
+  static String esc(String s) {
+    if (s == null) return "{null}";
+    StringBuilder sb = new StringBuilder();
+    for (int i = 0; i < s.length(); i++) {
+      char ch = s.charAt(i);
+      if (ch >= 0x20 && ch <= 0x7e && ch != '|') sb.append(ch);
+      else sb.append(String.format("{u%04x}", (int) ch));
+    }
+    return sb.toString();
+  }
+}
