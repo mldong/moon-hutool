@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# moon-hutool 契约门禁 G1~G16
+# moon-hutool 契约门禁 G1~G17
 #
 # 原则：每条判据都必须"真跑过且敢报红"。凡当前环境跑不了的项，显式打 SKIP + 理由，
 # 绝不伪装成 PASS（恒绿但没测的套件比红灯更危险）。
@@ -241,6 +241,21 @@ elif [ "$rc" = "0" ]; then
   else bad "类面漏档或表与 jar 漂移（见下）："; sed -n '1,12p' /tmp/mh_surface.log | sed 's/^/    /'; fi
 else
   bad "G16 自身失效：三档对照没全过——这条判据不可信（见下）"; sed -n '1,12p' /tmp/mh_surface_self.log | sed 's/^/    /'
+fi
+
+echo "== G17 死格形状棘轮（断言实参位上不许出现参照期望值字面串）=="
+# 起因见 scripts/vacuous_assert.py 文件头：path_test.mbt 那 49 条把 "true"/"false" 填进 pattern 位，
+# 恒绿却占着"有夹具"的位置，把真分岔按住了。现存债务走棘轮（只许降不许升），不假装已经清零。
+python scripts/vacuous_assert.py --selftest >/tmp/mh_vacuous_self.log 2>&1; rc=$?
+if [ "$rc" = "2" ]; then
+  skip "G17 扫描面为空 ⇒ 本轮不判"
+elif [ "$rc" = "0" ]; then
+  grep -E "^  PASS" /tmp/mh_vacuous_self.log
+  python scripts/vacuous_assert.py >/tmp/mh_vacuous.log 2>&1; rc2=$?
+  if [ "$rc2" = "0" ]; then grep -E "^  (PASS|INFO)" /tmp/mh_vacuous.log
+  else bad "死格形状上升或基线缺失（见下）："; sed -n '1,10p' /tmp/mh_vacuous.log | sed 's/^/    /'; fi
+else
+  bad "G17 自身失效：三档对照没全过——这条判据不可信（见下）"; sed -n '1,10p' /tmp/mh_vacuous_self.log | sed 's/^/    /'
 fi
 
 echo

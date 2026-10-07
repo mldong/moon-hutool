@@ -1,0 +1,3 @@
+# 死格形状基线（scripts/vacuous_assert.py --write 生成，勿手改）
+# 只许降：每更正一条死格，随笔 --write 收紧；上升即 G17 报红
+path/path_test.mbt = 49
