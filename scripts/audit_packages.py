@@ -78,6 +78,20 @@ def norm(n):
     return re.sub(r"[^a-z0-9]", "", n.lower())
 
 
+def same_name(ours, ref):
+    """对位判定：**允许族前缀**。本库把多类合一的包（typex 装了 CoordinateUtil/DataSizeUtil/…，
+    csv 装了 CsvReader/CsvWriter/…）按 `coord_*` / `csv_*` 前缀命名，而 hutool 的
+    `CoordinateUtil.bd09ToGCJ02` 本身没有这个前缀——只比"完全同名"会把 102/109 全判成不对位，
+    那份表就不能当改名依据。改成后缀互含：真·命名漂移仍然会被挑出来。
+
+    ⚠ 必须挡空串与超短名：`norm()` 会剥掉 `to/get/is/...` 前缀，于是参照里出现 `""`、`"of"`、
+    `"day"` 这类短串，而 `"任何串".endswith("")` 恒真——整格会**静默全通过**（实测 date 一度报 0/64，
+    与 javap 现读的 `add_days`↔`offsetDay` 直接矛盾）。判据全通过比有噪声更坏。"""
+    if len(ref) < 4 or len(ours) < 4:
+        return ours == ref
+    return ours == ref or ours.endswith(ref) or ref.endswith(ours)
+
+
 def public_names(pkg):
     p = os.path.join(pkg, "pkg.generated.mbti")
     if not os.path.exists(p):
@@ -179,7 +193,9 @@ def main():
                 ours = public_names(pkg)
                 hn = {norm(x) for x in hp}
                 on = {norm(x) for x in ours}
-                extra = [x for x in ours if norm(x) not in hn]
+                rlist = sorted({norm(m) for m in hp})
+                extra = [x for x in ours
+                         if not any(same_name(norm(x), r) for r in rlist)]
                 note = "参照 %d / 本库 %d / 本库名参照无 %d" % (len(set(hp)), len(ours), len(extra))
         flag = "  <== 看" if unc or (nvar and named < nvar) else ""
         print("%-10s %6d %8d %6d/%-3d  %s%s" % (pkg, unc, impl, named, nvar, note, flag))
