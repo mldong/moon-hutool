@@ -18,6 +18,9 @@ fn show(err : @num.NumError) -> String {
     @num.UnknownChineseUnit(c, i) =>
       "UnknownChineseUnit " + c.to_string() + " " + i.to_string()
     @num.BadChineseNumber(s, i) => "BadChineseNumber " + s + " " + i.to_string()
+    // 第四批（Calculator）新增的两档：只补全匹配，既有断言一条没动
+    @num.BadExpression(s) => "BadExpression " + s
+    @num.DivZero => "DivZero"
   }
 }
 

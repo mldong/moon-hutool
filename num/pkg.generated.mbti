@@ -56,6 +56,8 @@ pub fn mod_inverse(Int, Int) -> Int raise NumError
 
 pub fn money_of_chinese(String) -> Money raise NumError
 
+pub fn num_calculate(String) -> Double raise NumError
+
 pub fn round_to(Double, Int, mode? : RoundingMode) -> Double raise NumError
 
 pub fn round_to_str(Double, Int, mode? : RoundingMode) -> String raise NumError
@@ -79,6 +81,8 @@ pub suberror NumError {
   OutOfRange(String)
   UnknownChineseUnit(Char, Int)
   BadChineseNumber(String, Int)
+  BadExpression(String)
+  DivZero
 }
 
 // Types and methods

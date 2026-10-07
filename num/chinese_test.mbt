@@ -545,7 +545,7 @@ test "chinese_abbrev：万/亿/万亿 三档与两位 HALF_UP（#8.37）" {
   assert_eq(@num.chinese_abbrev(9223372036854775807), "9223372.04万亿")
   assert_eq(@num.chinese_abbrev(-9223372036854775807 - 1), "-9223372.04万亿")
   // 平局档判别夹具（JDK 实测：BigDecimal 两位 HALF_UP = 远离零）。没有这四条，把判据里的
-  // `>=` 写成 `>` 也全绿——10-05 变异对照就是这么暴露出「档位没人看着」的
+  // `>=` 写成 `>` 也照样通过——10-05 变异对照就是这么暴露出「档位没人看着」的
   assert_eq(@num.chinese_abbrev(10050), "1.01万")
   assert_eq(@num.chinese_abbrev(10150), "1.02万")
   assert_eq(@num.chinese_abbrev(-10050), "-1.01万")

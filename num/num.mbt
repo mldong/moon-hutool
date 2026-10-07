@@ -62,6 +62,18 @@ pub suberror NumError {
   ///
   /// 反向解析撞到"单位字后面又跟了个数字字"这类坏形状，带 hutool 同款的两字窗口与位置。
   BadChineseNumber(String, Int)
+  // ---- 第四批（Calculator 表达式求值）新增两条 ----
+  ///
+  /// 整个原式：式子形状坏了——括号失衡、以算子结尾、空串、纯 `=`、`(` 被当成操作数。
+  /// 参照在这一族输入上随机抛四类异常（`EmptyStackException` / `IllegalStateException` /
+  /// `ArrayIndexOutOfBoundsException` / `NumberFormatException`），本库合成一档：
+  /// "崩成哪一类"是 JVM 栈机的实现细节，不是语义（判据与逐条读数见 spec §11.4 第 16 行）
+  BadExpression(String)
+  ///
+  /// 除或取余的右操作数为 0。**不带载荷**：两个操作数调用方都有（式子是他写的），
+  /// "除零"这件事本身才是新信息（与 `MoneyOverflow` 同一条立场）。
+  /// 参照侧三条文案不同（`/ by zero`、`Division by zero`、`Division undefined`）但同一件事
+  DivZero
 }
 
 ///|
