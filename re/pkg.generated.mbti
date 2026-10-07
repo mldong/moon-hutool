@@ -48,6 +48,18 @@ pub fn named_groups(String, String) -> Map[String, String] raise ReError
 
 pub fn quote(String) -> String
 
+pub fn re_find_preset(RePreset, String) -> String? raise ReError
+
+pub fn re_first_number(String) -> String? raise ReError
+
+pub fn re_match_preset(RePreset, String) -> Bool raise ReError
+
+pub fn re_preset_name(RePreset) -> String
+
+pub fn re_preset_pattern(RePreset) -> String
+
+pub fn re_presets() -> Array[RePreset]
+
 pub fn replace_by(String, String, (@string.MatchResult) -> String) -> String raise ReError
 
 pub fn replace_with_template(String, String, String) -> String raise ReError
@@ -61,6 +73,31 @@ pub suberror ReError {
 }
 
 // Types and methods
+pub(all) enum RePreset {
+  General
+  Numbers
+  Word
+  Chinese
+  Chineses
+  GroupVar
+  Ipv4
+  Ipv6
+  Money
+  Email
+  EmailWithChinese
+  ZipCode
+  Birthday
+  Uri
+  Url
+  UrlHttp
+  GeneralWithChinese
+  Uuid
+  UuidSimple
+  MacAddress
+  Hex
+  Time
+  ChineseName
+}
 
 // Type aliases
 
