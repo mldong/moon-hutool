@@ -139,6 +139,12 @@ def emit_test(target, items, meta):
     L.append("  assert_eq(@re.re_presets().map(p => @re.re_preset_name(p)), %s)" % (
         "[" + ", ".join(mb_lit(n) for n, _c, _t, _s, _r in items) + "]"))
     L.append("  assert_eq(@re.re_presets().length(), %d)" % len(items))
+    # 这一条不来自腿：`re_presets()` 交的是副本，改返回的数组不许动到包内那张表（spec §11 第 17 行）。
+    # 来源＝变异 P3 零红暴露的夹具缺口——"交副本"这件事在原来那批断言里没有任何输入能观测到。
+    L.append('  // 本库自订（spec §11 第 17 行）：返回的是副本，调用方改它不许影响包内那张表')
+    L.append("  let got = @re.re_presets()")
+    L.append("  got.push(@re.RePreset::General)")
+    L.append("  assert_eq(@re.re_presets().length(), %d)" % len(items))
     L.append("}")
     L.append(NL)
     L.append("///|")
@@ -173,8 +179,9 @@ def emit_table(target, items):
     for name, case, txt, _n, _r in items:
         L.append("    %s => %s" % (case, mb_lit(txt)))
     L += ["  }", "}", NL, "// 声明序＝腿 R 行的序（参照 RegexPool 的字段序），本库把它当作表全集的唯一出口"]
-    L.append("const PRESETS : Array[RePreset] = [")
-    L.append(", ".join("  @re.RePreset::%s" % case for _n, case, _t, _s, _r in items))
+    L.append("let presets : Array[RePreset] = [")
+    for _n, case, _t, _s, _r in items:
+        L.append("  RePreset::%s," % case)
     L += ["]", NL]
     io.open(target, "w", encoding="utf-8", newline=NL).write(NL.join(L) + NL)
     print("preset_table.mbt：%d 档" % len(items))

@@ -617,6 +617,10 @@ test "preset 表全集" {
     "TIME", "CHINESE_NAME",
   ])
   assert_eq(@re.re_presets().length(), 23)
+  // 本库自订（spec §11 第 17 行）：返回的是副本，调用方改它不许影响包内那张表
+  let got = @re.re_presets()
+  got.push(@re.RePreset::General)
+  assert_eq(@re.re_presets().length(), 23)
 }
 
 ///|

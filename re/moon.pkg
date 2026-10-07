@@ -1,10 +1,5 @@
 // `re` 的底座是 core 的 `@string.Regex`（零依赖契约只允许 `moonbitlang/core`，这一条在内）。
 
-// 第二批骨架期（PR-A）：`preset.mbt` 的体全是 abort ⇒ 参数没人用、`raise` 没人抛，
-// 那两类警告是"未实现"的机械后果，按 G12 压掉（键只出现一次、flag 连写不带空格/逗号）；
-// 落地笔整行删除（G12 盯着骨架文案，藏不住"实现已落地却还留着豁免"这种状态）。
-warnings = "-unused_value-unused_error_type"
-
 // 本包不 import `text`/`num`：正则与它们没有依赖关系，串与视图的胶水在本包内自写。
 import {
   "moonbitlang/core/string",

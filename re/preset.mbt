@@ -1,6 +1,6 @@
 ///|
 // moon-hutool/re —— 第二批之一：RegexPool 常量表（ROADMAP 第 10 行第二批）
-// 契约真相在 `docs/spec/10-re.md` §9~§12。本文件的实现体在 PR-B 落地；现在是契约骨架。
+// 契约真相在 `docs/spec/10-re.md` §9~§12。数据表是生成物 `re/preset_table.mbt`（两列都从腿原文 + 改写规则表推导）。
 
 ///|
 /// #10.25 预置正则的档位。对位参照的 `cn.hutool.core.lang.RegexPool` 的 34 个 `String` 常量。
@@ -45,9 +45,7 @@ pub(all) enum RePreset {
 ///   `URI` 只在 `RegexPool` 有（腿 D 行 `only_regex_pool URI`）。本库不分两张表，
 ///   发的是**文本**（#10.27），要编译由调用方 `compile`(#10.1)
 pub fn re_preset_name(p : RePreset) -> String {
-  abort(
-    "moon-hutool PR-B：契约骨架 —— 23 串照腿 R 行的键名逐字符取，别改成小写或本库自己的别名",
-  )
+  preset_name(p)
 }
 
 ///|
@@ -62,9 +60,7 @@ pub fn re_preset_name(p : RePreset) -> String {
 ///   与参照逐条一致，探针跑在 `wasm`/`js`/`wasm-gc` 三档（spec §10 第 3 条）
 /// - Note: 未改写的那 6 档（`WORD`/`IPV6`/`URI`/`UUID_SIMPLE`/`HEX`/`CHINESE_NAME`）与参照逐字同形
 pub fn re_preset_pattern(p : RePreset) -> String {
-  abort(
-    "moon-hutool PR-B：契约骨架 —— 照生成器的 --table 出口，别手改任何一条串（改一条就是一条分岔）",
-  )
+  preset_pattern(p)
 }
 
 ///|
@@ -79,9 +75,7 @@ pub fn re_preset_pattern(p : RePreset) -> String {
 /// - Note: 多数档位是**不锚定**的（`NUMBERS`/`TIME`/`URL`/`GROUP_VAR` 这些参照原文就没写 `^…$`），
 ///   所以整串档对它们会大面积给 `false`——要"串里有没有"用 #10.29 或第一批的 `contains`(#10.5)
 pub fn re_match_preset(p : RePreset, text : String) -> Bool raise ReError {
-  abort(
-    "moon-hutool PR-B：契约骨架 —— 走整串档（matches），别顺手滑成 find",
-  )
+  is_match(preset_pattern(p), text)
 }
 
 ///|
@@ -92,9 +86,7 @@ pub fn re_match_preset(p : RePreset, text : String) -> Bool raise ReError {
 /// - Note: 参照的 `get` 在这里给的是"没找到就 `null`"，本库给 `None`——与 #10.7 同一条立场
 /// - Note: 腿的 F 行就是这一档的读数来源（286 条里的一半），锚定与不锚定的差别全在里面
 pub fn re_find_preset(p : RePreset, text : String) -> String? raise ReError {
-  abort(
-    "moon-hutool PR-B：契约骨架 —— 取第 0 组，不是第 1 组，也不是整串",
-  )
+  find_first(preset_pattern(p), text)
 }
 
 ///|
@@ -102,9 +94,8 @@ pub fn re_find_preset(p : RePreset, text : String) -> String? raise ReError {
 /// - Note: 存在的理由是把"收了哪 23 档"这件事做成可数的出口，而不是只写在文档里。
 ///   新增/删除一档要同时改 spec §9 的边界表与这张表的期望（门禁会红）
 pub fn re_presets() -> Array[RePreset] {
-  abort(
-    "moon-hutool PR-B：契约骨架 —— 23 档按腿 R 行的序，别排成字母序（那是把声明序藏起来）",
-  )
+  // 交副本：`Array` 是可变的，把包内那张表直接递出去等于让调用方能改常量表
+  presets.copy()
 }
 
 ///|
@@ -120,7 +111,5 @@ pub fn re_presets() -> Array[RePreset] {
 /// - Raises: `BadPattern` —— 这条不接模式串，正常永不触发；签名与 #10.29 同张嘴是为了让
 ///   "把 `Numbers` 档换成调用方自带的数字模式"这条路不改变错误面
 pub fn re_first_number(text : String) -> String? raise ReError {
-  abort(
-    "moon-hutool PR-B：契约骨架 —— 委托 #10.29 的 Numbers 档，别在这件里再抄一遍模式",
-  )
+  find_first(preset_pattern(Numbers), text)
 }
