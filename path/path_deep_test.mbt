@@ -8,70 +8,273 @@
 ///|
 test "path 深分支 match：可选组、trim 档、`**` 中段与端点、尾随分隔符（腿 16 对）" {
   // C1.trim-sep：match 参照读数 = true
-  assert_eq(@path.match_path_with("/a b/*", "/a b/c", @path.PathOptions::{ separator: "/", case_sensitive: true, trim_tokens: true }), true)
+  assert_eq(
+    @path.match_path_with("/a b/*", "/a b/c", @path.PathOptions::{
+      separator: "/",
+      case_sensitive: true,
+      trim_tokens: true,
+    }),
+    true,
+  )
   // C2.trim-var：match 参照读数 = true
-  assert_eq(@path.match_path_with("/{v}/x", "/ y /x", @path.PathOptions::{ separator: "/", case_sensitive: true, trim_tokens: true }), true)
+  assert_eq(
+    @path.match_path_with("/{v}/x", "/ y /x", @path.PathOptions::{
+      separator: "/",
+      case_sensitive: true,
+      trim_tokens: true,
+    }),
+    true,
+  )
   // C3.trim-false：match 参照读数 = true
-  assert_eq(@path.match_path_with("/{v}/x", "/ y /x", @path.PathOptions::{ separator: "/", case_sensitive: true, trim_tokens: false }), true)
+  assert_eq(
+    @path.match_path_with("/{v}/x", "/ y /x", @path.PathOptions::{
+      separator: "/",
+      case_sensitive: true,
+      trim_tokens: false,
+    }),
+    true,
+  )
   // D1.ci：match 参照读数 = true
-  assert_eq(@path.match_path_with("/A/*", "/a/b", @path.PathOptions::{ separator: "/", case_sensitive: false, trim_tokens: false }), true)
+  assert_eq(
+    @path.match_path_with("/A/*", "/a/b", @path.PathOptions::{
+      separator: "/",
+      case_sensitive: false,
+      trim_tokens: false,
+    }),
+    true,
+  )
   // E1.suffix-dots：match 参照读数 = true
-  assert_eq(@path.match_path_with("/**/x", "/a/b/c/x", @path.PathOptions::{ separator: "/", case_sensitive: true, trim_tokens: false }), true)
+  assert_eq(
+    @path.match_path_with("/**/x", "/a/b/c/x", @path.PathOptions::{
+      separator: "/",
+      case_sensitive: true,
+      trim_tokens: false,
+    }),
+    true,
+  )
   // E2.mid-star-multi：match 参照读数 = true
-  assert_eq(@path.match_path_with("/a/**/b/**/c", "/a/1/2/b/3/c", @path.PathOptions::{ separator: "/", case_sensitive: true, trim_tokens: false }), true)
+  assert_eq(
+    @path.match_path_with("/a/**/b/**/c", "/a/1/2/b/3/c", @path.PathOptions::{
+      separator: "/",
+      case_sensitive: true,
+      trim_tokens: false,
+    }),
+    true,
+  )
   // E3.mid-star-zero：match 参照读数 = true
-  assert_eq(@path.match_path_with("/a/**/b", "/a/b", @path.PathOptions::{ separator: "/", case_sensitive: true, trim_tokens: false }), true)
+  assert_eq(
+    @path.match_path_with("/a/**/b", "/a/b", @path.PathOptions::{
+      separator: "/",
+      case_sensitive: true,
+      trim_tokens: false,
+    }),
+    true,
+  )
   // E4.star-then-star：match 参照读数 = true
-  assert_eq(@path.match_path_with("/**/**", "/a/b", @path.PathOptions::{ separator: "/", case_sensitive: true, trim_tokens: false }), true)
+  assert_eq(
+    @path.match_path_with("/**/**", "/a/b", @path.PathOptions::{
+      separator: "/",
+      case_sensitive: true,
+      trim_tokens: false,
+    }),
+    true,
+  )
   // E5.lead-dots-trail：match 参照读数 = true
-  assert_eq(@path.match_path_with("/**/x/", "/a/x/", @path.PathOptions::{ separator: "/", case_sensitive: true, trim_tokens: false }), true)
+  assert_eq(
+    @path.match_path_with("/**/x/", "/a/x/", @path.PathOptions::{
+      separator: "/",
+      case_sensitive: true,
+      trim_tokens: false,
+    }),
+    true,
+  )
   // F1.star-trailing-sep：分岔登记（参照=true / 本库=false），见 spec 末节，本笔不钉
   // F2.qm-trailing-sep：match 参照读数 = false
-  assert_eq(@path.match_path_with("/a/?", "/a/", @path.PathOptions::{ separator: "/", case_sensitive: true, trim_tokens: false }), false)
+  assert_eq(
+    @path.match_path_with("/a/?", "/a/", @path.PathOptions::{
+      separator: "/",
+      case_sensitive: true,
+      trim_tokens: false,
+    }),
+    false,
+  )
   // F3.star-nosep：match 参照读数 = false
-  assert_eq(@path.match_path_with("/a/*", "/a", @path.PathOptions::{ separator: "/", case_sensitive: true, trim_tokens: false }), false)
+  assert_eq(
+    @path.match_path_with("/a/*", "/a", @path.PathOptions::{
+      separator: "/",
+      case_sensitive: true,
+      trim_tokens: false,
+    }),
+    false,
+  )
   // H1.regex-colon：match 参照读数 = true
-  assert_eq(@path.match_path_with("/{v:[a-z]+}/x", "/abc/x", @path.PathOptions::{ separator: "/", case_sensitive: true, trim_tokens: false }), true)
+  assert_eq(
+    @path.match_path_with("/{v:[a-z]+}/x", "/abc/x", @path.PathOptions::{
+      separator: "/",
+      case_sensitive: true,
+      trim_tokens: false,
+    }),
+    true,
+  )
   // H2.regex-miss：match 参照读数 = false
-  assert_eq(@path.match_path_with("/{v:[a-z]+}/x", "/123/x", @path.PathOptions::{ separator: "/", case_sensitive: true, trim_tokens: false }), false)
+  assert_eq(
+    @path.match_path_with("/{v:[a-z]+}/x", "/123/x", @path.PathOptions::{
+      separator: "/",
+      case_sensitive: true,
+      trim_tokens: false,
+    }),
+    false,
+  )
   // I1.no-var：match 参照读数 = true
-  assert_eq(@path.match_path_with("/a/*/c", "/a/b/c", @path.PathOptions::{ separator: "/", case_sensitive: true, trim_tokens: false }), true)
+  assert_eq(
+    @path.match_path_with("/a/*/c", "/a/b/c", @path.PathOptions::{
+      separator: "/",
+      case_sensitive: true,
+      trim_tokens: false,
+    }),
+    true,
+  )
   // I2.root-pattern：match 参照读数 = true
-  assert_eq(@path.match_path_with("/", "/", @path.PathOptions::{ separator: "/", case_sensitive: true, trim_tokens: false }), true)
+  assert_eq(
+    @path.match_path_with("/", "/", @path.PathOptions::{
+      separator: "/",
+      case_sensitive: true,
+      trim_tokens: false,
+    }),
+    true,
+  )
 }
 
 ///|
 test "path 深分支 matchStart：同一批输入走 matchStart 那条路（腿 16 对）" {
   // C1.trim-sep：matchStart 参照读数 = true
-  assert_eq(@path.match_start_with("/a b/*", "/a b/c", @path.PathOptions::{ separator: "/", case_sensitive: true, trim_tokens: true }), true)
+  assert_eq(
+    @path.match_start_with("/a b/*", "/a b/c", @path.PathOptions::{
+      separator: "/",
+      case_sensitive: true,
+      trim_tokens: true,
+    }),
+    true,
+  )
   // C2.trim-var：matchStart 参照读数 = true
-  assert_eq(@path.match_start_with("/{v}/x", "/ y /x", @path.PathOptions::{ separator: "/", case_sensitive: true, trim_tokens: true }), true)
+  assert_eq(
+    @path.match_start_with("/{v}/x", "/ y /x", @path.PathOptions::{
+      separator: "/",
+      case_sensitive: true,
+      trim_tokens: true,
+    }),
+    true,
+  )
   // C3.trim-false：matchStart 参照读数 = true
-  assert_eq(@path.match_start_with("/{v}/x", "/ y /x", @path.PathOptions::{ separator: "/", case_sensitive: true, trim_tokens: false }), true)
+  assert_eq(
+    @path.match_start_with("/{v}/x", "/ y /x", @path.PathOptions::{
+      separator: "/",
+      case_sensitive: true,
+      trim_tokens: false,
+    }),
+    true,
+  )
   // D1.ci：matchStart 参照读数 = true
-  assert_eq(@path.match_start_with("/A/*", "/a/b", @path.PathOptions::{ separator: "/", case_sensitive: false, trim_tokens: false }), true)
+  assert_eq(
+    @path.match_start_with("/A/*", "/a/b", @path.PathOptions::{
+      separator: "/",
+      case_sensitive: false,
+      trim_tokens: false,
+    }),
+    true,
+  )
   // E1.suffix-dots：matchStart 参照读数 = true
-  assert_eq(@path.match_start_with("/**/x", "/a/b/c/x", @path.PathOptions::{ separator: "/", case_sensitive: true, trim_tokens: false }), true)
+  assert_eq(
+    @path.match_start_with("/**/x", "/a/b/c/x", @path.PathOptions::{
+      separator: "/",
+      case_sensitive: true,
+      trim_tokens: false,
+    }),
+    true,
+  )
   // E2.mid-star-multi：matchStart 参照读数 = true
-  assert_eq(@path.match_start_with("/a/**/b/**/c", "/a/1/2/b/3/c", @path.PathOptions::{ separator: "/", case_sensitive: true, trim_tokens: false }), true)
+  assert_eq(
+    @path.match_start_with("/a/**/b/**/c", "/a/1/2/b/3/c", @path.PathOptions::{
+      separator: "/",
+      case_sensitive: true,
+      trim_tokens: false,
+    }),
+    true,
+  )
   // E3.mid-star-zero：matchStart 参照读数 = true
-  assert_eq(@path.match_start_with("/a/**/b", "/a/b", @path.PathOptions::{ separator: "/", case_sensitive: true, trim_tokens: false }), true)
+  assert_eq(
+    @path.match_start_with("/a/**/b", "/a/b", @path.PathOptions::{
+      separator: "/",
+      case_sensitive: true,
+      trim_tokens: false,
+    }),
+    true,
+  )
   // E4.star-then-star：matchStart 参照读数 = true
-  assert_eq(@path.match_start_with("/**/**", "/a/b", @path.PathOptions::{ separator: "/", case_sensitive: true, trim_tokens: false }), true)
+  assert_eq(
+    @path.match_start_with("/**/**", "/a/b", @path.PathOptions::{
+      separator: "/",
+      case_sensitive: true,
+      trim_tokens: false,
+    }),
+    true,
+  )
   // E5.lead-dots-trail：matchStart 参照读数 = true
-  assert_eq(@path.match_start_with("/**/x/", "/a/x/", @path.PathOptions::{ separator: "/", case_sensitive: true, trim_tokens: false }), true)
+  assert_eq(
+    @path.match_start_with("/**/x/", "/a/x/", @path.PathOptions::{
+      separator: "/",
+      case_sensitive: true,
+      trim_tokens: false,
+    }),
+    true,
+  )
   // F1.star-trailing-sep：分岔登记（参照=true / 本库=false），见 spec 末节，本笔不钉
   // F2.qm-trailing-sep：分岔登记（参照=true / 本库=false），见 spec 末节，本笔不钉
   // F3.star-nosep：matchStart 参照读数 = true
-  assert_eq(@path.match_start_with("/a/*", "/a", @path.PathOptions::{ separator: "/", case_sensitive: true, trim_tokens: false }), true)
+  assert_eq(
+    @path.match_start_with("/a/*", "/a", @path.PathOptions::{
+      separator: "/",
+      case_sensitive: true,
+      trim_tokens: false,
+    }),
+    true,
+  )
   // H1.regex-colon：matchStart 参照读数 = true
-  assert_eq(@path.match_start_with("/{v:[a-z]+}/x", "/abc/x", @path.PathOptions::{ separator: "/", case_sensitive: true, trim_tokens: false }), true)
+  assert_eq(
+    @path.match_start_with("/{v:[a-z]+}/x", "/abc/x", @path.PathOptions::{
+      separator: "/",
+      case_sensitive: true,
+      trim_tokens: false,
+    }),
+    true,
+  )
   // H2.regex-miss：matchStart 参照读数 = false
-  assert_eq(@path.match_start_with("/{v:[a-z]+}/x", "/123/x", @path.PathOptions::{ separator: "/", case_sensitive: true, trim_tokens: false }), false)
+  assert_eq(
+    @path.match_start_with("/{v:[a-z]+}/x", "/123/x", @path.PathOptions::{
+      separator: "/",
+      case_sensitive: true,
+      trim_tokens: false,
+    }),
+    false,
+  )
   // I1.no-var：matchStart 参照读数 = true
-  assert_eq(@path.match_start_with("/a/*/c", "/a/b/c", @path.PathOptions::{ separator: "/", case_sensitive: true, trim_tokens: false }), true)
+  assert_eq(
+    @path.match_start_with("/a/*/c", "/a/b/c", @path.PathOptions::{
+      separator: "/",
+      case_sensitive: true,
+      trim_tokens: false,
+    }),
+    true,
+  )
   // I2.root-pattern：matchStart 参照读数 = true
-  assert_eq(@path.match_start_with("/", "/", @path.PathOptions::{ separator: "/", case_sensitive: true, trim_tokens: false }), true)
+  assert_eq(
+    @path.match_start_with("/", "/", @path.PathOptions::{
+      separator: "/",
+      case_sensitive: true,
+      trim_tokens: false,
+    }),
+    true,
+  )
 }
 
 ///|
@@ -174,4 +377,3 @@ test "path 比较器逐对直读：7 枚模式两两配对（并列档给 0，�
   // compare_patterns(/a/b, /a/**/b, /**) 参照读数 = -1
   assert_eq(@path.compare_patterns("/a/b", "/a/**/b", "/**"), -1)
 }
-
