@@ -32,16 +32,16 @@ DECL = {
     ("I", "nan", "t64"): "None",
 }
 
-# 登记而不钉：0x 带符号两档。参照那两个读数（1 / -1）本身是前缀解析的产物，
-# 而本库 spec 9.9 承诺"0x 十六进制可带符号"却给 None —— 这是实现与自家契约不符，
-# 不替缺陷钉期望，挂实现笔（见 docs/spec/09-conv.md 新增的缺陷行）。
-DROP = {("I", "hexsign", "ti"), ("I", "hexsign", "t64"),
-        ("I", "hexneg", "ti"), ("I", "hexneg", "t64")}
+# 登记而不钉：本批没有。曾经的四条 `0x` 带符号读数（`0x+1F`/`0x-1F` × to_int/to_int64）
+# 是"契约说收符号、取值层不收"的缺陷档（docs/spec/09-conv.md §9.1），实现笔修好后
+# 与参照逐条同判 ⇒ 一起进断言，不再 DROP。
+DROP = set()
 
 HEAD = '''///|
-// conv 界外与符号档补档（10-08）——`+`/`-`/空串、`0x` 带符号、非有限值、越出位宽、
+// conv 界外与符号档补档（10-08）——`+`/`-`/空串、`0x` 带符号全族、非有限值、越出位宽、
 // NBSP 与全角归一。期望全部由 Conv2Leg.java 现读灌入（hutool-core 5.8.35 · JDK 17.0.14），手打零条。
 // 参照改判档钉本库形状、把参照原读数留在注释里（依据见 docs/spec/09-conv.md §5）。
+// `0x` 那九档是 §9.1 缺陷修好之后重测的：本库值与参照逐条相等，不需要改判。
 
 '''
 
@@ -71,8 +71,12 @@ def json_str_lit(raw):
 
 
 def main():
+    text = io.open(LEG, encoding="utf-8", errors="replace").read().replace("\r", "")
+    # 腿的自检行必须存在且是 OK 档：缺行或 FAIL 都说明参照自己没跑对，读数一律不可用
+    if "G|GUARD_OK|distinct3" not in text:
+        raise SystemExit("腿自检缺失或失败（没有 G|GUARD_OK|distinct3 这一行）：%s" % LEG)
     rows = []
-    for raw in io.open(LEG, encoding="utf-8", errors="replace").read().replace("\r", "").splitlines():
+    for raw in text.splitlines():
         f = raw.split("|")
         if f[0] != "I":
             continue

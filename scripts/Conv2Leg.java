@@ -7,12 +7,19 @@ public class Conv2Leg {
   static String[][] TOINT = {
     {"plus", "+"}, {"minus", "-"}, {"empty", ""}, {"dotdash", "1.e"},
     {"hexsign", "0x+1F"}, {"hexneg", "0x-1F"},
+    {"hexplus", "0x+"}, {"hexminus", "0x-"}, {"hexone", "0x+1"}, {"hexg", "0x+G"},
+    {"hexmulti", "0xff"}, {"hexuppersign", "0X+F"}, {"hexbig", "0xFFFFFFFFFF"},
+    {"hexd", "0x1FL"}, {"hexsignmulti", "0x-ff"},
+    {"hexupper", "0X1F"}, {"hexbig64", "0x7FFFFFFFFFFFFFFF00"},
     {"big1e20", "1e20"}, {"big1e100", "1e100"}, {"nan", "NaN"}, {"inf", "Infinity"},
     {"nbsp", "1 2"}, {"fullwidth", "１２３"}, {"spacey", " 42 "},
   };
   public static void main(String[] args) {
-    System.out.println("G|guard|" + ti("+") + "|" + ti("0x+1F") + "|" + ti("1"));
-    System.out.println("G|GUARD_OK|distinct3");
+    // 自检：三条已知互不相同的读数（null / -1 / 1）——相等就说明腿自己坏了，后面的读数全部作废
+    String g1 = ti("+"), g2 = ti("0x-1F"), g3 = ti("1");
+    System.out.println("G|guard|" + g1 + "|" + g2 + "|" + g3);
+    boolean ok = !g1.equals(g2) && !g2.equals(g3) && !g1.equals(g3);
+    System.out.println(ok ? "G|GUARD_OK|distinct3" : "G|GUARD_FAIL|same-reading");
     for (String[] r : TOINT) {
       System.out.println("I|" + r[0] + "|" + esc(r[1]) + "|" + ti(r[1]) + "|" + t64(r[1]));
     }

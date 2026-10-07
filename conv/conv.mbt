@@ -376,6 +376,32 @@ fn big_strict(t : String) -> BigInt? {
 ///|
 
 ///|
+/// `Hex` 档取值前的符号摘除：core 认 `0x` 前缀、也认前导符号，唯独不认「`0x` 后紧跟符号」
+/// （实测 `parse_int("0x+1F")` 抛，见 docs/spec/09-conv.md §9.1），而 #9.9 的文法层收这一档
+/// ⇒ 取值层把串还原成 core 认得的形状，符号自己记。
+fn hex_unsign(t : String) -> (String, Bool) {
+  let cs = t.to_array()
+  let n = cs.length()
+  if n > 3 && (cs[2] == '+' || cs[2] == '-') {
+    (String::from_array(cs[0:2]) + String::from_array(cs[3:n]), cs[2] == '-')
+  } else {
+    (t, false)
+  }
+}
+
+///|
+fn parse_int_safe(s : String) -> Int? {
+  let v = @string.parse_int(s) catch { _ => return None }
+  Some(v)
+}
+
+///|
+fn parse_int64_safe(s : String) -> Int64? {
+  let v = @string.parse_int64(s) catch { _ => return None }
+  Some(v)
+}
+
+///|
 /// 宽松整数腿的共用体：**前段归一（trim + 去 D/L/F 尾 + 全角归一）在内部做**，
 /// 所以 Json 的字符串档、路径下标段都可以直接喂原文（spec #9.9 的顺序就是这条）。
 fn loose_int_text(s : String) -> Int? {
@@ -385,7 +411,14 @@ fn loose_int_text(s : String) -> Int? {
   }
   match num_form(t, false) {
     None => None
-    Some(Int) | Some(Hex) => Some(@string.parse_int(t)) catch { _ => None }
+    Some(Int) => parse_int_safe(t)
+    Some(Hex) => {
+      let (body, neg) = hex_unsign(t)
+      match parse_int_safe(body) {
+        None => None
+        Some(v) => Some(if neg { 0 - v } else { v })
+      }
+    }
     Some(Dec) | Some(Exp) =>
       match parse_double_safe(t) {
         Some(d) => trunc_to_int(d)
@@ -421,7 +454,14 @@ fn loose_int64_text(s : String) -> Int64? {
   }
   match num_form(t, true) {
     None => None
-    Some(Int) | Some(Hex) => Some(@string.parse_int64(t)) catch { _ => None }
+    Some(Int) => parse_int64_safe(t)
+    Some(Hex) => {
+      let (body, neg) = hex_unsign(t)
+      match parse_int64_safe(body) {
+        None => None
+        Some(v) => Some(if neg { 0L - v } else { v })
+      }
+    }
     Some(Dec) | Some(Exp) =>
       match parse_double_safe(t) {
         Some(d) => trunc_to_int64(d)
