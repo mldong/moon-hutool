@@ -1504,7 +1504,7 @@ owner 点头后另起一笔收口。腿仍是 `Temp/convsrc/hktw_rows.tsv`（同
 | rainbow | `mid-even(6,20,6)`、`mid-even2(10,20,6)`、`mid-odd(8,20,5)`、`head/tail`、`few(2,4,10)` | 偶数档 `+1` 那一支、奇数档另一支、`totalPage < displayCount` 档 |
 | Version | `1.0+build` vs `1.0`、`1.0+2` vs `1.0+10`、`1.0.1` vs `1.0.a`、`1.0.a` vs `1.0.aa`、`1.2.3` vs `1.2.3-SNAPSHOT` | 构建元数据 `+` 支、字符串单元 `take_string` 支、Num×Str 择路、长度差档 |
 | DataSize | `1\u{1c}KB`、`1\u{1d}KB`、`1\u{2007}KB`、`1\u{feff}KB`、`1\u{202a}KB`、`1\u{85}KB`、`1 KB` | `ds_is_blank` 三档各一次（含 `U+0085` 那档"参照与 Java 都不当空白"的负样） |
-| 港澳台 | `A123456(7)`、`a1234567`（小写字母档）、`Z324567(8)`、`(5)`、`1234567890` 等 15 形 | 括号可选支、字母小写归一（`v - 32` 那一行） |
+| 港澳台 | `A123456(7)`、`a1234567`（小写字母档）、`Z324567(8)`、`(5)`、`1234567890` 等 15 形 | 括号可选支、**小写字母那一档其实没打到 `idc_hk_letter` 的 `v - 32`**（本轮更正：覆盖率现读 `idcard_region.mbt:196` 仍未覆盖——`idc_hk_grammar` 要 `cs[0]` 落在 `'A'..'Z'` 才放行，小写串在文法闸就判假，进不到取值层。原表这一格是把"配了小写夹具"当成"打到小写支路"，属解释句未过探针） |
 
 ### 22.1 五档"声明档"的用法（钉本库形状 + 腿原读数进注释 + 指回既有决策行）
 
@@ -1528,4 +1528,97 @@ owner 点头后另起一笔收口。腿仍是 `Temp/convsrc/hktw_rows.tsv`（同
 
 `X1` `U+0085` 当空白 → 1 红；`X2` 偶数档不 `+1` → 2 红；`X4` `compareTo` 不规格化 → 5 红；`X5` 长度差档丢符号 → 1 红。基线与还原两侧各 0 红，字节相同。
 
-剩余 32 行：`datasize_format` 6 行（3 枚 `abort` + 3 枚 `dsfmt_impossible`，**按构造测不到**，同 num §12.2 第一条的理由）；`idcard_region` 9 行（形状拒收档，本轮 15 个形只打到了字母小写那一支——剩下的是 `idc_digits_at` 越界、`idc_opt_check` 的 `rest<1||rest>3` 与两处 `' '` 兜底、`idc_mo_grammar` 长度档、以及三处"该位非数字"⇒ **待补**，夹具要按括号与长度成对构造）；`typex.mbt` 5 行（tokenizer 的 `break`/`i+1` 组合支）；`phone` 5、`credit` 1、`idcard` 2、`desensitize` 1、`ipv4` 2（含 1 枚 `abort`）——都在下一批的夹具表里，不在本批顺手补。
+剩余 32 行：`datasize_format` 6 行（3 枚 `abort` + 3 枚 `dsfmt_impossible`，**按构造测不到**，同 num §12.2 第一条的理由）；`idcard_region` 9 行（形状拒收档，本轮 15 个形打到的只有括号可选那两支——剩下的是 `idc_digits_at` 越界、`idc_opt_check` 的 `rest<1||rest>3` 与两处 `' '` 兜底、`idc_mo_grammar` 长度档、以及三处"该位非数字"⇒ **待补**，夹具要按括号与长度成对构造）；`typex.mbt` 5 行（tokenizer 的 `break`/`i+1` 组合支）；`phone` 5、`credit` 1、`idcard` 2、`desensitize` 1、`ipv4` 2（含 1 枚 `abort`）——都在下一批的夹具表里，不在本批顺手补。
+（10-08 第八批回看：上面这份"待补/待复核"的分配基本兑现——`idcard_region` 补到 5 行、`typex.mbt` 5 行清零、`phone` 5→3、`credit`/`idcard`/`desensitize`/`ipv4` 各按构造归位；见 §23。）
+
+## 23. 第八批补档（10-08，`typex/typex_leg5_test.mbt`）
+
+腿 `TypexLeg5.java`（hutool-core 5.8.35 · JDK 17.0.14 · `-Dfile.encoding=UTF-8`）七个出口：
+`Version.compareTo`/`toString`＋**反射字段快照**（`sequence`/`pre`/`build` 三槽只作注释证据，见 §23.2）、
+`isValidHKCard`、`isValidTWCard`、`isValidCard15`、`CreditCodeUtil.isCreditCode`、`DataSizeUtil.parse`、
+`isValidCard10`（`String[]`，形状不同源 ⇒ 不进断言）。**47 块**进断言，一条一块、手打零条；
+G15 **135 → 121 行**（typex 32 → **18**），`.mbti` 与实现一字未动。
+
+### 23.1 恒假夹具的闸门：腿第一轮就把自己判红了
+
+`HK` 族先配的九档，参照读数**全是 `false`** ⇒ 腿的自检打 `G|GUARD_BAD|1,2,5`（族内只有一种读数），
+生成器直接拒绝出文件。这不是形式主义：整族恒假的夹具，**形状闸坏掉也照样全绿**，
+它证明不了任何一件事。改法是让腿自己反推校验位（`findHk`/`findTw` 扫 `'0'..'9'`＋`'A'`），
+拿到一个真能过校验的正文，然后**只改收尾形状**：
+
+| 档 | 参照 | 打到的那一支 |
+|---|---|---|
+| `valid-plain`（`A123456`＋校验位）/ `valid-paren`（括号包住校验位） | `true` / `true` | `idc_opt_check` 的 `rest==1` 与 `lp&&rp&&rest==3` 两支 |
+| `valid-open-pad`（`...（X!`）/ `valid-close-pad`（`...!X)`） | `false` / `false` | 单边括号但长度不对 ⇒ 两处 `' '` 兜底（`:99`/`:105`） |
+| `valid-over-long`（后面多塞两位）/ `two-letter-valid`（`AB` 开头且长度恰 8） | `false` / `false` | `rest<1 \|\| rest>3` 的两个方向（`:84`） |
+
+`TW` 族同一条做法：`A123456789`（腿反推出的校验位）`true`，同正文末位换成 `X`/`)`/`a` ⇒ 参照**抛**
+`NumberFormatException`，本库判假 ⇒ 走声明档，指回 §22.1 那条"本库三件都不设这枚错误面"的决定行。
+**`true` 与 `false` 必须成对**，否则这一族等于没测。
+
+### 23.2 参照反射快照能解释支路，但**不给断言立法**
+
+`S` 行把 hutool `Version` 的 `sequence/pre/build` 三槽打了出来，当场钉住一条我原先以为是本库偏离的形状：
+`1.0.0+b.c` 在**参照**里也落进 `pre=[b, c]`、`build=[]`（没有 `-` 时 `+` 后的内容走的是预发段）。
+本库同形，所以这不是分岔、是两边共同的实现事实。但断言一律不比对这三槽——
+本库的 `Version` 是 `raw/sequence/pre/build` 记录、参照是私有 `List`，形状不同源（§22.2 那条），
+比对只能靠自创映射。反射快照的正当用途是**解释"这条夹具打到哪一支"**，写进注释；
+取值仍从 `compareTo`／`toString` 这两条同形状出口来。
+
+`compareTo` 的读数按 §5 第 4 条只取符号（本库出口归一成 `-1/0/1`），腿的原始值留在注释里。
+
+### 23.3 剩余 18 行的处置：8 行按构造不可达、9 行是守卫、1 行待复核
+
+不可达这一类要三种证据齐（未覆盖行 + 结构推导 + 删掉那一支仍然全绿的变异），本轮七行给齐了：
+
+| 站点 | 推导 |
+|---|---|
+| `idcard_region.mbt:65`（`idc_digits_at` 的越界档） | 三个调用点：`tw` 已过 `cs.length()==10` 且 `from+n=10`；`mo` 已过 `len>=8` 且 `1+6=7`；`hk` 已过 `len>=8` 且 `letters+6<=8` ⇒ 界内恒成立 |
+| `idcard_region.mbt:141`（`idc_mo_grammar` 的 `len<8`） | 唯一调用点 `idcard_info10.mbt:56`，进到那里的前提是 `stripped.length()∈{8,9}` 或 `cs.length()==10`，而 `stripped` 只是 `cs` 去掉括号 ⇒ `cs.length()>=8` 恒成立 |
+| `idcard_region.mbt:196`（`idc_hk_letter` 的小写归一） | 两个调用点都在 `idc_hk_grammar` 放行之后，该文法要求首字母（及两位档的次字母）落在 `'A'..'Z'`；`idc_strip_parens` 只删字符不改字符 ⇒ 进得来的一律大写。**§22 那表里"小写档打到了这一行"的说法本轮已就地更正** |
+| `idcard_region.mbt:260`/`:271`（港卡算式里的"该位非数字"） | 文法已锁 `letters` 之后 6 位全数字、收尾位过 `idc_hk_check`（数字或 `A`），`strip` 不重排 ⇒ 算式取到的位必是数字；`A` 那档由 `:266` 先接走 |
+| `idcard.mbt:60`（`idcard_all_digits` 的 `from>=to`） | 四个调用点 `from` 恒 0、`to∈{8,15,17}`，且都排在各自的长度闸之后 |
+| `credit.mbt:58`（`credit_parity` 的 `-1`） | 函数注释与 §12.3 第 1 条早写过：只在形状闸（18 码位＋前 17 位全在码表内）放行后才调用 |
+| `ipv4.mbt:297`（饱和窄化的**下界**那一支） | 三个低位项之和的下界是 `-(255·2^16+255·2^8+255)=-(2^24-1)`，远不到 `-2^31-1`；上界那一支（`:295`）本轮已被覆盖，说明这枚闸不是永假的写法，只是负方向到不了 |
+
+9 行是**守卫**（`abort` 与"自家产物必可解析"那类 catch 臂）：`datasize_format.mbt` 的 `:24`/`:37`/`:51`/`:54`/`:70`/`:75`、
+`ipv4.mbt:324`、`phone.mbt:111`/`:129`——按 G12 允许落地包保留，理由与 num §12.3 同一族。
+1 行**待复核、不写成已覆盖**：`phone.mbt:124`（`tel_group` 里 `m.group(k)` 给 `None` 那一档）——
+`TEL` 码型两个组是否恒参与本轮没推严，只看到现有夹具没走到它。
+
+### 23.4 变异 10 条：5 抓红、3 条 0 红是"不可达证据"、2 条 0 红是"判不开"
+
+隔离副本（整仓 `copytree`，基线先断 0 红，每条锚点唯一性断言 + `finally` 还原 + 写后回读，收尾再复跑一次 0 红）：
+
+| 变异 | 改动 | 结果 | 归位 |
+|---|---|---|---|
+| `T1` | `idc_opt_check` 的 `rest>3` 收成 `rest>2` | **红 4** | 括号档承重（`valid-paren` 等四块翻） |
+| `T6` | `phone_from_units` 的"高代理在切片尾"判据 `i+1>=e` 改 `i+1>e` | **红 1** | 代理对丢弃档承重（`phone-hi-tail`） |
+| `T7` | 15 位的省码闸改永假 | **红 2** | `F|bad-prov`/`bad-prov0` 承重 |
+| `T8` | 坏后缀不 `raise` 给 `1L` | **红 1** | `ds-bad-suffix` 声明档承重 |
+| `T9` | 未知档位串给 `None` 而非原串 | **红 1** | `desens-unknown` 声明档承重 |
+| `T2` | `idc_digits_at` 的越界闸改成合取（永假） | 红 0 | **不可达证据**（§23.3 第一行） |
+| `T3` | `idc_mo_grammar` 的 `len<8` 改成 `len<0` | 红 0 | **不可达证据**（第二行） |
+| `T4` | `idc_hk_letter` 的小写归一 `-32` 改 `-31` | 红 0 | **不可达证据**（第三行） |
+| `T5` | `version_of` 预发段撞 `+` 时不 `break` | 红 0 | **判不开**，见下 |
+| `T10` | 构建段的数字档从 `take_number(…, build)` 改落进 `pre` | 红 0 | **判不开**，与 `T5` 同一条病 |
+
+`T5`/`T10` 这两条值得单写一段，因为它推翻了我对本批的一处预期。
+本轮先按"覆盖到就算补上"配了 `V` 族十对 `compareTo` 读数，`typex.mbt` 那 5 行当场全部转绿；
+但把这两支改成"漏槽"（`build` 的内容落进 `pre`）之后，**十条读数的符号一条都没变**——
+连我专门为它补的 `1.0.0-alpha+0` vs `1.0.0-alpha-0` 也是 0（参照在这一档同样给 0，
+即参照自己把"数字落 `pre` 还是落 `build`"看成同值）。两条独立变异同时 0 红 ⇒
+这不是夹具没配够，而是**本库公开面（`version_of`/`version_compare`/`version_equals`/`version_to_string`）
+没有 `pre`/`build` 的取值通道**：`type Token` 在 `.mbti` 里不是 `pub`，两槽也不在出口面上。
+要判别必须先动 ABI（给两槽一个公开读数，或把 `Token` 变成可匹配的类型），
+而本笔是纯测试笔，**不动 ABI、也不假装判别**——这 5 行如实登记成"覆盖到、公开面判不开"，
+与 §22.2 那条"形状不同源一条都不比"是同一族：那条讲的是不能比，这条讲的是**想比还没有通道**。
+（反射快照本轮只用来解释支路走向，见 §23.2。）
+
+### 23.5 状态
+
+`typex` 包 153 → **202 块**；全仓 **1519 = 绿 1519 / 红 0**（wasm / js / wasm-gc 三档一致、零警告）；
+G15 **135 → 121 行 / 18 包**（typex 32 → **18**，基线由 `coverage_ratchet.py --write` 生成）；
+`.mbti` 与实现一字未动；GATE GREEN。剩余 18 行的处置全在 §23.3，本包已无"待补夹具"档：
+8 行按构造不可达（三种证据齐）、9 行是守卫、1 行待复核（`phone.mbt:124`）。
+挂账一件：`pre`/`build` 取值通道的 ABI 题（§23.4 末段），要不要开由 owner 拍。
