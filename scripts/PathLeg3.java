@@ -63,6 +63,43 @@ public class PathLeg3 {
     {"m", "/a/**", "/a/x"},
   };
 
+  // 本轮第二笔：按 `do_match` 的**失败出口**与抽变量/组合各档配的对（N 行）。
+  // 反斜杠一律用 (char)92 现拼，别在 Java 源里写 \d（词法先于转义，会报非法转义符）。
+  static final String B = String.valueOf((char) 92);
+  static final String[][] N = {
+    {"m", "/a/{n:" + B + "d+}/b", "/a/12/b"},          // Java-only 子表达式：core 方言编不出来
+    {"m", "/a/**/z", "/a/b/y"},                        // 后段循环的"不匹配"出口
+    {"x", "/a/**/{*p}", "/a/b/c"},                     // 后段循环里抛出来的错误
+    {"x", "/{a}/x/{b}", "/p/x/q"},                     // 两个变量、两次填
+    {"m", "/x/**/a/**/y", "/x/b/a/c/z"},               // 中段滑动找不到 ⇒ 失败
+    {"m", "/a/**/b/**", "/a/b"},
+    {"m", "/**/a/**/b/**", "/a/x/b"},
+    {"m", "/a/**/b/c", "/a/x/b"},                      // 收尾循环里余段不是 ** ⇒ 失败
+    {"m", "/a/**/*", "/a/b/c"},
+    {"m", "/**/**/a", "/b/a"},                         // **/** 相邻那一档
+    {"c", "a/{" + "v}/x", "y"},                        // combine：前缀里带非首位 { ⇒ 走 contains_char
+    {"c", "/a/*", "/b"},
+    {"c", "/*.jsp", "/x.txt"},                         // 两侧后缀都非全能 ⇒ 冲突
+    // 四条冲着 do_match 剩下的失败出口配的对：中段滑动找不到、中段循环里抛、
+    // 后段循环 leftover 非 **、中段 leftover 非 **
+    {"m", "/a/**/q/**/z", "/a/b/x/c/z"},
+    {"m", "/a/**/x/y/**/z", "/a/b/z"},
+    {"x", "/**/{a(b)}/**", "/p/q/r"},
+    {"x", "/x/**/{n:(a)(b)}/**/y", "/x/p/q/y"},        // 中段滑动里抛：子表达式带额外捕获组
+    {"x", "/**/{n:(a)(b)}/y", "/p/q/y"},               // 前段循环里抛（对照档）
+    {"m", "/a/**/b/**/c/d", "/a/x/b/y"},
+    {"m", "/a/**/x/y/**/z", "/a/z"},                   // 后段循环 leftover 里有非 ** ⇒ :450 那一档
+  };
+
+  // sep="" 那一档：参照有 `AntPathMatcher(String pathSeparator)`，所以这不是"没有对位物"，
+  // 是可以现读的 —— 用它取空分隔符下的判定，本库的 `starts_with_sep`/`ends_with_sep` 空串档就有人对撞了
+  static final String[][] E = {
+    {"", "/a/b", "/a/b"},
+    {"", "/a/b", "/ab"},
+    {"", "abc", "abc"},
+    {"", "/a/*", "/a/b"},
+  };
+
   static class TK extends AntPathMatcher {
     String[] tk(String p) {
       return tokenizePath(p);
@@ -86,6 +123,40 @@ public class PathLeg3 {
       StringBuilder sb = new StringBuilder();
       for (String q : parts) sb.append(esc(q)).append(",");
       System.out.println("T|" + esc(p) + "|" + parts.length + "|" + sb.toString());
+    }
+    for (String[] r : N) {
+      String verb = r[0], pat = r[1], path = r[2];
+      String reading;
+      if (verb.equals("m")) reading = String.valueOf(m.match(pat, path));
+      else if (verb.equals("x")) {
+        try {
+          java.util.Map<String, String> vs = m.extractUriTemplateVariables(pat, path);
+          java.util.List<String> keys = new java.util.ArrayList<String>(vs.keySet());
+          java.util.Collections.sort(keys);
+          StringBuilder sb = new StringBuilder();
+          for (String k : keys) sb.append(esc(k)).append("=").append(esc(vs.get(k))).append(";");
+          reading = sb.toString();
+        } catch (Throwable th) {
+          reading = "ERR:" + th.getClass().getSimpleName();
+        }
+      } else {
+        try {
+          reading = esc(m.combine(pat, path));
+        } catch (Throwable th) {
+          reading = "ERR:" + th.getClass().getSimpleName();
+        }
+      }
+      System.out.println("N|" + verb + "|" + esc(pat) + "|" + esc(path) + "|" + reading);
+    }
+    AntPathMatcher ms = new AntPathMatcher("");
+    for (String[] r : E) {
+      String rd;
+      try {
+        rd = String.valueOf(ms.match(r[1], r[2]));
+      } catch (Throwable th) {
+        rd = "ERR:" + th.getClass().getSimpleName();
+      }
+      System.out.println("E|" + esc(r[1]) + "|" + esc(r[2]) + "|" + rd);
     }
     for (String[] r : M) {
       String verb = r[0], pat = r[1], path = r[2];
