@@ -14,6 +14,10 @@ import subprocess
 from collections import OrderedDict
 
 
+# 段起点基准：2000-01-01T00:00:00Z 的 epoch 秒
+TZ_SEC_BASE = 946684800
+
+
 def read_leg(path):
     meta = {}
     segs, probes, bounds, walls, unknown, instants = OrderedDict(), [], [], [], [], []
@@ -87,6 +91,7 @@ def table_text(meta, names, segs):
            meta.get("WINDOW_LO"), meta.get("WINDOW_HI")),
         "// 表内 %s 个区、%d 段；每区首段起点=窗口下界，其后每段起点=该偏移开始生效的 epoch 秒。"
         % (meta.get("ZONES"), len(sstart)),
+        "// tbl_seg_start 走基准相对编码（见 tz_sec_base），别按裸 epoch 秒读。",
         "// 区名序 = **逐字节字典序**，配 date/zone.mbt 里自带的比较器；"
         "本工具链 core 的 `String.compare` 是先比长度再比内容，两者不同序（spec §5.4）。",
         "let tbl_names : Array[String] = [",
@@ -95,7 +100,11 @@ def table_text(meta, names, segs):
     L.append("]")
     L += ints("tbl_start", start)
     L += ints("tbl_len", ln)
-    L += ["let tbl_seg_start : Array[Int64] = ["] + ["  %dL," % v for v in sstart] + ["]"]
+    # 段起点存基准相对值（秒 - TZ_SEC_BASE）：裸 epoch 秒的上界 2524608000 超过 2^31-1，
+    # 而 wasm/js 档 Int 是 32 位且越界静默回绕，所以把原点搬到 2000-01-01；
+    # 消费侧在 date/zone.mbt 的 seg_last_le，常量 tz_sec_base 由本函数一起生成。
+    L += ["let tbl_seg_start : Array[Int] = ["] + ["  %d," % (v - TZ_SEC_BASE) for v in sstart] + ["]"]
+    L += ["", "let tz_sec_base : Int64 = %dL" % TZ_SEC_BASE]
     L += ints("tbl_seg_off", soff)
     L += [
         "let tbl_window_lo : Int64 = %sL" % meta.get("WINDOW_LO"),

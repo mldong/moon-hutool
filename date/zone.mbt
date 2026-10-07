@@ -65,7 +65,7 @@ fn seg_last_le(zi : Int, sec : Int64) -> Int {
   let mut found = -1
   while lo <= hi {
     let mid = (lo + hi) / 2
-    if tbl_seg_start[base + mid] <= sec {
+    if tbl_seg_start[base + mid].to_int64() + tz_sec_base <= sec {
       found = mid
       lo = mid + 1
     } else {
