@@ -75,7 +75,13 @@ PR-A 的合入标准：`moon check` 必须全绿（签名与类型自洽、文�
 
 ### 零依赖四条（违反任何一条直接红）
 
-只用 `moonbitlang/core`（`moonbitlang/async` 也算第三方）· 零 `extern` · 全同步 · OS 能力只走 `env.now`/`env.rand` 且必须可注入。
+只用 `moonbitlang/core`（`moonbitlang/async` 也算第三方）· 零 `extern` · 全同步 · OS 能力只走 `env` 的 `now`/`rand`/`get_env_var` 三件，且**都必须可覆盖或可注入**（时钟走 `clock_fixed`，默认区走 `set_default_zone`）。
+
+> `get_env_var` 是 10-07 第五批加进这一条的：MoonBit core 没有任何时区能力，宿主时区只能从环境变量拿，
+> 而 `TZ` 在 js/wasm/wasm-gc 三档实测都读得到（判"读不读得到某个环境量"要并一条自造对照变量一起喂——
+> git-bash 会把 `TZ` 自家征用再从子进程环境里摘掉，单看 `TZ` 会把 shell 的坑读成平台限制）。
+> 加它之前先量后改口径，不默认"红线里没写就是禁止"，也不静默扩红线。第 4 条的后半句从"只走 env.now/env.rand"
+> 改成上面这形；`read_file`、网络、宿主 API 仍然在禁令里。
 
 ### 语法坑（本机 moon 0.1.20260920 / moonc v0.10.14 实测，别再撞）
 
