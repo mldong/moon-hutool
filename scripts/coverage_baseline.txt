@@ -4,7 +4,7 @@
 cache = 12
 codec = 9
 conv = 13
-cron = 27
+cron = 12
 csv = 10
 date = 13
 dfa = 2
