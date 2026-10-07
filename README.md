@@ -28,7 +28,7 @@ MoonBit 版 [hutool](https://github.com/chinabugotech/hutool) 风格工具库。
 <!-- READINGS:BEGIN 由 scripts/sync_status.py 生成，勿手改 -->
 | 读数（`moon test --target wasm`，当场跑） | 值 |
 |---|---|
-| 用例总数 | **664** —— 绿 664 / 红 0 |
+| 用例总数 | **667** —— 绿 667 / 红 0 |
 | 包状态 | 共 22 个：`已实现` 22 · `契约已冻结` 0 · `未开工` 0 |
 <!-- READINGS:END -->
 

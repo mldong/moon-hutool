@@ -8,7 +8,7 @@
 /// - Note: 这是**本库自订**的决定，不是参照读数——hutool 没有"读 `TZ` 再降级"这一件，
 ///   它吃的是 JVM 的 `TimeZone.getDefault()`（进程级、查不到来源、Windows 上还不跟 `TZ`）。
 ///   判据与代价见 spec §8.3 第 1 行。
-/// - Note: 取值必须是 `zone_exists` 认得的区名，这条有独立用例（§8.5 块 1），改它要过门禁。
+/// - Note: 取值必须是 `zone_exists` 认得的区名，这条有独立用例（`date/default_test.mbt` 块 1），改它要过门禁。
 pub let fallback_zone : String = "Asia/Shanghai"
 
 ///|
@@ -49,9 +49,9 @@ fn resolve_default() -> (String, ZoneSource) {
 /// - Returns: **恒为内置表认得的区名**（`zone_exists` 必给 `true`）。这是这一件的核心承诺：
 ///   坏的环境变量值不会漏到下游，`now_local` 那批便捷件因此**永远不会因为区名而给 `None`**。
 /// - Note: 每次调用现读环境变量，不缓存——实测 `set_env_var` 之后立即读得到新值（三档一致），
-///   所以"改环境"这件事在生产与测试里都有确定行为。判据见 spec §8.2 第 1 行。
+///   所以"改环境"这件事在生产与测试里都有确定行为。判据见 spec §8.3 第 6 行。
 /// - Note: 不跟随参照的静默回落：JDK 的 `TimeZone.getTimeZone` 对坏名给 GMT=0，本库给 `fallback_zone`。
-/// - 示例见 `docs/spec/03-date.md` §8.5。
+/// - 示例见 `date/README.mbt.md` 的「默认区：不想每次传区名的一档」一节。
 pub fn default_zone() -> String {
   let (z, _) = resolve_default()
   z
@@ -60,7 +60,7 @@ pub fn default_zone() -> String {
 ///|
 /// 当前默认区是从哪一级来的。
 /// - Returns: `FromOverride` / `FromEnv` / `Fallback` 之一，与 `default_zone()` 同一次降级结果对应
-/// - Note: 两件必须走同一条判据，不许各读一遍环境后给出互相矛盾的一对读数（spec §8.2 第 2 行）
+/// - Note: 两件必须走同一条判据，不许各读一遍环境后给出互相矛盾的一对读数（spec §8.2 第 3 行）
 pub fn default_zone_source() -> ZoneSource {
   let (_, s) = resolve_default()
   s
@@ -73,7 +73,7 @@ pub fn default_zone_source() -> ZoneSource {
 ///   - zone: 必须是内置表认得的区名
 /// - Returns: `true` = 已生效；`false` = 区名不认，**且当前默认区一律不变**（不留下"设了个坏值"的中间态）
 /// - Note: 返回 `Bool` 而不是 `raise`——参照没有对应件，这是本库自订档；新增一个 `DateError` 变体
-///   会撞上"设置一次配置"的手感，也会让既有的穷尽 `match` 当场报缺档。取舍见 spec §8.3 第 3 行。
+///   会撞上"设置一次配置"的手感，也会让既有的穷尽 `match` 当场报缺档。取舍见 spec §8.2 第 4 行。
 pub fn set_default_zone(zone : String) -> Bool {
   if !zone_exists(zone) {
     false
@@ -95,7 +95,7 @@ pub fn reset_default_zone() -> Unit {
 /// - Returns: 唯一给 `None` 的成因是**瞬间落在内置表的覆盖窗口之外**（2050 年后）；
 ///   区名那一层已被 `default_zone()` 的"恒在表内"不变式挡掉
 /// - Note: 用例只断形状与下界，不断两次读时钟之间的大小关系——计时依赖会在慢机器上假红，
-///   这条纪律沿用 §5.5 与第三批 #C 系列（spec §8.4 第 2 行）
+///   这条纪律沿用 §5.5 与第三批 #C 系列（spec §8.4 第 3 条）
 pub fn now_local() -> DateTime? {
   now_in(default_zone())
 }

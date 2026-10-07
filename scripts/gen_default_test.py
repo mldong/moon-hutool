@@ -70,19 +70,19 @@ def build():
 
     off = {}
     for m in re.finditer(
-        r'@date\.zone_offset_minutes\(\s*"([^"]+)",\s*(\d+L)\s*,?\s*\),\s*(Some\(\s*(-?\d+)\s*\)|None)', zsrc
+        r'@date\.zone_offset_minutes\(\s*"([^"]+)",\s*(-?\d+L)\s*,?\s*\),\s*(Some\(\s*(-?\d+)\s*\)|None)', zsrc
     ):
         off[(m.group(1), m.group(2))] = m.group(3)
 
     fmtv = {}
     for m in re.finditer(
-        r'@date\.format_in\(\s*(\d+L),\s*"([^"]*)",\s*"([^"]+)"\s*,?\s*\),\s*(Some\(\s*"([^"]*)"\s*\)|None)', fsrc
+        r'@date\.format_in\(\s*(-?\d+L),\s*"([^"]*)",\s*"([^"]+)"\s*,?\s*\),\s*(Some\(\s*"([^"]*)"\s*\)|None)', fsrc
     ):
         fmtv[(m.group(1), m.group(2), m.group(3))] = m.group(4)
 
     rfc = {}
     for m in re.finditer(
-        r'@date\.to_rfc3339_in\(\s*(\d+L),\s*"([^"]+)"\s*,?\s*\),\s*(Some\(\s*"([^"]*)"\s*\)|None)', fsrc
+        r'@date\.to_rfc3339_in\(\s*(-?\d+L),\s*"([^"]+)"\s*,?\s*\),\s*(Some\(\s*"([^"]*)"\s*\)|None)', fsrc
     ):
         rfc[(m.group(1), m.group(2))] = m.group(3)
 
@@ -90,7 +90,7 @@ def build():
     #   parse_in 那批就是这样只抽到 4 条（13 条里的 9 条被静默丢掉），靠阈值阳性对照才暴露。
     pin = {}
     for m in re.finditer(
-        r'@date\.parse_in\(\s*"([^"]*)",\s*"([^"]*)",\s*"([^"]+)"\s*,?\s*\),\s*(Some\(\s*(\d+)L\s*\)|None)', fsrc
+        r'@date\.parse_in\(\s*"([^"]*)",\s*"([^"]*)",\s*"([^"]+)"\s*,?\s*\),\s*(Some\(\s*(-?\d+)L\s*\)|None)', fsrc
     ):
         pin[(m.group(1), m.group(2), m.group(3))] = m.group(4)
 
@@ -128,6 +128,24 @@ def need(d, key, what):
     if key not in d:
         sys.exit("缺已冻读数：%s %s —— 去补腿或换区，不许自己算一个填进来" % (what, key))
     return d[key]
+
+
+def need_tag(dsrc, tag):
+    """错误形状一律复用首批已冻串：先在 date_test.mbt 里断言这条串真的存在，再搬过来用。
+    这样"第五批的 raise 通道"不是照实现现编的读数（valid 轮那条教训的同一形状）。"""
+    if ('"%s"' % tag) not in dsrc:
+        sys.exit("缺首批已冻的错误形状：%r —— 这条不许现编" % tag)
+    return tag
+
+
+def inner(v):
+    """把已冻的 Option 形状落成 dflt_fmt / dflt_parse 那个"两通道合一"出口该有的串。"""
+    m = re.match(r'Some\(\s*"(.*)"\s*\)$', v)
+    if m:
+        return '"%s"' % m.group(1)
+    if v == "None":
+        return '"None"'
+    sys.exit("认不出的已冻形状：%r" % v)
 
 
 def block(name, lines):
@@ -454,6 +472,62 @@ def main():
     ]
     blocks.append(block("@date now_local/today_local 与假钟等价式 + 形状下界", ls))
 
+    # ---- 块 16/17/18：两条失败通道与"同时坏时谁先"（错误形状一律搬首批已冻串）----
+    dsrc = read("date/date_test.mbt")
+    TOKS = [
+        "UnknownPatternToken EEEE", "UnknownPatternToken SSSS", "UnknownPatternToken YYYY",
+        "UnknownPatternToken ww", "UnknownPatternToken MMMM", "UnknownPatternToken XXX",
+    ]
+    win_fmt = need(fmtv, ("-1L", P_MAIN, "UTC"), "§7 窗外 format_in")
+    win_rfc = need(rfc, ("2524608000000L", "UTC"), "§7 窗外 to_rfc3339_in")
+    win_parse = need(pin, ("1969-12-31 23:59:59", P_MAIN, "UTC"), "§7 窗外 parse_in")
+
+    ls = pre(zone="Asia/Shanghai")
+    ls.append("  // pattern 那一半的判据原样委托 §2.6，串一律搬首批已冻读数（need_tag 逐条断言其存在）")
+    for tg in TOKS:
+        t = need_tag(dsrc, tg)
+        tok = t.split(" ")[1]
+        ls.append(a("dflt_fmt(%s, \"%s\")" % (MS_DAY, tok), '"raise %s"' % t))
+    ls.append(
+        a(
+            "dflt_fmt(%s, \"%s\")" % (MS_DAY, P_MAIN),
+            inner(need(fmtv, (MS_DAY, P_MAIN, "Asia/Shanghai"), "§7 上海正常档")),
+        )
+    )
+    ls.append("  // 窗外档（TZ=UTC 时 §7 已冻 format_in(-1L) 给 None）")
+    ls.append('  @env.set_env_var("TZ", "UTC")')
+    ls.append("  // 源出 §7 已冻：format_in(-1L, \"%s\", UTC)" % P_MAIN)
+    ls.append(a("dflt_fmt(-1L, \"%s\")" % P_MAIN, inner(win_fmt)))
+    ls.append("  // **优先序档（本库自订，不是腿读数）**：窗外与坏 pattern 同时出现时，窗外先 ⇒ 给 None 不 raise")
+    ls.append(a("dflt_fmt(-1L, \"yyyy-MM-dd EEEE\")", '"None"'))
+    blocks.append(block("@date format_local 的两条失败通道：pattern 判据原样委托 §2.6，且窗外先于 pattern", ls))
+
+    ls = pre(zone="Asia/Shanghai")
+    ls.append("  // 空洞档仍 raise ZoneGap（串搬 §7 已冻）")
+    for (wall, p, z), t in sorted(gap.items()):
+        if p != P_MAIN or z != "Asia/Shanghai":
+            continue
+        ls.append('  @env.set_env_var("TZ", "%s")' % z)
+        ls.append("  // 源出 §7 已冻的 ZoneGap 档：%s" % z)
+        ls.append(a("dflt_parse(\"%s\", \"%s\")" % (wall, p), '"raise %s"' % t))
+    hh = need_tag(dsrc, "UnknownPatternToken hh")
+    ls.append("  // pattern 表外 token 走 raise（串搬首批 §2.7 已冻）")
+    ls.append(a("dflt_parse(\"2026-10-04 09:07:03\", \"yyyy-MM-dd hh:mm:ss\")", '"raise %s"' % hh))
+    ls.append('  @env.set_env_var("TZ", "UTC")')
+    ls.append("  // 源出 §7 已冻：parse_in(1969-12-31 23:59:59, UTC) 落窗外 ⇒ None（不判成空洞）")
+    ls.append(a("dflt_parse(\"1969-12-31 23:59:59\", \"%s\")" % P_MAIN, inner(win_parse)))
+    ls.append("  // **优先序档（本库自订）**：parse 与 format 相反——pattern 坏先 raise，因为得先解出墙上时刻才谈得上落点")
+    ls.append(a("dflt_parse(\"2026-10-04 09:07:03\", \"yyyy-MM-dd hh:mm:ss\")", '"raise %s"' % hh))
+    blocks.append(block("@date parse_local 的三条通道与优先序：pattern 先、空洞 raise、窗外 None", ls))
+
+    ls = pre(zone="UTC")
+    ls.append("  // 源出 §7 已冻的 R 行：窗外 None 与正常档")
+    ls.append(a("@date.to_rfc3339_local(2524608000000L)", win_rfc))
+    ls.append(a("@date.to_rfc3339_local(%s)" % MS_EPOCH, need(rfc, (MS_EPOCH, "UTC"), "§7 R 行 UTC 0L")))
+    ls.append('  @env.set_env_var("TZ", "Asia/Shanghai")')
+    ls.append(a("@date.to_rfc3339_local(%s)" % MS_DAY, need(rfc, (MS_DAY, "Asia/Shanghai"), "§7 R 行上海第二瞬间")))
+    blocks.append(block("@date to_rfc3339_local 的窗外 None 与两区正常档", ls))
+
     head = """// moon-hutool/date 第五批（默认区与无参便捷入口）契约用例（黑盒）。**生成件，勿手改**：
 // 生成器 scripts/gen_default_test.py。
 //
@@ -494,6 +568,31 @@ fn dflt_d(o : @date.Date?) -> String {
   match o {
     None => "None"
     Some(v) => v.to_iso_string()
+  }
+}
+
+///|
+// 两条失败通道放进同一个出口比，才钉得住"同时坏时谁先"那一档（shape 只看 raise，看不见 None）
+fn dflt_fmt(millis : Int64, p : String) -> String {
+  try {
+    match @date.format_local(millis, p) {
+      None => "None"
+      Some(s) => s
+    }
+  } catch {
+    e => "raise \\{show(e)}"
+  }
+}
+
+///|
+fn dflt_parse(text : String, p : String) -> String {
+  try {
+    match @date.parse_local(text, p) {
+      None => "None"
+      Some(v) => "Some(\\{v})"
+    }
+  } catch {
+    e => "raise \\{show(e)}"
   }
 }
 """

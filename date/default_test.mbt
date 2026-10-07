@@ -42,6 +42,31 @@ fn dflt_d(o : @date.Date?) -> String {
 }
 
 ///|
+// 两条失败通道放进同一个出口比，才钉得住"同时坏时谁先"那一档（shape 只看 raise，看不见 None）
+fn dflt_fmt(millis : Int64, p : String) -> String {
+  try {
+    match @date.format_local(millis, p) {
+      None => "None"
+      Some(s) => s
+    }
+  } catch {
+    e => "raise \{show(e)}"
+  }
+}
+
+///|
+fn dflt_parse(text : String, p : String) -> String {
+  try {
+    match @date.parse_local(text, p) {
+      None => "None"
+      Some(v) => "Some(\{v})"
+    }
+  } catch {
+    e => "raise \{show(e)}"
+  }
+}
+
+///|
 test "@date 兜底常量与它的闸门读数（本块 4 条）" {
   // 本库自订（spec §8.3 第 1 行）：兜底值本身没有腿读数；它的两条下游判据有。
   assert_eq(@date.fallback_zone, "Asia/Shanghai")
@@ -375,7 +400,10 @@ test "@date reset 的三级回路与幂等（本块 7 条）" {
 }
 
 ///|
-test "@date format_local 的读数逐条等于 §7 已冻的 format_in（本块 110 条）" {
+test "@date format_local 的读数逐条等于 §7 已冻的 format_in（本块 111 条）" {
+  @env.set_env_var("TZ", "UTC")
+  // 源出 §7 已冻的 format_in(-1L, "yyyy-MM-dd HH:mm:ss", UTC)
+  assert_eq(@date.format_local(-1L, "yyyy-MM-dd HH:mm:ss"), None)
   @env.set_env_var("TZ", "Africa/Monrovia")
   // 源出 §7 已冻的 format_in(0L, "yyyy-MM-dd HH:mm:ss", Africa/Monrovia)
   assert_eq(
@@ -1444,4 +1472,73 @@ test "@date now_local/today_local 与假钟等价式 + 形状下界（本块 17 
     Some("1970-01-01 08:00:00"),
   )
   assert_eq(@date.zone_offset_minutes(@date.default_zone(), 0L), Some(480))
+}
+
+///|
+test "@date format_local 的两条失败通道：pattern 判据原样委托 §2.6，且窗外先于 pattern（本块 9 条）" {
+  @date.reset_default_zone()
+  @env.set_env_var("TZ", "Asia/Shanghai")
+  // pattern 那一半的判据原样委托 §2.6，串一律搬首批已冻读数（need_tag 逐条断言其存在）
+  assert_eq(dflt_fmt(1791244800000L, "EEEE"), "raise UnknownPatternToken EEEE")
+  assert_eq(dflt_fmt(1791244800000L, "SSSS"), "raise UnknownPatternToken SSSS")
+  assert_eq(dflt_fmt(1791244800000L, "YYYY"), "raise UnknownPatternToken YYYY")
+  assert_eq(dflt_fmt(1791244800000L, "ww"), "raise UnknownPatternToken ww")
+  assert_eq(dflt_fmt(1791244800000L, "MMMM"), "raise UnknownPatternToken MMMM")
+  assert_eq(dflt_fmt(1791244800000L, "XXX"), "raise UnknownPatternToken XXX")
+  assert_eq(
+    dflt_fmt(1791244800000L, "yyyy-MM-dd HH:mm:ss"),
+    "2026-10-06 08:00:00",
+  )
+  // 窗外档（TZ=UTC 时 §7 已冻 format_in(-1L) 给 None）
+  @env.set_env_var("TZ", "UTC")
+  // 源出 §7 已冻：format_in(-1L, "yyyy-MM-dd HH:mm:ss", UTC)
+  assert_eq(dflt_fmt(-1L, "yyyy-MM-dd HH:mm:ss"), "None")
+  // **优先序档（本库自订，不是腿读数）**：窗外与坏 pattern 同时出现时，窗外先 ⇒ 给 None 不 raise
+  assert_eq(dflt_fmt(-1L, "yyyy-MM-dd EEEE"), "None")
+}
+
+///|
+test "@date parse_local 的三条通道与优先序：pattern 先、空洞 raise、窗外 None（本块 5 条）" {
+  @date.reset_default_zone()
+  @env.set_env_var("TZ", "Asia/Shanghai")
+  // 空洞档仍 raise ZoneGap（串搬 §7 已冻）
+  @env.set_env_var("TZ", "Asia/Shanghai")
+  // 源出 §7 已冻的 ZoneGap 档：Asia/Shanghai
+  assert_eq(
+    dflt_parse("1986-05-04 02:00:00", "yyyy-MM-dd HH:mm:ss"),
+    "raise ZoneGap 1986-05-04T02:00:00.000",
+  )
+  @env.set_env_var("TZ", "Asia/Shanghai")
+  // 源出 §7 已冻的 ZoneGap 档：Asia/Shanghai
+  assert_eq(
+    dflt_parse("1986-05-04 02:30:00", "yyyy-MM-dd HH:mm:ss"),
+    "raise ZoneGap 1986-05-04T02:30:00.000",
+  )
+  // pattern 表外 token 走 raise（串搬首批 §2.7 已冻）
+  assert_eq(
+    dflt_parse("2026-10-04 09:07:03", "yyyy-MM-dd hh:mm:ss"),
+    "raise UnknownPatternToken hh",
+  )
+  @env.set_env_var("TZ", "UTC")
+  // 源出 §7 已冻：parse_in(1969-12-31 23:59:59, UTC) 落窗外 ⇒ None（不判成空洞）
+  assert_eq(dflt_parse("1969-12-31 23:59:59", "yyyy-MM-dd HH:mm:ss"), "None")
+  // **优先序档（本库自订）**：parse 与 format 相反——pattern 坏先 raise，因为得先解出墙上时刻才谈得上落点
+  assert_eq(
+    dflt_parse("2026-10-04 09:07:03", "yyyy-MM-dd hh:mm:ss"),
+    "raise UnknownPatternToken hh",
+  )
+}
+
+///|
+test "@date to_rfc3339_local 的窗外 None 与两区正常档（本块 3 条）" {
+  @date.reset_default_zone()
+  @env.set_env_var("TZ", "UTC")
+  // 源出 §7 已冻的 R 行：窗外 None 与正常档
+  assert_eq(@date.to_rfc3339_local(2524608000000L), None)
+  assert_eq(@date.to_rfc3339_local(0L), Some("1970-01-01T00:00:00Z"))
+  @env.set_env_var("TZ", "Asia/Shanghai")
+  assert_eq(
+    @date.to_rfc3339_local(1791244800000L),
+    Some("2026-10-06T08:00:00+08:00"),
+  )
 }
