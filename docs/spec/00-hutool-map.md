@@ -91,7 +91,26 @@
 | `IdUtil`（UUID/雪花/ObjectId/NanoId） | `random.Rand` + `env.rand(n)->Bytes?` 是熵源；**无 uuid** | ② `id`（P1：worker/dataCenter/时钟**全显式注入**） | hutool 用 PID+IP 自动派生 workerId（MoonBit 无此接口）；`ObjectId` 布局与 MongoDB 官方不同，按 hutool 实现并注明 |
 | `RandomUtil`/`WeightRandom` | core `@random` 有 `Rand`（`int`/`int64`/`uint`/`double`/`boolean`/`shuffle`）与 `pub(open) trait Source` ⇒ **随机源可由调用方注入**（脚本化即完全可复现） | ② `rand`：第一批 19 件已交付（`12-rand.md`：四张表 + 界值四组合 + 字符串族 + 取样三件 + 加权件） | **secure/pseudo 双通道判不做**——实测 core 只有一条 chacha8 流，且 `Rand::new()` 在无熵档**静默回落固定种子**，承诺不了；`randomChinese`（要 CJK 码表）、`randomDay`/`randomDate`（读墙钟）不做；`random_float`/`random_double`/`randomBigDecimal`/`randomBytes` 留第二批；`getRandom()` 一类"供应生成器"的件不做（本包生成器是入参） |
 
-## 7. 整模块不做（写进 README 的「不承诺清单」）
+## 7. hutool-core 顶层类 census：每个类必须落一档（机器判据 G16）
+
+上面 §1~§6 只登记了**做过的**那一面，所以"还差多少"这问题过去只能现场 `unzip` + `javap` 手算。现在改成常驻判据：`scripts/core_surface.py` 从参照 jar 里列出 `cn.hutool.core.**` 的**全部顶层类**（剥内部类与 `package-info`），逐类落进五档之一，落不进就红。
+
+| 档 | 含义 | 现读类数（hutool-all **5.8.37**，632 个顶层类） |
+|---|---|---|
+| `done` | 本库有对位件（含"复用隔壁包同一判据"） | 272 |
+| `excluded` | 结构上不属于本库：反射/动态代理/宿主 IO/网络/线程/AWT/JVM 内部机制 | 287 |
+| `core` | MoonBit core 已有同义能力，本库按规则不写转发层 | 35 |
+| `deferred` | 已登记在 [`docs/ROADMAP.md`](https://github.com/mldong/moon-hutool/blob/master/docs/ROADMAP.md) 的「暂不做」档 | 20 |
+| `gap` | **够得着、既没做也没登记** ⇒ 这一档就是要拍板的清单 | 18 |
+
+- 取法：`python scripts/core_surface.py --write` 生成 `docs/spec/core-surface.tsv`（类名｜全限定名｜档｜一句话理由）；`--check` 既查漏档也查"表与 jar 类面漂移"；判状态只认 jar，不依赖 `javap`。
+- 版本口径：census 用 **hutool-all 5.8.37**（一份件覆盖全部 artifact，`$HUTOOL_JAR` 指它），而各包参照腿多数是 5.8.35——**类面是普查、读数腿是逐包**，两件事不同源，换版本时 `--check` 的漂移格会先报出来。
+- `gap` 这 18 条就是本轮新登记的欠账（此前四处文档一个字没提）：`TreeUtil`/`Tree`/`TreeNode`/`TreeBuilder`/`TreeNodeConfig`/`Node`/`NodeParser`/`DefaultNodeParser`（扁平列表构树族）、`EscapeUtil`（HTML/XML 实体）、`UnicodeUtil`（`\uXXXX`）、`FileNameUtil`（主名/扩展名/前后缀这类纯路径串档）、`URLUtil`（`isUrl`/`getSuffix`/参数串那半，组装与归一已由 codec 承接）、`ObjectUtil`/`ObjUtil`（null-safe 族：`Option` 惯用法替不掉的那几条）、`YearQuarter`/`TemporalUtil`、`BitStatusUtil`/`RingIndexUtil`。
+- 这一节的**初稿被自己的判据抓回去一次**：初稿把 `PadUtil`/`ValidateUtil` 也写进 `gap` 清单，`--check` 的死条目判据（覆盖表里不许有 jar 中不存在的类名）当场点名——那两名在 5.8.37 的 `cn.hutool.core.**` 里根本不存在，连同另外 35 个凭记忆写的对位名一起清掉。**"凭记忆建表"第四次应验，这次是新加的判据第一次跑就抓到作者**，留在这里当反面样本。
+- 判据自证三档（`--selftest`）：① 现表零漏档才放行；② **抽一个"由包级规则落档"的类，撤掉那条规则后它必须掉进漏档**——没这条对照，"全部落档"可能只是某条规则在永真兜底；③ 覆盖表里出现 jar 中不存在的类名必须被点名（防凭记忆建表，本仓已犯三次）。jar 取不到或类面为空 ⇒ `SKIP`（退出码 2），不给通过。
+
+## 8. 整模块不做（写进 README 的「不承诺清单」）
+
 
 `bean`/`annotation`/`reflect`/`getter`/`compiler`/`aop`/`script`/`MapProxy`/序列化式 `clone`（**无运行时反射/动态代理**）；`io.FileUtil`/`IoUtil`/`CharsetUtil.convert`/`watch`/`net.NetUtil` 本机 IP/`ThreadUtil`/`system`（**需要 FFI，违反零依赖定义**）；`http`/`db`/`socket`/`poi`/`captcha`（AWT 栅格化）/`extra`/`log`（跨栈定位不同：web 走 moonback、DB 走 moondb/moonmysql）。
 

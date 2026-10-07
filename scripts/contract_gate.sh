@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# moon-hutool 契约门禁 G1~G15
+# moon-hutool 契约门禁 G1~G16
 #
 # 原则：每条判据都必须"真跑过且敢报红"。凡当前环境跑不了的项，显式打 SKIP + 理由，
 # 绝不伪装成 PASS（恒绿但没测的套件比红灯更危险）。
@@ -227,6 +227,20 @@ elif [ "$rc" = "0" ]; then
   fi
 else
   bad "G15 自身失效：三档对照没全过——这条判据不可信（见下）"; sed -n '1,14p' /tmp/mh_ratchet_self.log | sed 's/^/    /'
+fi
+
+echo "== G16 hutool-core 顶层类 census（每类必须落一档；漏档与类面漂移都判红）=="
+python scripts/core_surface.py --selftest >/tmp/mh_surface_self.log 2>&1; rc=$?
+if [ "$rc" = "2" ]; then
+  skip "G16 没有参照 jar（设 HUTOOL_JAR 指 hutool-all/hutool-core）⇒ 类面本轮不判"
+elif [ "$rc" = "0" ]; then
+  grep -E "^  (PASS|INFO)" /tmp/mh_surface_self.log
+  python scripts/core_surface.py --check >/tmp/mh_surface.log 2>&1; rc2=$?
+  if [ "$rc2" = "0" ]; then grep -E "^  PASS" /tmp/mh_surface.log
+  elif [ "$rc2" = "2" ]; then skip "G16 类面为空 ⇒ 不判"
+  else bad "类面漏档或表与 jar 漂移（见下）："; sed -n '1,12p' /tmp/mh_surface.log | sed 's/^/    /'; fi
+else
+  bad "G16 自身失效：三档对照没全过——这条判据不可信（见下）"; sed -n '1,12p' /tmp/mh_surface_self.log | sed 's/^/    /'
 fi
 
 echo

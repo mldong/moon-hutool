@@ -57,7 +57,7 @@
 
 | 项 | 值 |
 |---|---|
-| 门禁 | G1~G15 见 `scripts/contract_gate.sh`（G9 引用红线、G10 死链自检、G11 状态读数一致、G12 骨架豁免棘轮、G13 spec 序号＝表行号、G14 不承诺声明反查——写进公开文档的「不做 X」拿去 `.mbti` 现读对撞，证据取不到走 SKIP 不当通过，自检三档＝敢红/敢放/缺证据必 SKIP；G15 未覆盖行棘轮——基线 `scripts/coverage_baseline.txt` 提交进仓，任一包未覆盖行数上升即红，收紧随时可以、放宽要单独一笔，取不到覆盖率数据走 SKIP）；正向 GREEN、负向对照敢红（基线抬到 99 立刻 RED + 退出码 1） |
+| 门禁 | G1~G15 见 `scripts/contract_gate.sh`（G9 引用红线、G10 死链自检、G11 状态读数一致、G12 骨架豁免棘轮、G13 spec 序号＝表行号、G14 不承诺声明反查——写进公开文档的「不做 X」拿去 `.mbti` 现读对撞，证据取不到走 SKIP 不当通过，自检三档＝敢红/敢放/缺证据必 SKIP；G15 未覆盖行棘轮——基线 `scripts/coverage_baseline.txt` 提交进仓，任一包未覆盖行数上升即红，收紧随时可以、放宽要单独一笔，取不到覆盖率数据走 SKIP；G16 hutool-core 顶层类 census——`scripts/core_surface.py` 从参照 jar 列全 `cn.hutool.core.**` 顶层类，逐类落 done/core/excluded/deferred/gap 五档，漏档与"表 vs jar 类面漂移"都判红，`gap` 那档就是待拍清单（现读 18 条，见 `00-hutool-map.md` §7））；正向 GREEN、负向对照敢红（基线抬到 99 立刻 RED + 退出码 1） |
 
 ## 暂不做（排后，未定日期）
 
