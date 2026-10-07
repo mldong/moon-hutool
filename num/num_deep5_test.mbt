@@ -305,6 +305,12 @@ test "num 深档 mb-4" {
 }
 
 ///|
+test "num 深档 mb-5" {
+  // Money 坏输入 ｜ 入参='1e3' ｜ 参照=1000.0 ｜本库形状=false（依据 08-num §12 表对应行）
+  assert_eq(n5_tag_of_text("1e3"), false)
+}
+
+///|
 test "num 深档 mb-6" {
   // Money 坏输入 ｜ 入参='1..2' ｜ 参照=ERR:NumberFormatException:Character array contains more than one decimal point.
   assert_eq(n5_tag_of_text("1..2"), false)
@@ -320,6 +326,12 @@ test "num 深档 mb-7" {
 test "num 深档 ae-1p00-m3" {
   // allocate_even ｜ 入参=['1.00', '-3'] ｜ 参照=ERR:NegativeArraySizeException:-3
   assert_eq(n5_even("1.00", -3), "RAISE")
+}
+
+///|
+test "num 深档 ae-m1p00-3" {
+  // allocate_even ｜ 入参=['-1.00', '3'] ｜ 参照=ERR:ArrayIndexOutOfBoundsException:Index -1 out of bounds for length 3 ｜本库形状="-34;-33;-33"（依据 08-num §12 表对应行）
+  assert_eq(n5_even("-1.00", 3), "-34;-33;-33")
 }
 
 ///|
@@ -344,6 +356,12 @@ test "num 深档 ae-10p00-7" {
 test "num 深档 ar-1p00-1_1_1" {
   // allocate_by_ratio ｜ 入参=['1.00', '1,1,1'] ｜ 参照=34;33;33
   assert_eq(n5_ratio("1.00", [1, 1, 1]), "34;33;33")
+}
+
+///|
+test "num 深档 ar-m1p00-1_1_1" {
+  // allocate_by_ratio ｜ 入参=['-1.00', '1,1,1'] ｜ 参照=-33;-33;-33 ｜本库形状="-34;-33;-33"（依据 08-num §12 表对应行）
+  assert_eq(n5_ratio("-1.00", [1, 1, 1]), "-34;-33;-33")
 }
 
 ///|
@@ -617,6 +635,12 @@ test "num 深档 rn-10" {
 }
 
 ///|
+test "num 深档 rn-11" {
+  // int_of_chinese ｜ 入参= ｜ 参照=0 ｜本库形状="RAISE"（依据 08-num §12 表对应行）
+  assert_eq(n5_int(""), "RAISE")
+}
+
+///|
 test "num 深档 rn-12" {
   // int_of_chinese ｜ 入参=壹佰贰拾叁拾肆万伍仟陆佰柒拾捌元玖角玖分 ｜ 参照=ERR:IllegalArgumentException:Unknown unit '元' at: 15
   assert_eq(
@@ -635,6 +659,66 @@ test "num 深档 rn-13" {
 test "num 深档 rm-1" {
   // money_of_chinese ｜ 入参=零 ｜ 参照=0.00
   assert_eq(n5_money("零"), "0.00")
+}
+
+///|
+test "num 深档 rm-2" {
+  // money_of_chinese ｜ 入参=一百 ｜ 参照=0.00 ｜本库形状="100.00"（依据 08-num §12 表对应行）
+  assert_eq(n5_money("一百"), "100.00")
+}
+
+///|
+test "num 深档 rm-3" {
+  // money_of_chinese ｜ 入参=一千零一 ｜ 参照=0.00 ｜本库形状="1001.00"（依据 08-num §12 表对应行）
+  assert_eq(n5_money("一千零一"), "1001.00")
+}
+
+///|
+test "num 深档 rm-4" {
+  // money_of_chinese ｜ 入参=一万 ｜ 参照=0.00 ｜本库形状="10000.00"（依据 08-num §12 表对应行）
+  assert_eq(n5_money("一万"), "10000.00")
+}
+
+///|
+test "num 深档 rm-5" {
+  // money_of_chinese ｜ 入参=十万 ｜ 参照=0.00 ｜本库形状="100000.00"（依据 08-num §12 表对应行）
+  assert_eq(n5_money("十万"), "100000.00")
+}
+
+///|
+test "num 深档 rm-6" {
+  // money_of_chinese ｜ 入参=一百万 ｜ 参照=0.00 ｜本库形状="1000000.00"（依据 08-num §12 表对应行）
+  assert_eq(n5_money("一百万"), "1000000.00")
+}
+
+///|
+test "num 深档 rm-7" {
+  // money_of_chinese ｜ 入参=一千万 ｜ 参照=0.00 ｜本库形状="10000000.00"（依据 08-num §12 表对应行）
+  assert_eq(n5_money("一千万"), "10000000.00")
+}
+
+///|
+test "num 深档 rm-8" {
+  // money_of_chinese ｜ 入参=一亿 ｜ 参照=0.00 ｜本库形状="100000000.00"（依据 08-num §12 表对应行）
+  assert_eq(n5_money("一亿"), "100000000.00")
+}
+
+///|
+test "num 深档 rm-9" {
+  // money_of_chinese ｜ 入参=一二三 ｜ 参照=0.00 ｜本库形状="RAISE"（依据 08-num §12 表对应行）
+  assert_eq(n5_money("一二三"), "RAISE")
+}
+
+///|
+test "num 深档 rm-10" {
+  // money_of_chinese ｜ 入参=abc ｜ 参照=0.00 ｜本库形状="RAISE"（依据 08-num §12 表对应行）
+  assert_eq(n5_money("abc"), "RAISE")
+}
+
+///|
+test "num 深档 rm-11" {
+  // money_of_chinese ｜ 入参= ｜ 参照=null ｜本库形状="RAISE"（依据 08-num §12 表对应行）
+  assert_eq(n5_money(""), "RAISE")
 }
 
 ///|
@@ -674,6 +758,27 @@ test "num 深档 rb-3" {
 }
 
 ///|
+test "num 深档 rbm-1" {
+  // money_of_chinese 万万档 ｜ 入参=九千九百九十九万万 ｜ 参照=0.00 ｜本库形状="99990000.00"（依据 08-num §12 表对应行）
+  assert_eq(n5_money("九千九百九十九万万"), "99990000.00")
+}
+
+///|
+test "num 深档 rbm-2" {
+  // money_of_chinese 万万档 ｜ 入参=九百九十九万九千九百九十九万万 ｜ 参照=0.00 ｜本库形状="109980000.00"（依据 08-num §12 表对应行）
+  assert_eq(
+    n5_money("九百九十九万九千九百九十九万万"),
+    "109980000.00",
+  )
+}
+
+///|
+test "num 深档 rbm-3" {
+  // money_of_chinese 万万档 ｜ 入参=十亿 ｜ 参照=0.00 ｜本库形状="1000000000.00"（依据 08-num §12 表对应行）
+  assert_eq(n5_money("十亿"), "1000000000.00")
+}
+
+///|
 test "num 深档 ac-0" {
   // chinese_abbrev ｜ 入参=0 ｜ 参照 formatSimple=0
   assert_eq(n5_abcn(0L), "0")
@@ -710,6 +815,30 @@ test "num 深档 ac-10500" {
 }
 
 ///|
+test "num 深档 ac-100000" {
+  // chinese_abbrev ｜ 入参=100000 ｜ 参照 formatSimple=10.0万 ｜本库形状="10.00万"（依据 08-num §12 表对应行）
+  assert_eq(n5_abcn(100000L), "10.00万")
+}
+
+///|
+test "num 深档 ac-105000" {
+  // chinese_abbrev ｜ 入参=105000 ｜ 参照 formatSimple=10.5万 ｜本库形状="10.50万"（依据 08-num §12 表对应行）
+  assert_eq(n5_abcn(105000L), "10.50万")
+}
+
+///|
+test "num 深档 ac-1000000" {
+  // chinese_abbrev ｜ 入参=1000000 ｜ 参照 formatSimple=100.0万 ｜本库形状="100.00万"（依据 08-num §12 表对应行）
+  assert_eq(n5_abcn(1000000L), "100.00万")
+}
+
+///|
+test "num 深档 ac-10050000" {
+  // chinese_abbrev ｜ 入参=10050000 ｜ 参照 formatSimple=1005.0万 ｜本库形状="1005.00万"（依据 08-num §12 表对应行）
+  assert_eq(n5_abcn(10050000L), "1005.00万")
+}
+
+///|
 test "num 深档 ac-m10050" {
   // chinese_abbrev ｜ 入参=-10050 ｜ 参照 formatSimple=-1.01万
   assert_eq(n5_abcn(-10050L), "-1.01万")
@@ -725,6 +854,12 @@ test "num 深档 aw-0" {
 test "num 深档 aw-1000" {
   // english_abbrev ｜ 入参=1000 ｜ 参照 formatSimple=1k
   assert_eq(n5_aben(1000L), "1k")
+}
+
+///|
+test "num 深档 aw-1005" {
+  // english_abbrev ｜ 入参=1005 ｜ 参照 formatSimple=1k ｜本库形状="1.01k"（依据 08-num §12 表对应行）
+  assert_eq(n5_aben(1005L), "1.01k")
 }
 
 ///|
