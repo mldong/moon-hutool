@@ -56,7 +56,7 @@
 |---|---|---|---|
 | 当前时间 | `env.now() -> UInt64`（epoch ms，唯一时钟） | ② `date.Clock`（注入式） | 直接读系统时区（无接口） |
 | 日历换算 | 无 | ③ `date`（civil↔epoch，Hinnant 算法） | — |
-| 时区/DST | 无；`moonbitlang/x/time` 也只有固定偏移 + 自备 TZif | ② 显式 `offset_minutes` | **不支持命名时区与 DST**（本库固定口径：不支持命名时区与 DST） |
+| 时区/DST | 无；`moonbitlang/x/time` 也只有固定偏移 + 自备 TZif | ② 显式 `offset_minutes` + **内置 IANA 段表**（第二批：`date/zone_table.mbt`，现读 603 区 / 36,701 段，窗口 [1970,2050)；`zone_names`/`zone_exists`/`zone_count`/`zone_offset_minutes`/`zone_offsets_at_wall` + 命名区版 `format_in`/`parse_in`/`to_rfc3339_in`；第五批默认区三级降级 `set_default_zone` → `TZ` → `fallback_zone`，`default_zone_source()` 把参照那个查不到来源的进程级全局量做成可查询） | **偏移承诺到整分钟**（窗口内只有 `Africa/Monrovia` 一区两年不是整分钟，已作分岔双栏读数）；表窗口外的墙上时刻判 `None`；不追 `java.time` 的规则求值器 |
 | `format/parse` | 无 | ① 封闭 pattern 子集（`y M d H h m s S E Z X a`，其余字符**显式拒绝**）+ ISO8601 / RFC 7231 两个专用解析器 | hutool 的"智能无格式 parse"、`java.text` 全套词法、lenient 语义 |
 | `ChineseDate`/农历/节气/生肖 | 无 | — | `docs/ROADMAP.md` 的「暂不做」档，且**码表独立成数据件** |
 

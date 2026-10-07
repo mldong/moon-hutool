@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# moon-hutool 契约门禁 G1~G13
+# moon-hutool 契约门禁 G1~G14
 #
 # 原则：每条判据都必须"真跑过且敢报红"。凡当前环境跑不了的项，显式打 SKIP + 理由，
 # 绝不伪装成 PASS（恒绿但没测的套件比红灯更危险）。
@@ -197,6 +197,19 @@ if python scripts/sync_status.py --numbers >/tmp/mh_numbers.log 2>&1; then
   grep -E "^  PASS" /tmp/mh_numbers.log
 else
   bad "序号与表行号不一致（见下）："; sed -n '1,10p' /tmp/mh_numbers.log | sed 's/^/    /'
+fi
+
+echo "== G14 不承诺声明反查（写进公开文档的「不做 X」必须与实现面对得上）=="
+# 判据与自检三档（敢红 / 敢放 / 缺证据走 SKIP）都在 scripts/claim_audit.py 里，理由见那份文件头。
+if python scripts/claim_audit.py --selftest >/tmp/mh_claims_self.log 2>&1; then
+  grep -E "^  (PASS|SKIP|FAIL)" /tmp/mh_claims_self.log
+  if python scripts/claim_audit.py >/tmp/mh_claims.log 2>&1; then
+    grep -E "^  (PASS|SKIP)" /tmp/mh_claims.log
+  else
+    bad "不承诺声明过期（见下）："; sed -n '1,10p' /tmp/mh_claims.log | sed 's/^/    /'
+  fi
+else
+  bad "G14 自身失效：三档对照没全过——这条判据不可信（见下）"; sed -n '1,10p' /tmp/mh_claims_self.log | sed 's/^/    /'
 fi
 
 echo
