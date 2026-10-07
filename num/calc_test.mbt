@@ -280,16 +280,20 @@ test "calc 15" {
   assert_eq(calc_val("1/3+1/3+1/3"), 0.9999999999) // 腿 RET
   assert_eq(calc_val("10=2"), 10.0) // 腿 RET
   assert_eq(calc_val("1+2=3=4"), 3.0) // 腿 RET
+  assert_eq(calc_val("1/2048"), 0.0004882813) // 腿 RET
+  assert_eq(calc_val("-1/2048"), -0.0004882813) // 腿 RET
+  assert_eq(calc_val("1/32768"), 3.05176e-05) // 腿 RET
+  assert_eq(calc_val("3/2048"), 0.0014648438) // 腿 RET
   assert_eq(calc_val("5f"), 5.0) // 腿 RET
-  assert_eq(calc_val("5d"), 5.0) // 腿 RET
-  assert_eq(calc_val("1d"), 1.0) // 腿 RET
-  assert_eq(calc_val("1f"), 1.0) // 腿 RET
-  assert_eq(calc_val("1e2a"), 1.0) // 腿 RET
 }
 
 ///|
 // #8.40 第四批（Calculator）第 16 块：12 格，每格一条腿读数
 test "calc 16" {
+  assert_eq(calc_val("5d"), 5.0) // 腿 RET
+  assert_eq(calc_val("1d"), 1.0) // 腿 RET
+  assert_eq(calc_val("1f"), 1.0) // 腿 RET
+  assert_eq(calc_val("1e2a"), 1.0) // 腿 RET
   assert_eq(calc_val("1E2a"), 100.0) // 腿 RET
   assert_eq(calc_val("1e23"), 1.0e23) // 腿 RET
   assert_eq(calc_val("1E23"), 1.0e23) // 腿 RET
@@ -298,15 +302,15 @@ test "calc 16" {
   assert_eq(calc_val("1E2.5"), 100.0) // 腿 RET
   assert_eq(calc_val("1e2e"), 1.0) // 腿 RET
   assert_eq(calc_val("2e3e4"), 2.0) // 腿 RET
+}
+
+///|
+// #8.40 第四批（Calculator）第 17 块：10 格，每格一条腿读数
+test "calc 17" {
   assert_eq(calc_val("1e2e3"), 1.0) // 腿 RET
   assert_eq(calc_val("1E2e3"), 100.0) // 腿 RET
   assert_eq(calc_val("1e2 "), 100.0) // 腿 RET
   assert_eq(calc_val("1E2X3"), 300.0) // 腿 RET
-}
-
-///|
-// #8.40 第四批（Calculator）第 17 块：6 格，每格一条腿读数
-test "calc 17" {
   assert_eq(calc_val("0x1p3"), 0.0) // 腿 RET
   assert_eq(calc_err("١٢"), "NotDecimal ١٢") // 腿 12.0｜分岔：参照认 Unicode 十进制数字（§11.4 第 19 行），本库只认 ASCII ⇒ 该位置判坏
   assert_eq(calc_err("Infinity"), "NotDecimal Infinity") // 腿 ERR_NumberFormatException|Unparseable number: \"Infinity\"｜token 来源=腿
