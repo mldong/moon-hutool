@@ -60,7 +60,7 @@ hutool 侧口径：读 GitHub `dromara/hutool` HEAD 的
 
 | 签名 | 语义 | 边界/错误 | hutool 对位 | 差异声明 | 读数来源 |
 |---|---|---|---|---|---|
-| `pub suberror NumError { ScaleOutOfRange(Int) NotFinite NegativeRadicand(Int) InvalidModulus(Int) NonCoprime(Int, Int) NegativeFactorial(Int) NegativeCount(Int, Int) NotDecimal(String) NonPositiveTargets(Int) NegativeRatio(Int) RatioSumNotPositive(Int64) MoneyOverflow }` | 本包唯一错误面，12 个变体各对应**一个** `raise` 点（后五个属第二批） | `NotFinite` 与 `NegativeFactorial` 之类只带一个读数；两个双读数变体（`NonCoprime`、`NegativeCount`）都带**给进来的原值对**，不做归一化 | hutool 一律抛 `IllegalArgumentException` / `ArithmeticException`，把数字拼进文案 | 文案不进错误面（同四个已交付包）；`NonCoprime` 不返回 `-1`——`-1` 在模 11 下是个合法剩余类，拿它当失败信号会和答案混起来 | 定义即契约；逐条形状在 `num_test.mbt`「两类报错各带原读数」块 |
+| `pub suberror NumError { ... }` | 本包唯一错误面；**变体数一律现读 `num/pkg.generated.mbti`（本行旧写"12 个变体"已过期——交付三批与第四批之后实际更多，手写必漂）**，每个 `raise` 点对应一个变体 | `NotFinite` 与 `NegativeFactorial` 之类只带一个读数；两个双读数变体（`NonCoprime`、`NegativeCount`）都带**给进来的原值对**，不做归一化 | hutool 一律抛 `IllegalArgumentException` / `ArithmeticException`，把数字拼进文案 | 文案不进错误面（同四个已交付包）；`NonCoprime` 不返回 `-1`——`-1` 在模 11 下是个合法剩余类，拿它当失败信号会和答案混起来 | 定义即契约；逐条形状在 `num_test.mbt`「两类报错各带原读数」块，失败通道补档在 `num_channels_test.mbt`（10-07） |
 
 ## 3. 契约矩阵（行号 = 用例号 `#8.x`）
 

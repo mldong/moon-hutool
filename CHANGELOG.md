@@ -9,7 +9,7 @@
 
 ## 0.1.0（首发）
 
-首个对外版本，覆盖 22 个包、667 条用例（`moon test --target wasm`），四目标可编译（wasm / wasm-gc / js / native），零第三方依赖、零 `extern`、全同步。
+首个对外版本，覆盖 22 个包、672 条用例（`moon test --target wasm`，条数以 `docs/ROADMAP.md` 的生成读数块为准），四目标可编译（wasm / wasm-gc / js / native），零第三方依赖、零 `extern`、全同步。
 
 | 包 | 对位 | 这一版给了什么 |
 |---|---|---|
