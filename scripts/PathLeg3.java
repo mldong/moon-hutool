@@ -44,6 +44,35 @@ public class PathLeg3 {
     {"/a/b", "/a/*", null},
   };
 
+  // 直接问参照的切分器：tokenizePath 是 protected，子类化就能现读它的输出（T 行）。
+  // 这一组的用途是把 §8 末段那条根因从"读源码推断"升级成"逐串读数"：空段到底丢不丢。
+  // 匹配与抽段的逐对读数（M 行）：五条已登记分岔的原始配对 + 一圈会受"丢空段"影响的邻档，
+  // 用来验改 tokenizer 到底有没有把别的东西一起挪走。verb：m=match、s=matchStart、w=extractPathWithinPattern
+  static final String[][] M = {
+    {"m", "/a/*", "/a/"}, {"s", "/a/*", "/a/"}, {"s", "/a/?", "/a/"},
+    {"s", "/abc/", "/abc"}, {"w", "/**/x/", "/a/x/"},
+    {"m", "/a/**", "/a/"}, {"m", "/a/", "/a/"}, {"m", "/a/*", "/a"},
+    {"m", "/*", "/"}, {"m", "/**", ""}, {"m", "", ""}, {"m", "/", ""},
+    {"m", "/a//b", "/a/b"}, {"m", "/a/b", "/a//b"}, {"m", "/*/x", "/a/x"},
+    {"m", "/{v}/x", "/a/x"}, {"w", "/WEB-INF/**", "/WEB-INF/web.xml"},
+    {"w", "/**", "/a/b"}, {"w", "/a/b", "/a/b"}, {"w", "/a/*", "/a/b/c"},
+    {"s", "/a/**", "/a/b/c"}, {"s", "/a/b", "/a"}, {"m", "?/x", "a/x"},
+    // 两条"纯空白段"档：参照的 ignoreEmpty 只丢**空串**，不丢空白段（trimTokens=false 时空白段照留）
+    {"m", "/ /x", "/ /x"}, {"m", "/a/ ", "/a/ "},
+    {"m", "/a//b", "/a/ /b"},
+    {"m", "/a/**", "/a/x"},
+  };
+
+  static class TK extends AntPathMatcher {
+    String[] tk(String p) {
+      return tokenizePath(p);
+    }
+  }
+
+  static final String[] TOK = {
+    "/a/b", "/a/", "a/b", "/a//b", "/", "", "//a", "/WEB-INF/**", "/{v}/x", "/abc",
+  };
+
   public static void main(String[] args) {
     AntPathMatcher m = new AntPathMatcher();
     Comparator<String> c = m.getPatternComparator("/a/b");
@@ -51,6 +80,21 @@ public class PathLeg3 {
     System.out.println("G|guard|" + g1 + "|" + g2 + "|" + g3);
     boolean ok = !g1.equals(g2) && !g2.equals(g3) && !g1.equals(g3);
     System.out.println(ok ? "G|GUARD_OK|distinct3" : "G|GUARD_FAIL|same-reading");
+    TK t = new TK();
+    for (String p : TOK) {
+      String[] parts = t.tk(p);
+      StringBuilder sb = new StringBuilder();
+      for (String q : parts) sb.append(esc(q)).append(",");
+      System.out.println("T|" + esc(p) + "|" + parts.length + "|" + sb.toString());
+    }
+    for (String[] r : M) {
+      String verb = r[0], pat = r[1], path = r[2];
+      String reading;
+      if (verb.equals("m")) reading = String.valueOf(m.match(pat, path));
+      else if (verb.equals("s")) reading = String.valueOf(m.matchStart(pat, path));
+      else reading = esc(m.extractPathWithinPattern(pat, path));
+      System.out.println("M|" + verb + "|" + esc(pat) + "|" + esc(path) + "|" + reading);
+    }
     for (String[] r : P) {
       // 比较器绑的是"当前流程要匹配的那条路径"，每对都要按各自的 against 现取
       Comparator<String> cc = m.getPatternComparator(r[0]);

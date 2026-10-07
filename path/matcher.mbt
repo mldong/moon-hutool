@@ -304,7 +304,11 @@ fn fill_vars(
 }
 
 ///|
-// 拆段：**保留空段**，`trim` 才逐段去首尾空白。hutool 默认 `trimTokens=false`（Spring 原版是 true）。
+// 拆段：**空段整条丢掉**，`trim_tokens` 只控制"逐段去首尾空白"这一件事。
+// 参照 `tokenizePath()` 走 `StrSplitter.splitToArray(path, sep, 0, trimTokens, /*ignoreEmpty=*/true)`：
+// 第五参是 `ignoreEmpty`、与 `trimTokens` 是两个独立开关（此前这里把两者当成一个，判成"保留空段"，
+// 于是 `do_match` 里那条"路径先耗尽 + 余一颗 `*`"的特判永远走不到）。
+// 空段丢掉的读数在 `PathLeg3.java` 的 T 行：`"/"` ⇒ 0 段、`"/a//b"` ⇒ `a,b`、`"/a/"` ⇒ `a`。
 fn tokenize(s : String, opts : PathOptions) -> Array[String] {
   let out : Array[String] = []
   let sep = opts.separator
@@ -317,15 +321,23 @@ fn tokenize(s : String, opts : PathOptions) -> Array[String] {
   let mut i = 0
   while i < n {
     if i + sep.length() <= n && slice_units(s, i, i + sep.length()) == sep {
-      out.push(maybe_trim(slice_units(s, start, i), opts.trim_tokens))
+      push_seg(out, slice_units(s, start, i), opts)
       i = i + sep.length()
       start = i
     } else {
       i = i + 1
     }
   }
-  out.push(maybe_trim(slice_units(s, start, n), opts.trim_tokens))
+  push_seg(out, slice_units(s, start, n), opts)
   out
+}
+
+///|
+fn push_seg(out : Array[String], piece : String, opts : PathOptions) -> Unit {
+  let t = maybe_trim(piece, opts.trim_tokens)
+  if t.length() > 0 {
+    out.push(t)
+  }
 }
 
 ///|
