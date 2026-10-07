@@ -1489,3 +1489,43 @@ owner 点头后另起一笔收口。腿仍是 `Temp/convsrc/hktw_rows.tsv`（同
 2. 腿给的 Java 代理对转义 `\ud83d\ude80` 直接抄进 MoonBit 字面量判 **`Invalid unicode escape sequence \u{d83d}`** ——本版 MoonBit 的串字面量**不接受代理对**，增补平面字符要么写合成后的码位，要么按本仓既有惯例直接写真实字符（`typex` 里 `1380013🍎8000` 那条就是这么写的）。生成器改成先按 UTF-16 合成码位再落字符。
 
 **typex 那一格的未覆盖行没动（41 → 41）**：这 36 条钉住的是"比较行为"，而 41 行里的 13 行在 `units_to_string` / `take_string` / `cmp_units` 的**内部支路**（含代理对合成那两行），本轮输入没走到——说明"补一批同族断言"与"消一格未覆盖行"是两件事，别混着报。下一批按这三个函数的入口反推判别样本；另有约 11 行是 `abort("moon-hutool/typex 内部…")` 型不变量守卫（`datasize_format.mbt` 4 处 + `dsfmt_impossible` 3 处 + `phone.mbt` 码表编译失败 2 处 + `ipv4.mbt` 1 处），按"按构造不可达"处置：逐条写推导，不追夹具。
+
+
+## 22. 第七批补档（10-08，`typex/typex_deep6_test.mbt`）
+
+参照腿 `TypexLeg4.java`（hutool-core 5.8.35 · JDK 17.0.14 · `-Dfile.encoding=UTF-8`）四族出口：`PageUtil.rainbow(pageNo,totalPage,displayCount)`、`Version.compareTo`/`toString`、`DataSizeUtil.parse`、`IdcardUtil.isValidHKCard`/`isValidTWCard`。**69 块**进断言，一条一块；全仓 **1252 = 绿 1252 / 红 0**（wasm / js / wasm-gc 三档一致），G15 基线 207 → **198 行**（typex 41 → 32），`.mbti` 一字未动。
+
+**不可见码点夹具的形状**（这条是本轮唯一的新工装做法）：`ds_is_blank` 打的三档（`U+001C..1F`、`U+2007/FEFF/202A`、`U+0085`）不能把双向控制字符写进源文件。做法是腿里用 `Character.toChars(0x2007)` 现构、读数行打 `0xNN` 码点序列（`DP|31+2007+4b+42|…`），生成器 `cps_to_moonbit()` 按同一序列还原成 MoonBit 字面量（可打印 ASCII 原样、其余 `\u{...}`）。**人不手打一个字符，夹具也不依赖文件编码**。
+
+钉住的档与它对应的支路：
+
+| 族 | 夹具 | 打到的支路 |
+|---|---|---|
+| rainbow | `mid-even(6,20,6)`、`mid-even2(10,20,6)`、`mid-odd(8,20,5)`、`head/tail`、`few(2,4,10)` | 偶数档 `+1` 那一支、奇数档另一支、`totalPage < displayCount` 档 |
+| Version | `1.0+build` vs `1.0`、`1.0+2` vs `1.0+10`、`1.0.1` vs `1.0.a`、`1.0.a` vs `1.0.aa`、`1.2.3` vs `1.2.3-SNAPSHOT` | 构建元数据 `+` 支、字符串单元 `take_string` 支、Num×Str 择路、长度差档 |
+| DataSize | `1\u{1c}KB`、`1\u{1d}KB`、`1\u{2007}KB`、`1\u{feff}KB`、`1\u{202a}KB`、`1\u{85}KB`、`1 KB` | `ds_is_blank` 三档各一次（含 `U+0085` 那档"参照与 Java 都不当空白"的负样） |
+| 港澳台 | `A123456(7)`、`a1234567`（小写字母档）、`Z324567(8)`、`(5)`、`1234567890` 等 15 形 | 括号可选支、字母小写归一（`v - 32` 那一行） |
+
+### 22.1 五档"声明档"的用法（钉本库形状 + 腿原读数进注释 + 指回既有决策行）
+
+探针 6 条红，逐条回 spec 找行，找到行的才钉：
+
+| 档 | 参照读数 | 本库 | 指回的既有行 |
+|---|---|---|---|
+| `rainbow(2,-3,10)` | `NegativeArraySizeException` | 空表 | §5 第 6 条（`typex.mbt` 注释同处） |
+| `version_compare("1.0.1","1.0.a")` | `-48`（原始码元差） | `-1` | §5 第 4 条：腿的 `CMP` 读数本身是符号档，本库出口归一成 `-1/0/1`，**只承诺符号** |
+| `version_compare("1.0_1","1.0.1")` | `46` | `1` | 同上（同号，规格化是本库契约） |
+| `isValidTWCard("A123456(7)")` | `NumberFormatException` | `false` | §19 那段"失败形状不同"：参照在坏形状上走 `Integer.parseInt` 抛，**本库三件都不设这枚错误面**，这类串一律判假 |
+| `isValidTWCard("Z324567(8)")` | `NumberFormatException` | `false` | 同上 |
+
+判据是"能不能指回一行已经写过的决定"——指得回就钉（并把参照原读数留在断言注释里），指不回就登记不钉（见 §21 与 num §12 那两批）。这样"改判"不会变成"顺手迁就实现"。
+
+### 22.2 形状不同源，一条都不比
+
+`IdcardUtil.isValidCard10(String)` 返回的是 `String[]`（**两种可接受写法**：带括号与不带括号），本库没有同形状出口——#23.111 的 `IdcardInfo10` 是 `region/gender/valid` 三槽。两个返回值形状不同的件，断言只能是自创映射，所以这一族的 15 条 `I10` 读数**留在腿里不进断言**，港澳台只比 `isValidHKCard`/`isValidTWCard` 两个布尔。
+
+### 22.3 变异 4 条全抓红，剩余 32 行的处置
+
+`X1` `U+0085` 当空白 → 1 红；`X2` 偶数档不 `+1` → 2 红；`X4` `compareTo` 不规格化 → 5 红；`X5` 长度差档丢符号 → 1 红。基线与还原两侧各 0 红，字节相同。
+
+剩余 32 行：`datasize_format` 6 行（3 枚 `abort` + 3 枚 `dsfmt_impossible`，**按构造测不到**，同 num §12.2 第一条的理由）；`idcard_region` 9 行（形状拒收档，本轮 15 个形只打到了字母小写那一支——剩下的是 `idc_digits_at` 越界、`idc_opt_check` 的 `rest<1||rest>3` 与两处 `' '` 兜底、`idc_mo_grammar` 长度档、以及三处"该位非数字"⇒ **待补**，夹具要按括号与长度成对构造）；`typex.mbt` 5 行（tokenizer 的 `break`/`i+1` 组合支）；`phone` 5、`credit` 1、`idcard` 2、`desensitize` 1、`ipv4` 2（含 1 枚 `abort`）——都在下一批的夹具表里，不在本批顺手补。

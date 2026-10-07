@@ -18,5 +18,5 @@ path = 26
 rand = 7
 re = 7
 text = 8
-typex = 41
+typex = 32
 valid = 1
