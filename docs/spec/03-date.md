@@ -9,7 +9,8 @@
 > 改掉的是一处实现算错（两位年窗口 `70..99` 那档）。
 >
 > core **没有任何时间能力**：没有 `time`/`date`/`calendar` 包，全树 `grep ZonedDateTime|Instant|calendar|weekday|leap_year`
-> 在非测试代码命中 0（本机 `G:\dev-tools\moon\lib\core` 实测）。能借的只有 `env.now()`（epoch 毫秒）。
+> 在非测试代码命中 0（**任何人都能自己复跑**：`moon --version` 末行打出工具链目录，对它下面的 `lib/core` 跑
+> `grep -rniE "timezone|utc_offset|localtime" --include=*.mbt .`，排除测试文件后就是 0）。能借的只有 `env.now()`（epoch 毫秒）。
 > ⇒ 本包整包自研，也是本库最大的一处"从无到有"。
 >
 > **本包没有 core 对拍腿**（门禁 G8 那条腿在这里天然为空）：没有可对照的 core 函数。唯一的 core 接触点是

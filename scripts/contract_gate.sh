@@ -117,16 +117,18 @@ else bad "声明复用 core 却没有对拍腿（core 语义漂移会被静默�
 echo "== G9 公开仓引用红线（不许指向私有台账/内部叙事）=="
 # 本仓是 PUBLIC 仓：决策台账在协调仓（不进本仓提交历史），公开文档必须自洽。
 # 扫描面 = git 跟踪的文件，排除 scripts/（本脚本自己就要写这些禁词，否则永远命中）。
-BAN='moon-hutool-plan|协调仓|14 栈|第 14 栈|夜班|申报书|codeup|glm-flash|hub docs|见 hub|口径 [0-9]'
+BAN='moon-hutool-plan|协调仓|14 栈|第 14 栈|夜班|申报书|codeup|glm-flash|hub docs|见 hub|口径 [0-9]|dev-tools|[A-Za-z]:[\\/]{1,2}(Users|develop|Program|Work|work|tmp)|192\.168\.1\.160|HBuilderX|BlueStacks'
 hits=$(git ls-files 2>/dev/null | grep -v '^scripts/' | xargs -r grep -nE "$BAN" 2>/dev/null | head -5)
-if [ -z "$hits" ]; then ok "跟踪文件里无内部叙事引用（禁词表 $BAN）"
-else bad "公开仓出现内部引用：$hits"; fi
-# 自检：往临时文件灌一条禁词，确认这条扫描真的抓得到（否则 G9 是永真格）
+if [ -z "$hits" ]; then ok "跟踪文件里无内部叙事引用与本机路径（禁词表见脚本内 BAN）"
+else bad "公开仓出现内部引用/本机路径：$hits"; fi
+# 自检：两类坏样本各写一行——① 内部叙事，② 本机盘符路径。
+# ⚠ 必须**每类一行**并断言行数：只断 `>=1` 的话，旧词会把新加的那一档"其实没生效"整个藏掉
+#   （10-07 就是这条判据放过了 `G:\dev-tools\moon\lib\core` 被写进公开 spec）。
 probe=$(mktemp ./_g9_probe_XXXX.md 2>/dev/null || echo ./_g9_probe.md)
-echo "参见 hub docs/moon-hutool-plan.md 与 14 栈口径 6" > "$probe"
-caught=$(grep -nE "$BAN" "$probe" 2>/dev/null | wc -l | tr -d ' ')
+printf '%s\n' "参见 hub docs/moon-hutool-plan.md 与 14 栈口径 6" "本机 G:\\dev-tools\\moon\\lib\\core 实测" > "$probe"
+caught=$(grep -cE "$BAN" "$probe" 2>/dev/null || true)
 rm -f "$probe"
-[ "$caught" -ge 1 ] && ok "阳性对照正常（坏样本被抓到）" || bad "G9 自身失效：坏样本没抓到，这条判据不可信"
+[ "${caught:-0}" -ge 2 ] && ok "阳性对照正常（两类坏样本各 $caught/2 被抓到）" || bad "G9 自身失效：两类坏样本只抓到 ${caught:-0} 条，这条判据不可信"
 
 
 echo "== G10 仓内文档链接可达（索引不许漂成死链）=="
