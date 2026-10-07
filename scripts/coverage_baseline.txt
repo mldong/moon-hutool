@@ -2,7 +2,6 @@
 # 现读命令：moon coverage analyze（要先 moon test --target wasm --enable-coverage）
 # 收紧（数字变小）随时可以；放宽或新增包的条目必须单独一笔并写明是哪条通道补/加了
 cache = 9
-codec = 9
 conv = 10
 cron = 12
 csv = 4
