@@ -1,0 +1,47 @@
+# Changelog
+
+本文件记录 moon-hutool 的对外可见变化。版本号遵循语义化版本；格式参考 Keep a Changelog。
+
+约定两条，与 `AGENTS.md` 的两条红线一致：
+
+- **公开件签名只前进**：`.mbti` 里既有件的签名不改；要改必须另开主版本。
+- **期望值冻结**：断言右侧（参照读数）不因实现而改；确需更正，单独一条并在对应 spec 里写清外部读数来源。
+
+## 0.1.0（首发）
+
+首个对外版本，覆盖 22 个包、667 条用例（`moon test --target wasm`），四目标可编译（wasm / wasm-gc / js / native），零第三方依赖、零 `extern`、全同步。
+
+| 包 | 对位 | 这一版给了什么 |
+|---|---|---|
+| `text` | `StrUtil` / `CharSequenceUtil` / `NamingCase` / `StrFormatter` | 空白与裁剪档、`{}` 占位格式化、命名法互转、`sub_*` 取段、`hide`（码位档）、逐段数值版序比较 |
+| `digest` | `DigestUtil`（MD5 / SHA-256 / HMAC） | MD5/SHA-256 全套 + HMAC 家族八件（含裸字节键与常量时间校验）；输入固定 UTF-8 |
+| `date` | `DateUtil` / `CalendarUtil` / `DatePattern` / `DateUnit` | 整包自研日历与格式化（core 无 time 包）+ 内置 IANA 时区段表（603 区 / 36,701 段）+ 可注入时钟源 + 默认区三级降级（`set_default_zone` → `TZ` → 兜底） |
+| `id` | `IdUtil` | 雪花、UUID v3/v4、ObjectId、NanoId；时钟与熵全显式注入 |
+| `codec` | `Base64` / `Base32` / `Base58` / `Base62` / `RadixUtil` / form / URL | url-safe 与 MIME 档、严格/宽松双档解码、表单 `+` 档、URL 结构化组装与语法归一 |
+| `coll` | `CollUtil` / `ListUtil` / `IterUtil` 高频子集 | 分组、两桶划分、保序去重与按键去重、频次表、分页、数组版并/交/差、极值与按键极值 |
+| `mapx` | `MapUtil` / `Table` / `BiMap` / `CaseInsensitiveMap` | `BiMap`（双向唯一 + 显式 `force_put`）、`CiMap`、`Table`（行列双索引）、`filter_map` / `rename_key` |
+| `num` | `NumberUtil` / `NumberChineseFormatter` / `MathUtil` / `Calculator` / `Money` | 数论件与七档舍入、千分位/百分比/薄 `Money`、中文数字四模式与反向解析、英文 word、十进制精确表达式求值 |
+| `conv` | `Convert`（无反射版） | `Json` → 7 类标量宽松转换、`get_by_path` / `field` / `get_ids`、一等闭包 `chain` 组合 |
+| `re` | `ReUtil` / `PatternPool` / `RegexPool` | 24 件正则门面 + `ReError` 两档；`RegexPool`/`PatternPool` 常量表按封闭规则表离线改写（不自动改写调用方的串） |
+| `valid` | `Validator` 正则族 | 15 件合法性判定，码表为包内常量、无错误面 |
+| `rand` | `RandomUtil` / `WeightRandom` | 19 件，随机源显式注入、库内一次都不取熵；常量表原样 + 单点定义域 + 与流无关的不变量 |
+| `dfa` | `WordTree` / `SensitiveUtil` | 词树构建与七档查询、停顿字符表；`(density, greed)` 三档语义 |
+| `path` | `AntPathMatcher` | 10 件 + `PathOptions` + `PathError` 四档；默认档跟随 hutool（`trimTokens=false`） |
+| `cache` | `Cache` + FIFO/LRU/LFU/Timed/NoCache | 23 件公开面；时钟由调用方显式传 `now`，`prune` 三档语义各按其参照 |
+| `hash` | `HashUtil` + murmur/city/metro + CRC8/CRC16 族 | 45 件（含 2 枚举 2 记录）；返回值一律有符号，与参照读数十进制逐字同形 |
+| `bloom` | `BitMapBloomFilter` + `filter/` + `bitMap/` | 位图/过滤器/聚合三层 23 件；哈希全部委托 `hash`，词数地板除截断跟随 |
+| `cron` | `CronPattern` | 解析（5~7 段、`/ > - > ,`、别名、`L`）+ 匹配 + 下一瞬间两族 + `Part` 七档 + 建造器；只算不调度；带区名档与内置时区表打通 |
+| `textsim` | `TextSimilarity` | 相似比与百分比（按实现的 LCS 口径，非莱文斯坦）、剥离集与判据件提到公开面 |
+| `csv` | `CsvReader` / `CsvWriter` | RFC 4180 读写，API 只收 `String`/`Bytes`，不碰文件 |
+| `ini` | `Props` / `GroupedMap` / `SettingLoader` | INI 面 + `Props` 的 Java Properties 严格语义（含畸形 `\u` 的错误档） |
+| `typex` | `Version` / `PageUtil` / `Ipv4Util` / `DataSize` / `DesensitizedUtil` / `IdcardUtil` / `CreditCodeUtil` / `PhoneUtil` / `CoordinateUtil` | 109 件：版本序、分页、IPv4 族、手机/固话/港澳台号码族、统一社会信用代码、身份证校验与切片、数据容量与格式化、脱敏、坐标换算 |
+
+明确的精度与能力承诺变化点（详见各 spec）：
+
+- `date` 的偏移承诺到整分钟（窗口内仅 `Africa/Monrovia` 一区两年不是整分钟，已作显式分岔双栏读数）。
+- `typex` 的坐标九件承诺相对误差 1e-15，**不承诺与 JVM 末位逐位相同**（参照侧是 JVM libm，本库三档是宿主 libm）。
+- `re` 不假装 Java 方言、也不自动改写调用方的模式串；等价改写表只作为给调用方看的对照。
+
+## 未发布的部分
+
+加密套件（AES/SM4/RSA/ECDSA/BCrypt/Argon2/PBKDF2）、SHA-1/SHA-512/SM3/SHA-3、压缩（gzip/zip）、农历与区划码表、非 UTF 字符集表、Excel、流式增量摘要 API 排在 `docs/ROADMAP.md` 的「暂不做」档；运行时反射类与文件/网络类**结构上不属于本库**（见根 `README.md` 的不承诺清单与 `AGENTS.md` 零依赖四条）。

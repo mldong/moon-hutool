@@ -1,0 +1,70 @@
+name: publish
+
+# mooncakes.io 发版通道：push tag `v*` 或 workflow_dispatch 触发。
+#
+# 为什么这里是"一次一发"而不是逐包 publish（与多模块 workspace 的库不同）：
+#   本仓是**单个 MoonBit 模块**（`moon.mod` 里 name = mldong/moon-hutool），22 个包都在这个模块里，
+#   包与包之间的依赖（typex→num/text/valid、cron→date、codec/digest…）是**模块内引用**，
+#   不经过注册表解析 ⇒ 不存在"上游模块刚发完、索引还没刷新"那条接力卡点，
+#   `moon publish` 一次把整个模块（含全部包）打成同一个版本号发出去。
+#
+# 退出码不可信（实测）：`moon publish --dry-run` 成功时服务端回 `202 Accepted`，
+#   CLI 仍然打印 `Error: moon publish failed` 并以非 0 退出。⇒ 判状态一律读状态行与注册表索引，
+#   见 .github/scripts/publish-module.sh。
+#
+# 工具链：只装 latest（钉版本做不到——显式版本路径服务端拒绝）。常规发版版本号只前进；
+#   每次运行把实际 `moon version` 打进日志留痕，出问题按日志对号。
+#   若某次发版在 `moon check` 阶段因编译器新增语法裁决而红，按报错修语法并把修复合进 master，
+#   再把 tag 重指到修复后的 commit 重推（Re-run 原 run 只会 checkout 旧 tag commit，拿不到修复）。
+#
+# 前置一次性动作：仓库需配置 secrets MOON_TOKEN / MOON_USERNAME（mooncakes 账户令牌）。
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      validate_only:
+        description: "只走通道自检（装工具链 + 契约门禁 + 包体校验），不上传"
+        type: boolean
+        default: false
+
+concurrency:
+  group: publish-${{ github.ref }}
+  # 上传中途被取消会留下"服务端已受理、索引还没刷新"的半状态，故这里不自动取消；
+  # 重入由 .github/scripts/publish-module.sh 的"已在注册表就跳过"兜住。
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install MoonBit toolchain (latest)
+        run: |
+          curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash
+          echo "$HOME/.moon/bin" >> $GITHUB_PATH
+          "$HOME/.moon/bin/moon" version    # 留痕：本次实际使用的工具链版本
+
+      - name: Write mooncakes credentials
+        if: ${{ !inputs.validate_only }}
+        run: |
+          mkdir -p ~/.moon
+          printf '{"token":"%s","username":"%s"}\n' "${{ secrets.MOON_TOKEN }}" "${{ secrets.MOON_USERNAME }}" > ~/.moon/credentials.json
+
+      - name: Update registry index + install dependencies
+        run: |
+          moon update
+          moon install
+
+      - name: Contract gate（发版前必须全绿）
+        run: bash scripts/contract_gate.sh
+
+      - name: Validate-only channel（包体校验，不上传）
+        if: ${{ inputs.validate_only }}
+        run: bash .github/scripts/publish-module.sh --dry-run
+
+      - name: Publish module
+        if: ${{ !inputs.validate_only }}
+        run: bash .github/scripts/publish-module.sh

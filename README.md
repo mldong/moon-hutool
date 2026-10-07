@@ -57,7 +57,29 @@ MoonBit 版 [hutool](https://github.com/chinabugotech/hutool) 风格工具库。
 - **明确不做**：`BeanUtil`/`ReflectUtil`/`MapProxy`/`aop`/`script`（MoonBit **无运行时反射与动态代理**，Bean 拷贝请走内置 `derive(ToJson)/derive(FromJson)` 或手写映射）；`FileUtil`/`IoUtil`/`NetUtil`/`ThreadUtil`（需 FFI）；`http`/`db`/`socket`/`poi`/`captcha`；`DateUtil` 的智能无格式解析与 `java.text` 全套 pattern；命名时区与 DST；Unicode 大小写；完整 `BigDecimal`；cron **调度器**（只算表达式不触发）
 - **移植来源声明**：本项目移植的是 hutool 的**能力与语义**，实现按外部规范（RFC / FIPS）或独立设计重写，**未复制 Java 源码**。hutool 本体为 MulanPSL-2.0；少数类（`CharSequenceUtil`、`date/format/*`、`ComparatorChain`、`AntPathMatcher`）自带 Apache Commons / Spring 上游署名，本库对应格子按 Apache 系处理（见各 spec 的"血统"列）。
 
-## 用法（实现相位可用后）
+## 用法
+
+整模块发布到 mooncakes（一次发版 = 全部包同一个版本号），按包引用：
+
+```bash
+moon add mldong/moon-hutool/text
+moon add mldong/moon-hutool/digest
+```
+
+或直接写进 `moon.mod`：
+
+```toml
+[deps]
+"mldong/moon-hutool/text" = "0.1.0"
+"mldong/moon-hutool/digest" = "0.1.0"
+```
+
+> 版本号一律现读：`moon.mod` 里的 `version` 是**当前待发布的代次**，装哪一代请以注册表索引为准
+> （`$MOON_HOME/registry/index/user/mldong/moon-hutool.index`），别照抄本文档。发版通道见
+> [`.github/workflows/publish.yml`](https://github.com/mldong/moon-hutool/blob/master/.github/workflows/publish.yml)，
+> 版本变化记在 [`CHANGELOG.md`](https://github.com/mldong/moon-hutool/blob/master/CHANGELOG.md)。
+> 包与包之间的依赖（`typex`→`num`/`text`/`valid`、`cron`→`date`、`codec`/`id`→`digest`、`bloom`→`hash`）
+> 都在同一模块内，引用其中一个包即可自动带上其余。
 
 ```moonbit
 // moon.pkg —— 只带需要的包
