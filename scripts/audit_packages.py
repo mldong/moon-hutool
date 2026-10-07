@@ -8,7 +8,12 @@
 #   C 与 Java hutool 的命名对位  ── 拿参照 jar 的 javap 公开面，把本包公开件名做 snake_case↔camelCase
 #      归一后比对，输出两类清单：本库有而参照无（自订档，须在 spec 标明）、参照有而本库无（待拍缺口）
 #
-# 用法：python scripts/audit_packages.py [--javap]
+# 用法：python scripts/audit_packages.py [--javap] [--list]
+#   --javap 才去调 JDK：参照 jar 走 $HUTOOL_JAR（指 hutool-all 一份就够，crypto/setting/bloomFilter
+#   这些独立 artifact 全在里面）；没设则退回 /tmp/convsrc 下的 hutool-*.jar。
+#   --list 打印 C 格两份清单（本库名参照无 / 参照有名库无）——改名 triage 用的就是它。
+#   C 格取不到参照面时显式 SKIP 并计数，绝不给比值：件数少算（泛型行形状整包漏抽）与空参照集
+#   都在这轮被抓出来过，见 public_names / hutool_jar 两处注。
 #   默认只跑 A/B（快，纯本地）；--javap 才去调 JDK（需要 /tmp/convsrc 下有 hutool jar）
 import glob
 import io
@@ -93,16 +98,49 @@ def same_name(ours, ref):
 
 
 def public_names(pkg):
+    """抽公开件名。三种行形状都要认（旧版只认第一种，于是泛型包整包漏抽——
+    10-07 实测 mapx 报 0、coll 报 1，而现读 `mapx/pkg.generated.mbti` 全是
+    `pub fn[K : Hash + Eq] BiMap::get(...)` 这种带类型参数的形状）：
+      pub fn name(...)
+      pub fn[T] name(...)
+      pub fn[T] Type::method(...)   /   pub fn Type::method(...)
+    抽取数与文件里 `pub fn` 行数不等就记进 EXTRACT_AUDIT 并由 main() 显式点名——
+    "件数少算"是静默失效，比多算更危险。"""
     p = os.path.join(pkg, "pkg.generated.mbti")
     if not os.path.exists(p):
+        EXTRACT_AUDIT[pkg] = (0, 0)
         return []
     s = io.open(p, encoding="utf-8", errors="replace").read()
-    names = re.findall(r"^pub fn ([a-zA-Z0-9_]+)\(", s, re.M)
-    names += re.findall(r"^pub fn [A-Za-z]+::([a-zA-Z0-9_]+)\(", s, re.M)
-    return sorted(set(names))
+    lines = [ln for ln in s.splitlines() if ln.startswith("pub fn")]
+    got = re.findall(r"^pub fn(?:\[[^\]]*\])?\s+(?:[A-Za-z_][A-Za-z0-9_]*::)?([a-z_][A-Za-z0-9_]*)\(", s, re.M)
+    EXTRACT_AUDIT[pkg] = (len(got), len(lines))
+    return sorted(set(got))
+
+
+# trait / 运算符派生面：这些名字 Java 参照里天然没有（`op_ge` 是 `>=` 的糖，`to_string`/`compare`
+# 来自 derive），混进"本库名参照无"会把真漂移淹掉——单列一档，不参与对位比对。
+TRAIT_OPS = re.compile(r"^(op_[a-z0-9_]+|new|to_string|compare|equal|not_equal|hash|show|inspect)$")
 
 
 _JAR_INDEX = {}
+EXTRACT_AUDIT = {}   # pkg -> (抽取到的件名数, 该 .mbti 里 pub fn 行数)
+
+
+def hutool_jar():
+    """参照 jar 的取法（旧版写死 /tmp/convsrc/hutool-core.jar，于是对位类只要落在 crypto /
+    bloomFilter / setting / cron 这些**独立 artifact** 就整格取不到数，只打一行注记继续给比值——
+    "取不到数就当过"那一族）。现在的顺序：
+      $HUTOOL_JAR（推荐指 hutool-all，一次覆盖全部 artifact）→ convsrc/hutool-core.jar → 该目录里任意 hutool-*.jar。
+    找不到就返回 None，由调用方显式 SKIP，不产出比值。"""
+    env = os.environ.get("HUTOOL_JAR")
+    if env and os.path.exists(env):
+        return env
+    cand = [os.path.join(JARS, "hutool-core.jar")]
+    cand += sorted(glob.glob(os.path.join(JARS, "hutool-*.jar")))
+    for c in cand:
+        if os.path.exists(c) and not c.endswith("-sources.jar") and "-src" not in os.path.basename(c):
+            return c
+    return None
 
 
 def jar_index():
@@ -111,9 +149,12 @@ def jar_index():
     if _JAR_INDEX:
         return _JAR_INDEX
     import zipfile
-    for j in sorted(glob.glob(os.path.join(JARS, "*.jar"))):
-        if j.endswith("-sources.jar") or "-src" in os.path.basename(j):
-            continue
+    jars = []
+    if hutool_jar():
+        jars.append(hutool_jar())
+    jars += [j for j in sorted(glob.glob(os.path.join(JARS, "*.jar")))
+             if not j.endswith("-sources.jar") and "-src" not in os.path.basename(j)]
+    for j in jars:
         try:
             zf = zipfile.ZipFile(j)
         except Exception:
@@ -127,8 +168,8 @@ def jar_index():
 
 
 def javap_public(classes):
-    jar = os.path.join(JARS, "hutool-core.jar")
-    if not os.path.exists(jar):
+    jar = hutool_jar()
+    if not jar:
         return None
     idx = jar_index()
     fqns = sorted({c if "." in c else idx.get(c, c) for c in classes})
@@ -171,12 +212,16 @@ def classes_for(pkg):
 
 def main():
     do_javap = "--javap" in sys.argv
+    list_mode = "--list" in sys.argv
+    cskip = 0
+    lists = []
     byp, raw = coverage_by_pkg()
     if not byp:
         print("覆盖率一格没取到数（判据先自证：`moon coverage analyze` 是否真跑了）")
         print(raw[-400:])
     pkgs = sorted({os.path.dirname(p).replace("\\", "/") for p in glob.glob("*/moon.pkg")})
-    print("%-10s %6s %8s %10s  %s" % ("包", "未覆盖", "raise口", "变体 点名/总", "对位比对（参照公开件 / 本库公开件 / 本库名参照无）"))
+    print("%-10s %6s %8s %10s  %s" % ("包", "未覆盖", "raise口", "变体 点名/总",
+                                     "对位比对（参照公开件 / 本库公开件 / 名参照无 / 参照有名库无）"))
     for pkg in pkgs:
         unc = sum(len(rows) for _, rows in byp.get(pkg, []))
         impl, nvar, named = raise_sites(pkg)
@@ -189,19 +234,53 @@ def main():
             miss = missing_classes(cls)
             if miss:
                 note += " [jar 里找不到类: %s]" % ",".join(miss)
-            if hp:
+            if not cls:
+                note += " C 格 SKIP：spec/ROADMAP 那行没登记到参照类名"
+                cskip += 1
+            elif not hp:
+                note += " C 格 SKIP：参照面取到空集（jar 里没有这些类或 javap 失败）⇒ 空表不等于零缺口，比值不算数"
+                cskip += 1
+            elif miss:
+                note += " C 格 SKIP：对位类有 %d 个不在索引里，参照面不完整 ⇒ 比值不可信" % len(miss)
+                cskip += 1
+            else:
                 ours = public_names(pkg)
-                hn = {norm(x) for x in hp}
-                on = {norm(x) for x in ours}
                 rlist = sorted({norm(m) for m in hp})
-                extra = [x for x in ours
+                core = [x for x in ours if not TRAIT_OPS.match(x)]
+                extra = [x for x in core
                          if not any(same_name(norm(x), r) for r in rlist)]
-                note = "参照 %d / 本库 %d / 本库名参照无 %d" % (len(set(hp)), len(ours), len(extra))
+                missing = [r for r in rlist
+                           if r and not any(same_name(norm(x), r) for x in core)]
+                note = "参照 %d / 本库 %d（trait 面另剔 %d）/ 名参照无 %d / 参照有名库无 %d" % (
+                    len(set(hp)), len(ours), len(ours) - len(core), len(extra), len(missing))
+                if list_mode:
+                    lists.append((pkg, extra, missing[:24]))
         flag = "  <== 看" if unc or (nvar and named < nvar) else ""
         print("%-10s %6d %8d %6d/%-3d  %s%s" % (pkg, unc, impl, named, nvar, note, flag))
         for f, rows in byp.get(pkg, []):
             for ln, code in rows:
                 print("           %s:%d  %s" % (f, ln, code[:78]))
+
+    # 抽取器自证：matched 必须等于该 .mbti 的 pub fn 行数。少算＝静默失效（本仓已栽过一次：
+    # 泛型形状整包漏抽，mapx 报 0、coll 报 1，那份"比值"因此骗了一轮）。
+    if do_javap:
+        broken = [(k, m, l) for k, (m, l) in sorted(EXTRACT_AUDIT.items()) if m != l]
+        if not EXTRACT_AUDIT:
+            print("抽取器自证 SKIP：本轮没走到 public_names（对位格一格没跑）")
+        elif broken:
+            print("抽取器自证 FAIL：%d 个包的件名数与 pub fn 行数不符 ⇒ C 格比值不可信" % len(broken))
+            for k, m, l in broken:
+                print("           %s 抽取 %d / 行 %d" % (k, m, l))
+        else:
+            print("抽取器自证 OK：%d 个包件名数 == pub fn 行数（阳性对照：三种行形状都认）" % len(EXTRACT_AUDIT))
+        if cskip:
+            print("C 格 SKIP %d 个包（参照类未登记 / jar 取不到 / 对位类不全）——这些包的比值本轮不算数" % cskip)
+        if list_mode:
+            for pkg, extra, missing in lists:
+                print("\n### %s：本库名参照无 %d" % (pkg, len(extra)))
+                print("    " + ", ".join(extra))
+                print("### %s：参照有名库无 %d（截 24 条，判档前先对 `.mbti` 与 spec 现读）" % (pkg, len(missing)))
+                print("    " + ", ".join(missing))
 
 
 if __name__ == "__main__":
