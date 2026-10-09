@@ -189,7 +189,8 @@ pub fn scheduler_new(
 
 ///|
 /// #24.18 **跑一拍**（不循环、不起定时器）：取 `due_indices` 依次 `execute`，返回真正执行了几条。
-/// 用例只调这一件就能覆盖"到点/不到点/同刻重复触发"三条判据，完全不必起事件循环
+/// 用例只调这一件就能覆盖"到点/不到点/同一瞬间连喂两次就重复执行两次"三条判据（第三条与参照同形，
+/// 腿 N2 现读 `hits=2`），完全不必起事件循环
 /// （spec §3 的验收线就钉在这条上；`scheduler_start` 只是它外面套的一层循环）
 pub async fn scheduler_tick(s : Scheduler) -> Int {
   let _ = s
@@ -200,8 +201,9 @@ pub async fn scheduler_tick(s : Scheduler) -> Int {
 /// #24.19 启动/停止。对位 `CronUtil.start`/`stop` 与 `Scheduler` 的 `started` 标记。
 /// `scheduler_start` 是全仓**唯一**使用 `moonbitlang/async` 定时器处（wasm-gc 档该包无可执行入口，
 /// 已用 `supported_targets` 摘档，代价见 spec §1 第 3 条）
-/// - Note: 参照 `CronUtil.start` 吞异常继续跑；本库任务体 raise 出去怎么办**待拍**（spec §6 P3），
-///   不先照"吞掉"抄下来当语义
+/// - Note: 任务体抛出的错误在 `tick` 里**被忽略**，调度照常继续——跟随参照（腿 P1 现读 `surfaced=none`、
+///   抛异常那条与同期正常条都按秒续触发）。代价本库更硬：没有日志通道，所以这里是静默丢弃，
+///   要可见只能等 `listener` 族（对位 `TaskListener.onFailed`）第二批收（spec §6 P9）
 pub async fn scheduler_start(s : Scheduler) -> Unit {
   let _ = s
   abort("PR-B：契约骨架，契约见 docs/spec/24-sched.md #24.19")

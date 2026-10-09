@@ -27,7 +27,7 @@
 - **触发壳半**（`scheduler_*`）：只做"等 + 调 + 推状态"，**时钟与时延源一律注入**（#24.15/#24.16）。
 
 验收线（本包三档判据，缺一档就是恒绿的摆设）：
-1. 假 sleeper + 注入时钟下，`scheduler_tick` 的"到点/不到点/同刻再调一次不重复"三条各有独立断言；
+1. 假 sleeper + 注入时钟下，`scheduler_tick` 的三条各有独立断言：到点该触发、不到点不该、**同一瞬间连喂两次就重复触发两次**（腿 N2 现读 `hits=2`，参照不去重 ⇒ 本库同形，这条断言钉的是"确实会重复"，不是"不重复"）；
 2. **阳性对照**：把一个栅格算坏（例如去掉"秒对齐"），上述判据必须转红——"tick 恒返回 0"是自欺，不是通过；
 3. 真事件循环只在 wasm/js 两档各做一次抽样：注册一条秒级表达式，确认确实执行过（异步语义不因摘档而漏测）。
 
@@ -55,7 +55,7 @@
 | #24.16 `type Sleeper = async (Int) -> Unit` | 时延源注入口 | 无对位（参照是 `Thread` 睡眠） | 本包能脱离计时依赖被评审的前提 |
 | #24.17 `struct Scheduler` + `scheduler_new` | 调度器 | `Scheduler` 现读字段面 `config`/`started`/`daemon`/`timer`/`taskTable`/两 manager/`listenerManager`/`threadExecutor` | 只保留 `table`/`config`/`started` 三件语义面 |
 | #24.18 `scheduler_tick(s) -> Int` | 跑一拍（不循环） | `executeTaskIfMatch` 整体 | 返回执行条数；时刻取自注入时钟 ⇒ 可测 |
-| #24.19 `scheduler_start` / `scheduler_stop` / `scheduler_is_started` | 启停与状态 | `CronUtil.start`/`stop` + `Scheduler.started` | `start` 是全仓唯一使用 async 定时器处；stop 时执行中的任务是否跑完**待拍**（§6 P2） |
+| #24.19 `scheduler_start` / `scheduler_stop` / `scheduler_is_started` | 启停与状态 | `CronUtil.start`/`stop` + `Scheduler.started` | `start` 是全仓唯一使用 async 定时器处；任务体异常**吞掉**（跟随参照，§6 P1）、`stop` **不等不切**（§6 P2）、同 unit 内**不去重**（§6 N2） |
 | #24.20 `suberror SchedError { UnknownTask \| DuplicatedTask \| BadCron }` | 错误三档 | `CronException extends RuntimeException`（只带消息） | 消息不进契约；`DuplicatedTask` 是否可达取决于 §6 N1，不可达就撤档 |
 
 ## 4. 本库改判（逐条给理由，不给"统一口径"这种话）
@@ -65,7 +65,8 @@
    本包与其同源，避免"一个库两套时刻轴"。
 3. 默认区不跟随"读宿主"这条隐式路径写进判据：参照 `CronPattern.match(millis)` 内部 `new DateTime(millis)`
    即宿主默认区，而 boot2 侧靠 `CronUtil` 灌入的表达式钉住行为——本包把区名做成显式配置项（#24.2）。
-4. `table_ids` 承诺插入序：参照是 `List`，其序由 `add`/`remove` 维护，行为待腿核；先钉本库形状。
+4. `table_ids` 承诺插入序：参照是 `List`（腿 N1 现读 `ids=[dup]`、`add` 追加/`remove` 删除 ⇒ 插入序与参照同形，这一条其实不是改判，只是把序显式写成承诺）。
+5. **语义层零改判**（10-09 owner 定，覆盖 P1/N2/P2 三条）：吞异常、不去重、stop 不等不切，一律与 hutool 同形。本包留在契约里的差异只有**结构层**——`execute` 写 `async`（§4 第 1 行）、时刻入参用 `DateTime`（第 2 行）、区名显式化（第 3 行）、无全局单例、判定与执行劈成两件（#24.13 与 #24.18）。
 
 ## 5. 不收清单（每条带现读理由）
 
@@ -88,9 +89,9 @@
 | # | 事项 | 参照侧读数（腿） | 本库处置 |
 |---|---|---|---|
 | N1 | 重复 id 的 `add` | `CronException: Id [dup] has been existed!`；表**原样不动**（`size=1`、`ids=[dup]`、三条 List 各 1、`getTask` 仍是第一个、`getPattern` 仍是第一个） | **跟随**：`table_add` 对重复 id `raise DuplicatedTask(id)`，且失败后表不变。`DuplicatedTask` 这一档由"可能不可达"转成**在案可达**（§3 那条 note 就地作废） |
-| P1 | 任务体抛异常 | 异常**不外漏**：换了 `UncaughtExceptionHandler` 也收到 `surfaced=none`；抛异常那条与同期正常那条**都照常按秒续触发**（`boomHits=4` / `okHits=4`） | **待拍 P1**：本库缺省不吞（任务体的错该让调用方看见），但这条现在有了参照侧真读数，改判要明写在 §4；若加"吞掉"开关，两种形状都得有测试 |
+| P1 | 任务体抛异常 | 异常**不外漏**：换了 `UncaughtExceptionHandler` 也收到 `surfaced=none`；抛异常那条与同期正常那条**都照常按秒续触发**（`boomHits=4` / `okHits=4`） | **跟随参照**（10-09 owner 定：参照侧语义必须与 hutool 一致，本库不自创）：任务体抛出的错误在 `tick` 里被忽略，调度照常继续。代价要写明白——本库没有日志通道，所以这里是**静默丢弃**，不像参照还能进它的 `Log`；要可见只能靠第二批收 `listener` 族（对位 `TaskListener.onFailed(TaskExecutor, Throwable)`，见 §5 那一行），**新挂 P9 待拍** |
 | P2 | `stop` 撞上执行中的任务 | 任务体睡 1800 ms、900 ms 处 `stop`，结果 `hits=1` **`done=1`** ⇒ 参照**不打断**在跑的任务，放完再收 | **跟随**：`scheduler_stop` 只摘后续定时器、不等不切；本库这条从"待拍"转为已定（要"等到跑完"的语义另说，参照没有） |
-| N2 | 同一毫秒连喂两次 `executeTaskIfMatch` | `hits=2` ⇒ **重复触发**。参照的去重不在匹配路径上：`spawnExecutor` 每次都新建一个 `TaskExecutor` 丢进线程池，秒对齐只发生在 `CronTimer.run` 的唤醒时刻 `(now / unit + 1) * unit`（`unit` 由 `matchSecond` 取 1000 或 60000） | **待拍 P8**（新）：本库 `scheduler_tick` 是公开件、调用方可能随手多调，重复执行的副作用不可逆。两案——① 跟随参照（不去重，去重责任推给调用方的 tick 对齐）；② 改判（`tick` 记住每条的"上次已触发瞬间"，同 unit 内幂等）。建议 ②，代价是多一个内部状态，需在 §3 补一件判据 |
+| N2 | 同一毫秒连喂两次 `executeTaskIfMatch` | `hits=2` ⇒ **重复触发**。参照的去重不在匹配路径上：`spawnExecutor` 每次都新建一个 `TaskExecutor` 丢进线程池，秒对齐只发生在 `CronTimer.run` 的唤醒时刻 `(now / unit + 1) * unit`（`unit` 由 `matchSecond` 取 1000 或 60000） | **跟随参照，P8 已闭**（10-09 owner 定）：`scheduler_tick` **不做幂等、不去重**，同 unit 内重复喂同一瞬间就重复执行。原本我建议"记住上次已触发瞬间"是自创语义，撤。调用方要防重复，责任在它自己的唤醒对齐上（参照也是这么做的：`CronTimer.run` 的 `(now / unit + 1) * unit`） |
 
 ⚠ 本轮更正一条我自己写错的读数：先前把"秒栅格 `millis / 1000 * 1000`"记在 `TaskTable.executeTaskIfMatch`
 上，`javap -c` 现读否掉了——匹配路径直接拿原始 `millis` 调 `CronPattern.match(TimeZone, long, boolean)`，
