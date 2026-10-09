@@ -383,6 +383,96 @@ else
   bad "G17 自身失效：三档对照没全过——这条判据不可信（见下）"; sed -n '1,10p' /tmp/mh_vacuous_self.log | sed 's/^/    /'
 fi
 
+
+echo "== G18 裸读 OS 时钟的收口闸（10-09 拍 P7：「可注入」必须是结构，不能只是约定）=="
+# 现读：全仓**代码里**裸读 @env.now() 的只有一处——date/date.mbt 的 now_millis()（该件注释自述"全库唯一"）。
+# 本轮第一次跑这条闸时被两处**注释文本**误报（sched 的"也不裸读 @env.now()"、id 的 spec 引文），
+# 所以判据必须先剥注释再数——否则闸会在文档句上造假红。
+# 闸的作用不是"证明这一处对"，而是**新增第二处就红**；上限按文件计数，防止在白名单文件里再加一处。
+if python - <<'PY'
+import io, os, re, shutil, subprocess, sys
+
+ROOT = subprocess.run(["git", "rev-parse", "--show-toplevel"],
+                      capture_output=True, text=True).stdout.strip()
+CAP = re.compile(r"@?env\.now\(\)")
+# 白名单 = 文件 → 允许出现的裸读处数上限（现读各 1）
+ALLOW = {"date/date.mbt": 1}
+SKIP_DIRS = {"_build", ".mooncakes", ".git", "docs", "scripts", "node_modules"}
+
+
+def sites(base):
+    """{相对路径: 裸读命中次数}"""
+    out = {}
+    for dirpath, dirnames, filenames in os.walk(base):
+        dirnames[:] = [d for d in dirnames
+                       if d not in SKIP_DIRS and not d.startswith("_g18_fixture")]
+        for fn in filenames:
+            if not fn.endswith(".mbt"):
+                continue
+            full = os.path.join(dirpath, fn)
+            rel = os.path.relpath(full, base).replace("\\", "/")
+            text = io.open(full, encoding="utf-8", errors="replace").read()
+            # 剥注释：整行注释 + 行尾注释都不算代码点
+            kept = []
+            for line in text.splitlines():
+                s = line.strip()
+                if s.startswith("//"):
+                    continue
+                cut = line.find("//")
+                kept.append(line[:cut] if cut >= 0 else line)
+            n = len(CAP.findall(chr(10).join(kept)))
+            if n:
+                out[rel] = n
+    return out
+
+
+def violations(found, allow):
+    bad = []
+    for rel, n in sorted(found.items()):
+        if rel not in allow:
+            bad.append("未登记的裸读点 %s（%d 处）" % (rel, n))
+        elif n > allow[rel]:
+            bad.append("%s 裸读 %d 处，超过上限 %d" % (rel, n, allow[rel]))
+    return bad
+
+
+found = sites(ROOT)
+rc = 0
+
+# 三档自证：缺一档这条判据就是许愿池
+#  ① 坏样本必须被抓（在临时目录造一处裸读）
+fx = os.path.join(ROOT, "_g18_fixture_probe")
+os.makedirs(fx, exist_ok=True)
+io.open(os.path.join(fx, "bad.mbt"), "w", encoding="utf-8").write(
+    '///|\npub fn sneaky() -> UInt64 {\n  @env.now()\n}\n')
+if not violations(sites(fx), {}):
+    print("  FAIL G18 自身失效：造了一处裸读却没被抓到")
+    rc = 1
+#  ② 白名单本身不许误报
+if violations(found, ALLOW):
+    print("  FAIL 白名单被误报（判据与现读不符）：%s" % violations(found, ALLOW))
+    rc = 1
+#  ③ 上限那一档必须真起作用（把上限调成 0 ⇒ 必须报红）
+if not violations(found, {"date/date.mbt": 0}):
+    print("  FAIL G18 自身失效：把上限调成 0 仍不报红，「按文件计数」这半条是摆设")
+    rc = 1
+shutil.rmtree(fx, ignore_errors=True)
+
+real = violations(found, ALLOW)
+if real:
+    print("  FAIL 裸读 OS 时钟超出登记：%s" % "；".join(real))
+    rc = 1
+else:
+    print("  PASS 裸读点仍在登记的 %d 处白名单内（%s）"
+          % (len(ALLOW), ", ".join("%s<=%d" % (k, v) for k, v in sorted(ALLOW.items()))))
+print("     （现读命中明细：%s）" % (", ".join("%s:%d" % (k, v) for k, v in sorted(found.items())) or "无"))
+sys.exit(rc)
+PY
+then ok "G18 绿"
+else bad "G18 红（见上）"
+fi
+
+
 echo
 if [ "$FAILS" = "0" ]; then
   echo "GATE GREEN：0 失败，$SKIPS 项 SKIP（SKIP 不等于通过，逐条看理由）"

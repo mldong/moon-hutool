@@ -34,7 +34,7 @@
 跨栈矩阵**不含**本包：现读 `scripts/contract-tests/contract_runner.py` 无 timer 用例，
 "调度真的触发"不是 13 栈契约格。所以本包的验收线全部在仓内，不要拿矩阵绿当调度绿。
 
-## 3. 公开面台账（PR-A：签名即契约，体一律 `abort`）
+## 3. 公开面台账（10-09 已落地；`abort` 与包级豁免同笔撤掉）
 
 | 件 | 语义 | hutool 对位（`javap -p` 现读） | 边界 / 差异 |
 |---|---|---|---|
@@ -100,6 +100,37 @@
 
 | P5 | `cron_expr` 独立包建不建 | **已拍（10-09）：不建**。`sched` 已经依赖 `cron`+`date`，拆包不会让它少一个依赖，只会多出一份要靠比对门禁按住的重复实现；`docs/spec/25-cron_expr.md` 作决策留痕保留，逐包表第 25 行保持未开工 |
 | P10 | 落地后要不要同轮接进 mldong-moon 的 `sys/timer` | **已拍（10-09）：先不接**，本包按库收口。现读 `scripts/contract-tests/contract_runner.py` 没有 timer 用例 ⇒ 跨栈矩阵不含调度触发；接进去等于改一栈的运行行为，且要先跟 boot2 `TimerTaskRunListener` 的「启动灌表 + start」逐件对表，另开一单 |
+
+## 8. 落地轮读数（10-09，两档真跑）
+
+- 用例：`Total tests: 12, passed: 12, failed: 0`，wasm 与 js 两档各跑一遍同读数；零警告。
+  前三块是 PR-A 的形状级恒等式，后九块是 spec §2 验收线的判据（到点 / 不到点 / 同瞬间连喂两次就执行两次 /
+  唤醒对齐 / 缺省吞异常与注册回调 / 摘除后三条数组同步收缩 / 改表达式 / 重复 id 抛且表不变 / 坏表达式 raise）。
+- **变异对照 7 条全抓到**（在副本里打，不碰共享树；每条都断言"文件确实变了"再跑）：
+
+  | 变异 | 结果 |
+  |---|---|
+  | 匹配恒真（`cron_match` 之后 `|| true`） | 1 块红（不到点那条） |
+  | 匹配取反 | 5 块红 |
+  | 任务异常不再吞（去掉 catch） | 1 块红（on_failed 那条） |
+  | `unit` 随 `match_second` 取反 | 1 块红（唤醒对齐那条） |
+  | 对齐算式去掉 `+1` | 1 块红 |
+  | 摘除时数组不收缩（少一次 `pop`） | 1 块红 |
+  | 重复 id 不查（不 raise） | 1 块红 |
+
+  第五条的第一版形态**不是红而是挂住**：那时实现写成 `if wait > 0 { sleeper(wait) }`，去掉 `+1` 后
+  `wait` 恒 0 ⇒ sleeper 永不调用 ⇒ 循环永不退出，测试被超时杀掉（exit 143）。"不收敛"和"报红"是两种
+  失效形状，前者在 CI 上表现为挂钟而不是失败。因此实现改成**无条件让出一次**（`wait<=0` 时喂 0），
+  这条变异才落成干净的一块红——顺带去掉了一处忙轮询。
+- 真事件循环抽样（§2 第 3 条）：一次性探针件（跑完即删，不进常跑套件，避免计时依赖）
+  在 wasm 与 js 两档各测得 `sleeps=2 hits=1`，走的是 `default_clock()` + `default_sleeper` 的真等待。
+- 本版编译器三条裁决（撞到才写，不靠记忆）：
+  ① `Sleeper = async (Int) -> Unit` **不收**普通函数值（"has type (Int) -> Unit, wanted async (Int) -> Unit"），
+  而空转的 `async fn` 吃 `unused_async` ⇒ 假 sleeper 必须真 await 一手（用本包 `default_sleeper(0)`）；
+  ② 实现 trait 方法时**不写** `async`（照 `mldong-moon` 的 `DevQueryApi` 实现形状），与 ① 不同形；
+  ③ 调用方要能构造 `CronConfig` ⇒ 必须 `pub(all) struct`（普通 `pub struct` 判 read-only type）。
+  另：`Array::to_string()` 走已废弃的 `Show` ⇒ 断言直接比数组；本版没有 `Array::remove_at`，
+  摘除走"前移一位 + `pop`"。
 
 ## 7. 门禁影响（口径翻案的机械部分）
 

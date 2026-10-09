@@ -35,7 +35,7 @@
 | `csv` | `CsvReader` / `CsvWriter` | RFC 4180 读写，API 只收 `String`/`Bytes`，不碰文件 |
 | `ini` | `Props` / `GroupedMap` / `SettingLoader` | INI 面 + `Props` 的 Java Properties 严格语义（含畸形 `\u` 的错误档） |
 | `typex` | `Version` / `PageUtil` / `Ipv4Util` / `DataSize` / `DesensitizedUtil` / `IdcardUtil` / `CreditCodeUtil` / `PhoneUtil` / `CoordinateUtil` | 109 件：版本序、分页、IPv4 族、手机/固话/港澳台号码族、统一社会信用代码、身份证校验与切片、数据容量与格式化、脱敏、坐标换算 |
-| `sched` | hutool-cron 的调度族（`TaskTable` / `Scheduler` / `CronUtil` 面） | **契约已冻结（PR-A 骨架，函数体未实现、无测试文件；件数现读 `sched/pkg.generated.mbti`）**：任务表三条并行键值 + `due_indices`（给定此刻该触发哪几条，纯函数）+ `scheduler_tick`/`start`/`stop` 触发壳；时钟与时延源一律注入。对位关系全部由 `javap -p` 现读 `hutool-cron-5.8.35.jar` 支撑，据此撤掉两处凭空对位（参照侧无 `CronStatus` 枚举、无 `TaskInfo` 类）；线程/反射/监听器/时间轮四族明写不收。契约 `docs/spec/24-sched.md` |
+| `sched` | hutool-cron 的调度族（`TaskTable` / `Scheduler` / `CronUtil` 面） | **已实现（12 块用例全绿，wasm/js 两档；件数现读 `sched/pkg.generated.mbti`）**：任务表三条并行键值 + `due_indices`（给定此刻该触发哪几条，纯函数）+ `scheduler_tick`/`start`/`stop` 触发壳；时钟与时延源一律注入。对位关系全部由 `javap -p` 现读 `hutool-cron-5.8.35.jar` 支撑，据此撤掉两处凭空对位（参照侧无 `CronStatus` 枚举、无 `TaskInfo` 类）；线程/反射/监听器/时间轮四族明写不收。契约 `docs/spec/24-sched.md` |
 
 明确的精度与能力承诺变化点（详见各 spec）：
 

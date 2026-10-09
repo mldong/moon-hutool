@@ -8,11 +8,17 @@ import {
 // Values
 pub fn config_default() -> CronConfig
 
+pub fn default_clock() -> () -> Int64
+
+pub async fn default_sleeper(Int) -> Unit
+
 pub fn due_indices(TaskTable, CronConfig, @date.DateTime) -> Array[Int]
 
 pub fn scheduler_is_started(Scheduler) -> Bool
 
 pub fn scheduler_new(TaskTable, CronConfig, () -> Int64, async (Int) -> Unit) -> Scheduler
+
+pub fn scheduler_on_failed(Scheduler, (String, Error) -> Unit) -> Unit
 
 pub async fn scheduler_start(Scheduler) -> Unit
 
@@ -46,7 +52,7 @@ pub suberror SchedError {
 }
 
 // Types and methods
-pub struct CronConfig {
+pub(all) struct CronConfig {
   match_second : Bool
   zone : String
 }
