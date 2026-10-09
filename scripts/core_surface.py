@@ -34,6 +34,30 @@ OUT = "docs/spec/core-surface.tsv"
 MANIFEST = "docs/spec/hutool-classes.tsv"   # 类面清单（离线判据的真相源），由 --write 生成
 REF_VERSION = "5.8.37"                      # census 参照版本；与清单/ jar 不一致 ⇒ 红
 CORE_PREFIX = "cn.hutool.core."
+DOC_CANON = "docs/spec/00-hutool-map.md"     # 对位参照实现的唯一口径声明处
+VER_MARK = re.compile(r"hutool-reference-version:\s*([0-9][0-9.]*)")
+
+
+def doc_declared_version(path=None):
+    """从对外口径那份文档里取声明的 hutool 版本；没有标记 ⇒ None（不是"放过"）。"""
+    p = path or DOC_CANON
+    if not os.path.isfile(p):
+        return None
+    m = VER_MARK.search(io.open(p, encoding="utf-8", errors="replace").read())
+    return m.group(1) if m else None
+
+
+def check_doc_version(declared=None):
+    """口径三处必须同版：脚本常量 REF_VERSION、仓内类面清单头、对外声明。
+    10-09 owner 拍"统一一个版本"——统一之后就得有机器的"一个"，否则又是一句人治。"""
+    ver = declared if declared is not None else doc_declared_version()
+    if ver is None:
+        return False, ("`%s` 里没有 `hutool-reference-version:` 声明 ⇒ 无法核对口径，"
+                       "拒判通过" % DOC_CANON)
+    if ver != REF_VERSION:
+        return False, ("对外声明的参照版本 %r ≠ 脚本口径 REF_VERSION %r"
+                       "（要换版一起换：常量 + 清单 --write + 那句声明）" % (ver, REF_VERSION))
+    return True, None
 
 # 运行期解析出来的类面来源（active_classes 填），None 表示本轮没取到任何一边
 _ACTIVE = {"classes": None, "source": None, "version": None}
@@ -344,15 +368,23 @@ def resolve_source(jar):
         good, why = check_version(ver)
         _ACTIVE.update(classes=classes_from_jar(jar), source='jar ' + os.path.basename(jar),
                        version=ver)
-        return (False, why if ver else version_note(jar)) if not good else (True, None)
+        if not good:
+            return False, why if ver else version_note(jar)
+        dok, dwhy = check_doc_version()
+        return (False, dwhy) if not dok else (True, None)
     cls, ver, _sha = read_manifest()
     if cls is None:
         return None, None
     if not cls:
         return False, '清单里一条类都没有（生成物被改坏？）'
     good, why = check_version(ver)
+    if not good:
+        return False, why
+    dok, dwhy = check_doc_version()
+    if not dok:
+        return False, dwhy
     _ACTIVE.update(classes=cls, source='清单 ' + MANIFEST, version=ver)
-    return (False, why) if not good else (True, None)
+    return True, None
 
 
 def jar_version(jar):
@@ -469,10 +501,14 @@ def selftest_version():
     bad1 = not check_version("5.8.35")[0]
     bad2 = not check_version(jar_version("hutool-all-9.9.9.jar"))[0]
     ver = read_manifest()[1]
-    if good and bad1 and bad2 and ver == REF_VERSION:
+    dok, _ = check_doc_version()
+    dbad = not check_doc_version("5.8.35")[0]      # 声明被写回旧版必须被抓
+    dmissing = not check_doc_version("")[0]        # 声明被删掉也不许当通过
+    if good and bad1 and bad2 and ver == REF_VERSION and dok and dbad and dmissing:
         return 1
-    print("  FAIL 自检④：版本判据不可信（放行对版=%s / 抓 5.8.35=%s / 抓 9.9.9=%s / 清单版本=%r≠%r）"
-          % (good, bad1, bad2, ver, REF_VERSION))
+    print("  FAIL 自检④：版本判据不可信（放行对版=%s / 抓 5.8.35=%s / 抓 9.9.9=%s / 清单版本=%r≠%r"
+          " / 对外声明=%s / 声明改旧版被抓=%s / 声明被删被抓=%s）"
+          % (good, bad1, bad2, ver, REF_VERSION, dok, dbad, dmissing))
     return 0
 
 
