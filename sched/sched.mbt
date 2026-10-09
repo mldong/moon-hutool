@@ -64,7 +64,8 @@ pub fn table_new() -> TaskTable {
 ///|
 /// #24.5 登记任务（显式 id）。对位 `TaskTable.add(id, CronPattern, Task)`，
 /// cron 文本在本包边界处解析成 `@cron.Cron`（解析失败出 `BadCron`）
-/// - Note: 重复 id 时参照给"静默覆盖"还是报错，**javap 读不出行为** ⇒ 判据待腿核（spec §6 腿 N1）
+/// - Note: 重复 id 时参照**抛错且表原样不动**（腿 N1 现读：`CronException: Id [dup] has been existed!`，
+///   `size`/`ids`/三条 List 都不变，第一个 task 与 pattern 保留）⇒ 本库跟随，见 spec §6 N1
 pub fn table_add(
   t : TaskTable,
   id : String,
@@ -223,8 +224,7 @@ pub fn scheduler_is_started(s : Scheduler) -> Bool {
 ///|
 /// #24.20 本包错误三档。对位参照的 `CronException`（现读：`RuntimeException` 的子类，只带消息）——
 /// 按"消息不进契约、档位进契约"的既有规矩拆三件
-/// - Note: `DuplicatedTask` 是否真会被抛出，取决于 #24.5 那条待腿核的判据 ⇒ 腿回来若证明参照是
-///   静默覆盖，这一档按"不可观测就撤"处理，不留死档
+/// - Note: `DuplicatedTask` 已在案可达（腿 N1 现读：重复 id 参照抛 `CronException` 且表不变）
 pub suberror SchedError {
   UnknownTask(String)
   DuplicatedTask(String)

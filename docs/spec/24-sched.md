@@ -82,11 +82,19 @@
 
 ## 6. 待拍 / 待腿核
 
-| # | 事项 | 现状 |
-|---|---|---|
-| P1 | 任务体抛错的语义：参照 `TaskExecutor.runTask` **catch 全部异常只记日志**；本库缺省不吞。要不要提供"吞掉"开关（对齐 boot2 那种常驻服务不因一次任务失败中断） | **待拍**（建议：缺省不吞 + 可选一键吞，两者都必须有测试形状） |
-| P2 | `scheduler_stop` 时执行中的任务是否跑完 | 待拍，与 `listener` 是否重开联动 |
-| N1 | 重复 id 的 `add`：覆盖还是报错 | `javap` 读不出行为 ⇒ 待腿核；`DuplicatedTask` 这一档的存废由它决定 |
+读数来源：`scripts/Cron5Leg.java`（真跑 JVM，参照 jar 与仓内版本同号 5.8.35；jar 不提交）。
+下面 §5 之外新添的"同刻重复触发"一条是**本轮腿照出来的**，`javap` 看不出来。
+
+| # | 事项 | 参照侧读数（腿） | 本库处置 |
+|---|---|---|---|
+| N1 | 重复 id 的 `add` | `CronException: Id [dup] has been existed!`；表**原样不动**（`size=1`、`ids=[dup]`、三条 List 各 1、`getTask` 仍是第一个、`getPattern` 仍是第一个） | **跟随**：`table_add` 对重复 id `raise DuplicatedTask(id)`，且失败后表不变。`DuplicatedTask` 这一档由"可能不可达"转成**在案可达**（§3 那条 note 就地作废） |
+| P1 | 任务体抛异常 | 异常**不外漏**：换了 `UncaughtExceptionHandler` 也收到 `surfaced=none`；抛异常那条与同期正常那条**都照常按秒续触发**（`boomHits=4` / `okHits=4`） | **待拍 P1**：本库缺省不吞（任务体的错该让调用方看见），但这条现在有了参照侧真读数，改判要明写在 §4；若加"吞掉"开关，两种形状都得有测试 |
+| P2 | `stop` 撞上执行中的任务 | 任务体睡 1800 ms、900 ms 处 `stop`，结果 `hits=1` **`done=1`** ⇒ 参照**不打断**在跑的任务，放完再收 | **跟随**：`scheduler_stop` 只摘后续定时器、不等不切；本库这条从"待拍"转为已定（要"等到跑完"的语义另说，参照没有） |
+| N2 | 同一毫秒连喂两次 `executeTaskIfMatch` | `hits=2` ⇒ **重复触发**。参照的去重不在匹配路径上：`spawnExecutor` 每次都新建一个 `TaskExecutor` 丢进线程池，秒对齐只发生在 `CronTimer.run` 的唤醒时刻 `(now / unit + 1) * unit`（`unit` 由 `matchSecond` 取 1000 或 60000） | **待拍 P8**（新）：本库 `scheduler_tick` 是公开件、调用方可能随手多调，重复执行的副作用不可逆。两案——① 跟随参照（不去重，去重责任推给调用方的 tick 对齐）；② 改判（`tick` 记住每条的"上次已触发瞬间"，同 unit 内幂等）。建议 ②，代价是多一个内部状态，需在 §3 补一件判据 |
+
+⚠ 本轮更正一条我自己写错的读数：先前把"秒栅格 `millis / 1000 * 1000`"记在 `TaskTable.executeTaskIfMatch`
+上，`javap -c` 现读否掉了——匹配路径直接拿原始 `millis` 调 `CronPattern.match(TimeZone, long, boolean)`，
+对齐在 `CronTimer.run`。这条更正也说明 §2 验收线里"同刻再调一次不重复"当时是**按我的设想写的，不是参照行为**。
 
 ## 7. 门禁影响（口径翻案的机械部分）
 
