@@ -1,9 +1,10 @@
 # moon-hutool
 
-MoonBit 版 [hutool](https://github.com/chinabugotech/hutool) 风格工具库。**零第三方依赖**：只依赖随编译器发布的 `moonbitlang/core`。
+MoonBit 版 [hutool](https://github.com/chinabugotech/hutool) 风格工具库。**零第三方依赖**：只依赖随编译器发布的 `moonbitlang/core`；全库唯一一条例外是 `sched` 包引官方的 `moonbitlang/async`（触发面绕不开事件循环），代价明写在 `docs/spec/24-sched.md` §1，判据见下面那节第 1、3 条。
 
 ```toml
-# moon.mod（本库无需任何 import 依赖声明）
+# moon.mod —— 本库的 import 段有且仅有下面这一条，它就是那条例外的全部形状
+import { "moonbitlang/async@0.22.4" }
 ```
 
 ## 文档索引
@@ -15,7 +16,7 @@ MoonBit 版 [hutool](https://github.com/chinabugotech/hutool) 风格工具库。
 | **某包的契约表**（签名/边界/差异/读数来源/血统） | [`docs/spec/01-text.md`](https://github.com/mldong/moon-hutool/blob/master/docs/spec/01-text.md)（text）· [`docs/spec/02-digest.md`](https://github.com/mldong/moon-hutool/blob/master/docs/spec/02-digest.md)（digest）· [`docs/spec/03-date.md`](https://github.com/mldong/moon-hutool/blob/master/docs/spec/03-date.md)（date）· [`docs/spec/04-id.md`](https://github.com/mldong/moon-hutool/blob/master/docs/spec/04-id.md)（id）· [`docs/spec/05-codec.md`](https://github.com/mldong/moon-hutool/blob/master/docs/spec/05-codec.md)（codec）· [`docs/spec/06-coll.md`](https://github.com/mldong/moon-hutool/blob/master/docs/spec/06-coll.md) · [`docs/spec/07-mapx.md`](https://github.com/mldong/moon-hutool/blob/master/docs/spec/07-mapx.md) · [`docs/spec/08-num.md`](https://github.com/mldong/moon-hutool/blob/master/docs/spec/08-num.md) · [`docs/spec/09-conv.md`](https://github.com/mldong/moon-hutool/blob/master/docs/spec/09-conv.md) · [`docs/spec/10-re.md`](https://github.com/mldong/moon-hutool/blob/master/docs/spec/10-re.md) · [`docs/spec/11-valid.md`](https://github.com/mldong/moon-hutool/blob/master/docs/spec/11-valid.md) · [`docs/spec/12-rand.md`](https://github.com/mldong/moon-hutool/blob/master/docs/spec/12-rand.md) ——**文件名序号＝该包在 ROADMAP 逐包表里的行号**（稳定 ID，不是排名；G13 守）。**这一行不写状态**：状态只在下面的生成物读数块与 `docs/ROADMAP.md` 里，两处各写一遍必漂（G11 拦这个） |
 | **某包怎么用**（可执行示例，跑在 CI 里） | [`text/README.mbt.md`](https://github.com/mldong/moon-hutool/blob/master/text/README.mbt.md) · [`digest/README.mbt.md`](https://github.com/mldong/moon-hutool/blob/master/digest/README.mbt.md) · [`date/README.mbt.md`](https://github.com/mldong/moon-hutool/blob/master/date/README.mbt.md) · [`id/README.mbt.md`](https://github.com/mldong/moon-hutool/blob/master/id/README.mbt.md) · [`codec/README.mbt.md`](https://github.com/mldong/moon-hutool/blob/master/codec/README.mbt.md) · [`coll/README.mbt.md`](https://github.com/mldong/moon-hutool/blob/master/coll/README.mbt.md) · [`mapx/README.mbt.md`](https://github.com/mldong/moon-hutool/blob/master/mapx/README.mbt.md) · [`num/README.mbt.md`](https://github.com/mldong/moon-hutool/blob/master/num/README.mbt.md) · [`conv/README.mbt.md`](https://github.com/mldong/moon-hutool/blob/master/conv/README.mbt.md) · [`re/README.mbt.md`](https://github.com/mldong/moon-hutool/blob/master/re/README.mbt.md) · [`valid/README.mbt.md`](https://github.com/mldong/moon-hutool/blob/master/valid/README.mbt.md) · [`rand/README.mbt.md`](https://github.com/mldong/moon-hutool/blob/master/rand/README.mbt.md)；首发后也能在 mooncakes 包页看（**截至本文尚未首发**，链接待发版生效）：[mldong/moon-hutool/text](https://mooncakes.io/docs/mldong/moon-hutool/text) |
 | **贡献规范与两条红线** | [`AGENTS.md`](https://github.com/mldong/moon-hutool/blob/master/AGENTS.md)（交付形状、与 core 的边界、期望值冻结、文档三层分工、本机语法坑） |
-| **门禁判据 G1~G17** | [`scripts/contract_gate.sh`](https://github.com/mldong/moon-hutool/blob/master/scripts/contract_gate.sh) · CI 见 [`.github/workflows/ci.yml`](https://github.com/mldong/moon-hutool/blob/master/.github/workflows/ci.yml) |
+| **门禁判据 G1~G18** | [`scripts/contract_gate.sh`](https://github.com/mldong/moon-hutool/blob/master/scripts/contract_gate.sh) · CI 见 [`.github/workflows/ci.yml`](https://github.com/mldong/moon-hutool/blob/master/.github/workflows/ci.yml) |
 
 > 本表里的仓内链接一律写成 GitHub 绝对地址：发布包根是模块目录，相对路径在 mooncakes 页面上是死链（这条由门禁 G10 盯着，索引不许漂成死链）。
 
@@ -40,9 +41,9 @@ MoonBit 版 [hutool](https://github.com/chinabugotech/hutool) 风格工具库。
 
 四条硬判据，CI 逐条跑：
 
-1. `moon tree --json` 输出里除 `moonbitlang/core/*` 外**零节点**；`moon.mod` 无 `deps`（**`moonbitlang/async` 也算第三方**，本库不许出现）；
+1. `moon tree --json` 的 `modules[]` 里除本仓与 `moonbitlang/core` 之外**只许出现 `moonbitlang/async` 一个节点**，且 `moon.mod` 的 import 段有且仅有那一条；除此之外任何 registry 依赖（官方的 `moonbitlang/x` 也在内）都判红。这条腿自己带阳性对照（塞一个假第三方必须被抓）与"一个节点都没读到就判红"——它 10-09 之前就在走一种 `moon tree` 根本不输出的嵌套形状，于是一直空转报绿；
 2. 全仓 `grep 'extern "'` 命中 0 —— 不写任何 JS/C/WASI 绑定；
-3. 全库**同步、无 async** ⇒ 同一份 API 在 `wasm` / `wasm-gc` / `js` / `native` 四档都能编译；
+3. 除 `sched` 之外全库**同步、无 async** ⇒ 其余每个包的同一份 API 在 `wasm` / `wasm-gc` / `js` / `native` 四档都能编译；`sched` 因为要事件循环只承诺三档，第四档由包级 `supported_targets` 摘掉（实测：`moon check --target wasm-gc` 编得过，但 `moon run`/`moon test` 在该档报 `[4021] Value run_async_main not found`——"编得过"不等于"跑得动"）；
 4. OS 能力只走 core 给的三扇窗：`@env.now()`（epoch 毫秒）、`@env.rand(n)`、`@env.get_env_var(k)`（10-07 第五批加，宿主时区只能从 `TZ` 拿）；三扇窗**都必须可覆盖或可注入**——时钟走 `date.clock_fixed`，默认区走 `date.set_default_zone`。`read_file`、网络、宿主 API 仍在禁令里。
 
 推论：文件 IO、网络、HTTP 客户端、字符集码表这类能力**结构上就不属于本库**——它们需要 FFI。（Java 的 `hutool-core` 是 JDK-only，本库是 `moonbitlang/core`-only，定位同构。）
