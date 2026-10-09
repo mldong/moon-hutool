@@ -1,0 +1,25 @@
+// PR-A 骨架期豁免（体全是 `abort` ⇒ 包没人用、异步注解没人等、结构体没人构造、字段没人读、
+// 错误变体没人构造且 raise 没人抛，那几类警告是"未实现"的机械后果，按 G12 压掉；
+// 键只能出现一次、flag 连写不带空格/逗号，落地那一笔整行删除）
+warnings = "-unused_package-unused_async-struct_never_constructed-unused_field-unused_value-unused_error_type-unused_constructor"
+
+// 全仓唯一 import moonbitlang/async 的包（口径翻案的落点与代价见 docs/spec/24-sched.md §1）：
+//   cron  —— 表达式与"下一条匹配时刻"全在它，本包不重算字段进位（spec §2 第 3 条）
+//   date  —— 时刻类型与时钟注入口同形（#24.4）
+import {
+  "moonbitlang/async",
+  "mldong/moon-hutool/cron",
+  "mldong/moon-hutool/date",
+}
+
+// 本包只承诺三档。wasm-gc 档 async **没有可执行入口**：实测 `moon run --target wasm-gc` 报
+// `[4021] Value run_async_main not found in package moonbitlang/async` 且 rc=1（`moon test` 同一条）。
+// 靠 supported_targets 摘掉这一档，而不是让全仓 test 腿在这档炸——代价与判据写在 spec §1 第 3 条。
+
+supported_targets = "+native+wasm+js"
+
+// 黑盒测试侧：用例只走公开面（`@sched.*`），时刻换算借用 `date`
+import {
+  "mldong/moon-hutool/sched",
+  "mldong/moon-hutool/date",
+} for "test"

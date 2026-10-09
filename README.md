@@ -28,8 +28,9 @@ MoonBit 版 [hutool](https://github.com/chinabugotech/hutool) 风格工具库。
 <!-- READINGS:BEGIN 由 scripts/sync_status.py 生成，勿手改 -->
 | 读数（`moon test --target wasm`，当场跑） | 值 |
 |---|---|
-| 用例总数 | **1519** —— 绿 1519 / 红 0 |
-| 包状态 | 共 22 个：`已实现` 22 · `契约已冻结` 0 · `未开工` 0 |
+| 用例总数 | **1523** —— 绿 1519 / 红 4 |
+| 包状态 | 共 23 个：`已实现` 22 · `契约已冻结` 1 · `未开工` 0 |
+| 红的是谁 | `sched`（4 红） —— 未实现的包红是设计态 |
 <!-- READINGS:END -->
 
 逐包的"哪个实现了、哪个在做、哪个暂不做"看 [`docs/ROADMAP.md`](https://github.com/mldong/moon-hutool/blob/master/docs/ROADMAP.md)——它是进度的唯一真相，且每个真实存在的包都必须在那里有一行（门禁 G11 查这条）。
@@ -49,12 +50,12 @@ MoonBit 版 [hutool](https://github.com/chinabugotech/hutool) 风格工具库。
 
 ## 为什么不复用生态里已有的包
 
-`moonbitlang/x`（官方实验库，自述 "may change frequently"）与 `moonbitstack/*`、`moonbit-community/flate` 等已经覆盖日期、加密、压缩、UUID 等一大片。本库仍自带实现，唯一理由是**零依赖契约**：传递依赖一旦进入，跨 runtime 的可移植性与版本解耦就不再由我们保证。README 里把这句话写明白，比对第三方做沉默替换更诚实。
+`moonbitlang/x`（官方实验库，自述 "may change frequently"）与 `moonbitstack/*`、`moonbit-community/flate` 等已经覆盖日期、加密、压缩、UUID 等一大片。本库仍自带实现，理由是**核心包的零依赖契约**：传递依赖一旦进入，跨 runtime 的可移植性与版本解耦就不再由我们保证。唯一的破例是 `sched`（第 24 行）引了官方 `moonbitlang/async`——那是触发面绕不开的事件循环，代价明写在 `docs/spec/24-sched.md` §1：该包只承诺三档、native 由 CI 出证、上游 0.x 的 breaking 由我们背。README 把这两件事都写明白，比对第三方做沉默替换更诚实。
 
 ## 能力对照与不承诺清单
 
 - **对照表**：[`docs/spec/00-hutool-map.md`](https://github.com/mldong/moon-hutool/blob/master/docs/spec/00-hutool-map.md) —— 四列：hutool 类.方法 ｜ core 直接可用（打哪条）｜ 本库补（哪类）｜ 不做
-- **明确不做**：`BeanUtil`/`ReflectUtil`/`MapProxy`/`aop`/`script`（MoonBit **无运行时反射与动态代理**，Bean 拷贝请走内置 `derive(ToJson)/derive(FromJson)` 或手写映射）；`FileUtil`/`IoUtil`/`NetUtil`/`ThreadUtil`（需 FFI）；`http`/`db`/`socket`/`poi`/`captcha`；`DateUtil` 的智能无格式解析与 `java.text` 全套 pattern；Unicode 大小写；完整 `BigDecimal`；cron **调度器**（只算表达式不触发）
+- **明确不做**：`BeanUtil`/`ReflectUtil`/`MapProxy`/`aop`/`script`（MoonBit **无运行时反射与动态代理**，Bean 拷贝请走内置 `derive(ToJson)/derive(FromJson)` 或手写映射）；`FileUtil`/`IoUtil`/`NetUtil`/`ThreadUtil`（需 FFI）；`http`/`db`/`socket`/`poi`/`captcha`；`DateUtil` 的智能无格式解析与 `java.text` 全套 pattern；Unicode 大小写；完整 `BigDecimal`。cron 的表达式面在第 19 行 `cron`，**触发面**在第 24 行 `sched`（全仓唯一依赖官方 `moonbitlang/async` 的包，只承诺三档）
 - **时区那一档已翻案**：`date` 内置 IANA 段表（现读 `date/zone_table.mbt`，603 区、窗口 [1970,2050)），偏移承诺到**整分钟**——窗口内只有 `Africa/Monrovia` 一区两年不是整分钟，已在 spec 里作分岔双栏读数。这里从前写过一句"不支持"，那句过期了，现在由门禁 **G14** 拿 `zone_names`/`zone_offset_minutes` 现读反查拦住
 - **移植来源声明**：本项目移植的是 hutool 的**能力与语义**，实现按外部规范（RFC / FIPS）或独立设计重写，**未复制 Java 源码**。hutool 本体为 MulanPSL-2.0；少数类（`CharSequenceUtil`、`date/format/*`、`ComparatorChain`、`AntPathMatcher`）自带 Apache Commons / Spring 上游署名，本库对应格子按 Apache 系处理（见各 spec 的"血统"列）。
 

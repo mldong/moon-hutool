@@ -9,7 +9,7 @@
 
 ## 未发布（0.1.0 · 首发）
 
-首个对外版本，覆盖 22 个包、用例条数以 `docs/ROADMAP.md` 的生成读数块为准（`moon test --target wasm` 现读，不写死——本节初稿的「672」已被后续补档越过多轮），四目标可编译（wasm / wasm-gc / js / native），零第三方依赖、零 `extern`、全同步。
+首个对外版本，包数与用例条数以 `docs/ROADMAP.md` 的逐包表与生成读数块为准（`moon test --target wasm` 现读，不写死——本节初稿的「672」已被后续补档越过多轮）。**除 `sched` 外**的包零第三方依赖、零 `extern`、全同步、四目标可编译（wasm / wasm-gc / js / native）；`sched` 依赖官方 `moonbitlang/async`（触发面绕不开事件循环），只承诺三档（wasm / js / native），`wasm-gc` 档该依赖没有异步可执行入口（`moon check` 能过，`moon run`／`moon test` 报 `[4021] Value run_async_main not found`），已按包级 `supported_targets` 摘掉那一档。
 
 | 包 | 对位 | 这一版给了什么 |
 |---|---|---|
@@ -35,6 +35,7 @@
 | `csv` | `CsvReader` / `CsvWriter` | RFC 4180 读写，API 只收 `String`/`Bytes`，不碰文件 |
 | `ini` | `Props` / `GroupedMap` / `SettingLoader` | INI 面 + `Props` 的 Java Properties 严格语义（含畸形 `\u` 的错误档） |
 | `typex` | `Version` / `PageUtil` / `Ipv4Util` / `DataSize` / `DesensitizedUtil` / `IdcardUtil` / `CreditCodeUtil` / `PhoneUtil` / `CoordinateUtil` | 109 件：版本序、分页、IPv4 族、手机/固话/港澳台号码族、统一社会信用代码、身份证校验与切片、数据容量与格式化、脱敏、坐标换算 |
+| `sched` | hutool-cron 的调度族（`TaskTable` / `Scheduler` / `CronUtil` 面） | **契约已冻结（PR-A 骨架，函数体未实现、无测试文件；件数现读 `sched/pkg.generated.mbti`）**：任务表三条并行键值 + `due_indices`（给定此刻该触发哪几条，纯函数）+ `scheduler_tick`/`start`/`stop` 触发壳；时钟与时延源一律注入。对位关系全部由 `javap -p` 现读 `hutool-cron-5.8.35.jar` 支撑，据此撤掉两处凭空对位（参照侧无 `CronStatus` 枚举、无 `TaskInfo` 类）；线程/反射/监听器/时间轮四族明写不收。契约 `docs/spec/24-sched.md` |
 
 明确的精度与能力承诺变化点（详见各 spec）：
 
@@ -42,6 +43,7 @@
 - `date` 的内置时区段表改走**基准相对编码**（段起点存 `秒 - 2000-01-01`）：引用命名区的消费者产物从 491,053 B 降到 344,064 B（-147 KB，wasm-gc 实测），只用日历的消费者不受影响（未被引用的表本来就被链接器 DCE 掉，5,845 B 逐字节不变）；查表耗时不变，公开签名一字未动。读数与等价性凭据记在 `03-date.md` §5.9。
 - `typex` 的坐标九件承诺相对误差 1e-15，**不承诺与 JVM 末位逐位相同**（参照侧是 JVM libm，本库三档是宿主 libm）。
 - `re` 不假装 Java 方言、也不自动改写调用方的模式串；等价改写表只作为给调用方看的对照。
+- **依赖口径改为包级**（10-09）：`AGENTS.md` 零依赖四条里「`moonbitlang/async` 也算第三方」那句撤下——真正的红线是「同步 + 零 OS 能力」（它撑着同一输入必同一输出这套可测性），而不是「官方 / 第三方」这个分类。例外只登记在 `sched` 一个包上，且 `async` 只准出现在触发壳；G1 判据随之从前缀白名单改成按包归属放行，并带四档自证（含 pin 了却没人用的悬空例外也要报红）。
 
 ## 未发布的部分
 

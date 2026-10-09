@@ -1,0 +1,70 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "mldong/moon-hutool/sched"
+
+import {
+  "mldong/moon-hutool/date",
+}
+
+// Values
+pub fn config_default() -> CronConfig
+
+pub fn due_indices(TaskTable, CronConfig, @date.DateTime) -> Array[Int]
+
+pub fn scheduler_is_started(Scheduler) -> Bool
+
+pub fn scheduler_new(TaskTable, CronConfig, () -> Int64, async (Int) -> Unit) -> Scheduler
+
+pub async fn scheduler_start(Scheduler) -> Unit
+
+pub fn scheduler_stop(Scheduler) -> Unit
+
+pub async fn scheduler_tick(Scheduler) -> Int
+
+pub fn table_add(TaskTable, String, String, &Task) -> Unit raise SchedError
+
+pub fn table_ids(TaskTable) -> Array[String]
+
+pub fn table_is_empty(TaskTable) -> Bool
+
+pub fn table_new() -> TaskTable
+
+pub fn table_pattern_text(TaskTable, String) -> String raise SchedError
+
+pub fn table_remove(TaskTable, String) -> Bool
+
+pub fn table_size(TaskTable) -> Int
+
+pub fn table_task_at(TaskTable, Int) -> &Task raise SchedError
+
+pub fn table_update_pattern(TaskTable, String, String) -> Bool raise SchedError
+
+// Errors
+pub suberror SchedError {
+  UnknownTask(String)
+  DuplicatedTask(String)
+  BadCron(String)
+}
+
+// Types and methods
+pub struct CronConfig {
+  match_second : Bool
+  zone : String
+}
+
+pub struct Scheduler {
+  // private fields
+}
+
+pub struct TaskTable {
+  // private fields
+}
+
+// Type aliases
+pub type Clock = () -> Int64
+
+pub type Sleeper = async (Int) -> Unit
+
+// Traits
+pub(open) trait Task {
+  async fn execute(Self) -> Unit
+}

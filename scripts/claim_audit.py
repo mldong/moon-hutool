@@ -56,6 +56,15 @@ CLAIMS = [
         "evidence_file": "typex/pkg.generated.mbti",
         "evidence_re": r"idcard_is_valid_card|idcard_info_10",
     },
+    {
+        "id": "C4",
+        "what": "cron 的触发面（调度族）",
+        # 10-09 口径翻案：`sched`（逐包表第 24 行）把触发器装上了。门面文档再写"调度族不做/只算不调度"
+        # 就成了对外假账，所以这条拿 sched 的现读公开面当反查证据。
+        "claim": r"不做 cron 调度|cron 调度器|调度器整族不做|调度族整族不做|只算不调度",
+        "evidence_file": "sched/pkg.generated.mbti",
+        "evidence_re": r"table_add|scheduler_start|due_indices",
+    },
 ]
 
 
@@ -101,7 +110,8 @@ def selftest():
     if ev is None:
         print("  SKIP 自检：读不到 date/pkg.generated.mbti，本机不是仓根？")
         return 0
-    docs_ev = {"date/pkg.generated.mbti": ev, "typex/pkg.generated.mbti": ev}
+    docs_ev = {"date/pkg.generated.mbti": ev, "typex/pkg.generated.mbti": ev,
+               "sched/pkg.generated.mbti": read("sched/pkg.generated.mbti") or ""}
     bad, _ = check({**docs_ev, **docs})
     if bad:
         caught += 1
@@ -111,6 +121,7 @@ def selftest():
     docs_ev2 = dict(docs_ev)
     docs_ev2["date/pkg.generated.mbti"] = "pub fn nothing_here(Unit) -> Unit\n"
     docs_ev2["typex/pkg.generated.mbti"] = "pub fn nothing_here(Unit) -> Unit\n"
+    docs_ev2["sched/pkg.generated.mbti"] = "pub fn nothing_here(Unit) -> Unit\n"
     bad2, _ = check({**docs_ev2, **docs})
     if not bad2:
         caught += 1
@@ -119,11 +130,19 @@ def selftest():
     # ③ 反查文件缺失 ⇒ 不许给出通过
     docs_ev3 = dict(docs_ev)
     docs_ev3["date/pkg.generated.mbti"] = None
+    docs_ev3["sched/pkg.generated.mbti"] = None
     _, sk = check({**docs_ev3, **docs})
     if sk:
         caught += 1
     else:
         print("  FAIL 自检③失效：反查文件缺失却给出 0 SKIP")
+    # ④ C4 单独点名：sched 证据在位 + 文档写"不做 cron 调度器" ⇒ 必须报出 **C4 这一条**
+    docs4 = {"README.md": "本库不做 cron 调度器。\n", "docs/ROADMAP.md": "", "docs/spec/00-hutool-map.md": ""}
+    bad4, _ = check({**docs_ev, **docs4})
+    if any(x.startswith("C4") for x in bad4):
+        caught += 1
+    else:
+        print("  FAIL 自检④失效：C4 没抓到调度族那句过期声明（实际抓到 %r）" % (bad4[:1],))
     return caught
 
 
@@ -131,10 +150,10 @@ def main():
     os.chdir(REPO)
     if "--selftest" in sys.argv:
         n = selftest()
-        if n == 3:
-            print("  PASS 三档对照全过（敢红 / 敢放 / 缺证据走 SKIP）")
+        if n == 4:
+            print("  PASS 四档对照全过（敢红 / 敢放 / 缺证据走 SKIP / C4 单独点名）")
             return 0
-        print("  FAIL 自检只有 %d/3 档通过" % n)
+        print("  FAIL 自检只有 %d/4 档通过" % n)
         return 1
     bad, skips = check()
     for s in skips:

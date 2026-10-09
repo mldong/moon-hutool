@@ -23,12 +23,18 @@ keywords = [
   "moonbit",
   "hutool",
   "utility",
-  "zero-dependency",
+  "core-only",
   "string",
   "date",
   "digest",
+  "cron",
+  "scheduler",
 ]
 
 preferred_target = "wasm"
 
-description = "Zero-dependency Hutool-style utility library for MoonBit: depends only on moonbitlang/core, no FFI, no async, four targets"
+description = "Hutool-style utility library for MoonBit: all packages depend only on moonbitlang/core (no FFI, fully synchronous); the single exception is the `sched` package, which imports official `moonbitlang/async` for timer firing and therefore ships on three targets, not four"
+
+import {
+  "moonbitlang/async@0.22.4",
+}

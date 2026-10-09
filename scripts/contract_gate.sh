@@ -18,36 +18,157 @@ skip(){ echo "  SKIP $*"; SKIPS=$((SKIPS+1)); }
 GATE_TARGETS="${GATE_TARGETS:-wasm js}"
 BASELINE_TESTS="${BASELINE_TESTS:-678}"
 
-echo "== G1 零依赖（moon tree 无第三方节点 + moon.mod 无 deps）=="
-if tree_json=$(moon tree --json 2>/dev/null) && [ -n "$tree_json" ]; then
-  if python - "$tree_json" <<'PY'
-import json,sys
-d=json.loads(sys.argv[1]); bad=[]
-def walk(n):
-    name=n.get("name") or n.get("package") or ""
-    if name and not name.startswith("moonbitlang/core") and not name.startswith("mldong/moon-hutool"):
-        bad.append(name)
-    for c in n.get("deps") or n.get("children") or []: walk(c)
-roots=d if isinstance(d,list) else [d]
-for r in roots: walk(r)
-print("\n".join(sorted(set(bad))) if bad else "")
-sys.exit(1 if bad else 0)
+echo "== G1 零第三方 + async 按包归属（10-09 口径翻案：白名单不再等于零依赖）=="
+# 三条判据一起跑，任何一条红即 G1 红；判据自身另有三档对照，对照不过 ⇒ 报"G1 自身失效"而不是放过。
+if python - <<'PY'
+import io, os, re, subprocess, sys
+
+ROOT = subprocess.run(["git", "rev-parse", "--show-toplevel"],
+                      capture_output=True, text=True).stdout.strip()
+ASYNC = "moonbitlang/async"
+OWNER = "sched"                      # 唯一被放行 import async 的包目录
+THIRD = r'(moonbitstack|Betterlol|mizchi|bobzhang|justjavac|tonyfettes|Lfan-ke|oboard|caijiewei295|iceBear67|suiyunonghen|Asterless|Metalymph|Nanaloveyuki)/'
+
+
+def pkg_imports(base):
+    """{包目录: [import 名]} —— 只看包级 moon.pkg 的 import 段，忽略注释与 _build/.mooncakes。"""
+    out = {}
+    for dirpath, dirnames, filenames in os.walk(base):
+        dirnames[:] = [d for d in dirnames if d not in ("_build", ".mooncakes", ".git", "docs", "scripts")]
+        if "moon.pkg" not in filenames:
+            continue
+        rel = os.path.relpath(dirpath, base).replace("\\", "/")
+        text = io.open(os.path.join(dirpath, "moon.pkg"), encoding="utf-8", errors="replace").read()
+        text = re.sub(r"//[^\n]*", "", text)
+        names = []
+        for block in re.findall(r"import\s*\{([^}]*)\}", text, re.S):
+            names += re.findall(r'"([^"]+)"', block)
+        out[rel] = names
+    return out
+
+
+def mod_imports(base):
+    p = os.path.join(base, "moon.mod")
+    text = re.sub(r"//[^\n]*", "", io.open(p, encoding="utf-8", errors="replace").read())
+    names = []
+    for block in re.findall(r"import\s*\{([^}]*)\}", text, re.S):
+        names += re.findall(r'"([^"]+)"', block)
+    return [n.split("@")[0] for n in names]
+
+
+def scan(imports, mods):
+    """返回违规列表。三类判据：① async 归属；② 任何真第三方；③ 模块级 import 段只许那一条例外。"""
+    bad = []
+    for pkg, names in sorted(imports.items()):
+        for n in names:
+            if re.search(THIRD, n):
+                bad.append("第三方依赖 %s（包 %s）" % (n, pkg))
+            if n == ASYNC and pkg != OWNER:
+                bad.append("%s 包 import 了 %s —— 例外只登记在 %s" % (pkg, ASYNC, OWNER))
+    for n in mods:
+        if re.search(THIRD, n):
+            bad.append("moon.mod 有第三方 import：%s" % n)
+        if n == ASYNC and OWNER not in imports:
+            bad.append("moon.mod pin 了 %s 但包 %s 不存在 ⇒ 例外登记悬空" % (ASYNC, OWNER))
+    if ASYNC in mods and sorted(set(mods)) != [ASYNC]:
+        bad.append("moon.mod 的 import 段必须只有 %s 这一条例外，现读：%s" % (ASYNC, mods))
+    # ④ 反向死格：例外登记了却没人用（pin 漂成摆设），或用了却没登记（构建期才发现）
+    used = [p for p, ns in imports.items() if ASYNC in ns]
+    if used and ASYNC not in mods:
+        bad.append("包 %s 用了 %s，但 moon.mod 没有该 import ⇒ 依赖靠运气解析" % (used, ASYNC))
+    if ASYNC in mods and not used:
+        bad.append("moon.mod pin 了 %s 但没有任何包 import 它 ⇒ 该从 moon.mod 撤掉，别留悬空 pin" % ASYNC)
+    return bad
+
+
+def show(tag, bad):
+    if bad:
+        print("  FAIL %s：%s" % (tag, "；".join(bad)))
+        return 1
+    print("  PASS %s" % tag)
+    return 0
+
+
+imports = pkg_imports(ROOT)
+mods = mod_imports(ROOT)
+rc = 0
+
+
+def probe_from(base, pkg, dep):
+    """探针：包名->import 列表必须**逐值拷**。
+    上一版直接 dict(imports) 再 setdefault(pkg, []).append(...)，拿到的是真实 list 对象，
+    于是探针把 coll/text 的真读数改脏，G1 拿自己的坏样本判了本包红——判据自证反而污染了判据。"""
+    copy = {k: list(v) for k, v in base.items()}
+    copy.setdefault(pkg, []).append(dep)
+    return copy
+
+# 判据自证三档（缺一档这条判据就是许愿池）：
+#  ① 别的包塞 async 必须红；② 塞真第三方必须红；③ 仓内真实读数必须放。
+probe = probe_from(imports, "coll", ASYNC)
+b1 = [x for x in scan(probe, mods) if "coll" in x or "例外只登记" in x]
+if not b1:
+    print("  FAIL G1 自身失效：往 coll 塞一条 async import 没被抓到，归属判据不可信")
+    rc = 1
+probe2 = probe_from(imports, "text", "moonbitstack/moondate")
+b2 = [x for x in scan(probe2, mods) if "第三方依赖" in x]
+if not b2:
+    print("  FAIL G1 自身失效：塞一个真第三方没被抓到，白名单判据不可信")
+    rc = 1
+probe3 = dict(imports)
+probe3.pop(OWNER, None)
+b3 = [x for x in scan(probe3, [ASYNC]) if "悬空" in x or "没有任何包" in x]
+if not b3:
+    print("  FAIL G1 自身失效：把唯一使用者摘掉后，悬空 pin 没被抓到（判据对'例外没人用'是瞎的）")
+    rc = 1
+
+def tree_bad():
+    """传递依赖腿：`moon tree` 里除 core / 本仓 / 那一条例外之外一律红。
+    这条是原 G1 的主判据，不能因为改成包级扫描就丢——包级只看得到直接 import，
+    传递进来的第三方只有树里照得见。取不到树 ⇒ SKIP 并说明，绝不当通过。"""
+    ALLOW = ("moonbitlang/core", "mldong/moon-hutool", ASYNC)
+    r = subprocess.run(["moon", "tree", "--json"], capture_output=True, text=True, cwd=ROOT)
+    if r.returncode != 0 or not r.stdout.strip():
+        return None
+    bad = set()
+    def walk(n):
+        name = n.get("name") or n.get("package") or ""
+        if name and not name.startswith(ALLOW):
+            bad.add(name)
+        for c in n.get("deps") or n.get("children") or []:
+            walk(c)
+    import json
+    try:
+        d = json.loads(r.stdout)
+    except Exception:
+        return None
+    for root in (d if isinstance(d, list) else [d]):
+        walk(root)
+    return sorted(bad)
+
+
+real = scan(imports, mods)
+rc |= show("G1 三条判据（async 只归属 %s · 零真第三方 · moon.mod import 段只那一条例外 · 无悬空 pin）" % OWNER, real)
+print("     （现读：moon.mod import 段 = %s；import %s 的包 = %s）"
+      % (mods or "空", ASYNC, [p for p, ns in imports.items() if ASYNC in ns]))
+
+tree = tree_bad()
+if tree is None:
+    print("  SKIP 传递依赖腿：`moon tree --json` 取不到（本机 moon 或网络）——本轮只判了包级三条")
+elif tree:
+    print("  FAIL 传递依赖树里有未登记节点：%s" % "，".join(tree))
+    rc = 1
+else:
+    print("  PASS 传递依赖树里除 core / 本仓 / %s 无其它节点" % ASYNC)
+sys.exit(rc)
 PY
-  then bad=""
-    if grep -qE '^\s*(deps|import)\s*=' moon.mod; then bad="moon.mod 存在 deps/import 段"
-    else bad=$(find . -name moon.pkg -not -path './_build/*' -exec grep -l '^\s*"moonbitlang/\(async\|x\|regexp\|moonback\)\|"\(moonbitstack\|Betterlol\|mizchi\|bobzhang\|justjavac\|tonyfettes\)/' {} \; | head -3)
-    fi
-    [ -z "$bad" ] && ok "零第三方节点，moon.mod 无 deps，包级无注册表依赖" || bad "发现第三方：$bad"
-  else bad="树里有第三方节点（见上）"
-  fi
-else skip "moon tree --json 不可用（本机 moon 版本或网络）；退化为 moon.mod/moon.pkg 静态扫描"
-  grep -qE '^\s*(deps|import)\s*=' moon.mod && bad "moon.mod 有 deps" || ok "moon.mod 无 deps"
+then ok "G1 绿"
+else bad "G1 红（见上）"
 fi
 
 echo "== G2 零 FFI =="
-n=$(grep -rn 'extern "' --include='*.mbt' . 2>/dev/null | grep -v '_build/' | wc -l | tr -d ' ')
+n=$(grep -rn 'extern "' --include='*.mbt' . 2>/dev/null | grep -v '_build/' | grep -v '\.mooncakes/' | wc -l | tr -d ' ')
 [ "$n" = "0" ] && ok "全仓 extern 命中 0" || bad "有 $n 处 extern —— 违反零依赖定义"
-n2=$(grep -rl 'native-stub' --include='moon.pkg' . 2>/dev/null | wc -l | tr -d ' ')
+n2=$(grep -rl 'native-stub' --include='moon.pkg' . 2>/dev/null | grep -v '\.mooncakes/' | wc -l | tr -d ' ')
 [ "$n2" = "0" ] && ok "无 native-stub" || bad "有 $n2 个包带 native-stub"
 
 echo "== G3 逐档编译 + 用例收集数 =="
@@ -65,7 +186,11 @@ for t in $GATE_TARGETS; do
 done
 
 echo "== G4 格式与公开接口 =="
-if moon fmt --check >/tmp/mh_fmt.log 2>&1; then ok "moon fmt --check 干净"; else bad "有文件需 moon fmt：$(grep -c . /tmp/mh_fmt.log) 行输出"; fi
+moon fmt --check >/tmp/mh_fmt.log 2>&1 || true
+# 只数本仓跟踪的 .mbt 命中行：依赖检出物 .mooncakes/ 里的格式告警不是本仓的账（10-09 引 async 后实测 81 行全是它）
+own=$(grep -oE '[^ "`]+\.mbt' /tmp/mh_fmt.log 2>/dev/null | sed 's|^\./||' | grep -v '\.mooncakes/' | sort -u | wc -l | tr -d ' ')
+own=${own:-0}
+if [ "$own" = "0" ]; then ok "moon fmt --check：本仓跟踪文件无待格式化（依赖树里的行不计）"; else bad "本仓有 $own 个文件需 moon fmt"; fi
 if command -v git >/dev/null && git rev-parse --git-dir >/dev/null 2>&1; then
   moon info >/tmp/mh_info.log 2>&1 || bad "moon info 执行失败"
   if git diff --quiet -- '*.mbti' 2>/dev/null; then ok ".mbti 无漂移（公开接口未意外变动）"; else bad ".mbti 有未提交漂移——API 变动须显式评审"; fi

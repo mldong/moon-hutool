@@ -73,7 +73,7 @@ PR-A 的合入标准：`moon check` 必须全绿（签名与类型自洽、文�
 1. **期望值冻结**：PR-B 不许改 `*_test.mbt` 里的期望串与 spec 表的"读数来源"列。要改必须单独一笔，正文写清外部证据（hutool 实测输出 / RFC 向量 / FIPS 示例 / 评审记录）。多个并行会话会各自发明同一条错语义并改期望值自证绿——这条就是拦这个的。
 2. **不搬运表达**：实现里不许出现从 Java 翻译来的注释、成段结构或变量名对应表。移植的是语义与规范（思想侧），不是 hutool 的代码写法（表达侧）；hutool 源码只用来**反推期望值**。少数 hutool 自身也是移植件的格子（`CharSequenceUtil`、`date/format/*`、`ComparatorChain`、`AntPathMatcher`）真上游是 Apache Commons / Spring，spec 的"血统"列必须标注。
 
-### 零依赖四条（违反任何一条直接红）
+### 零依赖四条（核心包的宪法，违反任何一条直接红）
 
 只用 `moonbitlang/core`（`moonbitlang/async` 也算第三方）· 零 `extern` · 全同步 · OS 能力只走 `env` 的 `now`/`rand`/`get_env_var` 三件，且**都必须可覆盖或可注入**（时钟走 `clock_fixed`，默认区走 `set_default_zone`）。
 
@@ -82,6 +82,38 @@ PR-A 的合入标准：`moon check` 必须全绿（签名与类型自洽、文�
 > git-bash 会把 `TZ` 自家征用再从子进程环境里摘掉，单看 `TZ` 会把 shell 的坑读成平台限制）。
 > 加它之前先量后改口径，不默认"红线里没写就是禁止"，也不静默扩红线。第 4 条的后半句从"只走 env.now/env.rand"
 > 改成上面这形；`read_file`、网络、宿主 API 仍然在禁令里。
+
+**10-09 唯一的例外登记**（不改写上面四条，只划死边界）：`sched`（逐包表第 24 行）允许 `import moonbitlang/async`。
+边界由三条判据钉住，缺一条这例外就不成立：
+
+1. **只这一个包**：其余任何包 import 到 `moonbitlang/` 下的非 core 件即红。G1 的判据因此从
+   "前缀白名单 `moonbitlang/core`"改成"按包归属放行"，并补阳性对照（往别的包塞一条 async import 必须抓到）。
+2. **`async` 只准出现在触发壳**（"等 + 调 + 推状态"那一层）。时钟与时延源一律注入；
+   纯计算半（任务表、"此刻该触发哪些"）保持同步、零 OS 能力、期望值可冻——**这条是外溢检查，不是风格偏好**。
+3. **代价如实写，不许缩回成"四目标一致"**：本包只承诺三档。`wasm-gc` 档 async 没有异步可执行入口
+   （实测 `moon run`／`moon test --target wasm-gc` 报 `[4021] Value run_async_main not found in package moonbitlang/async`
+   且 rc=1，而 `moon check` 照样通过 ⇒ 只看 check 会拿到假绿），已用包级 `supported_targets` 摘档；
+   native 档本机编不了 async 自带的 C stub（现读 `#error "Currently only MSVC is supported on Windows"`），由 CI 出证；
+   上游仍是 0.x，pin 的破坏性变更由本库背。
+
+口径改判的理由要说清：`moonbitlang/async` 是官方件，所以**"官方 / 第三方"从来不是这条红线的分类依据**，
+真正的红线是"**同步 + 零 OS 能力**"——它撑着"同一输入必同一输出"这套可测性（G5 冻期望、腿读数直抄、变异对照、三档逐字节相同）。
+因此本次动的是"能不能全同步"，不是"算不算官方"；把它写成"因为它是官方件所以可以依赖"是错的归因。
+
+### 这一家子四条撑不住什么（10-09 实测，别拿它当"覆盖到了"）
+
+| # | 四条管不到的地方 | 现读依据 | 现在的出口 |
+|---|---|---|---|
+| 1 | 传递依赖的档能力（async 的 `wasm-gc` 无事件循环） | G1 只判"有没有第三方节点"，不判"它在哪些档能用" | 包级 `supported_targets` + spec §1 的代价表 |
+| 2 | 上游 0.x 的破坏性变更 | `moonbitlang/async` 本机缓存里已有 0.20.2→0.22.4 六个版本 | 发版 SOP 里把 pin 同步做成固定步骤（同 jeeflow-moon 那条接力 pin 教训） |
+| 3 | 四条没逐条绑定门禁（`extern` 有 G2，"全同步"没有） | 现读 G1~G17 清单，无"同步性"判据 | 待拍：纯计算半加一条 `async` 关键字命中闸 |
+| 4 | 体积与安装面 | registry publish 的包体校验会取依赖源码 | 首发前在 README 明写依赖代价 |
+| 5 | 依赖边界的"轴"：`moon.mod` 的 import 是**模块级**，包级豁免只是构建期约定 | 现读 `moon.mod` 一条 import 全模块可见，tree 判据也按模块判 | G1 按包归属只拦"代码里真 import"，`moon.mod` 那一行必须留着并加注释说明作用域 |
+| 6 | **裸 OS 时钟没有结构闸**，"可注入"是约定不是结构 | 现读：全库唯一读 OS 时钟的入口是 `date/date.mbt` 的 `now_millis()`（体即 `@env.now()`，注释自述"全库唯一"），`clock_system()` 是它的函数值形态、`clock_fixed()` 才是假钟；任何公开件都能直接走前两条，仓里没有一道闸禁止公开面裸读 `@env.now()`。G8 那条"与 core 同输入同输出"的对拍腿**永远绿**——它比的是"和 core 一样"，不是"可注入" | **待拍 P7**：要么给全仓一道"公开面不许裸 `@env.now()`，一律走 clock 参数/槽"的闸，要么把第四条后半句从承诺改成"仅件级可注入"的实话 |
+
+第 6 条不是假想：`date/spec` 已经明写过"本库全同步起不了那条线程，也不承诺同一毫秒内恒等读数"，
+而 OS 时钟口只有 `@env.now()` 一个；`clock_fixed` 冻住的是件级取值，冻不住读墙钟的那条路。
+
 
 ### 语法坑（本机 moon 0.1.20260920 / moonc v0.10.14 实测，别再撞）
 

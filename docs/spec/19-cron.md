@@ -12,7 +12,7 @@
 | 处置 | 件 | 理由 |
 |---|---|---|
 | **本批落地** | `CronPattern` 的公开面：解析（5/6/7 段 + `\\|` 多选表达式）、`match`、`nextMatchAfter`、`nextMatch`、`toString` | 纯计算，期望值全部可由参照腿逐条直读（1386 行） |
-| **不做（整族）** | `CronUtil`/`TaskTable`/`Scheduler`/`CronTask`/`InvokeTask`/`CronTimer`/`CronConfig`/`timingwheel/*`/`listener/*` | 行内早写的"**只算不调度**"：调度要有线程/定时器，本库全同步、零 OS 能力（`AGENTS` 零依赖四条）；`CronConfig` 还读 `settings` 文件 |
+| **已改判（10-09）** → 逐包表第 24 行 `sched` | `CronUtil`/`TaskTable`/`Scheduler`/`CronTask`/`InvokeTask`/`CronTimer`/`CronConfig`/`timingwheel/*`/`listener/*` | 行内早写的"**只算不调度**"：调度要有线程/定时器，本库全同步、零 OS 能力（`AGENTS` 零依赖四条）；`CronConfig` 还读 `settings` 文件 |
 | 第二批（本批） | `CronPatternBuilder`、`CronPatternUtil`（`nextDateAfter`/`matchedDates`）、`Part` 七档、`CronPattern.nextMatch(Calendar)` 的带区名版 | 公开面与判据在 §8~§11；**早先写的"`describe` 人类可读化"要更正：5.8.35 的 `CronPatternUtil` 没有这件**（`javap` 现读），不是决定不做；`TimeZone` 档这一批收（第一批不收它的那条理由"本库不带 tzdb"已被 `date` §5 的内置表推翻，见 §11 第 6 行） |
 | **不在本包** | 日期算术（月末、闰年、epoch 换算） | 全部委托 `date` 包（`Date::of`、`DateTime::of`、`days_in_month`、`is_leap_year`、`add_*`），本包不重算 |
 
@@ -98,7 +98,7 @@ pub fn cron_pattern_text(c : Cron) -> String                                    
 | 5 | `-1 * * * *` | 接受并参与匹配（`length()<=2` 分支绕过 `checkValue`） | `raise OutOfRange("MINUTE", -1)` | 第 7 条两侧读数；与 `60 * * * *` 报错这条同族规则相矛盾，取"可推导"的一侧 |
 | 6 | 第 7 段年份 | 年档**参与匹配**（`Part.YEAR` 的 1970~2099 只在解析时校验；5/6 段压根没有年档） | 跟随 | 第 2 条 + 第 14 条 + `m.33.*`/`nx.33.*` 读数 |
 | 7 | `describe`/`CronPatternBuilder`/`nextMany` | `CronPatternBuilder` 与"取 N 个"有；**`describe` 在 5.8.35 不存在** | 建造器与 `matched_dates` 第二批落地（§8）；`describe` 不进契约（参照没有这件，不是决定不做） | 第 1 节 + §8 那张"不收"表 |
-| 8 | 调度族 | 有（含时间轮） | **整族不做** | 第 1 节"只算不调度" |
+| 8 | 调度族 | 有（含时间轮） | 本包不收，10-09 改判另立第 24 行 `sched` | §1 那一行的旧判据已改判；本包公开面一字未动 |
 | 9 | 年档无未来解 | `getMin` 没考虑 `YearValueMatcher` ⇒ `IllegalArgumentException:Invalid matcher: cn.hutool.cron.pattern.matcher.YearValueMatcher`（6 个基准实测全部如此） | 按参照自己"置最小值"的同一规矩回绕到年集合最小值，保住 #19.3/#19.4 是总函数 | §3 第 16 条；两侧读数都在案（`nx.34.*`/`nm.34.*` 标签原文即参照值） |
 | 10 | 星期中文别名 | `Week.of` 另认 `星期X`/`周X`（issue#3637） | 不跟随（只认三字母与全名，大小写不敏感） | 本库不引中文码表；夹具不覆盖，遇到再议 |
 | 11 | 字段越界的出口 | 靠 `Calendar` lenient 滚动 | 出口前按 epoch 秒/天整体折算，效果同滚 | §3 第 15 条 |

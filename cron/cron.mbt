@@ -8,7 +8,7 @@
 // 月份与星期有大小写不敏感的别名、`L` 只在"日"段单 token 时是月末、
 // `日` 与 `周` 同时限定是**且**、不存在的日子（4 月 31 日）**夹到月末**、
 // 秒段默认不参与匹配、年档只有 7 段式才存在并参与匹配、下一时刻毫秒恒 0。
-// **只算不调度**：参照侧的 `CronUtil`/`Scheduler`/`TaskTable`/`timingwheel/*` 整族不做（spec §1）。
+// 表达式层不内含触发器：参照侧的 `CronUtil`/`Scheduler`/`TaskTable`/`timingwheel/*` 不在本包，10-09 改判另立 `sched`（逐包表第 24 行，契约 `docs/spec/24-sched.md`）。
 // 时刻一律收 `@date.DateTime`（无时区入口）——参照侧的 `match(long millis, …)` 走
 // `TimeZone.getDefault()`，同输入在两台上两读（腿里 `sys.default_tz` 为凭），本库不跟随。
 
