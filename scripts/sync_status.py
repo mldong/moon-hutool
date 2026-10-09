@@ -35,9 +35,11 @@ BEGIN = "<!-- READINGS:BEGIN 由 scripts/sync_status.py 生成，勿手改 -->"
 END = "<!-- READINGS:END -->"
 STATE_DONE = "已实现"
 STATE_FROZEN = "契约已冻结"
+STATE_PARTIAL = "实现中"   # 有红也有绿：已落件 + 新批次骨架共存
 STATE_TODO = "未开工"
 NOT_DONE = re.compile(r"实现未开工|预期全红|预期红|函数体是 `abort`|函数体 `abort`")
 CLAIM_DONE = re.compile(r"已实现|全绿")
+PARTIAL_ACK = re.compile(r"实现中|契约已冻结|骨架")
 ROW = re.compile(r"^\|\s*`([a-z0-9_-]+)`\s*\|")
 STATE_WORDS = ("已实现", "契约已冻结", "实现中", "未开工")
 PAREN = re.compile(u"（([^）]*)）")
@@ -78,7 +80,25 @@ def read_state(pkg):
     total, passed, failed = (int(x) for x in m.groups())
     if total == 0:
         return STATE_TODO, 0, 0, 0
-    return (STATE_DONE if failed == 0 else STATE_FROZEN), total, passed, failed
+    return state_of(total, passed, failed), total, passed, failed
+
+
+def state_of(total, passed, failed):
+    """三档红绿形状（纯函数，自检可以直接喂样本，不必跑 moon）：
+
+    - 0 红 ⇒ `已实现`；
+    - 全红 ⇒ `契约已冻结`（整包还是 PR-A 骨架）；
+    - **有红也有绿 ⇒ `实现中`**——这一档是 10-10 批①逼出来的：往一个已落地的包里加新批次时，
+      旧件全绿、新件按设计红，二元模型只能把它说成"整包退回契约态"，那是假话
+      （`docs/spec/15-path.md` 里那 8 处"全绿"是在讲历史变异实验，不是整包自述）。
+    """
+    if total == 0:
+        return STATE_TODO
+    if failed == 0:
+        return STATE_DONE
+    if passed == 0:
+        return STATE_FROZEN
+    return STATE_PARTIAL
 
 
 def collect():
@@ -88,6 +108,7 @@ def collect():
 def block(rows):
     done = sum(1 for r in rows if r[1] == STATE_DONE)
     frozen = sum(1 for r in rows if r[1] == STATE_FROZEN)
+    partial = sum(1 for r in rows if r[1] == STATE_PARTIAL)
     todo = sum(1 for r in rows if r[1] == STATE_TODO)
     t = sum(r[2] for r in rows)
     g = sum(r[3] for r in rows)
@@ -96,7 +117,8 @@ def block(rows):
         "| 读数（`moon test --target wasm`，当场跑） | 值 |",
         "|---|---|",
         "| 用例总数 | **{}** —— 绿 {} / 红 {} |".format(t, g, f),
-        "| 包状态 | 共 {} 个：`{}` {} · `{}` {} · `{}` {} |".format(len(rows), STATE_DONE, done, STATE_FROZEN, frozen, STATE_TODO, todo),
+        "| 包状态 | 共 {} 个：`{}` {} · `{}` {} · `{}` {} · `{}` {} |".format(
+            len(rows), STATE_DONE, done, STATE_PARTIAL, partial, STATE_FROZEN, frozen, STATE_TODO, todo),
     ]
     if f:
         lines.append("| 红的是谁 | " + "、".join(
@@ -126,17 +148,21 @@ def wording_findings(rows):
             for i, line in enumerate(io.open(f, encoding="utf-8", errors="replace").read().splitlines(), 1):
                 if green and NOT_DONE.search(line):
                     bad.append("{}:{} 已全绿却写「未开工/预期红」".format(f, i))
-                if not green and state != STATE_TODO and CLAIM_DONE.search(line):
+                if (not green and state in (STATE_FROZEN,) and CLAIM_DONE.search(line)):
                     bad.append("{}:{} 未全绿却写「已实现/全绿」".format(f, i))
     return bad
 
 
-def roadmap_findings(rows):
-    """逐包表：每个真实包必须有一行，且状态词与读数一致。"""
-    path = os.path.join(os.getcwd(), "docs", "ROADMAP.md")
-    if not os.path.isfile(path):
-        return ["缺 docs/ROADMAP.md"]
-    text = io.open(path, encoding="utf-8").read()
+def roadmap_findings(rows, text=None):
+    """逐包表：每个真实包必须有一行，且状态词与读数一致。
+
+    `text` 传进来就直接判那份表文（自检用），不传就读 `docs/ROADMAP.md`。
+    """
+    if text is None:
+        path = os.path.join(os.getcwd(), "docs", "ROADMAP.md")
+        if not os.path.isfile(path):
+            return ["缺 docs/ROADMAP.md"]
+        text = io.open(path, encoding="utf-8").read()
     stated = {}
     for line in text.splitlines():
         m = ROW.match(line)
@@ -154,6 +180,9 @@ def roadmap_findings(rows):
             bad.append("`{}` 已全绿，ROADMAP 状态却写「{}」".format(pkg, s[:24]))
         if state == STATE_FROZEN and STATE_DONE in s:
             bad.append("`{}` 还有红用例，ROADMAP 状态却写「{}」".format(pkg, s[:24]))
+        if state == STATE_PARTIAL and STATE_DONE in s and not PARTIAL_ACK.search(s):
+            bad.append("`{}` 有红也有绿，状态格写了「已实现」却没交代哪一批还是骨架"
+                       "（要带上{}之一）：「{}」".format(pkg, "／".join(("实现中", "契约已冻结", "骨架")), s[:40]))
         if state == STATE_TODO and (STATE_DONE in s or STATE_FROZEN in s):
             bad.append("`{}` 没有任何用例，ROADMAP 状态却写「{}」".format(pkg, s[:24]))
     return bad
@@ -320,6 +349,15 @@ def number_findings(rows, files):
 
 def selftest():
     """判据自检：坏读数与坏序号都必须被识别。"""
+    # 三档红绿形状（10-10 新增 `实现中` 的判据面）：混包不许被说成"整包退回契约态"，
+    # 也不许把"有红"写成干净的"已实现"——状态格必须自带骨架交代。
+    shape = (state_of(10, 10, 0) == STATE_DONE and state_of(10, 0, 10) == STATE_FROZEN
+             and state_of(10, 8, 2) == STATE_PARTIAL and state_of(0, 0, 0) == STATE_TODO)
+    prows = [("text", STATE_PARTIAL, 10, 8, 2)]
+    hide_bad = roadmap_findings(prows, "| `text` | x | **已实现** | y | z |\n")
+    ack_ok = roadmap_findings(prows, "| `text` | x | **已实现**（批①新件是骨架） | y | z |\n")
+    clean_bad = roadmap_findings([("text", STATE_FROZEN, 10, 0, 10)],
+                                 "| `text` | x | **已实现** | y | z |\n")
     ok = (bool(NOT_DONE.search("> 当前状态：实现未开工，函数体是 `abort`"))
           and bool(CLAIM_DONE.search("| `text` | x | **已实现**（10-04） |"))
           and ROW.match("| `text` | `StrUtil` | 已实现 | a | b |") is not None
@@ -344,6 +382,7 @@ def selftest():
         + BEGIN + "\n| 包状态 | `已实现` 4 |\n" + END + "\n", st)
     ok = (ok and len(probe_bad) == 2 and not probe_ok and len(idx_bad) == 1
           and len(idx_multi) == 1 and not idx_ok)
+    ok = (ok and shape and len(hide_bad) == 1 and not ack_ok and len(clean_bad) == 1)
     print("  PASS 自检：措辞、表格行、序号、索引状态四条识别规则都对得上" if ok else
           "  FAIL 自检失效（序号坏样本 %d 应 2、好样本误报 %d；索引坏 %d 应 1、多点 %d 应 1、误报 %d）"
           % (len(probe_bad), len(probe_ok), len(idx_bad), len(idx_multi), len(idx_ok)))

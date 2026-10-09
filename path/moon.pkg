@@ -1,5 +1,9 @@
 // 依赖在此声明；落地轮起体子是真实现，契约骨架期的 `warnings` 豁免按 G12 撤掉
 
+// 骨架期豁免（G12：体里还有 `PR-B：契约骨架` 的 abort 才许压，落地笔整行删除）：
+// §11 那六件的形参在 abort 体里读不到 ⇒ unused_value 是"未实现"的机械后果，不是死码。
+warnings = "-unused_value"
+
 import {
   "moonbitlang/core/string",
 }

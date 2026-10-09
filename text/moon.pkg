@@ -1,3 +1,10 @@
+// 骨架期豁免（G12：体里还有 `abort` 才许压，落地笔整行删除）。
+// 这四类警告全是"没实现"的机械后果，不是死码：
+//   unused_constructor / unused_error_type —— `TextError` 四个变体没人构造、五个 raise 面没人抛；
+//   struct_never_constructed / unused_field —— `Replacer` 只有 `abort` 体，构造点还没写。
+// 为消警告去写假实现才是本末倒置（AGENTS「骨架期的三类警告」条 + G12 的不变量对照）。
+warnings = "-unused_value-unused_constructor-unused_error_type-struct_never_constructed-unused_field"
+
 import {
   "mldong/moon-hutool/text",
 } for "test"

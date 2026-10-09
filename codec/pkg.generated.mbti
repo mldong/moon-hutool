@@ -26,6 +26,10 @@ pub fn b64_encode_mime(Bytes) -> String
 
 pub fn b64_encode_url(Bytes, padding? : Bool) -> String
 
+pub fn data_uri(String, String, String) -> String
+
+pub fn data_uri_base64(String, String) -> String
+
 pub fn form_build(Array[(String, String)]) -> String
 
 pub fn form_decode(String) -> String raise CodecError

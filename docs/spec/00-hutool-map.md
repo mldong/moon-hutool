@@ -15,6 +15,9 @@
 | hutool | core 直接可用 | 本库补 | 不做 |
 |---|---|---|---|
 | `isEmpty/isBlank` | `String::is_empty`、`String::is_blank`；`Char::is_whitespace` **只是原料、不等价**（10-10 实测差四位：core 不算 U+001C–U+001F，core 多算 U+0085） | ① `text.is_blank` ② `text.is_blank_char`（对位 `CharUtil.isBlankChar`，35 位实测码表，整仓唯一一张：`ini`/`typex` 的两份副本已删） | 星平面逐码元的 Unicode 空白属性（参照按 UTF-16 码元走，代理码元一律非空白，本库同判） |
+| `EscapeUtil.escapeXml/escapeHtml4/escape/escapeAll/unescape/safeUnescape` | 无（core 只有 `percent` 编解码，形状完全不同：`%41` 档 vs `%uXXXX` 档） | ① `text` 包 §1.16 实体族四件 + §1.17 百分号族五件（含 `escape_by` 的过滤器档）。实体表 251/252 条**反射读四个类自己的 `String[][]`**，不抄 Apache 清单；`escape` 的不转义集是 146 段区间表（参照谓词 = `isDigit‖isLowerCase‖isUpperCase‖"*@-_+./"`，javap -c 现读，不是 `isLetterOrDigit`） | 把 `%uXXXX` 改成 UTF-8 百分号编码（那是 `percent`，不是 hutool 的 `escape`）；null 入参档（参照四件抛 NPE、两件给 null，本库 `String` 无该形状） |
+| `UnicodeUtil.toUnicode/toStr` | 无 | `text` 包 §1.18 四件（`to_unicode`/`to_unicode_all`/`unicode_of`/`unicode_to_string`）。原样档 = `0x20..0x7E` 一整段（逐位扫），`unicode_of` 走参照的 `Integer.toHexString` 形状：低 32 位、小写、最少四位、`-1` → `\uffffffff` | 解出**孤立代理**那一档给 U+FFFD（参照给一个码元，本库表示不了 ⇒ `raise(LoneSurrogate)`，不静默替换） |
+| `text.replacer.LookupReplacer/ReplacerChain/StrReplacer` | 无 | `text` 包 §1.20 三件（实体族在参照那边就是这三件拼的，所以择路规则一同冻：长键优先且与表序无关、同键后写生效、链不回头扫） | **公开的逐步钩子**——参照那个 `protected replace(CharSequence,int,StrBuilder)` 返回负数时它自己的驱动循环永不收敛（腿实测 16.5 亿次调用），开放即把"能写出不收敛"放进契约面 |
 | `trim/trimToNull/trimToEmpty` | `String::trim`（给 `StringView`，要 `.to_owned()`） | ① `text.trim`、`text.trim_opt` | — |
 | `split/splitTrim` | `String::split`（多分隔符、迭代器） | ① `text.split`（空段保留 + 逐段 trim） | — |
 | `startWith/endWith/contains/indexOf/equals(ignCase)` | `has_prefix/has_suffix/contains/contains_any/find/equal_ignore_ascii_case` | — | **不转发** |
@@ -68,7 +71,7 @@
 | `Base32/Base58/Base62/RadixUtil` | 无 | ③ `codec`（[`05-codec.md`](https://github.com/mldong/moon-hutool/blob/master/docs/spec/05-codec.md) #3~#6） | Base58Check 的校验位复用 `digest` 已冻结的 SHA-256，本包不重复实现摘要 |
 | `BCD` / `Base16Codec` | `encoding/hex` | **不做** | hutool `BCD` 自己标了 `@Deprecated`，逻辑就是把两个十六进制位打进一个字节；`Base16Codec` 更是同名转发（AGENTS「与 core 的边界」直接拒） |
 | `HexUtil` | `encoding/hex` | ③ 只在需要 `hexToInt/颜色` 等组合时补 | 不转发 encode/decode |
-| `PercentCodec`/`UrlBuilder` | `encoding/percent` | ③ URL 结构化组装 + form 的 `+` 档（RFC 3986，**codec 的 PR-A2**） | percent-encoding 本体已在 core；本包只补「空格出 `+`、`+` 解回空格」那一档，与 `UrlBuilder` 同批定契约 |
+| `PercentCodec`/`UrlBuilder` | `encoding/percent` | ③ URL 结构化组装 + form 的 `+` 档（RFC 3986，**codec 的 PR-A2**）；`codec` §12 的 data URI 两件（10-10 批①，177 条冻结期望） | percent-encoding 本体已在 core；本包只补「空格出 `+`、`+` 解回空格」那一档，与 `UrlBuilder` 同批定契约。**另两条判死不进本批**：`URLUtil.completeUrl` 判 **deferred**——实测它把"是不是绝对 URL"委托给 `java.net.URL` 的协议白名单（`data:`/`tel:`/`urn:`/`javascript:` 一律抛、无 scheme 的基串又被补成 `http://`、点段归一两套尾巴），不是纯串面，逐条读数与理由在 `05-codec.md` §12.2；`getDataUri(String, Charset, String, String)` 四参档不收——第 3 参是**属性段**、第 4 参才是数据，且 charset 名走宿主 `Charset.name()`（出 `UTF-8` 而不是传入的 `utf-8`） |
 | `ReUtil`/`PatternPool`/`RegexPool` | **core 有公开 `Regex`**（`prelude.mbt:93` 免 import 导出；`find/split/replace_by/命名组/Pattern 构造`）。引擎面四条实测（10-05，探针 114 条跑 wasm/js/wasm-gc **三档逐字节相同**）：纯 MoonBit 的 Brzozowski 导数自动机（`js` 档不借宿主 `RegExp`）、`.` 默认 DOTALL、`^`/`$` 恒整串（无 `MULTILINE`）、`\d \w \s \xHH \p{L} \1 \A \z \Q (?=) (?<=) (?i) a{300}` 一律**编译期报错** | ③ `re`：#10.1~#10.24 共 **24 件**（判断/取组/批量/位置/模板/删除/切分/转义/回调）+ `ReError` 两档，契约表 [`10-re.md`](10-re.md)；`RegexPool`/`PatternPool` 常量表留第二批 | **语法自动翻译**（`\d\w\s`→POSIX 类）**判不做**——**本轮更正**：原计划就是"翻译"，但实测两边**合法集不同**（`(?i)`、`a{300}`、`\1` 在 Java 侧合法、core 侧编译期报错），把改写塞进库里等于在引擎之上再造一份语义，还要替调用方吞掉"这串本来不该用"的信号；等价改写是**给调用方看的对照**（`(?i:…)`、`[[:digit:]]` 这类），表在 `10-re.md` §7，不是本包的义务。曾有调研判"core 无正则"，实测为假 |
 | `Validator.isEmail/isIpv4/...` | 靠 core `Regex` 可表达，**但 hutool 那 34 条 `RegexPool` 常量里 24 条带 core 不收的写法**（`\d` 18/`\w` 4/`\xHH` 2，普查见 `10-re.md` §4 第 7 条）⇒ 每条都得先改写成 core 方言 | ① `valid`：第一批 15 件已冻契约（`11-valid.md`，#11.1~#11.15，127 条样本两腿逐条对撞、**0 条分岔**） | **立场是"改写到命中集相同为止"**，不是"承诺逐字节等价"：等价件进契约、不等价的件**整件挂账**（`is_email` 的 `\xHH`、中文族的代理对码元区间、`is_letter`/`is_upper_case`/`is_lower_case` 的 Unicode 类别表、`is_birthday` 的 `find()`+时钟、`is_url` 的 `java.net.URL` 解析器）；`is_citizen_id`/`is_credit_code` 的校验位与区划码表归第 19 行 `typex`；hutool 那 38 个 `validateXxx(value, errorMsg)` 抛 `ValidateException` 的变体与 18 个存在性判定**不搬** |
 
@@ -78,6 +81,7 @@
 |---|---|---|---|
 | `DFA/SensitiveUtil` | 无 | ③ `dfa` **已实现**（10-05 两笔：9 件 + `WordTree`/`FoundWord` + 停顿字符表）：`new_word_tree` 建树、`is_match`/`first_match`/`first_found`/`match_all`/`match_all_words`/`match_all_mode`/`match_all_words_mode` 七档查询、`is_stop_char`/`is_not_stop_char` | **`SensitiveUtil` 静态全局表与 `containsSensitive(Object)` 反射档不做**（无全局可变注册表、无反射）；`clear`/`setCharFilter` 不放；**密集档不做性能承诺**（参照实现最坏 `O(n²)`，本库同形状，Aho-Corasick 是另一个算法族）。两条实测更正：默认档是**最左起点里的最短命中**（不是本表旧写的"最大长度命中"——最长要 `density=true` 且 `greed=true` 两条同时开），且 `greed` 在 `density=false` 时**完全惰性**（参照实现的那行 `break` 排在贪婪判定之前） |
 | `AntPathMatcher` | 无 | ③ `path`（**契约已冻结**，10-05：10 件 + `PathOptions` + `PathError`）**血统 = Spring-core（Apache-2.0）的 vendored 拷贝，就在 hutool-core 的 jar 里**；本库 `LICENSE` 从骨架起就是 Apache-2.0，许可无悬挂 | `setCachePatterns` 全局模式缓存不做（同 `re` 轮立场）；`{*path}` 捕获档判不支持（参照实现自己 `match` 恒假 + 抛异常）；`PathPatternParser` 那一族不引；`{name:regex}` 子表达式**按 core 方言**（Java-only 写法判非法模式）；本包 raise 面只有 `extract_variables` 三档 |
+| `io.file.FileNameUtil` | 无 | ③ `path` §11 六件（10-10 批①，**只收 String 档**，285 条冻结期望）：`name_of`/`main_name`/`ext_name`/`clean_invalid`/`contains_invalid`/`is_type`；复合扩展名四条与非法字符正则都由反射现读（`SPECIAL_SUFFIX` = `tar.bz2`/`tar.Z`/`tar.gz`/`tar.xz`，注意表里是大写 Z） | `File` 重载整条判 excluded（挂宿主分隔符与 `isDirectory`）；`getSuffix`/`getPrefix` 是同义委托，不出第二个名字（腿逐档两侧同读数）；`EXT_JAVA/EXT_CLASS/EXT_JAR` 三个常量不出公开面 |
 | `cn.hutool.cache.*`（`Cache`+5 个实现+`CacheObj`+`CacheUtil`，**件在 hutool-cache artifact**，hutool-core 的 jar 里 `cn/hutool/cache` 是 0 条） | 无 | ③ `cache`（**契约已冻结**，10-05：23 件公开面，146 条参照腿读数）——**时钟由调用方显式传 `now`**、`prune` 三档语义不同（`Fifo` 满着踢队首 / `Lru`·`Timed` 只扫过期 / `Lfu` 公平减计） | 不建六件带证据：`ReentrantCache`/`StampedCache`（成员只有锁）、`WeakCache` 与 core 的 `SimpleCache`（零依赖、core 无弱引用，回收时机不可冻）、`schedulePrune`/`GlobalPruneTimer`（实测起**非守护**线程 `Pure-Timer-1`，工装因此挂到超时）、`cache/file/*`（落盘 IO 出界）；`capacity==0` 与 `Integer.MAX_VALUE` 两档参照自相矛盾，处置见 `16-cache.md` §5 |
 | `HashUtil`（39 件静态：字符串族 + murmur/city/metro 委托）+ `lang.hash.{MurmurHash,CityHash,MetroHash,KetamaHash,Number128}` + `io.checksum.{CRC8,CRC16}` 与 `crc16/` 十变体 | 无（`Hash` trait 只服务 HashMap，js 档走 extern 不可当摘要用） | ③ `hash`（**契约已冻结**，10-05：40 件公开面、398 条参照腿读数；返回值一律有符号 `Int`/`Int64`，与读数十进制逐字同形） | 不建：`universal`/`zobrist`（值靠调用方传随机表）、`identityHashCode`（JVM 地址派生）；`CRC8` 照抄参照的非标准表构造（实测 2 对标准式 244，两侧都留档）；128 位族（city/metro/murmur128）与 `KetamaHash`/`ConsistentHash` 第二批；`codec/Hashids` **不是哈希**（可逆编码），归属另判待评 |
 | `cn.hutool.bloomfilter.*`（`BitMapBloomFilter` + `BitSetBloomFilter` + `filter/` 11 类 + `bitMap/` 3 件 + `BloomFilterUtil`，**件在独立 artifact hutool-bloomFilter**，core 的 jar 里 `bloom` 是 0 条） | 无 | ③ `bloom` 第一批（**已实现**，10-05 两笔，`docs/spec/18-bloom.md` #18.1~#18.23）：位图层（W32/W64 两档，词数按**地板除截断**跟随）+ 过滤器层（`abs(h % size)`，取模在前 abs 在后）+ 聚合层（m 定档 + 默认五过滤器顺序 `java_default/elf/js/pjw/sdbm` + `add` 是逻辑或）；哈希 16 件全部委托 `hash` 包 | 无参构造 `new int[93750000]`（≈375MB）**拒建**；`BitSetBloomFilter`（`ceil(c*k)` + 固定哈希顺序 + `Math.exp/pow` 误判率）第二批，超越函数不承诺三档逐位一致；`init(path, charset)` 文件 IO 出界；`Serializable` 不接；越界从 `AIOOBE` 换成可见的 `IndexOutOfRange(r, len)`；负位置与超 int 位置的**静默回绕跟随**（各有两侧读数） |
@@ -97,12 +101,12 @@
 
 | 档 | 含义 | 现读类数（hutool-all **5.8.37**，632 个顶层类，固化在 `docs/spec/hutool-classes.tsv`） |
 |---|---|---|
-| `done` | **逐条登记过**对位件（`OVERRIDES` 里点名哪个包哪件承接） | 136 |
+| `done` | **逐条登记过**对位件（`OVERRIDES` 里点名哪个包哪件承接） | 149 |
 | `unattested` | 包级规则**整片声称已做但没逐条指回实现件**（10-09 紧闸新增档，棘轮只许降） | 0 |
 | `excluded` | 结构上不属于本库：反射/动态代理/宿主 IO/网络/线程/AWT/JVM 内部机制 | 355 |
 | `core` | MoonBit core 已有同义能力，本库按规则不写转发层 | 53 |
 | `deferred` | 已登记在 [`docs/ROADMAP.md`](https://github.com/mldong/moon-hutool/blob/master/docs/ROADMAP.md) 的「暂不做」档 | 29 |
-| `gap` | **够得着、既没做也没登记** ⇒ 这一档就是要拍板的清单 | 59 |
+| `gap` | **够得着、既没做也没登记** ⇒ 这一档就是要拍板的清单 | 46 |
 
 
 > 这六个数**不是手抄**：`scripts/core_surface.py --check` 会解析本表并与归类表现算的条数逐档比对，任一处对不上或表形状变了（读不到六个档）直接判红（10-10 从临时比对脚本升级成判据，两侧对照进自检⑤：等值镜像必须为空、某一档多 1 条必须被抓到）。

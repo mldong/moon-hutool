@@ -307,3 +307,59 @@ path 未覆盖行 16 → **3**、全仓 148 → **135**、全仓 **1442 = 绿 14
 
 `R1`/`R2`/`R3` 三条都是**我预判会红、跑出来是红 0**——与同日 `path` 比较器那批的 `N6` 正好相反方向，
 同一条纪律：判"红不红"只许跑。三条各自的归位都写在上面，不写成"已覆盖"。
+
+## 11. 第五批（10-10 批①）：`FileNameUtil` 的纯字符串档（六件）
+
+契约先行笔（PR-A）：签名 + `.mbti` + 冻结期望 285 条在 `path/filename_test.mbt`，体全是
+`PR-B：契约骨架` 的 abort ⇒ `moon check` 绿、本包用例此刻红是设计态。
+读数腿 `scripts/FileNameLeg.java`（参照 hutool-all 5.8.37 + 本机 JDK 17.0.14，`javac -encoding UTF-8`），
+生成器 `scripts/gen_batch1_rest.py`。
+
+### 11.0 范围切法（先说清哪些不进）
+
+`FileNameUtil` 每个公开方法都有 `File` 与 `String` 两个重载。**只收 String 档**：
+`File` 档的语义挂在宿主（`File.separator` 随 OS 变、`isDirectory` 的尾斜杠规则、`File#getName`
+对空串的兜底），本库零 FFI ⇒ 该批重载整条判 `excluded`（census `FileNameUtil` 那行的理由栏同此）。
+null 入参在参照六件里有四件给 null、`containsInvalid(null)` 给 **false**——本库 `String` 无 null 档，
+该形状不在契约面（腿 N 行的 `{null}` 档逐条留在注释里，不当"已覆盖"）。
+
+**两件同义委托不重复出公开面**：参照的 `getSuffix` ≡ `extName`、`getPrefix` ≡ `mainName`，
+腿逐档并排打两侧读数、每一条同串（`archive.tar.gz` 两侧都给 `tar.gz` / `archive`）。
+再造第二件名字就是"两个名字一件事"，实现轮一改就一漏。
+
+### 11.1 六件签名
+
+| 件 | 签名 | 对位 |
+|---|---|---|
+| `name_of` | `String -> String` | `getName(String)` |
+| `main_name` | `String -> String` | `mainName`（+ 别名 `getPrefix`） |
+| `ext_name` | `String -> String` | `extName`（+ 别名 `getSuffix`） |
+| `clean_invalid` | `String -> String` | `cleanInvalid` |
+| `contains_invalid` | `String -> Bool` | `containsInvalid` |
+| `is_type` | `String, Array[String] -> Bool` | `isType(String, String...)` |
+
+### 11.2 语义档（全部实测，一条都不按"路径库应该怎样"写）
+
+1. **两种分隔符都认，且不分宿主**：`a\b/c.txt` 的 `name_of` 给 `c.txt`——参照就是纯串处理，
+   本库不引入"当前 OS 的分隔符"概念（本包 §1 的 Ant 匹配那一族同口径）。
+2. **尾随分隔符算一段空**：`/tmp/` 与 `tmp/` 都给 `tmp`，`ext_name` 给空串，
+   而 `contains_invalid("/tmp/")` 是 **true**（分隔符本身在非法字符集里，见第 5 条）。
+3. **点开头**：`.bashrc` 的 `ext_name` 是 `bashrc`、`main_name` 是**空串**（腿 N 行两侧都在）。
+   参照不给"隐藏文件整体当主名"那种常见做法，别顺手改。
+4. **复合扩展名**只认反射读来的 `SPECIAL_SUFFIX` 四条：`tar.bz2` / `tar.Z` / `tar.gz` / `tar.xz`
+   ——注意表里那条是**大写 Z**，`tar.bz` 不在表内。命中时 `ext_name` 给两段、`main_name` 跟着少两段；
+   `x.tar.gz.txt` 命中的是尾巴 ⇒ `txt`。`is_type` 同一段比法：`a.tar.gz` 命中 `tar.gz`
+   而**不**命中 `gz`（腿 IT 行三档并排）。
+5. **非法字符集不靠记忆**：反射读 `FILE_NAME_INVALID_PATTERN_WIN` 现读为
+   `[\/:*?"<>|\r\n]`（腿 CONST 行），`clean_invalid` 就是按这一张字符集删。
+   于是 `clean_invalid("/tmp/")` 给 `tmp`、`bad:name?.txt` 去掉 `:` 与 `?`。
+6. **`is_type` 的四条形状**：大小写不敏感（`a.TXT` 命中 `txt`，类型表里的 `Tar.GZ` 也命中）；
+   类型**不带点**（`[".txt"]` 永不命中）；空类型表恒 false；**空串类型是个真值档**——
+   无扩展名的 `noext` 对 `[""]` 给 true（腿 IT 行），表里含 null 元素时那一项永不命中
+   （本库 `Array[String]` 不收 null，该档无对位形状）。
+
+### 11.3 本批不承诺
+
+`File` 重载、null 入参档、`FileNameUtil` 里的 `EXT_JAVA/EXT_CLASS/EXT_JAR` 三个常量
+（腿 CONST 行读数 `.java/.class/.jar`——它们是给 `isType` 当参数用的串，本包不出常量表，
+调用点直接写字面量即可；要收的话得先拍"常量表算不算 API 面"，见 `00-hutool-map.md` §7 的 gap 档讨论）。

@@ -170,3 +170,50 @@ hutool `UrlBuilder` 的价值在两处：把一个 URL 串拆成组件（`of(url
 `C7` 空路径提前返回改成走点段循环 **0 红 ⇒ 按构造等价**：`path == ""` 时既不是 absolute 也不含 `/`，
 循环只把一个空段推进去、`join("/")` 仍是空串 ⇒ 与提前 `""` 同值，那条 `if` 是快路径而非语义档。
 这是同日第三条"覆盖到但不可判别"（前两条见 `09-conv.md` §10 的 `X6`、`22-ini.md` §10 的 `M3`）。
+
+## 12. 第五批（10-10 批①）：data URI 组装两件 + `completeUrl` 的改判
+
+契约先行笔（PR-A）：签名 + `.mbti` + 冻结期望 177 条在 `codec/data_uri_test.mbt`，体全是
+`PR-B：契约骨架` 的 abort。腿 `scripts/UrlPureLeg.java`（hutool-all 5.8.37 + JDK 17.0.14），
+生成器 `scripts/gen_batch1_rest.py`。`encodeBlank` 那 62 条**不在本包**——它的谓词与 `text.is_blank`
+同源，收在 `01-text.md` §1.19，归处也写进 `00-hutool-map.md`，别让读者以为 codec 漏了一件。
+
+### 12.1 `data_uri(mime, charset, data)` 与 `data_uri_base64(mime, base64)`
+
+| 件 | 形状（全部现读） |
+|---|---|
+| `data_uri` | `data:` + mime +（charset 非空则 `;` + charset **原文**）+ `,` + data **原文**。`("text/plain","utf-8","hello world")` → `data:text/plain;utf-8,hello world` |
+| `data_uri_base64` | `data:` + mime + `;base64,` + base64 原文。`("text/plain","aGk=")` → `data:text/plain;base64,aGk=` |
+
+四条会被"顺手修正"的形状，都有读数撑着：
+
+1. **数据不编码**。`100%` 就出 `...,100%`，空格、`&`、中文一律原样。它是**拼装器**不是编码器
+   （要百分号编码走本包 `Url::normalize` 那一族与 core 的 percent）。
+2. **charset 串也不校验**：`GBK`/`gbk`/`nope`/`utf-16` 全照原文带过去（参照没查 charset 表），
+   空串 ⇒ 整段 `;charset` 省略 ⇒ `data:text/plain,hi`。
+3. **base64 不校验**：`not-base64!!` 照出。给什么串拼什么串。
+4. **mime 为空**出 `data:;base64,...`（分号仍在）——参照的空串档如此，不是"省略整段"。
+
+参照的 null 档在腿里打成**字符串 `"null"`**（`getDataUri("text/plain","utf-8",null)` →
+`data:text/plain;utf-8,null`，因为它走 `String.valueOf`）；本库 `String` 无 null 档 ⇒ 该形状
+不在契约面，也不许"改成空串"——那是替参照决定。
+
+### 12.2 `completeUrl` 为什么改判 deferred（一条"看着是纯串"的读数）
+
+批①开工时把它当纯字符串件列进范围，腿跑完**推翻了这个前提**：`URLUtil.completeUrl(base, spec)`
+把"spec 是不是绝对 URL"的判断整个委托给 `java.net.URL` 的**协议处理器**，于是三件事同时成立：
+
+| 读数 | 参照行为 | 为什么不能照搬 |
+|---|---|---|
+| `data:text/plain,x`、`tel:123`、`urn:isbn:1`、`javascript:alert(1)` | `ERR:UtilException:MalformedURLException: unknown protocol: data` | 抛不抛由 **JDK 内置协议白名单**（http/https/ftp/file/jar/mailto/netdoc）决定，不是由串的形状决定；白名单随 JDK 版本变（腿跑 5.8.37 的 jar，但 handler 表在 JDK 侧） |
+| base=`"a"`（无 scheme）+ spec=`"b/c"` | `http://a/b/c` | 参照会**补 scheme**，且补的是 JDK 的默认 handler，不是 RFC 3986 的解析 |
+| base=`"a"` + spec=`"./b"` | `http://a/./b`（点段**不归一**） | 而 base=`"http://a.com/api/"` + spec=`"../b"` 又给 `http://a.com/b`（归一了）——同一个函数两套尾巴 |
+| base=null | 返回 `null`；spec=null | `ERR:UtilException:...spec is null` | 本库两件 `String` 都无 null 档 |
+
+本包 §8 已经有按 **RFC 3986 §5.2.4** 实现的点段归一（`Url::normalize`，规范自带两个 worked example
+都复现），照搬 `completeUrl` 的读数就得在归一之外再造一层"JDK 的半途归一"；不照搬就是**偏离参照**。
+两头都不是批①"纯字符串小件"的范围，所以：判 deferred，逐条读数留在
+`scripts/UrlPureLeg.java` 的 `C|completeUrl` 共 280 条里，拍板时要不要跟 JDK 的白名单形状，
+连同参照那件四参 `getDataUri(String, Charset, String, String)`（第 3 参是**属性段**、
+第 4 参才是数据，且 charset 出 `Charset.name()` 的 `UTF-8` 而非传入的 `utf-8`——腿 `D|getDataUri(4)` 五行）
+一起拍。

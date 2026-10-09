@@ -232,7 +232,7 @@ EnumItem	cn.hutool.core.lang.EnumItem	excluded	反射枚举项
 EnumUtil	cn.hutool.core.util.EnumUtil	excluded	反射枚举面
 EnumerationIter	cn.hutool.core.collection.EnumerationIter	excluded	java.util.Enumeration 接口适配件
 EqualsBuilder	cn.hutool.core.builder.EqualsBuilder	excluded	反射逐字段比等；MoonBit 用 derive(Eq)/显式比较
-EscapeUtil	cn.hutool.core.util.EscapeUtil	gap	HTML/XML 实体转义是纯串面，够得着却没人登记——待拍
+EscapeUtil	cn.hutool.core.util.EscapeUtil	done	text 包 #1.16/#1.17 十件：escape_xml/unescape_xml/escape_html4/unescape_html4 + escape/escape_all/escape_by/unescape/safe_unescape（实体表由 scripts/EntityTableLeg.java 反射读四个类的 String[][]；不转义集 146 段由 scripts/EscapeLeg3.java 对整个 BMP 逐位对撞，MISMATCH=0）
 ExceptionUtil	cn.hutool.core.exceptions.ExceptionUtil	core	错误形状走 raise/匹配；栈深读取属宿主
 ExecutorBuilder	cn.hutool.core.thread.ExecutorBuilder	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
 FastByteArrayOutputStream	cn.hutool.core.io.FastByteArrayOutputStream	excluded	Java Stream 家族
@@ -248,7 +248,7 @@ FileAppender	cn.hutool.core.io.file.FileAppender	excluded	文件系统/网络/�
 FileCopier	cn.hutool.core.io.file.FileCopier	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
 FileMagicNumber	cn.hutool.core.io.FileMagicNumber	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
 FileMode	cn.hutool.core.io.file.FileMode	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
-FileNameUtil	cn.hutool.core.io.file.FileNameUtil	gap	纯路径串档（主名/扩展名/前后缀）够得着，path 包只管 Ant 匹配——待拍
+FileNameUtil	cn.hutool.core.io.file.FileNameUtil	done	path 包 #11.1~#11.6 六件 name_of/main_name/ext_name/clean_invalid/contains_invalid/is_type（**只收 String 档**：File 重载挂宿主分隔符与 isDirectory，判 excluded；getSuffix/getPrefix 是 extName/mainName 的同义委托，腿逐档两侧同读数，不出第二件）。SPECIAL_SUFFIX 四条与非法字符正则都由 scripts/FileNameLeg.java 反射现读
 FileObjectResource	cn.hutool.core.io.resource.FileObjectResource	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
 FileReader	cn.hutool.core.io.file.FileReader	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
 FileResource	cn.hutool.core.io.resource.FileResource	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
@@ -297,8 +297,8 @@ HashUtil	cn.hutool.core.util.HashUtil	done	hash
 Hashids	cn.hutool.core.codec.Hashids	deferred	可逆编码，归属另判（见 00-hutool-map）
 HexUtil	cn.hutool.core.util.HexUtil	core	encoding/hex；hexToInt 与颜色档另判
 Hierarchical	cn.hutool.core.annotation.Hierarchical	excluded	无运行时反射/动态代理/内联编译器
-Html4Escape	cn.hutool.core.text.escape.Html4Escape	gap	text.escape 片整片声称 done，现读 text 公开面 19 件里 escape 命中 0 ⇒ 落 gap（HTML4 实体表 + 转义，能做，血统 Apache Commons Text）
-Html4Unescape	cn.hutool.core.text.escape.Html4Unescape	gap	同上（反档）
+Html4Escape	cn.hutool.core.text.escape.Html4Escape	done	text.escape_html4（#1.16）。251 条实体表**不抄 Apache 清单**：scripts/EntityTableLeg.java 反射读 `Html4Escape` 自己的三张 `String[][]`（BASIC_ESCAPE 4 + ISO8859_1_ESCAPE 96 + HTML40_EXTENDED_ESCAPE 151），逐条落 `text/escape_tables.mbt`；整 BMP 逐位扫"谁被转成哪个实体"另出一张 S 行，并证 escape→unescape 全表闭环（NOTROUND 0 条）
+Html4Unescape	cn.hutool.core.text.escape.Html4Unescape	done	text.unescape_html4（#1.16；252 条 = XML 那 5 条 + 反射读的 96 + 151。未知名/缺分号/坏数字引用一律原样留；代理区数字实体出 raise(LoneSurrogate)——参照给孤立码元，本库 String 无该形状）
 IDKey	cn.hutool.core.builder.IDKey	excluded	包装 System.identityHashCode（对象地址派生，跨平台不可复现，同 17-hash 对 identityHashCode 的判定）
 IJSONTypeConverter	cn.hutool.core.bean.copier.IJSONTypeConverter	excluded	无运行时反射/动态代理/内联编译器
 IORuntimeException	cn.hutool.core.io.IORuntimeException	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
@@ -313,7 +313,7 @@ IndexedComparator	cn.hutool.core.comparator.IndexedComparator	gap	按给定顺�
 InputStreamResource	cn.hutool.core.io.resource.InputStreamResource	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
 InstanceComparator	cn.hutool.core.comparator.InstanceComparator	gap	按实例类顺序比较：hutool 靠反射；改成手写顺序表属新能力，未拍 ⇒ 待拍
 InternUtil	cn.hutool.core.lang.intern.InternUtil	excluded	反射派生/JVM 内部机制/终端转义
-InternalEscapeUtil	cn.hutool.core.text.escape.InternalEscapeUtil	gap	同上（escape 族的内部实现件，不单独算一件能力）
+InternalEscapeUtil	cn.hutool.core.text.escape.InternalEscapeUtil	done	text.escape / escape_all / escape_by / unescape / safe_unescape（#1.17）。escapeChar 形状照读数：≤0xFF 出 `%XX`、其余出 `%uXXXX`、一律小写；unescape **不做 UTF-8 解码**（`%e4%b8%ad` 出三字符）且 `+` 不当空格。不转义集 146 段区间表由 scripts/EscapeLeg3.java 对整个 BMP 逐位对撞产出（MISMATCH=0）
 Interner	cn.hutool.core.lang.intern.Interner	excluded	反射派生/JVM 内部机制/终端转义
 InvocationTargetRuntimeException	cn.hutool.core.exceptions.InvocationTargetRuntimeException	excluded	hutool 的运行时异常包装面；本库错误面一律 raise 具名档（各包 suberror），JVM 异常链/包装无对位面
 IoCopier	cn.hutool.core.io.copy.IoCopier	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
@@ -357,7 +357,7 @@ LocalPortGenerater	cn.hutool.core.net.LocalPortGenerater	excluded	文件系统/�
 LocaleConverter	cn.hutool.core.convert.impl.LocaleConverter	excluded	JDK locale 表；num 轮已把 locale 分组读数判成参照自身不确定，不跟随
 LockUtil	cn.hutool.core.thread.lock.LockUtil	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
 LookupFactory	cn.hutool.core.lang.reflect.LookupFactory	excluded	反射派生/JVM 内部机制/终端转义
-LookupReplacer	cn.hutool.core.text.replacer.LookupReplacer	gap	text.replacer 片整片声称 done，现读无承接 ⇒ 落 gap（查表替换，纯串面）
+LookupReplacer	cn.hutool.core.text.replacer.LookupReplacer	done	text 包 #1.20 lookup_replacer（腿 scripts/ReplacerLeg.java：长键优先且与表序无关、同键后写生效、串尾不够长不匹配、空键参照构造即抛 ⇒ raise(EmptyKey)）
 LunarFestival	cn.hutool.core.date.chinese.LunarFestival	deferred	节日/农历码表在暂不做档
 LunarInfo	cn.hutool.core.date.chinese.LunarInfo	deferred	农历码表独立成数据件
 ManifestUtil	cn.hutool.core.io.ManifestUtil	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
@@ -422,7 +422,7 @@ NumberConverter	cn.hutool.core.convert.impl.NumberConverter	done	conv.to_int/to_
 NumberUtil	cn.hutool.core.util.NumberUtil	done	num 一/二/三批
 NumberWithFormat	cn.hutool.core.convert.NumberWithFormat	excluded	ThreadLocal 默认格式化器——宿主线程状态；本库格式化一律显式传参（num 的 round_to/format_percent 档）
 NumberWordFormatter	cn.hutool.core.convert.NumberWordFormatter	done	num 第三批
-NumericEntityUnescaper	cn.hutool.core.text.escape.NumericEntityUnescaper	gap	同上（&#数字; 实体反解析）
+NumericEntityUnescaper	cn.hutool.core.text.escape.NumericEntityUnescaper	done	并入 text.unescape_xml / unescape_html4 的数字实体档（#1.16）：十进制、小写 x、大写 X 三种写法与"位数不足/非十六进制一律原样留"逐档现读，夹具在 scripts/EntityTableLeg.java 的 N 行 33 档
 ObjUtil	cn.hutool.core.util.ObjUtil	gap	ObjectUtil 的新名，同档待拍
 ObjectGenerator	cn.hutool.core.lang.generator.ObjectGenerator	excluded	反射派生/JVM 内部机制/终端转义
 ObjectId	cn.hutool.core.lang.ObjectId	done	id
@@ -477,8 +477,8 @@ ReflectUtil	cn.hutool.core.util.ReflectUtil	excluded	反射
 RegexPool	cn.hutool.core.lang.RegexPool	done	re 第二批常量表
 RejectPolicy	cn.hutool.core.thread.RejectPolicy	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
 RelationType	cn.hutool.core.annotation.RelationType	excluded	无运行时反射/动态代理/内联编译器
-Replacer	cn.hutool.core.lang.Replacer	core	re/text 已承接替换档
-ReplacerChain	cn.hutool.core.text.replacer.ReplacerChain	gap	同上（链式替换；注意 `Replacer` 本体在 lang 包已判 core）
+Replacer	cn.hutool.core.lang.Replacer	core	cn.hutool.core.lang.Replacer<T> 接口在 MoonBit 就是函数值 String -> String，无需再造接口件（#1.20 的三件都实现它那一档行为，点名在此以免与 text.replacer 那三件混记）
+ReplacerChain	cn.hutool.core.text.replacer.ReplacerChain	done	text 包 #1.20 replacer_chain（每位置只问第一个命中的、产出不回头——腿 C|overlap 与 C|watch 两档实测）
 ResettableIter	cn.hutool.core.collection.ResettableIter	excluded	Iterator.reset 是 hutool 自定义协议，MoonBit 无该形状
 Resource	cn.hutool.core.io.resource.Resource	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
 ResourceClassLoader	cn.hutool.core.lang.ResourceClassLoader	excluded	classpath 资源
@@ -523,7 +523,7 @@ StrFormatter	cn.hutool.core.text.StrFormatter	done	text.format
 StrJoiner	cn.hutool.core.text.StrJoiner	core	Array.join
 StrMatcher	cn.hutool.core.text.StrMatcher	excluded	hutool 内部字符匹配器接口；能力面落在 text.trim/trim_opt 与 re 的模式档
 StrPool	cn.hutool.core.text.StrPool	excluded	同 CharPool：Java 常量类，MoonBit 直接写字面量
-StrReplacer	cn.hutool.core.text.replacer.StrReplacer	gap	同上（字符串档替换）
+StrReplacer	cn.hutool.core.text.replacer.StrReplacer	done	text 包 #1.20 Replacer::replace 整串面；**参照的 protected 逐步钩子不进公开面**，理由是一条读数而非洁癖：返回负数时参照驱动循环游标倒退、永不收敛（腿 B|solo|retNeg 两秒超时守护下跑出 16.5 亿次调用；0 才是"不匹配"档）
 StrSplitter	cn.hutool.core.text.StrSplitter	done	text.split + sub_before/sub_after/sub_between（截取与切分档一并承接）
 StrUtil	cn.hutool.core.util.StrUtil	done	text 首批
 StreamCopier	cn.hutool.core.io.copy.StreamCopier	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
@@ -579,11 +579,11 @@ URLConverter	cn.hutool.core.convert.impl.URLConverter	done	codec 的 URL 组装�
 URLDecoder	cn.hutool.core.net.URLDecoder	core	codec.form_parse 同档
 URLEncodeUtil	cn.hutool.core.net.URLEncodeUtil	core	codec 同档
 URLEncoder	cn.hutool.core.net.URLEncoder	core	codec.form_encode 同档
-URLUtil	cn.hutool.core.util.URLUtil	gap	codec 已承接 URL 组装与归一，isUrl/getSuffix/参数串那半没登记——待拍
+URLUtil	cn.hutool.core.util.URLUtil	done	codec 包 #12.1 两件 data_uri / data_uri_base64 + text 包 #1.19 encode_blank（腿 scripts/UrlPureLeg.java）。**completeUrl 判 deferred**：实测它把"是不是绝对 URL"委托给 java.net.URL 的协议白名单，data:/tel:/urn:/javascript: 一律 ERR，且点段归一两套尾巴——不是纯串面，逐条读数与理由在 docs/spec/05-codec.md §12.2；decode/encode 一族在 core 的 percent 与本包 §8 的 Url 面上
 UUID	cn.hutool.core.lang.UUID	done	id.uuid_v3/uuid_v4
 UUIDConverter	cn.hutool.core.convert.impl.UUIDConverter	done	id.uuid_v3 / id.uuid_v4
 UUIDGenerator	cn.hutool.core.lang.generator.UUIDGenerator	excluded	反射派生/JVM 内部机制/终端转义
-UnicodeUtil	cn.hutool.core.text.UnicodeUtil	gap	\uXXXX 串面转义够得着，既没做也没登记——待拍
+UnicodeUtil	cn.hutool.core.text.UnicodeUtil	done	text 包 #1.18 四件：to_unicode / to_unicode_all / unicode_of / unicode_to_string（腿 scripts/EscapeLeg.java 的 U/N/R/I 族 + scripts/UnicodeScan.java 逐位扫原样档 0020-007e）；注意真实 FQN 是 core.text.UnicodeUtil，core.util 那个不存在（javap 实测报找不到类）
 UniqueKeySet	cn.hutool.core.collection.UniqueKeySet	done	coll.distinct_by（按键去重即唯一键集语义）
 UploadFile	cn.hutool.core.net.multipart.UploadFile	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
 UploadFileHeader	cn.hutool.core.net.multipart.UploadFileHeader	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
@@ -622,8 +622,8 @@ WeightListRandom	cn.hutool.core.lang.WeightListRandom	done	rand 加权件
 WeightRandom	cn.hutool.core.lang.WeightRandom	done	rand 加权件
 WindowsExplorerStringComparator	cn.hutool.core.comparator.WindowsExplorerStringComparator	gap	Windows 资源管理器排序规则是一整张未登记的规则表（够得着；要做先拍码表落点）⇒ 待拍
 WrappedAnnotationAttribute	cn.hutool.core.annotation.WrappedAnnotationAttribute	excluded	无运行时反射/动态代理/内联编译器
-XmlEscape	cn.hutool.core.text.escape.XmlEscape	gap	同上（XML 实体，纯串面）
-XmlUnescape	cn.hutool.core.text.escape.XmlUnescape	gap	同上（反档）
+XmlEscape	cn.hutool.core.text.escape.XmlEscape	done	text.escape_xml（#1.16；`BASIC_ESCAPE` 反射读 5 条）——与 HTML4 的**唯一**读数差是撇号：XML 出 `&apos;`、HTML4 原样留（腿 E 行同输入两法并排）
+XmlUnescape	cn.hutool.core.text.escape.XmlUnescape	done	text.unescape_xml（#1.16；5 条 + 数字实体档。`&nbsp;` 解得出而 `&copy;`/`&pound;` 原样留是参照读数，不按 XML 规范常识改）
 XmlUtil	cn.hutool.core.util.XmlUtil	excluded	DOM/SAX 全在 JVM 侧
 YearQuarter	cn.hutool.core.date.YearQuarter	gap	年+季度复合键（含 parse/format）没登记——待拍
 ZipCopyVisitor	cn.hutool.core.compress.ZipCopyVisitor	deferred	DEFLATE/gzip/zip 在暂不做档

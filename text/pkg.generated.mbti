@@ -4,6 +4,18 @@ package "mldong/moon-hutool/text"
 // Values
 pub fn compare_version(String, String) -> Int
 
+pub fn encode_blank(String) -> String
+
+pub fn escape(String) -> String
+
+pub fn escape_all(String) -> String
+
+pub fn escape_by(String, (Char) -> Bool) -> String
+
+pub fn escape_html4(String) -> String
+
+pub fn escape_xml(String) -> String
+
 pub fn first_non_blank(Array[String?]) -> String?
 
 pub fn format(String, Array[String]) -> String
@@ -18,7 +30,13 @@ pub fn is_empty(String) -> Bool
 
 pub fn join(Array[String], String) -> String
 
+pub fn lookup_replacer(Array[(String, String)]) -> Replacer raise TextError
+
 pub fn lower_first(String) -> String
+
+pub fn replacer_chain(Array[Replacer]) -> Replacer
+
+pub fn safe_unescape(String) -> String
 
 pub fn split(String, Char, trim_result? : Bool) -> Array[String]
 
@@ -36,15 +54,39 @@ pub fn to_pascal_case(String) -> String
 
 pub fn to_underline_case(String) -> String
 
+pub fn to_unicode(String) -> String
+
+pub fn to_unicode_all(String) -> String
+
 pub fn trim(String) -> String
 
 pub fn trim_opt(String?) -> String?
 
+pub fn unescape(String) -> String raise TextError
+
+pub fn unescape_html4(String) -> String raise TextError
+
+pub fn unescape_xml(String) -> String raise TextError
+
+pub fn unicode_of(Int) -> String
+
+pub fn unicode_to_string(String) -> String raise TextError
+
 pub fn upper_first(String) -> String
 
 // Errors
+pub suberror TextError {
+  BadHex(String)
+  ShortInput
+  LoneSurrogate(Int)
+  EmptyKey
+}
 
 // Types and methods
+pub struct Replacer {
+  // private fields
+}
+pub fn Replacer::replace(Self, String) -> String
 
 // Type aliases
 
