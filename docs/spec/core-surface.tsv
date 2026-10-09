@@ -7,7 +7,7 @@ AbsEntry	cn.hutool.core.map.AbsEntry	excluded	java.util.Map.Entry 的抽象实�
 AbsTable	cn.hutool.core.map.multi.AbsTable	done	mapx.Table
 AbstractAnnotationSynthesizer	cn.hutool.core.annotation.AbstractAnnotationSynthesizer	excluded	无运行时反射/动态代理/内联编译器
 AbstractConverter	cn.hutool.core.convert.AbstractConverter	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
-AbstractDateBasic	cn.hutool.core.date.format.AbstractDateBasic	unattested	date 五批 / num 四批 / 错误形状走 raise（个别档见 overrides 与 deferred） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
+AbstractDateBasic	cn.hutool.core.date.format.AbstractDateBasic	excluded	hutool 内部基类（Date/DateField 共用父类），不是能力面，同 TransCollection 判法
 AbstractLinkAnnotationPostProcessor	cn.hutool.core.annotation.AbstractLinkAnnotationPostProcessor	excluded	无运行时反射/动态代理/内联编译器
 AbstractTypeAnnotationScanner	cn.hutool.core.annotation.scanner.AbstractTypeAnnotationScanner	excluded	无运行时反射/动态代理/内联编译器
 AbstractWrappedAnnotationAttribute	cn.hutool.core.annotation.AbstractWrappedAnnotationAttribute	excluded	无运行时反射/动态代理/内联编译器
@@ -75,7 +75,7 @@ BeanToBeanCopier	cn.hutool.core.bean.copier.BeanToBeanCopier	excluded	无运行�
 BeanToMapCopier	cn.hutool.core.bean.copier.BeanToMapCopier	excluded	无运行时反射/动态代理/内联编译器
 BeanUtil	cn.hutool.core.bean.BeanUtil	excluded	无运行时反射/动态代理/内联编译器
 BeanValueProvider	cn.hutool.core.bean.copier.provider.BeanValueProvider	excluded	无运行时反射/动态代理/内联编译器
-BetweenFormatter	cn.hutool.core.date.BetweenFormatter	unattested	date 五批 / num 四批 / 错误形状走 raise（个别档见 overrides 与 deferred） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
+BetweenFormatter	cn.hutool.core.date.BetweenFormatter	gap	时长差格式化串（“X天Y小时”）未登记；date 只给 between/between_day/difference 的数值档 ⇒ 待拍
 BiMap	cn.hutool.core.map.BiMap	done	mapx.BiMap
 BitStatusUtil	cn.hutool.core.math.BitStatusUtil	gap	位状态算式，够得着没人登记——待拍
 BlockPolicy	cn.hutool.core.thread.BlockPolicy	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
@@ -129,7 +129,7 @@ CharsetDetector	cn.hutool.core.io.CharsetDetector	deferred	同上
 CharsetUtil	cn.hutool.core.util.CharsetUtil	deferred	非 UTF 码表在暂不做档
 CheckedUtil	cn.hutool.core.exceptions.CheckedUtil	excluded	Java 受检异常糖
 ChineseDate	cn.hutool.core.date.ChineseDate	deferred	农历码表独立成数据件
-ChineseMonth	cn.hutool.core.date.chinese.ChineseMonth	unattested	date 五批 / num 四批 / 错误形状走 raise（个别档见 overrides 与 deferred） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
+ChineseMonth	cn.hutool.core.date.chinese.ChineseMonth	deferred	中文月名属农历码表，在暂不做档（同 Zodiac/GanZhi/LunarInfo 判例）
 CityHash	cn.hutool.core.lang.hash.CityHash	done	hash
 ClassConverter	cn.hutool.core.convert.impl.ClassConverter	excluded	Class 反射
 ClassLoaderUtil	cn.hutool.core.util.ClassLoaderUtil	excluded	类加载器
@@ -192,17 +192,17 @@ CustomKeyMap	cn.hutool.core.map.CustomKeyMap	done	coll.group_by 的 by 参数即
 DataSize	cn.hutool.core.io.unit.DataSize	done	typex.DataSize 族
 DataSizeUtil	cn.hutool.core.io.unit.DataSizeUtil	done	typex.data_size_format*
 DataUnit	cn.hutool.core.io.unit.DataUnit	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
-DateBasic	cn.hutool.core.date.format.DateBasic	unattested	date 五批 / num 四批 / 错误形状走 raise（个别档见 overrides 与 deferred） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
-DateBetween	cn.hutool.core.date.DateBetween	unattested	date 五批 / num 四批 / 错误形状走 raise（个别档见 overrides 与 deferred） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
+DateBasic	cn.hutool.core.date.format.DateBasic	excluded	hutool 内部接口件（Date/Calendar 共用形状）
+DateBetween	cn.hutool.core.date.DateBetween	done	date.between / between_day / difference（单位档走 date.TimeUnit）
 DateConverter	cn.hutool.core.convert.impl.DateConverter	done	date 的 parse/date_of 族（现读 date 公开面命中 5 处）
-DateException	cn.hutool.core.date.DateException	unattested	date 五批 / num 四批 / 错误形状走 raise（个别档见 overrides 与 deferred） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
-DateField	cn.hutool.core.date.DateField	unattested	date 五批 / num 四批 / 错误形状走 raise（个别档见 overrides 与 deferred） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
-DateModifier	cn.hutool.core.date.DateModifier	unattested	date 五批 / num 四批 / 错误形状走 raise（个别档见 overrides 与 deferred） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
-DateParser	cn.hutool.core.date.format.DateParser	unattested	date 五批 / num 四批 / 错误形状走 raise（个别档见 overrides 与 deferred） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
+DateException	cn.hutool.core.date.DateException	excluded	错误面在本库由各包 raise 表达（date 已有 ZoneGap 等），无对位运行时异常类
+DateField	cn.hutool.core.date.DateField	done	date.TimeUnit + offset_year/offset_month/offset_day + begin_of_*/end_of_* + quarter/week_of_year 这一批按字段件
+DateModifier	cn.hutool.core.date.DateModifier	done	date.offset / offset_day / offset_month / offset_year
+DateParser	cn.hutool.core.date.format.DateParser	done	date.parse / parse_in / parse_local / from_rfc3339 / from_epoch_days / from_epoch_millis
 DatePattern	cn.hutool.core.date.DatePattern	done	date.date_pattern
-DatePrinter	cn.hutool.core.date.format.DatePrinter	unattested	date 五批 / num 四批 / 错误形状走 raise（个别档见 overrides 与 deferred） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
-DateRange	cn.hutool.core.date.DateRange	unattested	date 五批 / num 四批 / 错误形状走 raise（个别档见 overrides 与 deferred） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
-DateTime	cn.hutool.core.date.DateTime	unattested	date 五批 / num 四批 / 错误形状走 raise（个别档见 overrides 与 deferred） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
+DatePrinter	cn.hutool.core.date.format.DatePrinter	done	date.format / format_in / format_local / to_rfc3339* / to_iso_string
+DateRange	cn.hutool.core.date.DateRange	gap	区间逐日迭代那半没登记（本库只有 begin_of_day/end_of_day 端点与 offset_day），惰性区间迭代器未拍 ⇒ 待拍
+DateTime	cn.hutool.core.date.DateTime	done	date.DateTime 型本体与 Date 互转（to_datetime / date_of）
 DateUnit	cn.hutool.core.date.DateUnit	done	date.TimeUnit
 DateUtil	cn.hutool.core.date.DateUtil	done	date 五批
 Decoder	cn.hutool.core.codec.Decoder	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
@@ -237,9 +237,9 @@ ExceptionUtil	cn.hutool.core.exceptions.ExceptionUtil	core	错误形状走 raise
 ExecutorBuilder	cn.hutool.core.thread.ExecutorBuilder	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
 FastByteArrayOutputStream	cn.hutool.core.io.FastByteArrayOutputStream	excluded	Java Stream 家族
 FastByteBuffer	cn.hutool.core.io.FastByteBuffer	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
-FastDateFormat	cn.hutool.core.date.format.FastDateFormat	unattested	date 五批 / num 四批 / 错误形状走 raise（个别档见 overrides 与 deferred） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
-FastDateParser	cn.hutool.core.date.format.FastDateParser	unattested	date 五批 / num 四批 / 错误形状走 raise（个别档见 overrides 与 deferred） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
-FastDatePrinter	cn.hutool.core.date.format.FastDatePrinter	unattested	date 五批 / num 四批 / 错误形状走 raise（个别档见 overrides 与 deferred） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
+FastDateFormat	cn.hutool.core.date.format.FastDateFormat	done	date.format/format_in/format_local——本库一律显式传区与 pattern，不跟 SimpleDateFormat 的宿主默认档（差异已在 03 §5 记）
+FastDateParser	cn.hutool.core.date.format.FastDateParser	done	date.parse/parse_in/parse_local（同上）
+FastDatePrinter	cn.hutool.core.date.format.FastDatePrinter	done	同 FastDateFormat：hutool 该件是其内部格式化器，本库一件 format 族承接
 FastStringWriter	cn.hutool.core.io.FastStringWriter	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
 FieldAnnotationScanner	cn.hutool.core.annotation.scanner.FieldAnnotationScanner	excluded	无运行时反射/动态代理/内联编译器
 FieldComparator	cn.hutool.core.comparator.FieldComparator	core	同 BaseFieldComparator（sort_by_key 取键）
@@ -268,7 +268,7 @@ ForceAliasedAnnotationAttribute	cn.hutool.core.annotation.ForceAliasedAnnotation
 ForeOrBack	cn.hutool.core.lang.ansi.ForeOrBack	excluded	反射派生/JVM 内部机制/终端转义
 ForestMap	cn.hutool.core.map.ForestMap	deferred	见 07-mapx §9
 FormUrlencoded	cn.hutool.core.net.FormUrlencoded	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
-FormatCache	cn.hutool.core.date.format.FormatCache	unattested	date 五批 / num 四批 / 错误形状走 raise（个别档见 overrides 与 deferred） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
+FormatCache	cn.hutool.core.date.format.FormatCache	excluded	缓存 JDK 格式化器实例是为线程复用设计的，本库无宿主格式化对象可缓存
 Func	cn.hutool.core.lang.func.Func	excluded	反射派生/JVM 内部机制/终端转义
 Func0	cn.hutool.core.lang.func.Func0	excluded	反射派生/JVM 内部机制/终端转义
 Func1	cn.hutool.core.lang.func.Func1	excluded	反射派生/JVM 内部机制/终端转义
@@ -282,10 +282,10 @@ GenericBuilder	cn.hutool.core.builder.GenericBuilder	unattested	text/conv/codec/
 GenericSynthesizedAggregateAnnotation	cn.hutool.core.annotation.GenericSynthesizedAggregateAnnotation	excluded	无运行时反射/动态代理/内联编译器
 GenericSynthesizedAnnotation	cn.hutool.core.annotation.GenericSynthesizedAnnotation	excluded	无运行时反射/动态代理/内联编译器
 GifDecoder	cn.hutool.core.img.gif.GifDecoder	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
-GlobalCustomFormat	cn.hutool.core.date.format.GlobalCustomFormat	unattested	date 五批 / num 四批 / 错误形状走 raise（个别档见 overrides 与 deferred） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
+GlobalCustomFormat	cn.hutool.core.date.format.GlobalCustomFormat	gap	全局自定义格式表未登记。要做必须走 date.set_default_zone/reset_default_zone 那条同形口径（显式可覆盖），不能建进程级暗全局 ⇒ 待拍
 GlobalThreadPool	cn.hutool.core.thread.GlobalThreadPool	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
 GraphicsUtil	cn.hutool.core.img.GraphicsUtil	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
-GroupTimeInterval	cn.hutool.core.date.GroupTimeInterval	unattested	date 五批 / num 四批 / 错误形状走 raise（个别档见 overrides 与 deferred） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
+GroupTimeInterval	cn.hutool.core.date.GroupTimeInterval	gap	分组计时件未登记；本库计时一律显式传 now（G18 白名单只 date.now_millis 一处裸读）⇒ 待拍
 GroupedTypeGetter	cn.hutool.core.getter.GroupedTypeGetter	excluded	无运行时反射/动态代理/内联编译器
 Gzip	cn.hutool.core.compress.Gzip	deferred	DEFLATE/gzip/zip 在暂不做档
 Hash	cn.hutool.core.lang.hash.Hash	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
@@ -358,7 +358,7 @@ LocaleConverter	cn.hutool.core.convert.impl.LocaleConverter	excluded	JDK locale 
 LockUtil	cn.hutool.core.thread.lock.LockUtil	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
 LookupFactory	cn.hutool.core.lang.reflect.LookupFactory	excluded	反射派生/JVM 内部机制/终端转义
 LookupReplacer	cn.hutool.core.text.replacer.LookupReplacer	gap	text.replacer 片整片声称 done，现读无承接 ⇒ 落 gap（查表替换，纯串面）
-LunarFestival	cn.hutool.core.date.chinese.LunarFestival	unattested	date 五批 / num 四批 / 错误形状走 raise（个别档见 overrides 与 deferred） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
+LunarFestival	cn.hutool.core.date.chinese.LunarFestival	deferred	节日/农历码表在暂不做档
 LunarInfo	cn.hutool.core.date.chinese.LunarInfo	deferred	农历码表独立成数据件
 ManifestUtil	cn.hutool.core.io.ManifestUtil	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
 MapBuilder	cn.hutool.core.map.MapBuilder	core	建 Map 就是字面量 Map([...]) / insert（本仓写作语法已核）
@@ -380,7 +380,7 @@ MirrorLinkAnnotationPostProcessor	cn.hutool.core.annotation.MirrorLinkAnnotation
 MirroredAnnotationAttribute	cn.hutool.core.annotation.MirroredAnnotationAttribute	excluded	无运行时反射/动态代理/内联编译器
 ModifierUtil	cn.hutool.core.util.ModifierUtil	excluded	反射修饰位
 Money	cn.hutool.core.math.Money	done	num 薄 Money 分定宽
-Month	cn.hutool.core.date.Month	unattested	date 五批 / num 四批 / 错误形状走 raise（个别档见 overrides 与 deferred） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
+Month	cn.hutool.core.date.Month	gap	12 月枚举本体（含首末日）没单建件；能力散在 begin_of_month/end_of_month/days_in_month/offset_month ⇒ 要不要建枚举待拍
 Morse	cn.hutool.core.codec.Morse	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
 MoveVisitor	cn.hutool.core.io.file.visitor.MoveVisitor	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
 MultiFileResource	cn.hutool.core.io.resource.MultiFileResource	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
@@ -515,7 +515,7 @@ SrcToDestCopier	cn.hutool.core.lang.copier.SrcToDestCopier	excluded	反射派生
 StackTraceCaller	cn.hutool.core.lang.caller.StackTraceCaller	excluded	反射派生/JVM 内部机制/终端转义
 StackTraceElementConverter	cn.hutool.core.convert.impl.StackTraceElementConverter	excluded	JVM 栈帧形状，跨平台无对位
 StatefulException	cn.hutool.core.exceptions.StatefulException	unattested	date 五批 / num 四批 / 错误形状走 raise（个别档见 overrides 与 deferred） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
-StopWatch	cn.hutool.core.date.StopWatch	unattested	date 五批 / num 四批 / 错误形状走 raise（个别档见 overrides 与 deferred） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
+StopWatch	cn.hutool.core.date.StopWatch	gap	计时器是有状态件且要读墙钟；本库口径是时钟显式注入（date.clock_system/clock_fixed），StopWatch 从未登记 ⇒ 待拍
 StrBuilder	cn.hutool.core.text.StrBuilder	core	StringBuf/StringBuilder
 StrClipboardListener	cn.hutool.core.swing.clipboard.StrClipboardListener	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
 StrFinder	cn.hutool.core.text.finder.StrFinder	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
@@ -543,7 +543,7 @@ SynthesizedAnnotationAttributeProcessor	cn.hutool.core.annotation.SynthesizedAnn
 SynthesizedAnnotationPostProcessor	cn.hutool.core.annotation.SynthesizedAnnotationPostProcessor	excluded	无运行时反射/动态代理/内联编译器
 SynthesizedAnnotationProxy	cn.hutool.core.annotation.SynthesizedAnnotationProxy	excluded	动态代理
 SynthesizedAnnotationSelector	cn.hutool.core.annotation.SynthesizedAnnotationSelector	excluded	无运行时反射/动态代理/内联编译器
-SystemClock	cn.hutool.core.date.SystemClock	unattested	date 五批 / num 四批 / 错误形状走 raise（个别档见 overrides 与 deferred） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
+SystemClock	cn.hutool.core.date.SystemClock	done	date.clock_system / clock_fixed（裸读 OS 时钟全库只 date/date.mbt 的 now_millis 一处，由 G18 钉）
 SystemPropsUtil	cn.hutool.core.util.SystemPropsUtil	excluded	系统属性表（本库只按零依赖四条读 env 三件）
 Table	cn.hutool.core.map.multi.Table	done	mapx.Table
 TableMap	cn.hutool.core.map.TableMap	deferred	多值 Map 已判不做（见 07-mapx §9）
@@ -556,7 +556,7 @@ TextSimilarity	cn.hutool.core.text.TextSimilarity	done	textsim
 ThreadException	cn.hutool.core.thread.ThreadException	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
 ThreadFactoryBuilder	cn.hutool.core.thread.ThreadFactoryBuilder	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
 ThreadUtil	cn.hutool.core.thread.ThreadUtil	excluded	线程池
-TimeInterval	cn.hutool.core.date.TimeInterval	unattested	date 五批 / num 四批 / 错误形状走 raise（个别档见 overrides 与 deferred） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
+TimeInterval	cn.hutool.core.date.TimeInterval	gap	计时区间件（start/end/pretty 串）未登记；数值差由 date.between/difference 承担 ⇒ 待拍
 TimeZoneConverter	cn.hutool.core.convert.impl.TimeZoneConverter	done	date.set_default_zone / date.zone_offset_minutes
 TolerantMap	cn.hutool.core.map.TolerantMap	gap	容错键 Map：本库只登记了 CiMap 的 ASCII 折叠一档，空白/全半角等容错没拍 ⇒ 待拍
 TransCollection	cn.hutool.core.collection.TransCollection	excluded	hutool 内部转换适配基类，不是能力面
@@ -617,7 +617,7 @@ WatcherChain	cn.hutool.core.io.watch.watchers.WatcherChain	excluded	文件系统
 WeakConcurrentMap	cn.hutool.core.map.WeakConcurrentMap	excluded	弱引用 + 并发（同 WeakCache 判据）
 WeakInterner	cn.hutool.core.lang.intern.WeakInterner	excluded	反射派生/JVM 内部机制/终端转义
 WebAppResource	cn.hutool.core.io.resource.WebAppResource	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
-Week	cn.hutool.core.date.Week	unattested	date 五批 / num 四批 / 错误形状走 raise（个别档见 overrides 与 deferred） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
+Week	cn.hutool.core.date.Week	done	date.day_of_week + begin_of_week/end_of_week + week_of_year/week_based_year/is_weekend
 WeightListRandom	cn.hutool.core.lang.WeightListRandom	done	rand 加权件
 WeightRandom	cn.hutool.core.lang.WeightRandom	done	rand 加权件
 WindowsExplorerStringComparator	cn.hutool.core.comparator.WindowsExplorerStringComparator	gap	Windows 资源管理器排序规则是一整张未登记的规则表（够得着；要做先拍码表落点）⇒ 待拍
@@ -631,4 +631,4 @@ ZipReader	cn.hutool.core.compress.ZipReader	deferred	DEFLATE/gzip/zip 在暂不�
 ZipUtil	cn.hutool.core.util.ZipUtil	deferred	压缩在暂不做档
 ZipWriter	cn.hutool.core.compress.ZipWriter	deferred	DEFLATE/gzip/zip 在暂不做档
 Zodiac	cn.hutool.core.date.Zodiac	deferred	生肖码表独立成数据件
-ZoneUtil	cn.hutool.core.date.ZoneUtil	unattested	date 五批 / num 四批 / 错误形状走 raise（个别档见 overrides 与 deferred） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
+ZoneUtil	cn.hutool.core.date.ZoneUtil	done	date.zone_names/zone_exists/zone_count/zone_offset_minutes/zone_offsets_at_wall/default_zone_source（内置 IANA 段表）

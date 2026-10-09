@@ -201,6 +201,35 @@ OVERRIDES = {
     "KetamaHash": ("deferred", "hash 第二批排期"),
     "Number128": ("deferred", "128 位族要先定返回形状"),
     "Hashids": ("deferred", "可逆编码，归属另判（见 00-hutool-map）"),
+    # —— 10-10 消化第三批：date 族（date 14 + date.chinese 2 + date.format 9）全 25 类逐条指认
+    # 口径与前两批一致：done 必须点名 date/pkg.generated.mbti 现读到的件（该文件 73 个名字，
+    # 含 offset_*/begin_of_*/end_of_*/zone_*/clock_*——注意抽取要带方法形式，
+    # 只 grep `pub fn ` 会漏掉 `pub fn Date::xxx` 而误判成“没有该件”）
+    "AbstractDateBasic": ("excluded", "hutool 内部基类（Date/DateField 共用父类），不是能力面，同 TransCollection 判法"),
+    "BetweenFormatter": ("gap", "时长差格式化串（“X天Y小时”）未登记；date 只给 between/between_day/difference 的数值档 ⇒ 待拍"),
+    "ChineseMonth": ("deferred", "中文月名属农历码表，在暂不做档（同 Zodiac/GanZhi/LunarInfo 判例）"),
+    "DateBasic": ("excluded", "hutool 内部接口件（Date/Calendar 共用形状）"),
+    "DateBetween": ("done", "date.between / between_day / difference（单位档走 date.TimeUnit）"),
+    "DateException": ("excluded", "错误面在本库由各包 raise 表达（date 已有 ZoneGap 等），无对位运行时异常类"),
+    "DateField": ("done", "date.TimeUnit + offset_year/offset_month/offset_day + begin_of_*/end_of_* + quarter/week_of_year 这一批按字段件"),
+    "DateModifier": ("done", "date.offset / offset_day / offset_month / offset_year"),
+    "DateParser": ("done", "date.parse / parse_in / parse_local / from_rfc3339 / from_epoch_days / from_epoch_millis"),
+    "DatePrinter": ("done", "date.format / format_in / format_local / to_rfc3339* / to_iso_string"),
+    "DateRange": ("gap", "区间逐日迭代那半没登记（本库只有 begin_of_day/end_of_day 端点与 offset_day），惰性区间迭代器未拍 ⇒ 待拍"),
+    "DateTime": ("done", "date.DateTime 型本体与 Date 互转（to_datetime / date_of）"),
+    "FastDateFormat": ("done", "date.format/format_in/format_local——本库一律显式传区与 pattern，不跟 SimpleDateFormat 的宿主默认档（差异已在 03 §5 记）"),
+    "FastDateParser": ("done", "date.parse/parse_in/parse_local（同上）"),
+    "FastDatePrinter": ("done", "同 FastDateFormat：hutool 该件是其内部格式化器，本库一件 format 族承接"),
+    "FormatCache": ("excluded", "缓存 JDK 格式化器实例是为线程复用设计的，本库无宿主格式化对象可缓存"),
+    "GlobalCustomFormat": ("gap", "全局自定义格式表未登记。要做必须走 date.set_default_zone/reset_default_zone 那条同形口径（显式可覆盖），不能建进程级暗全局 ⇒ 待拍"),
+    "GroupTimeInterval": ("gap", "分组计时件未登记；本库计时一律显式传 now（G18 白名单只 date.now_millis 一处裸读）⇒ 待拍"),
+    "LunarFestival": ("deferred", "节日/农历码表在暂不做档"),
+    "Month": ("gap", "12 月枚举本体（含首末日）没单建件；能力散在 begin_of_month/end_of_month/days_in_month/offset_month ⇒ 要不要建枚举待拍"),
+    "StopWatch": ("gap", "计时器是有状态件且要读墙钟；本库口径是时钟显式注入（date.clock_system/clock_fixed），StopWatch 从未登记 ⇒ 待拍"),
+    "SystemClock": ("done", "date.clock_system / clock_fixed（裸读 OS 时钟全库只 date/date.mbt 的 now_millis 一处，由 G18 钉）"),
+    "TimeInterval": ("gap", "计时区间件（start/end/pretty 串）未登记；数值差由 date.between/difference 承担 ⇒ 待拍"),
+    "Week": ("done", "date.day_of_week + begin_of_week/end_of_week + week_of_year/week_based_year/is_weekend"),
+    "ZoneUtil": ("done", "date.zone_names/zone_exists/zone_count/zone_offset_minutes/zone_offsets_at_wall/default_zone_source（内置 IANA 段表）"),
     # —— 10-10 消化第二批：collection / map / comparator 全 66 类逐条指认（口径与第一批一致：
     # 能点名 grep 到的承接件才写 done/core；JDK 接口适配、反射、并发、弱引用一律 excluded；
     # 核不到对位件的落 gap 并写明缺什么，不硬指认）
