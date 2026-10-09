@@ -85,7 +85,11 @@ pub fn table_remove(t : TaskTable, id : String) -> Bool {
 ///|
 /// #24.7 改表达式（不换任务体）。对位 `TaskTable.updatePattern(String, CronPattern)`——
 /// 这一件在参照里存在且独立于 `add`，说明"运行中改 cron"是参照的一等能力，本包跟
-pub fn table_update_pattern(t : TaskTable, id : String, cron_text : String) -> Bool raise SchedError {
+pub fn table_update_pattern(
+  t : TaskTable,
+  id : String,
+  cron_text : String,
+) -> Bool raise SchedError {
   let _ = (t, id, cron_text)
   abort("PR-B：契约骨架，契约见 docs/spec/24-sched.md #24.7")
 }
@@ -109,7 +113,10 @@ pub fn table_task_at(t : TaskTable, index : Int) -> &Task raise SchedError {
 ///|
 /// #24.10 按 id 取表达式原文。对位 `TaskTable.getPattern(String)`，本库出回写的文本
 /// （现读 `cron_pattern_text(@cron.Cron)` 是 `cron` 包公开面，本包不重造归一化）
-pub fn table_pattern_text(t : TaskTable, id : String) -> String raise SchedError {
+pub fn table_pattern_text(
+  t : TaskTable,
+  id : String,
+) -> String raise SchedError {
   let _ = (t, id)
   abort("PR-B：契约骨架，契约见 docs/spec/24-sched.md #24.10")
 }
@@ -134,7 +141,11 @@ pub fn table_is_empty(t : TaskTable) -> Bool {
 /// 本库把它劈成两半：判定留在这里（纯函数、不推进状态、不起线程、期望值可冻），执行在 `scheduler_tick`。
 /// - Note: 参照签名收 `long millis`，本库收 `@date.DateTime`（与 `cron` 包 #19.2 的入口同形，
 ///   避免"本库自己再算一次时区"）；`match_second` 从 `CronConfig` 取，与 cron 包 `cron_match` 的可选参对得上
-pub fn due_indices(t : TaskTable, cfg : CronConfig, now : @date.DateTime) -> Array[Int] {
+pub fn due_indices(
+  t : TaskTable,
+  cfg : CronConfig,
+  now : @date.DateTime,
+) -> Array[Int] {
   let _ = (t, cfg, now)
   abort("PR-B：契约骨架，契约见 docs/spec/24-sched.md #24.13")
 }
@@ -165,7 +176,12 @@ pub struct Scheduler {
 ///|
 /// #24.17 构造。时钟与时延源**一律注入**（默认件由调用方在实装轮用 `date.clock_system` 与
 /// `@async.sleep` 的包装提供）——这是本包能被脱离计时依赖评审的前提
-pub fn scheduler_new(table : TaskTable, cfg : CronConfig, clock : Clock, sleeper : Sleeper) -> Scheduler {
+pub fn scheduler_new(
+  table : TaskTable,
+  cfg : CronConfig,
+  clock : Clock,
+  sleeper : Sleeper,
+) -> Scheduler {
   let _ = (table, cfg, clock, sleeper)
   abort("PR-B：契约骨架，契约见 docs/spec/24-sched.md #24.17")
 }
