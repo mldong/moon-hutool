@@ -7,6 +7,33 @@
 ///|
 
 ///|
+/// 坐标族的**末位档**判据（分档承诺见 `docs/spec/23-typex.md` §17.5 与 §17.9）。
+/// 只在 §17.8 实测记名的两条上用，其余坐标档仍按精确字面量钉：
+/// - wasm / js / wasm-gc 三档逐位一致 ⇒ 精确字面量本来就成立；
+/// - 跨到 native（10-09 CI 实测 Linux glibc）与跨到 JVM 时，超越函数末位不可复现 ⇒ 只承诺相对误差 `1e-15`。
+/// 写成显式判据而不是随手 `is_close`：容差、适用范围、以及"为什么这两条而不是全部"都得在测试里看得见。
+fn coord_close_1e15(
+  label : String,
+  got : (Double, Double),
+  want : (Double, Double),
+) -> Unit raise {
+  let (gx, gy) = got
+  let (wx, wy) = want
+  assert_true(
+    coord_dim_within(gx, wx) && coord_dim_within(gy, wy),
+    msg=label.to_string_view(),
+  )
+}
+
+///|
+fn coord_dim_within(got : Double, want : Double) -> Bool {
+  let d = got - want
+  let aw = want.abs()
+  let scale = if aw > 1.0 { aw } else { 1.0 }
+  d.abs() <= 1.0e-15 * scale
+}
+
+///|
 test "outOfChina：只看四个边界常量，边界值本身算「国内”" {
   assert_eq(@typex.coord_out_of_china(116.397428, 39.90923), false) // OUT_OF_CHINA|116.397428,39.90923
   assert_eq(@typex.coord_out_of_china(121.473701, 31.230416), false) // OUT_OF_CHINA|121.473701,31.230416
@@ -134,10 +161,13 @@ test "wgs84 与 gcj02 互转，以及两条经过 gcj02 的复合路（参照不
     @typex.coord_wgs84_to_bd09(113.264385, 23.129112),
     (113.27613576798366, 23.132723116471208),
   ) // WGS84_BD09|113.264385,23.129112
-  assert_eq(
+  // 末位档①（spec §17.8 记名）：参照腿（JVM libm）给 40.75190838385263，本库三档给 …62，
+  // 10-09 又实测 native/Linux glibc 回到 …63 ⇒ 这一档按相对误差 1e-15 判，不按逐位。
+  coord_close_1e15(
+    "WGS84_BD09|-73.985428,40.748817",
     @typex.coord_wgs84_to_bd09(-73.985428, 40.748817),
     (-73.94037764846894, 40.75190838385262),
-  ) // WGS84_BD09|-73.985428,40.748817
+  )
   assert_eq(
     @typex.coord_wgs84_to_bd09(0.0, 0.0),
     (0.02200129584349762, 0.008728984041221487),
@@ -338,10 +368,13 @@ test "墨卡托投影两档（这一对用 Math.PI，其余用类内 PI 字面�
     @typex.coord_wgs84_to_mercator(0.0, 0.0),
     (0.0, -7.081154551613622e-10),
   ) // WGS84_MERCATOR|0.0,0.0
-  assert_eq(
+  // 末位档②（spec §17.8 记名）：参照腿（JVM）给 92309.34413512635，本库三档给 …776（差在末几位），
+  // 墨卡托那一路整条都靠 `ln`/`tan` ⇒ 同样按相对误差 1e-15 判。
+  coord_close_1e15(
+    "WGS84_MERCATOR|72.003,0.8292",
     @typex.coord_wgs84_to_mercator(72.003, 0.8292),
     (8015337.295588077, 92309.34413512776),
-  ) // WGS84_MERCATOR|72.003,0.8292
+  )
   assert_eq(
     @typex.coord_wgs84_to_mercator(72.004, 0.8293),
     (8015448.615078872, 92320.47725022398),
