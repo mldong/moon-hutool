@@ -1,10 +1,10 @@
 # hutool-core 顶层类三档归类表 —— 由 `python scripts/core_surface.py --write` 生成，勿手改
 # 列：类名<TAB>全限定名<TAB>档<TAB>一句话理由；档取值 done/core/excluded/deferred/gap
 ASCIIStrCache	cn.hutool.core.text.ASCIIStrCache	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
-AbsCollValueMap	cn.hutool.core.map.multi.AbsCollValueMap	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
+AbsCollValueMap	cn.hutool.core.map.multi.AbsCollValueMap	done	coll.group_by（一键多值）
 AbsCopier	cn.hutool.core.bean.copier.AbsCopier	excluded	无运行时反射/动态代理/内联编译器
-AbsEntry	cn.hutool.core.map.AbsEntry	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
-AbsTable	cn.hutool.core.map.multi.AbsTable	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
+AbsEntry	cn.hutool.core.map.AbsEntry	excluded	java.util.Map.Entry 的抽象实现适配件；MoonBit 摊平成二元组（同 PairConverter 判定）
+AbsTable	cn.hutool.core.map.multi.AbsTable	done	mapx.Table
 AbstractAnnotationSynthesizer	cn.hutool.core.annotation.AbstractAnnotationSynthesizer	excluded	无运行时反射/动态代理/内联编译器
 AbstractConverter	cn.hutool.core.convert.AbstractConverter	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
 AbstractDateBasic	cn.hutool.core.date.format.AbstractDateBasic	unattested	date 五批 / num 四批 / 错误形状走 raise（个别档见 overrides 与 deferred） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
@@ -37,7 +37,7 @@ AntPathMatcher	cn.hutool.core.text.AntPathMatcher	done	path 整包
 AppendableWriter	cn.hutool.core.io.AppendableWriter	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
 Arrangement	cn.hutool.core.math.Arrangement	unattested	date 五批 / num 四批 / 错误形状走 raise（个别档见 overrides 与 deferred） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
 ArrayConverter	cn.hutool.core.convert.impl.ArrayConverter	done	conv.to_array
-ArrayIter	cn.hutool.core.collection.ArrayIter	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
+ArrayIter	cn.hutool.core.collection.ArrayIter	core	core 已给 Array::iter/eachi（本仓写作语法已核），不需要迭代器包装件
 ArrayTypeGetter	cn.hutool.core.getter.ArrayTypeGetter	excluded	无运行时反射/动态代理/内联编译器
 ArrayUtil	cn.hutool.core.util.ArrayUtil	core	Array/Iter 面
 Assert	cn.hutool.core.lang.Assert	core	语言自带 assert/raise；抛错类型族属 JVM 语义
@@ -47,7 +47,7 @@ AtomicIntegerArrayConverter	cn.hutool.core.convert.impl.AtomicIntegerArrayConver
 AtomicLoader	cn.hutool.core.lang.loader.AtomicLoader	excluded	反射派生/JVM 内部机制/终端转义
 AtomicLongArrayConverter	cn.hutool.core.convert.impl.AtomicLongArrayConverter	excluded	同上
 AtomicReferenceConverter	cn.hutool.core.convert.impl.AtomicReferenceConverter	excluded	同上
-AvgPartition	cn.hutool.core.collection.AvgPartition	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
+AvgPartition	cn.hutool.core.collection.AvgPartition	done	coll.partition + coll.page_count 的平均分段档
 BCD	cn.hutool.core.codec.BCD	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
 BOMInputStream	cn.hutool.core.io.BOMInputStream	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
 BackgroundRemoval	cn.hutool.core.img.BackgroundRemoval	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
@@ -61,7 +61,7 @@ Base62Codec	cn.hutool.core.codec.Base62Codec	unattested	text/conv/codec/coll/map
 Base64	cn.hutool.core.codec.Base64	done	codec
 Base64Decoder	cn.hutool.core.codec.Base64Decoder	done	codec
 Base64Encoder	cn.hutool.core.codec.Base64Encoder	done	codec
-BaseFieldComparator	cn.hutool.core.comparator.BaseFieldComparator	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
+BaseFieldComparator	cn.hutool.core.comparator.BaseFieldComparator	core	按字段比较 = core 的 Array::sort_by_key 取键闭包（本轮在 builtin/array_sort.mbt 核到）
 BasicType	cn.hutool.core.convert.BasicType	excluded	JDBC 类型映射
 BasicTypeGetter	cn.hutool.core.getter.BasicTypeGetter	excluded	无运行时反射/动态代理/内联编译器
 BeanConverter	cn.hutool.core.convert.impl.BeanConverter	excluded	反射 bean↔Map（零依赖四条禁反射，同 ReflectUtil 判例）
@@ -82,7 +82,7 @@ BlockPolicy	cn.hutool.core.thread.BlockPolicy	excluded	文件系统/网络/线�
 BomReader	cn.hutool.core.io.BomReader	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
 BooleanConverter	cn.hutool.core.convert.impl.BooleanConverter	done	conv.to_bool + conv.parse_bool（宽松档另给）
 BooleanUtil	cn.hutool.core.util.BooleanUtil	core	conv.to_bool 已承接文本档
-BoundedPriorityQueue	cn.hutool.core.collection.BoundedPriorityQueue	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
+BoundedPriorityQueue	cn.hutool.core.collection.BoundedPriorityQueue	gap	有界优先队列（堆）：本库无该容器也没登记 ⇒ 待拍
 BufferUtil	cn.hutool.core.io.BufferUtil	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
 Builder	cn.hutool.core.builder.Builder	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
 ByteUtil	cn.hutool.core.util.ByteUtil	deferred	字节序族挂在 conv 第二批（见 ROADMAP conv 行）
@@ -108,11 +108,11 @@ CalendarConverter	cn.hutool.core.convert.impl.CalendarConverter	done	date 的 be
 CalendarUtil	cn.hutool.core.date.CalendarUtil	done	date
 Caller	cn.hutool.core.lang.caller.Caller	excluded	反射派生/JVM 内部机制/终端转义
 CallerUtil	cn.hutool.core.lang.caller.CallerUtil	excluded	反射派生/JVM 内部机制/终端转义
-CamelCaseLinkedMap	cn.hutool.core.map.CamelCaseLinkedMap	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
-CamelCaseMap	cn.hutool.core.map.CamelCaseMap	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
-CaseInsensitiveLinkedMap	cn.hutool.core.map.CaseInsensitiveLinkedMap	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
+CamelCaseLinkedMap	cn.hutool.core.map.CamelCaseLinkedMap	gap	键命名风格自动换形的 Map：text 有 to_camel_case/to_underline_case，但没登记过 Map 档 ⇒ 待拍
+CamelCaseMap	cn.hutool.core.map.CamelCaseMap	gap	同上
+CaseInsensitiveLinkedMap	cn.hutool.core.map.CaseInsensitiveLinkedMap	done	mapx.CiMap（折叠只覆盖 ASCII、原样键取首次写入，两侧读数在 07 §5）
 CaseInsensitiveMap	cn.hutool.core.map.CaseInsensitiveMap	done	mapx.CiMap
-CaseInsensitiveTreeMap	cn.hutool.core.map.CaseInsensitiveTreeMap	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
+CaseInsensitiveTreeMap	cn.hutool.core.map.CaseInsensitiveTreeMap	done	mapx.CiMap；红黑序档不跟随，本库只承诺插入序（同 16-cache 判例）
 CastConverter	cn.hutool.core.convert.impl.CastConverter	excluded	hutool 该件是运行时原样强转，MoonBit 由类型系统承担，无对位面
 CastUtil	cn.hutool.core.convert.CastUtil	excluded	泛型强转助手
 Chain	cn.hutool.core.lang.Chain	core	闭包组合
@@ -145,22 +145,22 @@ Cloneable	cn.hutool.core.clone.Cloneable	excluded	无运行时反射/动态代�
 CollStreamUtil	cn.hutool.core.collection.CollStreamUtil	core	Iter 组合
 CollUtil	cn.hutool.core.collection.CollUtil	done	coll 缺口子集
 CollectionConverter	cn.hutool.core.convert.impl.CollectionConverter	done	conv.to_array（去重档由 coll.distinct 承接，分组档由 coll.group_by）
-CollectionUtil	cn.hutool.core.collection.CollectionUtil	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
-CollectionValueMap	cn.hutool.core.map.multi.CollectionValueMap	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
+CollectionUtil	cn.hutool.core.collection.CollectionUtil	done	coll 14 件即 CollUtil 高频子集（spec 06 §1 逐条数过 core 缺口）
+CollectionValueMap	cn.hutool.core.map.multi.CollectionValueMap	done	coll.group_by
 CollectorUtil	cn.hutool.core.stream.CollectorUtil	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
 ColorUtil	cn.hutool.core.img.ColorUtil	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
 Combination	cn.hutool.core.math.Combination	unattested	date 五批 / num 四批 / 错误形状走 raise（个别档见 overrides 与 deferred） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
 CombinationAnnotationElement	cn.hutool.core.annotation.CombinationAnnotationElement	excluded	无运行时反射/动态代理/内联编译器
-ComparableComparator	cn.hutool.core.comparator.ComparableComparator	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
-ComparatorChain	cn.hutool.core.comparator.ComparatorChain	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
-ComparatorException	cn.hutool.core.comparator.ComparatorException	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
+ComparableComparator	cn.hutool.core.comparator.ComparableComparator	core	Compare 类型类的默认比较即够
+ComparatorChain	cn.hutool.core.comparator.ComparatorChain	gap	多比较器链：本库只有 path.compare_patterns 这一个专用档，通用链式比较未登记（要先定并列档语义）⇒ 待拍
+ComparatorException	cn.hutool.core.comparator.ComparatorException	excluded	该异常表达“两类型不可比”，MoonBit 由类型系统挡住 ⇒ 无对位错误面
 CompareToBuilder	cn.hutool.core.builder.CompareToBuilder	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
-CompareUtil	cn.hutool.core.comparator.CompareUtil	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
+CompareUtil	cn.hutool.core.comparator.CompareUtil	core	cmp/Compare 已给（本仓 num 轮核 String::compare 长度优先坑时一并核过）
 CompilerException	cn.hutool.core.compiler.CompilerException	excluded	无运行时反射/动态代理/内联编译器
 CompilerUtil	cn.hutool.core.compiler.CompilerUtil	excluded	无运行时反射/动态代理/内联编译器
-ComputeIter	cn.hutool.core.collection.ComputeIter	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
+ComputeIter	cn.hutool.core.collection.ComputeIter	core	惰性求值档由 core 的 map/闭包承担，不做迭代器包装
 ConcurrencyTester	cn.hutool.core.thread.ConcurrencyTester	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
-ConcurrentHashSet	cn.hutool.core.collection.ConcurrentHashSet	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
+ConcurrentHashSet	cn.hutool.core.collection.ConcurrentHashSet	excluded	java.util.concurrent 并发容器（全库单线程同步）
 ConsistentHash	cn.hutool.core.lang.ConsistentHash	deferred	hash 第二批排期
 Console	cn.hutool.core.lang.Console	excluded	终端输出
 ConsoleTable	cn.hutool.core.lang.ConsoleTable	excluded	终端输出
@@ -170,7 +170,7 @@ ConvertException	cn.hutool.core.convert.ConvertException	unattested	text/conv/co
 Converter	cn.hutool.core.convert.Converter	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
 ConverterRegistry	cn.hutool.core.convert.ConverterRegistry	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
 CoordinateUtil	cn.hutool.core.util.CoordinateUtil	done	typex.coord_*
-CopiedIter	cn.hutool.core.collection.CopiedIter	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
+CopiedIter	cn.hutool.core.collection.CopiedIter	excluded	遍历期快照是为 JDK fail-fast 集合设计的，本库无该失效模式
 Copier	cn.hutool.core.lang.copier.Copier	excluded	反射派生/JVM 内部机制/终端转义
 CopyOptions	cn.hutool.core.bean.copier.CopyOptions	excluded	无运行时反射/动态代理/内联编译器
 CopyVisitor	cn.hutool.core.io.file.visitor.CopyVisitor	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
@@ -188,7 +188,7 @@ CsvUtil	cn.hutool.core.text.csv.CsvUtil	unattested	text/conv/codec/coll/mapx/has
 CsvWriteConfig	cn.hutool.core.text.csv.CsvWriteConfig	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
 CsvWriter	cn.hutool.core.text.csv.CsvWriter	done	csv
 CurrencyConverter	cn.hutool.core.convert.impl.CurrencyConverter	excluded	JDK 币种表；本库薄 Money 只做数值面（num 第二批）
-CustomKeyMap	cn.hutool.core.map.CustomKeyMap	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
+CustomKeyMap	cn.hutool.core.map.CustomKeyMap	done	coll.group_by 的 by 参数即自定义键
 DataSize	cn.hutool.core.io.unit.DataSize	done	typex.DataSize 族
 DataSizeUtil	cn.hutool.core.io.unit.DataSizeUtil	done	typex.data_size_format*
 DataUnit	cn.hutool.core.io.unit.DataUnit	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
@@ -230,7 +230,7 @@ EntryConverter	cn.hutool.core.convert.impl.EntryConverter	gap	Map 键值对档�
 EnumConverter	cn.hutool.core.convert.impl.EnumConverter	excluded	枚举 by-name 反射查表；本库枚举互转一律手写 match（见 rand/typex 各包）
 EnumItem	cn.hutool.core.lang.EnumItem	excluded	反射枚举项
 EnumUtil	cn.hutool.core.util.EnumUtil	excluded	反射枚举面
-EnumerationIter	cn.hutool.core.collection.EnumerationIter	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
+EnumerationIter	cn.hutool.core.collection.EnumerationIter	excluded	java.util.Enumeration 接口适配件
 EqualsBuilder	cn.hutool.core.builder.EqualsBuilder	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
 EscapeUtil	cn.hutool.core.util.EscapeUtil	gap	HTML/XML 实体转义是纯串面，够得着却没人登记——待拍
 ExceptionUtil	cn.hutool.core.exceptions.ExceptionUtil	core	错误形状走 raise/匹配；栈深读取属宿主
@@ -242,8 +242,8 @@ FastDateParser	cn.hutool.core.date.format.FastDateParser	unattested	date 五批 
 FastDatePrinter	cn.hutool.core.date.format.FastDatePrinter	unattested	date 五批 / num 四批 / 错误形状走 raise（个别档见 overrides 与 deferred） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
 FastStringWriter	cn.hutool.core.io.FastStringWriter	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
 FieldAnnotationScanner	cn.hutool.core.annotation.scanner.FieldAnnotationScanner	excluded	无运行时反射/动态代理/内联编译器
-FieldComparator	cn.hutool.core.comparator.FieldComparator	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
-FieldsComparator	cn.hutool.core.comparator.FieldsComparator	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
+FieldComparator	cn.hutool.core.comparator.FieldComparator	core	同 BaseFieldComparator（sort_by_key 取键）
+FieldsComparator	cn.hutool.core.comparator.FieldsComparator	core	多字段字典序 = 嵌套取键闭包；专用档另见 path.compare_patterns
 FileAppender	cn.hutool.core.io.file.FileAppender	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
 FileCopier	cn.hutool.core.io.file.FileCopier	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
 FileMagicNumber	cn.hutool.core.io.FileMagicNumber	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
@@ -258,10 +258,10 @@ FileUtil	cn.hutool.core.io.FileUtil	excluded	文件 IO
 FileWrapper	cn.hutool.core.io.file.FileWrapper	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
 FileWriter	cn.hutool.core.io.file.FileWriter	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
 Filter	cn.hutool.core.lang.Filter	core	谓词就是一等闭包
-FilterIter	cn.hutool.core.collection.FilterIter	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
+FilterIter	cn.hutool.core.collection.FilterIter	gap	惰性过滤视图：core 的 Iter 是否给 filter 本轮没 grep 到，本库也无对位件 ⇒ 待拍
 FinalizableDelegatedExecutorService	cn.hutool.core.thread.FinalizableDelegatedExecutorService	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
 Finder	cn.hutool.core.text.finder.Finder	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
-FixedLinkedHashMap	cn.hutool.core.map.FixedLinkedHashMap	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
+FixedLinkedHashMap	cn.hutool.core.map.FixedLinkedHashMap	excluded	JVM LinkedHashMap 子类实现件；其 capacity 语义在 16-cache §5 已判不跟
 FontUtil	cn.hutool.core.img.FontUtil	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
 ForceAliasFor	cn.hutool.core.annotation.ForceAliasFor	excluded	无运行时反射/动态代理/内联编译器
 ForceAliasedAnnotationAttribute	cn.hutool.core.annotation.ForceAliasedAnnotationAttribute	excluded	无运行时反射/动态代理/内联编译器
@@ -272,9 +272,9 @@ FormatCache	cn.hutool.core.date.format.FormatCache	unattested	date 五批 / num 
 Func	cn.hutool.core.lang.func.Func	excluded	反射派生/JVM 内部机制/终端转义
 Func0	cn.hutool.core.lang.func.Func0	excluded	反射派生/JVM 内部机制/终端转义
 Func1	cn.hutool.core.lang.func.Func1	excluded	反射派生/JVM 内部机制/终端转义
-FuncComparator	cn.hutool.core.comparator.FuncComparator	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
-FuncKeyMap	cn.hutool.core.map.FuncKeyMap	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
-FuncMap	cn.hutool.core.map.FuncMap	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
+FuncComparator	cn.hutool.core.comparator.FuncComparator	core	取键闭包比较即 Array::sort_by_key
+FuncKeyMap	cn.hutool.core.map.FuncKeyMap	gap	函数键 Map：core 的 Map 键要 Hash+Eq（函数值不能当键，本仓已核），要做必先拍键等价口径 ⇒ 待拍
+FuncMap	cn.hutool.core.map.FuncMap	gap	读写都走函数的懒 Map：同上，未登记 ⇒ 待拍
 GanZhi	cn.hutool.core.date.chinese.GanZhi	deferred	干支码表独立成数据件
 Generator	cn.hutool.core.lang.generator.Generator	excluded	反射派生/JVM 内部机制/终端转义
 GenericAnnotationScanner	cn.hutool.core.annotation.scanner.GenericAnnotationScanner	excluded	无运行时反射/动态代理/内联编译器
@@ -309,9 +309,9 @@ IgnoreWatcher	cn.hutool.core.io.watch.watchers.IgnoreWatcher	excluded	文件系�
 ImageSelection	cn.hutool.core.swing.clipboard.ImageSelection	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
 Img	cn.hutool.core.img.Img	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
 ImgUtil	cn.hutool.core.img.ImgUtil	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
-IndexedComparator	cn.hutool.core.comparator.IndexedComparator	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
+IndexedComparator	cn.hutool.core.comparator.IndexedComparator	gap	按给定顺序表比较：没登记 ⇒ 待拍
 InputStreamResource	cn.hutool.core.io.resource.InputStreamResource	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
-InstanceComparator	cn.hutool.core.comparator.InstanceComparator	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
+InstanceComparator	cn.hutool.core.comparator.InstanceComparator	gap	按实例类顺序比较：hutool 靠反射；改成手写顺序表属新能力，未拍 ⇒ 待拍
 InternUtil	cn.hutool.core.lang.intern.InternUtil	excluded	反射派生/JVM 内部机制/终端转义
 InternalEscapeUtil	cn.hutool.core.text.escape.InternalEscapeUtil	gap	同上（escape 族的内部实现件，不单独算一件能力）
 Interner	cn.hutool.core.lang.intern.Interner	excluded	反射派生/JVM 内部机制/终端转义
@@ -319,10 +319,10 @@ InvocationTargetRuntimeException	cn.hutool.core.exceptions.InvocationTargetRunti
 IoCopier	cn.hutool.core.io.copy.IoCopier	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
 IoUtil	cn.hutool.core.io.IoUtil	excluded	流 IO
 Ipv4Util	cn.hutool.core.net.Ipv4Util	done	typex.ipv4_*
-IterChain	cn.hutool.core.collection.IterChain	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
+IterChain	cn.hutool.core.collection.IterChain	gap	多集合串联的惰性迭代未登记（本库只给 union/intersection/subtract 的即时数组档）
 IterUtil	cn.hutool.core.collection.IterUtil	done	coll
-IterableIter	cn.hutool.core.collection.IterableIter	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
-IteratorEnumeration	cn.hutool.core.collection.IteratorEnumeration	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
+IterableIter	cn.hutool.core.collection.IterableIter	excluded	Java Iterable 接口适配件
+IteratorEnumeration	cn.hutool.core.collection.IteratorEnumeration	excluded	同上（Enumeration 反向适配）
 JAXBUtil	cn.hutool.core.util.JAXBUtil	excluded	JAXB
 JNDIUtil	cn.hutool.core.util.JNDIUtil	excluded	JNDI
 JarClassLoader	cn.hutool.core.lang.JarClassLoader	excluded	类加载器
@@ -339,18 +339,18 @@ LabColor	cn.hutool.core.img.LabColor	excluded	文件系统/网络/线程/AWT 需
 LambdaUtil	cn.hutool.core.lang.func.LambdaUtil	excluded	lambda 元数据反射
 LazyFunLoader	cn.hutool.core.lang.loader.LazyFunLoader	excluded	反射派生/JVM 内部机制/终端转义
 LazyLoader	cn.hutool.core.lang.loader.LazyLoader	excluded	反射派生/JVM 内部机制/终端转义
-LengthComparator	cn.hutool.core.comparator.LengthComparator	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
+LengthComparator	cn.hutool.core.comparator.LengthComparator	core	String::char_length + sort_by_key
 LengthFinder	cn.hutool.core.text.finder.LengthFinder	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
 LimitedInputStream	cn.hutool.core.io.LimitedInputStream	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
 LineHandler	cn.hutool.core.io.LineHandler	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
-LineIter	cn.hutool.core.collection.LineIter	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
+LineIter	cn.hutool.core.collection.LineIter	core	按行迭代 = core 的 String::split + 循环（本仓已在 text/coll 用例里用该形状）
 LineReadWatcher	cn.hutool.core.io.file.LineReadWatcher	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
 LineSeparator	cn.hutool.core.io.file.LineSeparator	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
 Link	cn.hutool.core.annotation.Link	excluded	无运行时反射/动态代理/内联编译器
-LinkedForestMap	cn.hutool.core.map.LinkedForestMap	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
+LinkedForestMap	cn.hutool.core.map.LinkedForestMap	gap	森林层级 Map：随 tree 族整片在 gap（本表 §7 待拍清单）
 ListTypeGetter	cn.hutool.core.getter.ListTypeGetter	excluded	无运行时反射/动态代理/内联编译器
 ListUtil	cn.hutool.core.collection.ListUtil	done	coll
-ListValueMap	cn.hutool.core.map.multi.ListValueMap	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
+ListValueMap	cn.hutool.core.map.multi.ListValueMap	done	coll.group_by
 Loader	cn.hutool.core.lang.loader.Loader	excluded	反射派生/JVM 内部机制/终端转义
 LocalDateTimeUtil	cn.hutool.core.date.LocalDateTimeUtil	done	date 纯函数档
 LocalPortGenerater	cn.hutool.core.net.LocalPortGenerater	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
@@ -361,13 +361,13 @@ LookupReplacer	cn.hutool.core.text.replacer.LookupReplacer	gap	text.replacer 片
 LunarFestival	cn.hutool.core.date.chinese.LunarFestival	unattested	date 五批 / num 四批 / 错误形状走 raise（个别档见 overrides 与 deferred） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
 LunarInfo	cn.hutool.core.date.chinese.LunarInfo	deferred	农历码表独立成数据件
 ManifestUtil	cn.hutool.core.io.ManifestUtil	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
-MapBuilder	cn.hutool.core.map.MapBuilder	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
+MapBuilder	cn.hutool.core.map.MapBuilder	core	建 Map 就是字面量 Map([...]) / insert（本仓写作语法已核）
 MapConverter	cn.hutool.core.convert.impl.MapConverter	done	conv.to_map
-MapProxy	cn.hutool.core.map.MapProxy	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
+MapProxy	cn.hutool.core.map.MapProxy	excluded	动态代理（零依赖四条禁反射与代理）
 MapToBeanCopier	cn.hutool.core.bean.copier.MapToBeanCopier	excluded	无运行时反射/动态代理/内联编译器
 MapToMapCopier	cn.hutool.core.bean.copier.MapToMapCopier	excluded	无运行时反射/动态代理/内联编译器
 MapUtil	cn.hutool.core.map.MapUtil	done	mapx
-MapWrapper	cn.hutool.core.map.MapWrapper	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
+MapWrapper	cn.hutool.core.map.MapWrapper	excluded	hutool 内部包装件，不是能力面
 MaskBit	cn.hutool.core.net.MaskBit	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
 Matcher	cn.hutool.core.lang.Matcher	core	re 包 + core Regex
 MathUtil	cn.hutool.core.math.MathUtil	done	num
@@ -410,10 +410,10 @@ NoLock	cn.hutool.core.thread.lock.NoLock	excluded	文件系统/网络/线程/AWT
 NoReadWriteLock	cn.hutool.core.thread.lock.NoReadWriteLock	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
 NoResourceException	cn.hutool.core.io.resource.NoResourceException	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
 Node	cn.hutool.core.lang.tree.Node	gap	纯数据结构却既没做也没登记（本轮新发现的档）
-NodeListIter	cn.hutool.core.collection.NodeListIter	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
+NodeListIter	cn.hutool.core.collection.NodeListIter	excluded	DOM NodeList 适配（XML 域整片不在本库）
 NodeParser	cn.hutool.core.lang.tree.parser.NodeParser	gap	纯数据结构却既没做也没登记（本轮新发现的档）
 NotInitedException	cn.hutool.core.exceptions.NotInitedException	unattested	date 五批 / num 四批 / 错误形状走 raise（个别档见 overrides 与 deferred） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
-NullComparator	cn.hutool.core.comparator.NullComparator	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
+NullComparator	cn.hutool.core.comparator.NullComparator	core	Option 显式比较（本库一律 x is None 判，无 null 形状）
 NullOutputStream	cn.hutool.core.io.NullOutputStream	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
 NullWrapperBean	cn.hutool.core.bean.NullWrapperBean	excluded	无运行时反射/动态代理/内联编译器
 Number128	cn.hutool.core.lang.hash.Number128	deferred	128 位族要先定返回形状
@@ -440,8 +440,8 @@ PageUtil	cn.hutool.core.util.PageUtil	done	typex.page_*
 Pair	cn.hutool.core.lang.Pair	core	二元组
 PairConverter	cn.hutool.core.convert.impl.PairConverter	core	二元组/数组是语言层形状，本库 mapx.Table 与 conv.to_map 直接摊平
 ParameterizedTypeImpl	cn.hutool.core.lang.ParameterizedTypeImpl	excluded	泛型反射
-Partition	cn.hutool.core.collection.Partition	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
-PartitionIter	cn.hutool.core.collection.PartitionIter	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
+Partition	cn.hutool.core.collection.Partition	done	coll.partition
+PartitionIter	cn.hutool.core.collection.PartitionIter	done	coll.partition（本库一次性返回分段数组，不另做惰性档）
 PassAuth	cn.hutool.core.net.PassAuth	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
 PasswdStrength	cn.hutool.core.text.PasswdStrength	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
 PathConverter	cn.hutool.core.convert.impl.PathConverter	excluded	java.nio.file.Path 属宿主文件系统（read_file 在禁令里）
@@ -453,24 +453,24 @@ PercentCodec	cn.hutool.core.codec.PercentCodec	done	codec 表单档
 PeriodConverter	cn.hutool.core.convert.impl.PeriodConverter	gap	年+月档：同上，且 date 只有日/周/月边界件，没登记过 Period 形状 ⇒ 待拍
 PhoneUtil	cn.hutool.core.util.PhoneUtil	done	typex.phone_*
 Pid	cn.hutool.core.lang.Pid	excluded	进程号需宿主
-PinyinComparator	cn.hutool.core.comparator.PinyinComparator	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
+PinyinComparator	cn.hutool.core.comparator.PinyinComparator	deferred	拼音码表在暂不做档（同 CharsetUtil 与区划码表判例）
 PrimitiveArrayUtil	cn.hutool.core.util.PrimitiveArrayUtil	core	Array[T] 同义
 PrimitiveConverter	cn.hutool.core.convert.impl.PrimitiveConverter	core	基本类型互转由 conv 的 to_* 档位与类型系统承担（同 NumberConverter）
 PropDesc	cn.hutool.core.bean.PropDesc	excluded	无运行时反射/动态代理/内联编译器
 PropIgnore	cn.hutool.core.annotation.PropIgnore	excluded	无运行时反射/动态代理/内联编译器
-PropertyComparator	cn.hutool.core.comparator.PropertyComparator	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
+PropertyComparator	cn.hutool.core.comparator.PropertyComparator	excluded	反射取属性值
 ProxySocketFactory	cn.hutool.core.net.ProxySocketFactory	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
 PunyCode	cn.hutool.core.codec.PunyCode	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
 Quarter	cn.hutool.core.date.Quarter	core	date.Date::quarter 同档
 RFC3986	cn.hutool.core.net.RFC3986	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
 RadixUtil	cn.hutool.core.util.RadixUtil	done	codec
-RandomAccessAvgPartition	cn.hutool.core.collection.RandomAccessAvgPartition	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
-RandomAccessPartition	cn.hutool.core.collection.RandomAccessPartition	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
+RandomAccessAvgPartition	cn.hutool.core.collection.RandomAccessAvgPartition	done	coll.partition + coll.page / page_count
+RandomAccessPartition	cn.hutool.core.collection.RandomAccessPartition	done	同上
 RandomUtil	cn.hutool.core.util.RandomUtil	done	rand
 Range	cn.hutool.core.lang.Range	core	IntRange/Int64Range
 ReUtil	cn.hutool.core.util.ReUtil	done	re 第一批
 ReaderWriterCopier	cn.hutool.core.io.copy.ReaderWriterCopier	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
-ReferenceConcurrentMap	cn.hutool.core.map.ReferenceConcurrentMap	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
+ReferenceConcurrentMap	cn.hutool.core.map.ReferenceConcurrentMap	excluded	弱引用 + 并发（回收时机不可冻，同 WeakCache 判据）
 ReferenceConverter	cn.hutool.core.convert.impl.ReferenceConverter	excluded	弱/软引用回收时机不可冻（同 16-cache 的 WeakCache 判据）
 ReferenceUtil	cn.hutool.core.util.ReferenceUtil	excluded	弱/软引用回收时机不可冻（同 16-cache 的 WeakCache 判据）
 ReflectUtil	cn.hutool.core.util.ReflectUtil	excluded	反射
@@ -479,20 +479,20 @@ RejectPolicy	cn.hutool.core.thread.RejectPolicy	excluded	文件系统/网络/线
 RelationType	cn.hutool.core.annotation.RelationType	excluded	无运行时反射/动态代理/内联编译器
 Replacer	cn.hutool.core.lang.Replacer	core	re/text 已承接替换档
 ReplacerChain	cn.hutool.core.text.replacer.ReplacerChain	gap	同上（链式替换；注意 `Replacer` 本体在 lang 包已判 core）
-ResettableIter	cn.hutool.core.collection.ResettableIter	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
+ResettableIter	cn.hutool.core.collection.ResettableIter	excluded	Iterator.reset 是 hutool 自定义协议，MoonBit 无该形状
 Resource	cn.hutool.core.io.resource.Resource	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
 ResourceClassLoader	cn.hutool.core.lang.ResourceClassLoader	excluded	classpath 资源
 ResourceUtil	cn.hutool.core.io.resource.ResourceUtil	excluded	classpath 资源
-ReverseComparator	cn.hutool.core.comparator.ReverseComparator	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
+ReverseComparator	cn.hutool.core.comparator.ReverseComparator	core	比较结果取反一行
 RingIndexUtil	cn.hutool.core.collection.RingIndexUtil	gap	环形下标算式，够得着没人登记——待拍
 RobotUtil	cn.hutool.core.swing.RobotUtil	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
 Rot	cn.hutool.core.codec.Rot	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
-RowKeyTable	cn.hutool.core.map.multi.RowKeyTable	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
+RowKeyTable	cn.hutool.core.map.multi.RowKeyTable	done	mapx.Table（行键 + 列键双索引就是 RowKeyTable 的形状）
 RuntimeUtil	cn.hutool.core.util.RuntimeUtil	excluded	起进程
 SSLContextBuilder	cn.hutool.core.net.SSLContextBuilder	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
 SSLProtocols	cn.hutool.core.net.SSLProtocols	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
 SSLUtil	cn.hutool.core.net.SSLUtil	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
-SafeConcurrentHashMap	cn.hutool.core.map.SafeConcurrentHashMap	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
+SafeConcurrentHashMap	cn.hutool.core.map.SafeConcurrentHashMap	excluded	并发容器
 ScaleType	cn.hutool.core.img.ScaleType	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
 ScreenUtil	cn.hutool.core.swing.ScreenUtil	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
 SecurityManagerCaller	cn.hutool.core.lang.caller.SecurityManagerCaller	excluded	反射派生/JVM 内部机制/终端转义
@@ -500,7 +500,7 @@ Segment	cn.hutool.core.lang.Segment	core	同上（typex 的 PageUtil.Segment 判
 SemaphoreRunnable	cn.hutool.core.thread.SemaphoreRunnable	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
 SerializeUtil	cn.hutool.core.util.SerializeUtil	excluded	Java 序列化
 ServiceLoaderUtil	cn.hutool.core.util.ServiceLoaderUtil	excluded	SPI
-SetValueMap	cn.hutool.core.map.multi.SetValueMap	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
+SetValueMap	cn.hutool.core.map.multi.SetValueMap	done	coll.group_by + coll.distinct（多值去重档）
 Simhash	cn.hutool.core.text.Simhash	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
 SimpleCache	cn.hutool.core.lang.SimpleCache	excluded	同上，件在 core 不在 cache
 SimpleCollector	cn.hutool.core.stream.SimpleCollector	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
@@ -510,7 +510,7 @@ Snowflake	cn.hutool.core.lang.Snowflake	done	id 生成件
 SnowflakeGenerator	cn.hutool.core.lang.generator.SnowflakeGenerator	excluded	反射派生/JVM 内部机制/终端转义
 SolarTerms	cn.hutool.core.date.chinese.SolarTerms	deferred	节气码表独立成数据件
 SplitIter	cn.hutool.core.text.split.SplitIter	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
-SpliteratorUtil	cn.hutool.core.collection.SpliteratorUtil	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
+SpliteratorUtil	cn.hutool.core.collection.SpliteratorUtil	excluded	JDK Spliterator / 并行流入口
 SrcToDestCopier	cn.hutool.core.lang.copier.SrcToDestCopier	excluded	反射派生/JVM 内部机制/终端转义
 StackTraceCaller	cn.hutool.core.lang.caller.StackTraceCaller	excluded	反射派生/JVM 内部机制/终端转义
 StackTraceElementConverter	cn.hutool.core.convert.impl.StackTraceElementConverter	excluded	JVM 栈帧形状，跨平台无对位
@@ -558,14 +558,14 @@ ThreadFactoryBuilder	cn.hutool.core.thread.ThreadFactoryBuilder	excluded	文件�
 ThreadUtil	cn.hutool.core.thread.ThreadUtil	excluded	线程池
 TimeInterval	cn.hutool.core.date.TimeInterval	unattested	date 五批 / num 四批 / 错误形状走 raise（个别档见 overrides 与 deferred） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
 TimeZoneConverter	cn.hutool.core.convert.impl.TimeZoneConverter	done	date.set_default_zone / date.zone_offset_minutes
-TolerantMap	cn.hutool.core.map.TolerantMap	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
-TransCollection	cn.hutool.core.collection.TransCollection	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
-TransIter	cn.hutool.core.collection.TransIter	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
-TransMap	cn.hutool.core.map.TransMap	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
-TransSpliterator	cn.hutool.core.collection.TransSpliterator	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
+TolerantMap	cn.hutool.core.map.TolerantMap	gap	容错键 Map：本库只登记了 CiMap 的 ASCII 折叠一档，空白/全半角等容错没拍 ⇒ 待拍
+TransCollection	cn.hutool.core.collection.TransCollection	excluded	hutool 内部转换适配基类，不是能力面
+TransIter	cn.hutool.core.collection.TransIter	excluded	同上
+TransMap	cn.hutool.core.map.TransMap	excluded	hutool 内部双向转换适配件
+TransSpliterator	cn.hutool.core.collection.TransSpliterator	excluded	JDK Spliterator 适配
 Tree	cn.hutool.core.lang.tree.Tree	gap	同上
 TreeBuilder	cn.hutool.core.lang.tree.TreeBuilder	gap	纯数据结构却既没做也没登记（本轮新发现的档）
-TreeEntry	cn.hutool.core.map.TreeEntry	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
+TreeEntry	cn.hutool.core.map.TreeEntry	gap	树节点条目：随 tree 族一起在 gap（§7）
 TreeNode	cn.hutool.core.lang.tree.TreeNode	gap	纯数据结构却既没做也没登记（本轮新发现的档）
 TreeNodeConfig	cn.hutool.core.lang.tree.TreeNodeConfig	gap	纯数据结构却既没做也没登记（本轮新发现的档）
 TreeUtil	cn.hutool.core.lang.tree.TreeUtil	gap	扁平列表构树是纯算法，既没做也没登记——待拍
@@ -584,7 +584,7 @@ UUID	cn.hutool.core.lang.UUID	done	id.uuid_v3/uuid_v4
 UUIDConverter	cn.hutool.core.convert.impl.UUIDConverter	done	id.uuid_v3 / id.uuid_v4
 UUIDGenerator	cn.hutool.core.lang.generator.UUIDGenerator	excluded	反射派生/JVM 内部机制/终端转义
 UnicodeUtil	cn.hutool.core.text.UnicodeUtil	gap	\uXXXX 串面转义够得着，既没做也没登记——待拍
-UniqueKeySet	cn.hutool.core.collection.UniqueKeySet	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
+UniqueKeySet	cn.hutool.core.collection.UniqueKeySet	done	coll.distinct_by（按键去重即唯一键集语义）
 UploadFile	cn.hutool.core.net.multipart.UploadFile	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
 UploadFileHeader	cn.hutool.core.net.multipart.UploadFileHeader	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
 UploadSetting	cn.hutool.core.net.multipart.UploadSetting	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
@@ -600,7 +600,7 @@ Validator	cn.hutool.core.lang.Validator	done	valid 第一批 15 件
 ValueProvider	cn.hutool.core.bean.copier.ValueProvider	excluded	无运行时反射/动态代理/内联编译器
 ValueProviderToBeanCopier	cn.hutool.core.bean.copier.ValueProviderToBeanCopier	excluded	无运行时反射/动态代理/内联编译器
 Version	cn.hutool.core.lang.Version	done	typex.Version
-VersionComparator	cn.hutool.core.comparator.VersionComparator	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
+VersionComparator	cn.hutool.core.comparator.VersionComparator	done	typex.Version 的序比较 + text.compare_version
 VersionUtil	cn.hutool.core.util.VersionUtil	done	typex.Version 与 text.compare_version 承接
 VfsResource	cn.hutool.core.io.resource.VfsResource	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
 VoidFunc	cn.hutool.core.lang.func.VoidFunc	excluded	反射派生/JVM 内部机制/终端转义
@@ -614,13 +614,13 @@ WatchServer	cn.hutool.core.io.watch.WatchServer	excluded	文件系统/网络/线
 WatchUtil	cn.hutool.core.io.watch.WatchUtil	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
 Watcher	cn.hutool.core.io.watch.Watcher	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
 WatcherChain	cn.hutool.core.io.watch.watchers.WatcherChain	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
-WeakConcurrentMap	cn.hutool.core.map.WeakConcurrentMap	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
+WeakConcurrentMap	cn.hutool.core.map.WeakConcurrentMap	excluded	弱引用 + 并发（同 WeakCache 判据）
 WeakInterner	cn.hutool.core.lang.intern.WeakInterner	excluded	反射派生/JVM 内部机制/终端转义
 WebAppResource	cn.hutool.core.io.resource.WebAppResource	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
 Week	cn.hutool.core.date.Week	unattested	date 五批 / num 四批 / 错误形状走 raise（个别档见 overrides 与 deferred） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
 WeightListRandom	cn.hutool.core.lang.WeightListRandom	done	rand 加权件
 WeightRandom	cn.hutool.core.lang.WeightRandom	done	rand 加权件
-WindowsExplorerStringComparator	cn.hutool.core.comparator.WindowsExplorerStringComparator	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
+WindowsExplorerStringComparator	cn.hutool.core.comparator.WindowsExplorerStringComparator	gap	Windows 资源管理器排序规则是一整张未登记的规则表（够得着；要做先拍码表落点）⇒ 待拍
 WrappedAnnotationAttribute	cn.hutool.core.annotation.WrappedAnnotationAttribute	excluded	无运行时反射/动态代理/内联编译器
 XmlEscape	cn.hutool.core.text.escape.XmlEscape	gap	同上（XML 实体，纯串面）
 XmlUnescape	cn.hutool.core.text.escape.XmlUnescape	gap	同上（反档）

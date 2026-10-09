@@ -201,6 +201,75 @@ OVERRIDES = {
     "KetamaHash": ("deferred", "hash 第二批排期"),
     "Number128": ("deferred", "128 位族要先定返回形状"),
     "Hashids": ("deferred", "可逆编码，归属另判（见 00-hutool-map）"),
+    # —— 10-10 消化第二批：collection / map / comparator 全 66 类逐条指认（口径与第一批一致：
+    # 能点名 grep 到的承接件才写 done/core；JDK 接口适配、反射、并发、弱引用一律 excluded；
+    # 核不到对位件的落 gap 并写明缺什么，不硬指认）
+    "AbsCollValueMap": ("done", "coll.group_by（一键多值）"),
+    "AbsEntry": ("excluded", "java.util.Map.Entry 的抽象实现适配件；MoonBit 摊平成二元组（同 PairConverter 判定）"),
+    "AbsTable": ("done", "mapx.Table"),
+    "ArrayIter": ("core", "core 已给 Array::iter/eachi（本仓写作语法已核），不需要迭代器包装件"),
+    "AvgPartition": ("done", "coll.partition + coll.page_count 的平均分段档"),
+    "BaseFieldComparator": ("core", "按字段比较 = core 的 Array::sort_by_key 取键闭包（本轮在 builtin/array_sort.mbt 核到）"),
+    "BoundedPriorityQueue": ("gap", "有界优先队列（堆）：本库无该容器也没登记 ⇒ 待拍"),
+    "CamelCaseLinkedMap": ("gap", "键命名风格自动换形的 Map：text 有 to_camel_case/to_underline_case，但没登记过 Map 档 ⇒ 待拍"),
+    "CamelCaseMap": ("gap", "同上"),
+    "CaseInsensitiveLinkedMap": ("done", "mapx.CiMap（折叠只覆盖 ASCII、原样键取首次写入，两侧读数在 07 §5）"),
+    "CaseInsensitiveTreeMap": ("done", "mapx.CiMap；红黑序档不跟随，本库只承诺插入序（同 16-cache 判例）"),
+    "CollectionUtil": ("done", "coll 14 件即 CollUtil 高频子集（spec 06 §1 逐条数过 core 缺口）"),
+    "CollectionValueMap": ("done", "coll.group_by"),
+    "ComparableComparator": ("core", "Compare 类型类的默认比较即够"),
+    "ComparatorChain": ("gap", "多比较器链：本库只有 path.compare_patterns 这一个专用档，通用链式比较未登记（要先定并列档语义）⇒ 待拍"),
+    "ComparatorException": ("excluded", "该异常表达“两类型不可比”，MoonBit 由类型系统挡住 ⇒ 无对位错误面"),
+    "CompareUtil": ("core", "cmp/Compare 已给（本仓 num 轮核 String::compare 长度优先坑时一并核过）"),
+    "ComputeIter": ("core", "惰性求值档由 core 的 map/闭包承担，不做迭代器包装"),
+    "ConcurrentHashSet": ("excluded", "java.util.concurrent 并发容器（全库单线程同步）"),
+    "CopiedIter": ("excluded", "遍历期快照是为 JDK fail-fast 集合设计的，本库无该失效模式"),
+    "CustomKeyMap": ("done", "coll.group_by 的 by 参数即自定义键"),
+    "EnumerationIter": ("excluded", "java.util.Enumeration 接口适配件"),
+    "FieldComparator": ("core", "同 BaseFieldComparator（sort_by_key 取键）"),
+    "FieldsComparator": ("core", "多字段字典序 = 嵌套取键闭包；专用档另见 path.compare_patterns"),
+    "FilterIter": ("gap", "惰性过滤视图：core 的 Iter 是否给 filter 本轮没 grep 到，本库也无对位件 ⇒ 待拍"),
+    "FixedLinkedHashMap": ("excluded", "JVM LinkedHashMap 子类实现件；其 capacity 语义在 16-cache §5 已判不跟"),
+    "FuncComparator": ("core", "取键闭包比较即 Array::sort_by_key"),
+    "FuncKeyMap": ("gap", "函数键 Map：core 的 Map 键要 Hash+Eq（函数值不能当键，本仓已核），要做必先拍键等价口径 ⇒ 待拍"),
+    "FuncMap": ("gap", "读写都走函数的懒 Map：同上，未登记 ⇒ 待拍"),
+    "IndexedComparator": ("gap", "按给定顺序表比较：没登记 ⇒ 待拍"),
+    "InstanceComparator": ("gap", "按实例类顺序比较：hutool 靠反射；改成手写顺序表属新能力，未拍 ⇒ 待拍"),
+    "IterChain": ("gap", "多集合串联的惰性迭代未登记（本库只给 union/intersection/subtract 的即时数组档）"),
+    "IterableIter": ("excluded", "Java Iterable 接口适配件"),
+    "IteratorEnumeration": ("excluded", "同上（Enumeration 反向适配）"),
+    "LengthComparator": ("core", "String::char_length + sort_by_key"),
+    "LineIter": ("core", "按行迭代 = core 的 String::split + 循环（本仓已在 text/coll 用例里用该形状）"),
+    "LinkedForestMap": ("gap", "森林层级 Map：随 tree 族整片在 gap（本表 §7 待拍清单）"),
+    "ListValueMap": ("done", "coll.group_by"),
+    "MapBuilder": ("core", "建 Map 就是字面量 Map([...]) / insert（本仓写作语法已核）"),
+    "MapProxy": ("excluded", "动态代理（零依赖四条禁反射与代理）"),
+    "MapWrapper": ("excluded", "hutool 内部包装件，不是能力面"),
+    "NodeListIter": ("excluded", "DOM NodeList 适配（XML 域整片不在本库）"),
+    "NullComparator": ("core", "Option 显式比较（本库一律 x is None 判，无 null 形状）"),
+    "Partition": ("done", "coll.partition"),
+    "PartitionIter": ("done", "coll.partition（本库一次性返回分段数组，不另做惰性档）"),
+    "PinyinComparator": ("deferred", "拼音码表在暂不做档（同 CharsetUtil 与区划码表判例）"),
+    "PropertyComparator": ("excluded", "反射取属性值"),
+    "RandomAccessAvgPartition": ("done", "coll.partition + coll.page / page_count"),
+    "RandomAccessPartition": ("done", "同上"),
+    "ReferenceConcurrentMap": ("excluded", "弱引用 + 并发（回收时机不可冻，同 WeakCache 判据）"),
+    "ResettableIter": ("excluded", "Iterator.reset 是 hutool 自定义协议，MoonBit 无该形状"),
+    "ReverseComparator": ("core", "比较结果取反一行"),
+    "RowKeyTable": ("done", "mapx.Table（行键 + 列键双索引就是 RowKeyTable 的形状）"),
+    "SafeConcurrentHashMap": ("excluded", "并发容器"),
+    "SetValueMap": ("done", "coll.group_by + coll.distinct（多值去重档）"),
+    "SpliteratorUtil": ("excluded", "JDK Spliterator / 并行流入口"),
+    "TolerantMap": ("gap", "容错键 Map：本库只登记了 CiMap 的 ASCII 折叠一档，空白/全半角等容错没拍 ⇒ 待拍"),
+    "TransCollection": ("excluded", "hutool 内部转换适配基类，不是能力面"),
+    "TransIter": ("excluded", "同上"),
+    "TransMap": ("excluded", "hutool 内部双向转换适配件"),
+    "TransSpliterator": ("excluded", "JDK Spliterator 适配"),
+    "TreeEntry": ("gap", "树节点条目：随 tree 族一起在 gap（§7）"),
+    "UniqueKeySet": ("done", "coll.distinct_by（按键去重即唯一键集语义）"),
+    "VersionComparator": ("done", "typex.Version 的序比较 + text.compare_version"),
+    "WeakConcurrentMap": ("excluded", "弱引用 + 并发（同 WeakCache 判据）"),
+    "WindowsExplorerStringComparator": ("gap", "Windows 资源管理器排序规则是一整张未登记的规则表（够得着；要做先拍码表落点）⇒ 待拍"),
     # —— 10-09 消化第一批：cn.hutool.core.convert.impl 全 35 类逐条指认（不再吃整片声称）
     # 指认口径：done/core 的理由必须点名**已 grep 到**的承接件；核不到的一律落 gap 并写明没核到什么。
     # 本轮取证命令（现读命中数）：conv/coll/codec/id/date/num 各包 pkg.generated.mbti 逐件 grep，
@@ -353,6 +422,42 @@ def _downgrade_blanket_done(tier, reason):
     return (tier, reason)
 
 
+TIERS6 = ("done", "core", "excluded", "deferred", "gap", "unattested")
+DOC_ROW = re.compile(r"^\| `(done|core|excluded|deferred|gap|unattested)` \|.*\| (\d+) \|\s*$")
+
+
+def doc_tier_counts(path=None):
+    """从 `docs/spec/00-hutool-map.md` §7 表里读六个档位的条数（读不到的档就不出现在结果里，
+    由 doc_tier_findings 判成"表形状变了"而不是默默放过）。"""
+    p = path or DOC_CANON
+    doc = {}
+    if os.path.isfile(p):
+        for ln in io.open(p, encoding="utf-8", errors="replace").read().splitlines():
+            m = DOC_ROW.match(ln)
+            if m:
+                doc[m.group(1)] = int(m.group(2))
+    return doc
+
+
+def doc_tier_findings(rows, path=None):
+    """§7 表里那六个数必须等于归类表的现算数（10-09 由临时脚本升级成判据）。
+    起因：文档表格与生成物各写一遍，本仓已经因此漂过两次；临时比对脚本抓到过一次"六档全不一致"，
+    升级成判据才是"一劳永逸"。取法：解析 `docs/spec/00-hutool-map.md` 里 `| \`tier\` | ... | 数字 |` 行。"""
+    import collections
+    p = path or DOC_CANON
+    if not os.path.isfile(p):
+        return ["找不到 %s，无法核对 §7 表里的档位条数" % p]
+    live = collections.Counter(r[2] for r in rows)
+    doc = doc_tier_counts(p)
+    bad = []
+    for tier in TIERS6:
+        if tier not in doc:
+            bad.append("§7 表里读不到 `%s` 那一行的条数（表形状变了？判据会因此瞎掉）" % tier)
+        elif doc[tier] != live[tier]:
+            bad.append("`%s` 文档写 %d、归类表现读 %d" % (tier, doc[tier], live[tier]))
+    return bad
+
+
 def unattested_count(rows):
     return sum(1 for r in rows if r[2] == UNATTESTED)
 
@@ -391,7 +496,21 @@ def selftest_unattested():
     if not (ok_up is False or ok_up is True):
         print("  FAIL 自检⑤：棘轮返回形状不对")
         return 0
-    print("  PASS 自检⑤：整片 done 降级 + 棘轮读写都在跑（现值 %d 条）" % unattested_count(fake))
+    want = doc_tier_counts()
+    mirror = [(str(i), "cn.hutool.core.text.T%d" % i, ti)
+              for ti, n in want.items() for i in range(n)]
+    if len(want) != len(TIERS6):
+        print("  FAIL 自检⑤：§7 表里只读到 %d/%d 个档位 ⇒ 表形状变了，判据会瞎"
+              % (len(want), len(TIERS6)))
+        return 0
+    if doc_tier_findings(mirror):
+        print("  FAIL 自检⑤：等值镜像仍被判不一致 ⇒ 对账判据自己错了")
+        return 0
+    if not doc_tier_findings(mirror + [("X", "cn.hutool.core.text.X", "gap")]):
+        print("  FAIL 自检⑤：某一档多 1 条没被抓到 ⇒ 文档对账是摆设")
+        return 0
+    print("  PASS 自检⑤：整片 done 降级 + 棘轮读写 + 文档档位对账都在跑（合成现值 %d 条）"
+          % unattested_count(fake))
     return 1
 
 
@@ -608,6 +727,12 @@ def main():
     tiers = {}
     for r in rows:
         tiers[r[2]] = tiers.get(r[2], 0) + 1
+    dbad = doc_tier_findings(rows)
+    if dbad:
+        print("  FAIL 文档 §7 的档位条数与归类表不一致：")
+        for x in dbad:
+            print("    ", x)
+        return 1
     rok, rwhy = check_unattested_ratchet(rows)
     if not rok:
         print("  FAIL unattested 棘轮：%s" % rwhy)

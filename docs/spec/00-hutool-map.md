@@ -97,12 +97,15 @@
 
 | 档 | 含义 | 现读类数（hutool-all **5.8.37**，632 个顶层类，固化在 `docs/spec/hutool-classes.tsv`） |
 |---|---|---|
-| `done` | **逐条登记过**对位件（`OVERRIDES` 里点名哪个包哪件承接） | 80 |
-| `unattested` | 包级规则**整片声称已做但没逐条指回实现件**（10-09 紧闸新增档，棘轮只许降） | 161 |
-| `excluded` | 结构上不属于本库：反射/动态代理/宿主 IO/网络/线程/AWT/JVM 内部机制 | 301 |
-| `core` | MoonBit core 已有同义能力，本库按规则不写转发层 | 39 |
-| `deferred` | 已登记在 [`docs/ROADMAP.md`](https://github.com/mldong/moon-hutool/blob/master/docs/ROADMAP.md) 的「暂不做」档 | 21 |
-| `gap` | **够得着、既没做也没登记** ⇒ 这一档就是要拍板的清单 | 30 |
+| `done` | **逐条登记过**对位件（`OVERRIDES` 里点名哪个包哪件承接） | 97 |
+| `unattested` | 包级规则**整片声称已做但没逐条指回实现件**（10-09 紧闸新增档，棘轮只许降） | 95 |
+| `excluded` | 结构上不属于本库：反射/动态代理/宿主 IO/网络/线程/AWT/JVM 内部机制 | 322 |
+| `core` | MoonBit core 已有同义能力，本库按规则不写转发层 | 52 |
+| `deferred` | 已登记在 [`docs/ROADMAP.md`](https://github.com/mldong/moon-hutool/blob/master/docs/ROADMAP.md) 的「暂不做」档 | 22 |
+| `gap` | **够得着、既没做也没登记** ⇒ 这一档就是要拍板的清单 | 44 |
+
+
+> 这六个数**不是手抄**：`scripts/core_surface.py --check` 会解析本表并与归类表现算的条数逐档比对，任一处对不上或表形状变了（读不到六个档）直接判红（10-10 从临时比对脚本升级成判据，两侧对照进自检⑤：等值镜像必须为空、某一档多 1 条必须被抓到）。
 
 
 **10-09 紧闸：`done` 从此只能逐条登记**（owner 拍"先让闸不再允许整片算已做，再分批补登记"）
@@ -123,15 +126,13 @@
 数字因此换代（现读，不是推算）：`done` 272 → **67**，新出 `unattested` **196**，`gap` 18 → **27**。
 
 **同日第一批消化已落**（`convert.impl` 全 35 类逐条指认）：现读 `done` 67 → **80**、`unattested` 196 → **161**、`excluded` 287 → **301**、`core` 35 → **39**、`gap` 27 → **30**、`deferred` 20 → **21**（构成：13 done + 4 core + 1 deferred + 14 excluded + 3 gap = 35，与档位增量逐条对得上），棘轮基线随 `--write` 降到 161——**只许降这条是真的在动**。
+
+**第二批已落（10-10，`collection` + `map`(含 `map.multi`/`map.table`) + `comparator` 全 66 类）**：`unattested` 161 → **95**，构成 17 done + 13 core + 21 excluded + 1 deferred + 14 gap = 66，与档位增量逐条对得上（`done` +17、`core` +13、`excluded` +21、`deferred` +1、`gap` +14）。done 一律点名现读到的件（`coll.partition`/`page`/`group_by`/`distinct`/`distinct_by`、`mapx.CiMap`/`Table`/`filter_map`、`typex.Version`）；excluded 是 JDK 接口适配、反射代理、并发与弱引用那批（`EnumerationIter`/`SpliteratorUtil`/`NodeListIter`/`MapProxy`/`SafeConcurrentHashMap`/`WeakConcurrentMap`/`PropertyComparator`…）；core 靠 `Array::iter`/`eachi`、`Array::sort_by_key`（本轮在 `builtin/array_sort.mbt` 核到）、`String::char_length`、`Map([...])` 字面量与 Option/二元组；**14 条判 gap 的全是“核不到对位件就不硬指认”**——`BoundedPriorityQueue`（无堆容器）、`FilterIter`/`IterChain`（惰性视图 core 有无 filter 没核到）、`CamelCaseLinkedMap`/`CamelCaseMap`/`TolerantMap`（键换形/容错 Map 没登记）、`FuncKeyMap`/`FuncMap`（函数值不能当 Map 键，本仓已核，要做先拍键等价口径）、`LinkedForestMap`/`TreeEntry`（随 tree 族）、`ComparatorChain`/`IndexedComparator`/`InstanceComparator`（通用链式与顺序表比较）、`WindowsExplorerStringComparator`（一整张规则表）。
 涨的 9 条就是我抽验到的那批空头，已逐条落 `gap` 并写明证据：`Html4Escape`/`Html4Unescape`/`XmlEscape`/
 `XmlUnescape`/`InternalEscapeUtil`/`NumericEntityUnescaper`/`LookupReplacer`/`ReplacerChain`/`StrReplacer`
 （HTML/XML 实体与查表替换都是纯串面，能做，血统是 Apache Commons Text）。
 
-**消化计划**（`unattested` 归零的路，按片分批，每片都要指回具体承接件或改判 gap/excluded/deferred）：
-① **已完成**（10-09 第一批）`convert.impl` 35 条 ⇒ 每条理由都点名了 grep 到的承接件（`conv.to_str/to_bool/to_char/to_int/to_int64/to_double/to_big_int/to_array/to_map`、`coll.distinct`/`group_by`、`codec.normalize`/`form_decode`、`id.uuid_v*`、`date` 的 parse/`begin_of_*`/zone 族、`num.round_to`）；反射/并发/宿主那 14 类照既有判例落 excluded，`CharsetConverter` 归 deferred。**三条判 gap 的是没核到就不硬指认的**：`DurationConverter`/`PeriodConverter`（core 无 `Duration` 类型、跨平台时长表示没拍口径）与 `EntryConverter`（core 的 Map 键值视图本轮 grep 未命中）；
-② `collection` 24 + `map` 19 +
-`comparator` 17（coll/mapx/path 三包）；③ `codec` 11 + `text.finder` 7 + `text.csv` 7；④ 其余散片
-（`builder`/`lang.hash`/`lang.id`/`io.unit`/`map.multi`）。每批单独一笔，`--write` 顺带把基线降下来。
+**消化计划（剩余 95 条，现读前缀分布）**：③ date 族 25（`date` 14 + `date.format` 9 + `date.chinese` 2）——这片的公开面最好指认（date 五批已交付），优先；④ `io.checksum.crc16` 11 + `lang.hash` 4 + `codec` 11；⑤ `text` 片 15（`text` 7 + `text.finder` 7 + `text.split` 1）+ `text.csv` 7；⑥ 散片 `exceptions` 6 + `convert` 6 + `builder` 6 + `math` 2 + `lang.id` 2。每批单独一笔，`--write` 顺带把棘轮基线降下来（基线只许降，抬高即红；文档六个数由对账判据钉）。已完：第一批 `convert.impl` 35、第二批 66。
 
 - 取法：`python scripts/core_surface.py --write` 生成 `docs/spec/core-surface.tsv`（类名｜全限定名｜档｜一句话理由）；`--check` 既查漏档也查"表与 jar 类面漂移"；判状态只认 jar，不依赖 `javap`。
 - 版本口径：census 用 **hutool-all 5.8.37**，且这版类面已固化成仓内生成物 `docs/spec/hutool-classes.tsv`（头两行记 `version` 与 `sha256`）；日常判据离线跑，不再联网取 jar。`scripts/core_surface.py` 的常量 `REF_VERSION` 与清单头不一致就判红——这条是 10-09 补的：当时有人拿 5.8.35 去核对 5.8.37 的表，造出一条"表里有 jar 里没有"的假红（一份件覆盖全部 artifact，`$HUTOOL_JAR` 指它），而各包参照腿多数是 5.8.35——**类面是普查、读数腿是逐包**，两件事不同源，换版本时 `--check` 的漂移格会先报出来。
