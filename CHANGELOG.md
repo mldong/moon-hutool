@@ -13,11 +13,11 @@
 
 | 包 | 对位 | 这一版给了什么 |
 |---|---|---|
-| `text` | `StrUtil` / `CharSequenceUtil` / `NamingCase` / `StrFormatter` / `EscapeUtil` / `text.UnicodeUtil` / `util.CharUtil` / `text.replacer.*` | 空白与裁剪档、`{}` 占位格式化、命名法互转、`sub_*` 取段、`hide`（码位档）、逐段数值版序比较；**10-10 批①再加 14 件**（实体转义四件、百分号转义五件、`\uXXXX` 四件、`encode_blank`、替换引擎三件）+ `is_blank_char` 转公开。**这批此刻是契约骨架：签名、`.mbti`、779 条冻结期望都到位，函数体是 `abort`，调用即崩**——实现随 PR-B，`docs/spec/01-text.md` §1.15~§1.20 是判据面 |
+| `text` | `StrUtil` / `CharSequenceUtil` / `NamingCase` / `StrFormatter` / `EscapeUtil` / `text.UnicodeUtil` / `util.CharUtil` / `text.replacer.*` | 空白与裁剪档、`{}` 占位格式化、命名法互转、`sub_*` 取段、`hide`（码位档）、逐段数值版序比较；**10-10 批①再加 14 件**：实体转义四件（`escape_xml`/`unescape_xml`/`escape_html4`/`unescape_html4`）、百分号转义五件（`escape`/`escape_all`/`escape_by`/`unescape`/`safe_unescape`）、`\uXXXX` 四件（`to_unicode`/`to_unicode_all`/`unicode_of`/`unicode_to_string`）、`encode_blank`、替换引擎三件（`lookup_replacer`/`replacer_chain`/`Replacer::replace`）+ `is_blank_char` 转公开。两笔落地：契约笔冻 699+18+62 条期望（全由参照腿灌），实现笔只把红变绿、期望串零改写。判据面 `docs/spec/01-text.md` §1.15~§1.20 |
 | `digest` | `DigestUtil`（MD5 / SHA-256 / HMAC） | MD5/SHA-256 全套 + HMAC 家族八件（含裸字节键与常量时间校验）；输入固定 UTF-8 |
 | `date` | `DateUtil` / `CalendarUtil` / `DatePattern` / `DateUnit` | 整包自研日历与格式化（core 无 time 包）+ 内置 IANA 时区段表（603 区 / 36,701 段）+ 可注入时钟源 + 默认区三级降级（`set_default_zone` → `TZ` → 兜底） |
 | `id` | `IdUtil` | 雪花、UUID v3/v4、ObjectId、NanoId；时钟与熵全显式注入 |
-| `codec` | `Base64` / `Base32` / `Base58` / `Base62` / `RadixUtil` / form / URL / `URLUtil`(部分) | url-safe 与 MIME 档、严格/宽松双档解码、表单 `+` 档、URL 结构化组装与语法归一；**10-10 批①新增 data URI 两件**（`data_uri` / `data_uri_base64`，同为契约骨架，调用即 `abort`）。`URLUtil.completeUrl` **判 deferred**——实测它把"是不是绝对 URL"委托给 `java.net.URL` 的协议白名单，不是纯串面（读数与理由：`05-codec.md` §12.2）|
+| `codec` | `Base64` / `Base32` / `Base58` / `Base62` / `RadixUtil` / form / URL / `URLUtil`(部分) | url-safe 与 MIME 档、严格/宽松双档解码、表单 `+` 档、URL 结构化组装与语法归一；**10-10 批①新增 data URI 两件**（`data_uri` / `data_uri_base64`，150 条冻结期望）。`URLUtil.completeUrl` **判 deferred**——实测它把"是不是绝对 URL"委托给 `java.net.URL` 的协议白名单，不是纯串面（读数与理由：`05-codec.md` §12.2）|
 | `coll` | `CollUtil` / `ListUtil` / `IterUtil` 高频子集 | 分组、两桶划分、保序去重与按键去重、频次表、分页、数组版并/交/差、极值与按键极值 |
 | `mapx` | `MapUtil` / `Table` / `BiMap` / `CaseInsensitiveMap` | `BiMap`（双向唯一 + 显式 `force_put`）、`CiMap`、`Table`（行列双索引）、`filter_map` / `rename_key` |
 | `num` | `NumberUtil` / `NumberChineseFormatter` / `MathUtil` / `Calculator` / `Money` | 数论件与七档舍入、千分位/百分比/薄 `Money`、中文数字四模式与反向解析、英文 word、十进制精确表达式求值 |
@@ -26,7 +26,7 @@
 | `valid` | `Validator` 正则族 | 15 件合法性判定，码表为包内常量、无错误面 |
 | `rand` | `RandomUtil` / `WeightRandom` | 19 件，随机源显式注入、库内一次都不取熵；常量表原样 + 单点定义域 + 与流无关的不变量 |
 | `dfa` | `WordTree` / `SensitiveUtil` | 词树构建与七档查询、停顿字符表；`(density, greed)` 三档语义 |
-| `path` | `AntPathMatcher` + `io.file.FileNameUtil`(String 档) | 10 件 + `PathOptions` + `PathError` 四档；默认档跟随 hutool（`trimTokens=false`）；**10-10 批①新增文件名六件**（`name_of`/`main_name`/`ext_name`/`clean_invalid`/`contains_invalid`/`is_type`，同为契约骨架，调用即 `abort`；`File` 重载判 excluded）|
+| `path` | `AntPathMatcher` + `io.file.FileNameUtil`(String 档) | 10 件 + `PathOptions` + `PathError` 四档；默认档跟随 hutool（`trimTokens=false`）；**10-10 批①新增文件名六件**（`name_of`/`main_name`/`ext_name`/`clean_invalid`/`contains_invalid`/`is_type`，263 条冻结期望；`File` 重载判 excluded）|
 | `cache` | `Cache` + FIFO/LRU/LFU/Timed/NoCache | 23 件公开面；时钟由调用方显式传 `now`，`prune` 三档语义各按其参照 |
 | `hash` | `HashUtil` + murmur/city/metro + CRC8/CRC16 族 | 45 件（含 2 枚举 2 记录）；返回值一律有符号，与参照读数十进制逐字同形 |
 | `bloom` | `BitMapBloomFilter` + `filter/` + `bitMap/` | 位图/过滤器/聚合三层 23 件；哈希全部委托 `hash`，词数地板除截断跟随 |

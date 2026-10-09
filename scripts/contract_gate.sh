@@ -17,13 +17,13 @@ ok()  { echo "  PASS $*"; }
 bad() { echo "  FAIL $*"; FAILS=$((FAILS+1)); }
 skip(){ echo "  SKIP $*"; SKIPS=$((SKIPS+1)); }
 GATE_TARGETS="${GATE_TARGETS:-wasm js}"
-# 地板＝`moon test --target <档>` 汇总行的 Total tests（10-10 本机现读：wasm、js 两档 1548，
-#   wasm-gc 1536——差的 12 条是 sched 的 async 用例，该档不收集，见 docs/spec/24-sched.md §1。
-#   其中 17 条红是批① PR-A 的骨架态（体是 `PR-B：契约骨架` 的 abort），**收集数**照算——
-#   G3 这条判据看的是"用例收没收到"，红绿由 targets 那一步另行点名，两者不能混）。
-# 负向对照：把这里改成 1549 当场判红 `test wasm 只收集 1548 条 < 基线 1549`。
+# 地板＝`moon test --target <档>` 汇总行的 Total tests（10-10 现读：wasm、js 两档 1557，
+#   wasm-gc 1545——差的 12 条是 sched 的 async 用例，该档不收集，见 docs/spec/24-sched.md §1。
+#   同一天里这条数走过 1531 →（批① 契约笔）1548 红 17 →（批① 落地笔）1557 红 0；
+#   G3 判的是"用例收没收到"，红绿由 targets 那一步逐条点名，两者不混）。
+# 负向对照：把这里改成 1558 当场判红 `test wasm 只收集 1557 条 < 基线 1558`。
 # 逐包条数别抄在这里，现读 ROADMAP.md 末的 READINGS 生成块（G11 每次都会重生成）。
-BASELINE_TESTS="${BASELINE_TESTS:-1548}"
+BASELINE_TESTS="${BASELINE_TESTS:-1557}"
 
 echo "== G1 零第三方 + async 按包归属（10-09 口径翻案：白名单不再等于零依赖）=="
 # 三条判据一起跑，任何一条红即 G1 红；判据自身另有三档对照，对照不过 ⇒ 报"G1 自身失效"而不是放过。

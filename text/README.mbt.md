@@ -4,7 +4,7 @@ hutool `StrUtil` / `CharSequenceUtil` 的 MoonBit 对位：空白判定、切分
 
 契约与边界矩阵见 [`docs/spec/01-text.md`](https://github.com/mldong/moon-hutool/blob/master/docs/spec/01-text.md)。本页只放**典型用法**，每条都带期望值——这些 `test` 块会被 `moon test` 真编译真执行（抄 `moonbitlang/core/encoding/base64/README.mbt.md` 的机制），所以文档本身就是要通过的检查，不是装饰。
 
-> 状态：**已实现**（10-04）。本页 10 个示例块由 `moon test` 真跑，text 侧共 23 条用例全绿（`wasm`/`js`/`wasm-gc` 三档读数一致）。
+> 状态：**已实现**（10-04 第一批；10-10 批①补转义族与替换引擎）。本页每个 `test` 块都由`moon test` 真跑；块数与条数现读 `moon test --package text`，三档（`wasm`/`js`/`wasm-gc`）读数一致。
 > 期望值仍是冻结状态：要改任何一条，必须单独一笔并给外部读数来源（`AGENTS.md` 红线一，门禁 G5/G11 双重盯着）。
 
 ## 用法
@@ -118,6 +118,117 @@ test "naming 已冻结的三条" {
   assert_eq(@text.to_underline_case("userName"), "user_name")
   assert_eq(@text.to_camel_case("user_name"), "userName")
   assert_eq(@text.to_camel_case("userName"), "userName") // 无分隔符 → 原样返回
+}
+```
+
+## 转义族（10-10 批①）
+
+每条期望值都来自参照腿（`scripts/EscapeLeg.java` / `scripts/EntityTableLeg.java`），不是"看起来该这样"。
+两族唯一的形差在撇号：XML 转、HTML4 不转。
+
+```mbt check
+///|
+test "escape 实体族：XML 收撇号、HTML4 不收" {
+  assert_eq(@text.escape_xml("a<b&c>d\"e'f"), "a&lt;b&amp;c&gt;d&quot;e&apos;f")
+  assert_eq(@text.escape_html4("a<b&c>d\"e'f"), "a&lt;b&amp;c&gt;d&quot;e'f")
+  // 一次只解一层：`&amp;amp;` → `&amp;`，要回到 `&` 得再解一次
+  assert_eq(@text.unescape_xml("&amp;amp;"), "&amp;")
+  // HTML4 认 `&copy;`；XML 的还原表只有那 5 条 + `&nbsp;`
+  assert_eq(@text.unescape_xml("&copy;"), "&copy;")
+  assert_eq(@text.unescape_html4("&copy;"), "\u{00a9}")
+}
+```
+
+`escape` 是**百分号族**，与 core 的 `encoding/percent` 不是一张嘴：非 ASCII 出的是 IE 风格的
+`%uXXXX`（逐 UTF-16 码元、小写十六进制），而且 `%` 自己也被转 ⇒ **不幂等**。
+
+```mbt check
+///|
+test "escape 百分号族：`%uXXXX` 不是 UTF-8 百分号编码" {
+  assert_eq(@text.escape("中文 a"), "%u4e2d%u6587%20a")
+  assert_eq(@text.escape_all("ab"), "%61%62")
+  assert_eq(@text.escape("%41"), "%2541") // 已编码的再编码一次
+  assert_eq(@text.unescape("%41"), "A")
+  // 不做 UTF-8 解码：`%e4%b8%ad` 出三个字符，不是"中"
+  assert_eq(@text.unescape("%e4%b8%ad"), "\u{00e4}\u{00b8}\u{00ad}")
+}
+```
+
+还原失败折成错误面；`safe_unescape` 是"吞掉、返回**入参**"（不是空串、不是部分解码）。
+
+```mbt check
+///|
+test "unescape 的失败两档与 safe 档" {
+  let a = try {
+    let _ = @text.unescape("%zz")
+    "未抛错"
+  } catch {
+    @text.BadHex(x) => "BadHex " + x
+    @text.ShortInput => "ShortInput"
+    _ => "其它"
+  }
+  assert_eq(a, "BadHex zz")
+  let b = try {
+    let _ = @text.unescape("%2")
+    "未抛错"
+  } catch {
+    @text.BadHex(x) => "BadHex " + x
+    @text.ShortInput => "ShortInput"
+    _ => "其它"
+  }
+  assert_eq(b, "ShortInput")
+  assert_eq(@text.safe_unescape("%zz"), "%zz")
+}
+```
+
+`UnicodeUtil` 那三件是一把尺子三种入参：串档只转"不在可打印 ASCII 那段"的字符，
+`unicode_of` 走参照 `Integer.toHexString` 的形状（不补到 6 位、负数出 32 位补码）。
+
+```mbt check
+///|
+test "unicode 三件：一把尺子，三种入参形状" {
+  assert_eq(@text.to_unicode("中a文"), "\\u4e2da\\u6587")
+  assert_eq(@text.to_unicode_all("ab"), "\\u0061\\u0062")
+  assert_eq(@text.unicode_of(0x4e2d), "\\u4e2d")
+  assert_eq(@text.unicode_of(-1), "\\uffffffff") // 参照就是给 8 位 f
+  assert_eq(@text.unicode_to_string("\\\\u4e2d"), "\\中") // 双反斜杠只挡住第一个：参照吃掉第二个当转义起始
+}
+```
+
+`encode_blank` 只动空白位（用的就是本包那张 35 位表——整仓一张，`ini`/`typex` 共用）：
+
+```mbt check
+///|
+test "encode_blank 只动空白" {
+  assert_eq(@text.encode_blank(" a "), "%20a%20")
+  assert_eq(@text.encode_blank("\t\n"), "%20%20")
+  assert_eq(@text.encode_blank("中文"), "中文")
+}
+```
+
+## 替换引擎（10-10 批①）
+
+四条择路都有读数：长键优先且**与表序无关**、同键**后写的生效**、链是"每位置问第一个命中的"
+而不是"依次全文替换"（下面那条给 `1` 而不是 `X`）、空键参照构造即抛。
+
+```mbt check
+///|
+test "replacer：长键优先、链不回头扫" {
+  let t = @text.lookup_replacer([("ab", "X"), ("abc", "Y")])
+  assert_eq(t.replace("xaby abc"), "xXy Y")
+  let chain = @text.replacer_chain([
+    @text.lookup_replacer([("ab", "1")]),
+    @text.lookup_replacer([("1", "X")]), // 第一件产出的 `1` 不会被第二件再换掉
+  ])
+  assert_eq(chain.replace("ab"), "1")
+  let empty_key = try {
+    let _ = @text.lookup_replacer([("", "E")])
+    "未抛错"
+  } catch {
+    @text.EmptyKey => "EmptyKey"
+    _ => "其它"
+  }
+  assert_eq(empty_key, "EmptyKey")
 }
 ```
 

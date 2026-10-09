@@ -174,7 +174,7 @@ hutool `UrlBuilder` 的价值在两处：把一个 URL 串拆成组件（`of(url
 ## 12. 第五批（10-10 批①）：data URI 组装两件 + `completeUrl` 的改判
 
 契约先行笔（PR-A）：签名 + `.mbti` + 冻结期望 177 条在 `codec/data_uri_test.mbt`，体全是
-`PR-B：契约骨架` 的 abort。腿 `scripts/UrlPureLeg.java`（hutool-all 5.8.37 + JDK 17.0.14），
+两笔走完（契约笔冻期望、实现笔只把红变绿），本包 48 条全绿。腿 `scripts/UrlPureLeg.java`（hutool-all 5.8.37 + JDK 17.0.14），
 生成器 `scripts/gen_batch1_rest.py`。`encodeBlank` 那 62 条**不在本包**——它的谓词与 `text.is_blank`
 同源，收在 `01-text.md` §1.19，归处也写进 `00-hutool-map.md`，别让读者以为 codec 漏了一件。
 

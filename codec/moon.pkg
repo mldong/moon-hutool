@@ -1,7 +1,7 @@
 // Base58Check 的校验位是双 SHA-256，摘要走本库 digest（不重复实现）
-// 骨架期豁免（G12：体里还有 `PR-B：契约骨架` 的 abort 才许压，落地笔整行删除）：
-// 形参在 abort 体里读不到 ⇒ unused_value 是"未实现"的机械后果，不是死码。
-warnings = "-unused_value"
+
+// §7/§8 落地后骨架豁免整行删除（G12）；§12 data URI 两件同例（10-10 批① PR-B 撤掉豁免）：
+// 体里没有 `abort` 了，那两类警告若再响就是真死码，不再豁免。
 
 import {
   "moonbitlang/core/encoding/utf8",
@@ -15,6 +15,3 @@ import {
   "moonbitlang/core/encoding/utf8",
   "mldong/moon-hutool/codec",
 } for "test"
-
-// §7/§8 落地后骨架豁免整行已删除（G12）：体里没有 `abort` 了，
-// 那两类警告若再响就是真死码，不再豁免。

@@ -24,12 +24,24 @@
 /// 本库不收这一档：它要求调用方手里有个 `Charset` 对象，而"名字大小写随宿主 charset 表变"
 /// 的形状在零依赖库里没有对应物；要带属性段的形状，等 §12.2 一起拍。
 pub fn data_uri(mime : String, charset : String, data : String) -> String {
-  abort("PR-B：契约骨架，契约见 docs/spec/05-codec.md #12.1")
+  let buf = StringBuilder()
+  buf.write_string("data:")
+  buf.write_string(mime)
+  // 空 charset ⇒ 整段 `;charset` 省略（腿 D 行两档并排）；非空则**原文带过**，不查表、不改大小写
+  if charset.length() > 0 {
+    buf.write_string(";")
+    buf.write_string(charset)
+  }
+  buf.write_string(",")
+  buf.write_string(data)
+  buf.to_string()
 }
 
 ///|
 /// 组装 base64 档 data URI（`URLUtil.getDataUriBase64`）：`data:` + mime + `;base64,` + 原文。
 /// mime 给空串时出 `data:;base64,...`（腿 D 行的 null/空串两档都在，本库只收空串档）。
 pub fn data_uri_base64(mime : String, base64 : String) -> String {
-  abort("PR-B：契约骨架，契约见 docs/spec/05-codec.md #12.1")
+  // `;base64` 这一段恒定存在，mime 为空也留分号（腿 D 行：`data:;base64,aGk=`）；
+  // base64 串**不校验**——它是拼装器不是编码器，给什么拼什么
+  "data:" + mime + ";base64," + base64
 }

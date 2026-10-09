@@ -97,6 +97,34 @@ test "path combine 与排序" {
 }
 ```
 
+## 文件名六件（10-10 批①）
+
+对位 `io.file.FileNameUtil` 的 **String 档**。四条期望值全部由参照腿 `scripts/FileNameLeg.java`
+（含反射读 `SPECIAL_SUFFIX` 与非法字符正则）灌入，不是按"路径库应该怎样"写的。
+
+```mbt check
+///|
+test "filename 四条会被写错的形状" {
+  // 两种分隔符都认，且尾随分隔符先剥（参照不认宿主）
+  assert_eq(@path.name_of("a\\b/c.txt"), "c.txt")
+  assert_eq(@path.name_of("/tmp/"), "tmp")
+  // 复合扩展名整段给主名跟着少两段；表里没有 `tar`，所以 `archive.tar` 退到最后一个点
+  assert_eq(@path.ext_name("archive.tar.gz"), "tar.gz")
+  assert_eq(@path.main_name("archive.tar.gz"), "archive")
+  assert_eq(@path.ext_name("archive.tar"), "tar")
+  // 点开头：主名是空串（照参照，不"顺手改成 bashrc"）
+  assert_eq(@path.ext_name(".bashrc"), "bashrc")
+  assert_eq(@path.main_name(".bashrc"), "")
+  // 分隔符本身在非法字符集里 ⇒ clean 会把它删掉；is_type 的类型不带点、大小写不敏感
+  assert_eq(@path.clean_invalid("/tmp/"), "tmp")
+  assert_true(@path.contains_invalid("bad:name?.txt"))
+  assert_true(@path.is_type("a.TXT", ["tar.gz", "txt"]))
+  assert_false(@path.is_type("a.txt", [".txt"]))
+  // 空类型串是个真值档：无扩展名的名字对 [""] 给 true
+  assert_true(@path.is_type("noext", [""]))
+}
+```
+
 ## 本包不做的事
 
 不做 `setCachePatterns` 那类全局模式缓存（要缓存请自己持有编译结果）；不支持 `{*path}` 捕获档——参照实现自己

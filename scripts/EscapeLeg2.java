@@ -55,6 +55,10 @@ public class EscapeLeg2 {
             "%", "%2", "%zz", "%4", "abc%41def", "100%", "%25", "%2541", "+", "%2b",
             "%0a", "%0d%0a", "%ff", "%80", "%c3%28", "%e4%b8%ad", "%uD83D%uDE00",
             "%3c%3e", "%20", "%25u4e2d", "", "%2f", "%2F",
+            // 落单代理档：本库 `LoneSurrogate` 那条臂唯一的读数来源（不补就是"实现里写了、
+            // 却没有任何期望值证明过"）。参照在这里给的是一个**孤立码元**，本库表示不了。
+            "%uD83D", "%uDC00", "%uD800", "%u41%uD800", "%ud800%udbff", "abc%ud800def", "%uDFA0",
+            "%uD83D%uDE00%uD800", "x%uD83D",
         };
         for (String s : UN) {
             System.out.println("UN|unescape|" + esc(s) + "|" + esc(safe(() -> EscapeUtil.unescape(s))));

@@ -16,11 +16,11 @@
 
 | 包 | hutool 对位 | 状态 | 契约 | 用例 |
 |---|---|---|---|---|
-| `text` | `StrUtil` / `CharSequenceUtil` / `NamingCase` / `StrFormatter` / `EscapeUtil` / `UnicodeUtil` / `CharUtil` / `text.replacer.*` | **已实现**（10-10 批①新件是骨架，见详记） | `docs/spec/01-text.md` | 详记 [`roadmap-log/01-text.md`](https://github.com/mldong/moon-hutool/blob/master/docs/roadmap-log/01-text.md) |
+| `text` | `StrUtil` / `CharSequenceUtil` / `NamingCase` / `StrFormatter` / `EscapeUtil` / `UnicodeUtil` / `CharUtil` / `text.replacer.*` | **已实现** | `docs/spec/01-text.md` | 详记 [`roadmap-log/01-text.md`](https://github.com/mldong/moon-hutool/blob/master/docs/roadmap-log/01-text.md) |
 | `digest` | `DigestUtil`（MD5 / SHA-256 / HMAC） | **已实现** | `docs/spec/02-digest.md` | 详记 [`roadmap-log/02-digest.md`](https://github.com/mldong/moon-hutool/blob/master/docs/roadmap-log/02-digest.md) |
 | `date` | `DateUtil` / `CalendarUtil` / `DatePattern` / `DateUnit` | **已实现** | `docs/spec/03-date.md` | 详记 [`roadmap-log/03-date.md`](https://github.com/mldong/moon-hutool/blob/master/docs/roadmap-log/03-date.md) |
 | `id` | `IdUtil`（雪花 / UUID v3·v4 / ObjectId / NanoId） | **已实现** | `docs/spec/04-id.md` | 详记 [`roadmap-log/04-id.md`](https://github.com/mldong/moon-hutool/blob/master/docs/roadmap-log/04-id.md) |
-| `codec` | `Base64`(url-safe·MIME·宽松解码) / `Base32` / `Base58`(含 Check) / `Base62` / `RadixUtil` / `x-www-form-urlencoded` / `UrlBuilder` / `URLUtil`(部分) | **已实现**（10-10 批①新件是骨架，见详记） | `docs/spec/05-codec.md` | 详记 [`roadmap-log/05-codec.md`](https://github.com/mldong/moon-hutool/blob/master/docs/roadmap-log/05-codec.md) |
+| `codec` | `Base64`(url-safe·MIME·宽松解码) / `Base32` / `Base58`(含 Check) / `Base62` / `RadixUtil` / `x-www-form-urlencoded` / `UrlBuilder` / `URLUtil`(部分) | **已实现** | `docs/spec/05-codec.md` | 详记 [`roadmap-log/05-codec.md`](https://github.com/mldong/moon-hutool/blob/master/docs/roadmap-log/05-codec.md) |
 | `coll` | `CollUtil` / `ListUtil` / `IterUtil` 的高频子集 | **已实现** | `docs/spec/06-coll.md` | 详记 [`roadmap-log/06-coll.md`](https://github.com/mldong/moon-hutool/blob/master/docs/roadmap-log/06-coll.md) |
 | `mapx` | `MapUtil` / `Table`(二维表) / `BiMap` / `CaseInsensitiveMap` | **已实现** | `docs/spec/07-mapx.md` | 详记 [`roadmap-log/07-mapx.md`](https://github.com/mldong/moon-hutool/blob/master/docs/roadmap-log/07-mapx.md) |
 | `num` | `NumberUtil` / `NumberChineseFormatter` / `MathUtil` / `Calculator` / `Money`(薄) | **已实现** | `docs/spec/08-num.md` | 详记 [`roadmap-log/08-num.md`](https://github.com/mldong/moon-hutool/blob/master/docs/roadmap-log/08-num.md) |
@@ -30,7 +30,7 @@
 | `rand` | `RandomUtil` / `WeightRandom` | **已实现** | `docs/spec/12-rand.md` | 详记 [`roadmap-log/12-rand.md`](https://github.com/mldong/moon-hutool/blob/master/docs/roadmap-log/12-rand.md) |
 | `mac` | `HMac`（并入 `digest` 还是独立包，出契约时定） | **不做**（10-05 判定：内容并入 `digest` 第二批，不建独立包，占位目录一并删掉） | —（判据与八件签名都记在 `digest` 的 spec §2.6） | 判据三条，都现读：① `HMac` 在 **hutool-crypto** 不在 core（本机 `javap -cp hutool-core-5.8.35.jar cn.hutool.crypto.digest.HMac` 找不到类，同批 `ReUtil`/`Validator` 都在 core）；② 它是**有状态对象**（7 个构造器 + `update`/`digest`/`digestHex`/`verify`），`update` 那半属"流式/增量摘要"，早已在 `digest` 的暂不做档；③ 剩下的一次性用法薄薄一层，已由 `digest` 八件（HMAC-MD5 全套 + 裸字节键 + `*_verify_hex`）全数覆盖 ⇒ 再开一个包只造出第二张嘴。20 块用例与 22 条 JDK 读数挂在 `digest` 行 |
 | `dfa` | `WordTree` / `SensitiveUtil` / `StopChar` | **已实现** | `docs/spec/14-dfa.md` | 详记 [`roadmap-log/14-dfa.md`](https://github.com/mldong/moon-hutool/blob/master/docs/roadmap-log/14-dfa.md) |
-| `path` | `AntPathMatcher` + `io.file.FileNameUtil`(String 档) | **已实现**（10-10 批①新件是骨架，见详记） | `docs/spec/15-path.md` | 详记 [`roadmap-log/15-path.md`](https://github.com/mldong/moon-hutool/blob/master/docs/roadmap-log/15-path.md) |
+| `path` | `AntPathMatcher` + `io.file.FileNameUtil`(String 档) | **已实现** | `docs/spec/15-path.md` | 详记 [`roadmap-log/15-path.md`](https://github.com/mldong/moon-hutool/blob/master/docs/roadmap-log/15-path.md) |
 | `cache` | `Cache` 接口 + `FIFOCache`/`LRUCache`/`LFUCache`/`TimedCache`/`NoCache` + `CacheUtil`（件在 **hutool-cache** 这个 artifact，`unzip -l` 现读 hutool-core 的 jar 里 `cn/hutool/cache` 是 0 条） | **已实现** | `docs/spec/16-cache.md` | 详记 [`roadmap-log/16-cache.md`](https://github.com/mldong/moon-hutool/blob/master/docs/roadmap-log/16-cache.md) |
 | `hash` | `HashUtil`（39 个 `public static`，javap 现读）+ `lang.hash.MurmurHash`/`CityHash`/`MetroHash`/`KetamaHash` + `io.checksum.CRC8`/`CRC16` 与 `crc16/` 十变体——**全在 hutool-core 一个 jar 里**（与 `dfa`/`cache` 两行相反，这行不用另取 artifact） | **已实现** | `docs/spec/17-hash.md` | 详记 [`roadmap-log/17-hash.md`](https://github.com/mldong/moon-hutool/blob/master/docs/roadmap-log/17-hash.md) |
 | `bloom` | `BitMapBloomFilter` + `BitSetBloomFilter` + `filter/` 11 个类 + `bitMap/{BitMap,IntMap,LongMap}` + `BloomFilterUtil`——**件不在 hutool-core**（`unzip -l hutool-core.jar` 现读 `bloom` 是 0 条），全在独立 artifact `hutool-bloomFilter-5.8.35.jar`（19,216 字节、21 个 class，与 `dfa`/`cache` 两行同形；行内旧写"只有 `BitMapBloomFilter`"已按现读更正，`5.8.35` 里也**没有** `AutoBitBloomFilter`） | **已实现** | `docs/spec/18-bloom.md` | 详记 [`roadmap-log/18-bloom.md`](https://github.com/mldong/moon-hutool/blob/master/docs/roadmap-log/18-bloom.md) |
@@ -49,9 +49,8 @@
 <!-- READINGS:BEGIN 由 scripts/sync_status.py 生成，勿手改 -->
 | 读数（`moon test --target wasm`，当场跑） | 值 |
 |---|---|
-| 用例总数 | **1548** —— 绿 1531 / 红 17 |
-| 包状态 | 共 23 个：`已实现` 20 · `实现中` 3 · `契约已冻结` 0 · `未开工` 0 |
-| 红的是谁 | `codec`（1 红）、`path`（2 红）、`text`（14 红） —— 未实现的包红是设计态 |
+| 用例总数 | **1557** —— 绿 1557 / 红 0 |
+| 包状态 | 共 23 个：`已实现` 23 · `实现中` 0 · `契约已冻结` 0 · `未开工` 0 |
 <!-- READINGS:END -->
 
 | 项 | 值 |

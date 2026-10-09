@@ -56,14 +56,14 @@ jobs:
         run: moon test --target wasm --enable-coverage >/dev/null 2>&1 || echo "覆盖率数据没生成：G15 会在门禁里显式 SKIP，不会伪装成通过"
 
       - name: Run contract gate G1-G19
-        # 地板 = `moon test --target <档>` 汇总行里的 Total tests（10-10 本机现读：wasm、js 两档 1548；
+        # 地板 = `moon test --target <档>` 汇总行里的 Total tests（10-10 本机现读：wasm、js 两档 1557；
         # 上一代是 10-09 的 1531，负向对照当时打的是 `只收集 1531 条 < 基线 1532`——留原文不改写，
         # 换代读数只往上加一行）。
         # 这个数与 scripts/contract_gate.sh 里的默认值是同一个——两处不一致就是门禁自己漂了。
         # 这里原先还写着一张「393 = text 23 + digest 20 + …」的分解表，那是 16 个包时代的切片、
         # 与现读不符，已删；要逐包条数就现读 ROADMAP.md 末的 READINGS 生成块（G11 每轮重生成）。
         env:
-          BASELINE_TESTS: "1548"
+          BASELINE_TESTS: "1557"
           GATE_TARGETS: "wasm js"
         run: bash scripts/contract_gate.sh
 
@@ -94,16 +94,16 @@ jobs:
       - name: 逐档全绿 + 用例数地板（骨架期那条例外的三条判据见正文）
         env:
           TARGET: ${{ matrix.target }}
-          # 地板 1536＝四档里最低那一档（wasm-gc）的现读条数（10-10 本机 `moon test --target wasm-gc`
-          # = 1536，且 sched 的 12 条 async 用例在该档根本不收集——该包 supported_targets 摘掉了 wasm-gc，
+          # 地板 1545＝四档里最低那一档（wasm-gc）的现读条数（10-10 本机 `moon test --target wasm-gc`
+          # = 1545，且 sched 的 12 条 async 用例在该档根本不收集——该包 supported_targets 摘掉了 wasm-gc，
           # 见 docs/spec/24-sched.md §1；wasm/js 两档本机都是 1548）。钉在等值上 ⇒ 掉一条就红。
           # 上一代读数是 10-09 的 1519/1531，三段对照当时实测：
           #   FLOOR=1519 真跑 wasm-gc ⇒ exit 0 并打 collected=1519 failed=0；
           #   FLOOR=1520 ⇒ exit 1（"收集用例数不足"）；
           #   喂一份真有 2 红的样本 ⇒ exit 1（::error:: + 两条 文件:行 与 label 全打出来）。
-          # 10-10 这一代同三段重跑（FLOOR=1536 放行 / 1537 判红 / 样本红点名）——批① PR-A 的 17 条红
-          # 是骨架态设计红（体是 `PR-B：契约骨架` 的 abort），收集数照算，这一步会把它们逐条点名出来。
-          FLOOR: "1536"
+          # 10-10 这一代同三段重跑（FLOOR=1545 放行 / 1546 判红 / 喂真红样本点名）；
+          # 批① PR-A 那天这一步逐条点名了 17 条骨架红，PR-B 转绿后本步恢复成"只放行零红"。
+          FLOOR: "1545"
         run: |
           out=$(moon test --target "$TARGET" 2>&1 || true)
           # 汇总行按 `^Total tests: ` 锚定再取数（真样本实测：失败明细那几行长的是

@@ -311,7 +311,7 @@ path 未覆盖行 16 → **3**、全仓 148 → **135**、全仓 **1442 = 绿 14
 ## 11. 第五批（10-10 批①）：`FileNameUtil` 的纯字符串档（六件）
 
 契约先行笔（PR-A）：签名 + `.mbti` + 冻结期望 285 条在 `path/filename_test.mbt`，体全是
-`PR-B：契约骨架` 的 abort ⇒ `moon check` 绿、本包用例此刻红是设计态。
+契约笔冻期望、实现笔只把红变绿 ⇒ 本包 138 条全绿（含 6 个文档块），三档一致。
 读数腿 `scripts/FileNameLeg.java`（参照 hutool-all 5.8.37 + 本机 JDK 17.0.14，`javac -encoding UTF-8`），
 生成器 `scripts/gen_batch1_rest.py`。
 

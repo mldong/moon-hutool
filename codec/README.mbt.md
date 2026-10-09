@@ -307,6 +307,41 @@ test "归一化是等价写法而非改语义" {
 ```
 
 
+## data URI 组装两件（10-10 批①）
+
+它是**拼装器**不是编码器：数据原样带、charset 串原样带、base64 不校验。四条形状都有腿读数撑着
+（`scripts/UrlPureLeg.java`），"顺手加一层 URL 编码"会把这五条全改错。
+
+```mbt check
+///|
+test "data_uri 四条原样带过" {
+  assert_eq(
+    @codec.data_uri("text/plain", "utf-8", "hello world"),
+    "data:text/plain;utf-8,hello world",
+  )
+  // charset 空串 ⇒ 整段 `;charset` 省略；不查表，`nope` 也照写
+  assert_eq(@codec.data_uri("text/plain", "", "hi"), "data:text/plain,hi")
+  assert_eq(
+    @codec.data_uri("text/plain", "nope", "100%"),
+    "data:text/plain;nope,100%",
+  )
+  // 数据不编码：百分号、空格、中文一律原样
+  assert_eq(
+    @codec.data_uri("text/plain", "utf-8", "中文 a"),
+    "data:text/plain;utf-8,中文 a",
+  )
+  // base64 不校验；mime 为空也留分号
+  assert_eq(
+    @codec.data_uri_base64("text/plain", "aGk="),
+    "data:text/plain;base64,aGk=",
+  )
+  assert_eq(
+    @codec.data_uri_base64("", "not-base64!!"),
+    "data:;base64,not-base64!!",
+  )
+}
+```
+
 ## 这一层不做的事
 
-`Base16Codec`（就是 core `encoding/hex`，换名转发）、`BCD`（**hutool 自己标了 `@Deprecated`**，逻辑是把两个十六进制位打进一个字节，语义与 core hex 重合）；`Caesar`/`Rot`（三行算术）、`Morse`/`PunyCode`/`Hashids`（要符号表或随机盐语义）。URL 这一层**不含** RFC 3986 §5.2.2 的引用解析（`urljoin` 那一套 base + reference，是另一套完整算法，要做另起一批）、IDN/punycode（要 RFC 3492 的表）、`UrlPath`/`UrlQuery` 那种链式可变 builder（本库给值类型，改字段走 `Url::{ ...u, host: "x" }`；攒参数用 `form_build` 直接给键值对列表，效果相同且可测）。逐条理由见 [`docs/ROADMAP.md`](https://github.com/mldong/moon-hutool/blob/master/docs/ROADMAP.md) 的「暂不做」「不做」两节与 spec §9。
+`Base16Codec`（就是 core `encoding/hex`，换名转发）、`BCD`（**hutool 自己标了 `@Deprecated`**，逻辑是把两个十六进制位打进一个字节，语义与 core hex 重合）；`Caesar`/`Rot`（三行算术）、`Morse`/`PunyCode`/`Hashids`（要符号表或随机盐语义）。URL 这一层**不含** RFC 3986 §5.2.2 的引用解析（`urljoin` 那一套 base + reference，是另一套完整算法，要做另起一批；hutool `URLUtil.completeUrl` 看着像它的对位物，实测它把"是不是绝对 URL"委托给 `java.net.URL` 的协议白名单，判 deferred 的逐条读数在 [`docs/spec/05-codec.md`](https://github.com/mldong/moon-hutool/blob/master/docs/spec/05-codec.md) §12.2）、IDN/punycode（要 RFC 3492 的表）、`UrlPath`/`UrlQuery` 那种链式可变 builder（本库给值类型，改字段走 `Url::{ ...u, host: "x" }`；攒参数用 `form_build` 直接给键值对列表，效果相同且可测）。逐条理由见 [`docs/ROADMAP.md`](https://github.com/mldong/moon-hutool/blob/master/docs/ROADMAP.md) 的「暂不做」「不做」两节与 spec §9。

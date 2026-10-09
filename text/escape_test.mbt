@@ -791,6 +791,19 @@ test "text.escape #1.17 百分号族逐条" {
   assert_eq(@text.safe_unescape("%2f"), "/") // UN|safeUnescape|%2f|/
   assert_eq(@text.unescape("%2F"), "/") // UN|unescape|%2F|/
   assert_eq(@text.safe_unescape("%2F"), "/") // UN|safeUnescape|%2F|/
+  assert_eq(cn_err(() => @text.unescape("%uD83D")), "LoneSurrogate 55357") // UN|unescape|%uD83D|{ud83d}
+  assert_eq(cn_err(() => @text.unescape("%uDC00")), "LoneSurrogate 56320") // UN|unescape|%uDC00|{udc00}
+  assert_eq(cn_err(() => @text.unescape("%uD800")), "LoneSurrogate 55296") // UN|unescape|%uD800|{ud800}
+  assert_eq(cn_err(() => @text.unescape("%u41%uD800")), "BadHex 41%u") // UN|unescape|%u41%uD800|ERR:NumberFormatException:For input string: "41%u" under radix 16
+  assert_eq(@text.safe_unescape("%u41%uD800"), "%u41%uD800") // UN|safeUnescape|%u41%uD800|%u41%uD800
+  assert_eq(cn_err(() => @text.unescape("%ud800%udbff")), "LoneSurrogate 55296") // UN|unescape|%ud800%udbff|{ud800}{udbff}
+  assert_eq(cn_err(() => @text.unescape("abc%ud800def")), "LoneSurrogate 55296") // UN|unescape|abc%ud800def|abc{ud800}def
+  assert_eq(cn_err(() => @text.unescape("%uDFA0")), "LoneSurrogate 57248") // UN|unescape|%uDFA0|{udfa0}
+  assert_eq(
+    cn_err(() => @text.unescape("%uD83D%uDE00%uD800")),
+    "LoneSurrogate 55296",
+  ) // UN|unescape|%uD83D%uDE00%uD800|{ud83d}{ude00}{ud800}
+  assert_eq(cn_err(() => @text.unescape("x%uD83D")), "LoneSurrogate 55357") // UN|unescape|x%uD83D|x{ud83d}
 }
 
 ///|
