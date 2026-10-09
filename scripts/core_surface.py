@@ -201,6 +201,48 @@ OVERRIDES = {
     "KetamaHash": ("deferred", "hash 第二批排期"),
     "Number128": ("deferred", "128 位族要先定返回形状"),
     "Hashids": ("deferred", "可逆编码，归属另判（见 00-hutool-map）"),
+    # —— 10-09 消化第一批：cn.hutool.core.convert.impl 全 35 类逐条指认（不再吃整片声称）
+    # 指认口径：done/core 的理由必须点名**已 grep 到**的承接件；核不到的一律落 gap 并写明没核到什么。
+    # 本轮取证命令（现读命中数）：conv/coll/codec/id/date/num 各包 pkg.generated.mbti 逐件 grep，
+    # 例如 conv 的 to_str/to_bool/to_char/to_int/to_int64/to_double/to_big_int/to_array/to_map、
+    # coll 的 distinct/group_by、codec 的 normalize/form_decode、id 的 uuid_v*、
+    # date 的 parse/date_of 族与 begin_of_* 9 处、zone_offset_minutes/set_default_zone、num 的 round_to。
+    "StringConverter": ("done", "conv.to_str"),
+    "BooleanConverter": ("done", "conv.to_bool + conv.parse_bool（宽松档另给）"),
+    "CharacterConverter": ("done", "conv.to_char"),
+    "NumberConverter": ("done", "conv.to_int/to_int64/to_double/to_big_int 四档"),
+    "ArrayConverter": ("done", "conv.to_array"),
+    "CollectionConverter": ("done", "conv.to_array（去重档由 coll.distinct 承接，分组档由 coll.group_by）"),
+    "MapConverter": ("done", "conv.to_map"),
+    "DateConverter": ("done", "date 的 parse/date_of 族（现读 date 公开面命中 5 处）"),
+    "CalendarConverter": ("done", "date 的 begin_of_* 周边界族（现读命中 9 处，Java Calendar 形状摊平成件）"),
+    "TimeZoneConverter": ("done", "date.set_default_zone / date.zone_offset_minutes"),
+    "UUIDConverter": ("done", "id.uuid_v3 / id.uuid_v4"),
+    "URLConverter": ("done", "codec 的 URL 组装与归一（现读 normalize 命中；宿主 IO 面另判 excluded）"),
+    "URIConverter": ("done", "同上（URI 语法档）"),
+    "CharsetConverter": ("deferred", "非 UTF 字符集名表在 ROADMAP 暂不做档（同 CharsetUtil 判例）"),
+    "OptionalConverter": ("core", "MoonBit 的 Option 是语言层，无转换层可做"),
+    "OptConverter": ("core", "同上（hutool 该件只是 Optional 别名入口）"),
+    "PairConverter": ("core", "二元组/数组是语言层形状，本库 mapx.Table 与 conv.to_map 直接摊平"),
+    "PrimitiveConverter": ("core", "基本类型互转由 conv 的 to_* 档位与类型系统承担（同 NumberConverter）"),
+    "CastConverter": ("excluded", "hutool 该件是运行时原样强转，MoonBit 由类型系统承担，无对位面"),
+    "BeanConverter": ("excluded", "反射 bean↔Map（零依赖四条禁反射，同 ReflectUtil 判例）"),
+    "ClassConverter": ("excluded", "Class 反射"),
+    "EnumConverter": ("excluded", "枚举 by-name 反射查表；本库枚举互转一律手写 match（见 rand/typex 各包）"),
+    "AtomicBooleanConverter": ("excluded", "java.util.concurrent 原子类，全库单线程同步无对位"),
+    "AtomicIntegerArrayConverter": ("excluded", "同上"),
+    "AtomicLongArrayConverter": ("excluded", "同上"),
+    "AtomicReferenceConverter": ("excluded", "同上"),
+    "ReferenceConverter": ("excluded", "弱/软引用回收时机不可冻（同 16-cache 的 WeakCache 判据）"),
+    "StackTraceElementConverter": ("excluded", "JVM 栈帧形状，跨平台无对位"),
+    "PathConverter": ("excluded", "java.nio.file.Path 属宿主文件系统（read_file 在禁令里）"),
+    "CurrencyConverter": ("excluded", "JDK 币种表；本库薄 Money 只做数值面（num 第二批）"),
+    "TemporalAccessorConverter": ("excluded", "java.time.temporal 互转（与 TemporalAccessorUtil 同判）"),
+    "LocaleConverter": ("excluded", "JDK locale 表；num 轮已把 locale 分组读数判成参照自身不确定，不跟随"),
+    "DurationConverter": ("gap", "时长档：MoonBit core 无 Duration 类型（写作语法已记），跨平台时长表示没拍口径 ⇒ 待拍"),
+    "PeriodConverter": ("gap", "年+月档：同上，且 date 只有日/周/月边界件，没登记过 Period 形状 ⇒ 待拍"),
+    "EntryConverter": ("gap", "Map 键值对档：本库无对位件；core 的 Map 是否给 items 视图本轮没核到（grep 姿势未命中），不硬指认 ⇒ 待拍"),
+
     # —— 10-09 紧闸后第一批逐条核过的片（有硬证据，不再吃整片声称）：
     # 判据：`grep -c "escape\|replacer" text/pkg.generated.mbti` 现读 0，而 text 公开面 19 件逐条点过名；
     # 这 9 类是那条包级规则整片判 done 的，实测没有一件承接 ⇒ 落 gap（纯串面能做，见 00-hutool-map §7）。

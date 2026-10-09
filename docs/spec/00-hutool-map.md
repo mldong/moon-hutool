@@ -97,12 +97,12 @@
 
 | 档 | 含义 | 现读类数（hutool-all **5.8.37**，632 个顶层类，固化在 `docs/spec/hutool-classes.tsv`） |
 |---|---|---|
-| `done` | **逐条登记过**对位件（`OVERRIDES` 里点名哪个包哪件承接） | 67 |
-| `unattested` | 包级规则**整片声称已做但没逐条指回实现件**（10-09 紧闸新增档，棘轮只许降） | 196 |
-| `excluded` | 结构上不属于本库：反射/动态代理/宿主 IO/网络/线程/AWT/JVM 内部机制 | 287 |
-| `core` | MoonBit core 已有同义能力，本库按规则不写转发层 | 35 |
-| `deferred` | 已登记在 [`docs/ROADMAP.md`](https://github.com/mldong/moon-hutool/blob/master/docs/ROADMAP.md) 的「暂不做」档 | 20 |
-| `gap` | **够得着、既没做也没登记** ⇒ 这一档就是要拍板的清单 | 27 |
+| `done` | **逐条登记过**对位件（`OVERRIDES` 里点名哪个包哪件承接） | 80 |
+| `unattested` | 包级规则**整片声称已做但没逐条指回实现件**（10-09 紧闸新增档，棘轮只许降） | 161 |
+| `excluded` | 结构上不属于本库：反射/动态代理/宿主 IO/网络/线程/AWT/JVM 内部机制 | 301 |
+| `core` | MoonBit core 已有同义能力，本库按规则不写转发层 | 39 |
+| `deferred` | 已登记在 [`docs/ROADMAP.md`](https://github.com/mldong/moon-hutool/blob/master/docs/ROADMAP.md) 的「暂不做」档 | 21 |
+| `gap` | **够得着、既没做也没登记** ⇒ 这一档就是要拍板的清单 | 30 |
 
 
 **10-09 紧闸：`done` 从此只能逐条登记**（owner 拍"先让闸不再允许整片算已做，再分批补登记"）
@@ -121,12 +121,15 @@
 - `--selftest` 从四档扩到**五档**，第⑤档专证"降级与棘轮不是摆设"。
 
 数字因此换代（现读，不是推算）：`done` 272 → **67**，新出 `unattested` **196**，`gap` 18 → **27**。
+
+**同日第一批消化已落**（`convert.impl` 全 35 类逐条指认）：现读 `done` 67 → **80**、`unattested` 196 → **161**、`excluded` 287 → **301**、`core` 35 → **39**、`gap` 27 → **30**、`deferred` 20 → **21**（构成：13 done + 4 core + 1 deferred + 14 excluded + 3 gap = 35，与档位增量逐条对得上），棘轮基线随 `--write` 降到 161——**只许降这条是真的在动**。
 涨的 9 条就是我抽验到的那批空头，已逐条落 `gap` 并写明证据：`Html4Escape`/`Html4Unescape`/`XmlEscape`/
 `XmlUnescape`/`InternalEscapeUtil`/`NumericEntityUnescaper`/`LookupReplacer`/`ReplacerChain`/`StrReplacer`
 （HTML/XML 实体与查表替换都是纯串面，能做，血统是 Apache Commons Text）。
 
 **消化计划**（`unattested` 归零的路，按片分批，每片都要指回具体承接件或改判 gap/excluded/deferred）：
-① `convert.impl` 35 条（conv 包的注册表族，先证 17 件公开面覆盖到哪些类）；② `collection` 24 + `map` 19 +
+① **已完成**（10-09 第一批）`convert.impl` 35 条 ⇒ 每条理由都点名了 grep 到的承接件（`conv.to_str/to_bool/to_char/to_int/to_int64/to_double/to_big_int/to_array/to_map`、`coll.distinct`/`group_by`、`codec.normalize`/`form_decode`、`id.uuid_v*`、`date` 的 parse/`begin_of_*`/zone 族、`num.round_to`）；反射/并发/宿主那 14 类照既有判例落 excluded，`CharsetConverter` 归 deferred。**三条判 gap 的是没核到就不硬指认的**：`DurationConverter`/`PeriodConverter`（core 无 `Duration` 类型、跨平台时长表示没拍口径）与 `EntryConverter`（core 的 Map 键值视图本轮 grep 未命中）；
+② `collection` 24 + `map` 19 +
 `comparator` 17（coll/mapx/path 三包）；③ `codec` 11 + `text.finder` 7 + `text.csv` 7；④ 其余散片
 （`builder`/`lang.hash`/`lang.id`/`io.unit`/`map.multi`）。每批单独一笔，`--write` 顺带把基线降下来。
 
