@@ -49,7 +49,7 @@ jobs:
       - name: Coverage trace for G15（未覆盖行棘轮要有数据，否则那一格只能 SKIP）
         run: moon test --target wasm --enable-coverage >/dev/null 2>&1 || echo "覆盖率数据没生成：G15 会在门禁里显式 SKIP，不会伪装成通过"
 
-      - name: Run contract gate G1-G18
+      - name: Run contract gate G1-G19
         # 地板 = `moon test --target <档>` 汇总行里的 Total tests（10-09 本机现读 wasm、js 两档同为 1531；
         # 负向对照：本机把地板改成 1532 当场判红 `test wasm 只收集 1531 条 < 基线 1532`）。
         # 这个数与 scripts/contract_gate.sh 里的默认值是同一个——两处不一致就是门禁自己漂了。

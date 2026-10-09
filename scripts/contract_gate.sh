@@ -493,6 +493,105 @@ then ok "G18 绿"
 else bad "G18 红（见上）"
 fi
 
+echo "== G19 同步性收口闸（10-09 拍：红线实质是「同步 + 零 OS 能力」，就得有闸看着「同步」这半）=="
+# 现读：剥掉注释后，全仓代码里的 async 只在 sched/sched.mbt（7 处）与 sched/sched_test.mbt（7 处）。
+# 这条闸不是"证明 sched 那两处对"，而是**第二个包一冒 async 就红**。AGENTS 第 2 条边界
+# （纯计算半保持同步、零 OS 能力，"这条是外溢检查不是风格偏好"）此前只有文字：extern 有 G2、
+# 裸读时钟有 G18，「全同步」这一条一直没绑判据——缺口表第 3 行点名的就是它。
+# 扫两种面：*.mbt（剥整行与行尾注释）与 */README.mbt.md（**只数 ```mbt 围栏块里**）——
+# 否则散文里一句"本包不做 async"会造出假红（G18 被自家注释误报两次，同一条教训）。
+if python - <<'PY'
+import io, os, re, shutil, subprocess, sys
+
+ROOT = subprocess.run(["git", "rev-parse", "--show-toplevel"],
+                      capture_output=True, text=True).stdout.strip()
+OK_DIR = "sched"                 # 唯一登记过允许 async 的包目录
+SKIP_DIRS = {"_build", ".mooncakes", ".git", "docs", "scripts", "node_modules"}
+TOK = re.compile(r"\basync\b")
+
+
+def strip_comments(text):
+    kept = []
+    for line in text.splitlines():
+        s = line.strip()
+        if s.startswith("//"):
+            continue
+        cut = line.find("//")
+        kept.append(line[:cut] if cut >= 0 else line)
+    return "\n".join(kept)
+
+
+def code_text(path):
+    raw = io.open(path, encoding="utf-8", errors="replace").read()
+    if path.endswith(".mbt.md"):
+        body = [m.group(2) for m in re.finditer(
+            r"^```(mbt[^\n]*)\n(.*?)^```", raw, re.S | re.M)]
+        return strip_comments("\n".join(body))
+    return strip_comments(raw)
+
+
+def sites(base):
+    """({相对路径: 命中数}, 扫到的文件数)"""
+    out, seen = {}, 0
+    for dirpath, dirnames, filenames in os.walk(base):
+        dirnames[:] = [d for d in dirnames
+                       if d not in SKIP_DIRS and not d.startswith("_g19_fixture")]
+        for fn in filenames:
+            if not (fn.endswith(".mbt") or fn.endswith(".mbt.md")):
+                continue
+            full = os.path.join(dirpath, fn)
+            rel = os.path.relpath(full, base).replace("\\", "/")
+            seen += 1
+            n = len(TOK.findall(code_text(full)))
+            if n:
+                out[rel] = n
+    return out, seen
+
+
+def violations(found):
+    return ["未登记 async 的包 %s（%d 处）" % (rel, n)
+            for rel, n in sorted(found.items()) if not rel.startswith(OK_DIR + "/")]
+
+
+found, seen = sites(ROOT)
+rc = 0
+
+# ① 尺子先要有刻度：真实扫描必须读到 sched 那两处。读到 0 个对象就给"没有违规"是自证空转
+if not found or OK_DIR + "/sched.mbt" not in found:
+    print("  FAIL G19 自身失效：扫描面里没读到 %s/sched.mbt 的 async（现读命中 %s，扫过 %d 件）"
+          "⇒ 这条闸此刻什么都测不到" % (OK_DIR, found, seen))
+    rc = 1
+# ② 坏样本必须被抓：临时造一个不在白名单目录里的 async 件（扫完立刻删）
+fx = os.path.join(ROOT, "_g19_fixture_probe")
+os.makedirs(fx, exist_ok=True)
+io.open(os.path.join(fx, "bad.mbt"), "w", encoding="utf-8").write(
+    "///|\npub async fn sneaky() -> Unit {\n  println(\"x\")\n}\n")
+try:
+    fx_found, _ = sites(fx)
+    if not violations(fx_found):
+        print("  FAIL G19 自身失效：造了一处非白名单 async 却没被抓到（现读 %s）" % fx_found)
+        rc = 1
+finally:
+    shutil.rmtree(fx, ignore_errors=True)
+# ③ 白名单不许误报：现读的 sched 必须判干净
+bad = violations(found)
+if bad:
+    print("  FAIL 非白名单包里出现 async：%s" % "；".join(bad))
+    rc = 1
+# ④ 目录归属得真是那道口子：把 sched 挪出白名单目录名 ⇒ 必须报红
+moved = {("other/" + k if k.startswith(OK_DIR + "/") else k): v for k, v in found.items()}
+if not violations(moved):
+    print("  FAIL G19 自身失效：把 sched 挪出白名单后仍然不红（判据对目录归属是瞎的）")
+    rc = 1
+if rc == 0:
+    print("  PASS 现读：扫过 %d 个代码/文档件，async 只在 %s" % (seen, "，".join(
+        "%s=%d 处" % (k, v) for k, v in sorted(found.items()))))
+sys.exit(rc)
+PY
+then ok "G19 绿"
+else bad "G19 红（见上）"
+fi
+
 
 echo
 if [ "$FAILS" = "0" ]; then
