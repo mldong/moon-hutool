@@ -83,9 +83,10 @@ public class FileNameLeg {
                 System.out.println("IT|isType|" + esc(s) + "|" + typesOf(t) + "|" + safei(() -> FileNameUtil.isType(s, t)));
             }
         }
-        // null 文件名 + 各类型表
+        // null 文件名 + 各类型表（这里必须走 esc()，别打裸字面量 "null"——生成器会把
+        // 那个单词当成一个叫 `null` 的真文件名，给本库造出一条不存在的对位断言）
         for (String[] t : types) {
-            System.out.println("IT|isType|null|" + typesOf(t) + "|" + safei(() -> FileNameUtil.isType(null, t)));
+            System.out.println("IT|isType|" + esc(null) + "|" + typesOf(t) + "|" + safei(() -> FileNameUtil.isType(null, t)));
         }
     }
 

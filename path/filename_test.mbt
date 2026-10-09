@@ -180,10 +180,9 @@ test "path #11.6 is_type 的类型表择路（腿 IT 行：大小写/带点/空�
   assert_eq(@path.is_type("a.txt", ["txt", "jpg"]), true) // IT|isType|a.txt|[txt,jpg,]|true
   assert_eq(@path.is_type("a.txt", ["jpg", "txt"]), true) // IT|isType|a.txt|[jpg,txt,]|true
   assert_eq(@path.is_type("a.txt", [".txt"]), false) // IT|isType|a.txt|[.txt,]|false
-  assert_eq(@path.is_type("a.txt", []), false) // IT|isType|a.txt|[,]|false
+  assert_eq(@path.is_type("a.txt", [""]), false) // IT|isType|a.txt|[,]|false
   assert_eq(@path.is_type("a.txt", []), false) // IT|isType|a.txt|[]|false
-  assert_eq(@path.is_type("a.txt", ["{null}"]), false) // IT|isType|a.txt|[{null},]|false
-  assert_eq(@path.is_type("a.txt", ["txt"]), true) // IT|isType|a.txt|[txt,,]|true
+  assert_eq(@path.is_type("a.txt", ["txt", ""]), true) // IT|isType|a.txt|[txt,,]|true
   assert_eq(@path.is_type("a.txt", ["gz"]), false) // IT|isType|a.txt|[gz,]|false
   assert_eq(@path.is_type("a.txt", ["tar.gz"]), false) // IT|isType|a.txt|[tar.gz,]|false
   assert_eq(@path.is_type("a.txt", ["Tar.GZ"]), false) // IT|isType|a.txt|[Tar.GZ,]|false
@@ -193,10 +192,9 @@ test "path #11.6 is_type 的类型表择路（腿 IT 行：大小写/带点/空�
   assert_eq(@path.is_type("a.TXT", ["txt", "jpg"]), true) // IT|isType|a.TXT|[txt,jpg,]|true
   assert_eq(@path.is_type("a.TXT", ["jpg", "txt"]), true) // IT|isType|a.TXT|[jpg,txt,]|true
   assert_eq(@path.is_type("a.TXT", [".txt"]), false) // IT|isType|a.TXT|[.txt,]|false
-  assert_eq(@path.is_type("a.TXT", []), false) // IT|isType|a.TXT|[,]|false
+  assert_eq(@path.is_type("a.TXT", [""]), false) // IT|isType|a.TXT|[,]|false
   assert_eq(@path.is_type("a.TXT", []), false) // IT|isType|a.TXT|[]|false
-  assert_eq(@path.is_type("a.TXT", ["{null}"]), false) // IT|isType|a.TXT|[{null},]|false
-  assert_eq(@path.is_type("a.TXT", ["txt"]), true) // IT|isType|a.TXT|[txt,,]|true
+  assert_eq(@path.is_type("a.TXT", ["txt", ""]), true) // IT|isType|a.TXT|[txt,,]|true
   assert_eq(@path.is_type("a.TXT", ["gz"]), false) // IT|isType|a.TXT|[gz,]|false
   assert_eq(@path.is_type("a.TXT", ["tar.gz"]), false) // IT|isType|a.TXT|[tar.gz,]|false
   assert_eq(@path.is_type("a.TXT", ["Tar.GZ"]), false) // IT|isType|a.TXT|[Tar.GZ,]|false
@@ -206,10 +204,9 @@ test "path #11.6 is_type 的类型表择路（腿 IT 行：大小写/带点/空�
   assert_eq(@path.is_type("a.tar.gz", ["txt", "jpg"]), false) // IT|isType|a.tar.gz|[txt,jpg,]|false
   assert_eq(@path.is_type("a.tar.gz", ["jpg", "txt"]), false) // IT|isType|a.tar.gz|[jpg,txt,]|false
   assert_eq(@path.is_type("a.tar.gz", [".txt"]), false) // IT|isType|a.tar.gz|[.txt,]|false
-  assert_eq(@path.is_type("a.tar.gz", []), false) // IT|isType|a.tar.gz|[,]|false
+  assert_eq(@path.is_type("a.tar.gz", [""]), false) // IT|isType|a.tar.gz|[,]|false
   assert_eq(@path.is_type("a.tar.gz", []), false) // IT|isType|a.tar.gz|[]|false
-  assert_eq(@path.is_type("a.tar.gz", ["{null}"]), false) // IT|isType|a.tar.gz|[{null},]|false
-  assert_eq(@path.is_type("a.tar.gz", ["txt"]), false) // IT|isType|a.tar.gz|[txt,,]|false
+  assert_eq(@path.is_type("a.tar.gz", ["txt", ""]), false) // IT|isType|a.tar.gz|[txt,,]|false
   assert_eq(@path.is_type("a.tar.gz", ["gz"]), false) // IT|isType|a.tar.gz|[gz,]|false
   assert_eq(@path.is_type("a.tar.gz", ["tar.gz"]), true) // IT|isType|a.tar.gz|[tar.gz,]|true
   assert_eq(@path.is_type("a.tar.gz", ["Tar.GZ"]), true) // IT|isType|a.tar.gz|[Tar.GZ,]|true
@@ -219,10 +216,9 @@ test "path #11.6 is_type 的类型表择路（腿 IT 行：大小写/带点/空�
   assert_eq(@path.is_type("noext", ["txt", "jpg"]), false) // IT|isType|noext|[txt,jpg,]|false
   assert_eq(@path.is_type("noext", ["jpg", "txt"]), false) // IT|isType|noext|[jpg,txt,]|false
   assert_eq(@path.is_type("noext", [".txt"]), false) // IT|isType|noext|[.txt,]|false
-  assert_eq(@path.is_type("noext", []), true) // IT|isType|noext|[,]|true
+  assert_eq(@path.is_type("noext", [""]), true) // IT|isType|noext|[,]|true
   assert_eq(@path.is_type("noext", []), false) // IT|isType|noext|[]|false
-  assert_eq(@path.is_type("noext", ["{null}"]), false) // IT|isType|noext|[{null},]|false
-  assert_eq(@path.is_type("noext", ["txt"]), true) // IT|isType|noext|[txt,,]|true
+  assert_eq(@path.is_type("noext", ["txt", ""]), true) // IT|isType|noext|[txt,,]|true
   assert_eq(@path.is_type("noext", ["gz"]), false) // IT|isType|noext|[gz,]|false
   assert_eq(@path.is_type("noext", ["tar.gz"]), false) // IT|isType|noext|[tar.gz,]|false
   assert_eq(@path.is_type("noext", ["Tar.GZ"]), false) // IT|isType|noext|[Tar.GZ,]|false
@@ -232,10 +228,9 @@ test "path #11.6 is_type 的类型表择路（腿 IT 行：大小写/带点/空�
   assert_eq(@path.is_type("a.", ["txt", "jpg"]), false) // IT|isType|a.|[txt,jpg,]|false
   assert_eq(@path.is_type("a.", ["jpg", "txt"]), false) // IT|isType|a.|[jpg,txt,]|false
   assert_eq(@path.is_type("a.", [".txt"]), false) // IT|isType|a.|[.txt,]|false
-  assert_eq(@path.is_type("a.", []), true) // IT|isType|a.|[,]|true
+  assert_eq(@path.is_type("a.", [""]), true) // IT|isType|a.|[,]|true
   assert_eq(@path.is_type("a.", []), false) // IT|isType|a.|[]|false
-  assert_eq(@path.is_type("a.", ["{null}"]), false) // IT|isType|a.|[{null},]|false
-  assert_eq(@path.is_type("a.", ["txt"]), true) // IT|isType|a.|[txt,,]|true
+  assert_eq(@path.is_type("a.", ["txt", ""]), true) // IT|isType|a.|[txt,,]|true
   assert_eq(@path.is_type("a.", ["gz"]), false) // IT|isType|a.|[gz,]|false
   assert_eq(@path.is_type("a.", ["tar.gz"]), false) // IT|isType|a.|[tar.gz,]|false
   assert_eq(@path.is_type("a.", ["Tar.GZ"]), false) // IT|isType|a.|[Tar.GZ,]|false
@@ -245,10 +240,9 @@ test "path #11.6 is_type 的类型表择路（腿 IT 行：大小写/带点/空�
   assert_eq(@path.is_type(".txt", ["txt", "jpg"]), true) // IT|isType|.txt|[txt,jpg,]|true
   assert_eq(@path.is_type(".txt", ["jpg", "txt"]), true) // IT|isType|.txt|[jpg,txt,]|true
   assert_eq(@path.is_type(".txt", [".txt"]), false) // IT|isType|.txt|[.txt,]|false
-  assert_eq(@path.is_type(".txt", []), false) // IT|isType|.txt|[,]|false
+  assert_eq(@path.is_type(".txt", [""]), false) // IT|isType|.txt|[,]|false
   assert_eq(@path.is_type(".txt", []), false) // IT|isType|.txt|[]|false
-  assert_eq(@path.is_type(".txt", ["{null}"]), false) // IT|isType|.txt|[{null},]|false
-  assert_eq(@path.is_type(".txt", ["txt"]), true) // IT|isType|.txt|[txt,,]|true
+  assert_eq(@path.is_type(".txt", ["txt", ""]), true) // IT|isType|.txt|[txt,,]|true
   assert_eq(@path.is_type(".txt", ["gz"]), false) // IT|isType|.txt|[gz,]|false
   assert_eq(@path.is_type(".txt", ["tar.gz"]), false) // IT|isType|.txt|[tar.gz,]|false
   assert_eq(@path.is_type(".txt", ["Tar.GZ"]), false) // IT|isType|.txt|[Tar.GZ,]|false
@@ -258,10 +252,9 @@ test "path #11.6 is_type 的类型表择路（腿 IT 行：大小写/带点/空�
   assert_eq(@path.is_type("a.jpg", ["txt", "jpg"]), true) // IT|isType|a.jpg|[txt,jpg,]|true
   assert_eq(@path.is_type("a.jpg", ["jpg", "txt"]), true) // IT|isType|a.jpg|[jpg,txt,]|true
   assert_eq(@path.is_type("a.jpg", [".txt"]), false) // IT|isType|a.jpg|[.txt,]|false
-  assert_eq(@path.is_type("a.jpg", []), false) // IT|isType|a.jpg|[,]|false
+  assert_eq(@path.is_type("a.jpg", [""]), false) // IT|isType|a.jpg|[,]|false
   assert_eq(@path.is_type("a.jpg", []), false) // IT|isType|a.jpg|[]|false
-  assert_eq(@path.is_type("a.jpg", ["{null}"]), false) // IT|isType|a.jpg|[{null},]|false
-  assert_eq(@path.is_type("a.jpg", ["txt"]), false) // IT|isType|a.jpg|[txt,,]|false
+  assert_eq(@path.is_type("a.jpg", ["txt", ""]), false) // IT|isType|a.jpg|[txt,,]|false
   assert_eq(@path.is_type("a.jpg", ["gz"]), false) // IT|isType|a.jpg|[gz,]|false
   assert_eq(@path.is_type("a.jpg", ["tar.gz"]), false) // IT|isType|a.jpg|[tar.gz,]|false
   assert_eq(@path.is_type("a.jpg", ["Tar.GZ"]), false) // IT|isType|a.jpg|[Tar.GZ,]|false
@@ -271,10 +264,9 @@ test "path #11.6 is_type 的类型表择路（腿 IT 行：大小写/带点/空�
   assert_eq(@path.is_type("/d/b.png", ["txt", "jpg"]), false) // IT|isType|/d/b.png|[txt,jpg,]|false
   assert_eq(@path.is_type("/d/b.png", ["jpg", "txt"]), false) // IT|isType|/d/b.png|[jpg,txt,]|false
   assert_eq(@path.is_type("/d/b.png", [".txt"]), false) // IT|isType|/d/b.png|[.txt,]|false
-  assert_eq(@path.is_type("/d/b.png", []), false) // IT|isType|/d/b.png|[,]|false
+  assert_eq(@path.is_type("/d/b.png", [""]), false) // IT|isType|/d/b.png|[,]|false
   assert_eq(@path.is_type("/d/b.png", []), false) // IT|isType|/d/b.png|[]|false
-  assert_eq(@path.is_type("/d/b.png", ["{null}"]), false) // IT|isType|/d/b.png|[{null},]|false
-  assert_eq(@path.is_type("/d/b.png", ["txt"]), false) // IT|isType|/d/b.png|[txt,,]|false
+  assert_eq(@path.is_type("/d/b.png", ["txt", ""]), false) // IT|isType|/d/b.png|[txt,,]|false
   assert_eq(@path.is_type("/d/b.png", ["gz"]), false) // IT|isType|/d/b.png|[gz,]|false
   assert_eq(@path.is_type("/d/b.png", ["tar.gz"]), false) // IT|isType|/d/b.png|[tar.gz,]|false
   assert_eq(@path.is_type("/d/b.png", ["Tar.GZ"]), false) // IT|isType|/d/b.png|[Tar.GZ,]|false
@@ -284,29 +276,15 @@ test "path #11.6 is_type 的类型表择路（腿 IT 行：大小写/带点/空�
   assert_eq(@path.is_type("\u{4e2d}\u{6587}.txt", ["txt", "jpg"]), true) // IT|isType|{u4e2d}{u6587}.txt|[txt,jpg,]|true
   assert_eq(@path.is_type("\u{4e2d}\u{6587}.txt", ["jpg", "txt"]), true) // IT|isType|{u4e2d}{u6587}.txt|[jpg,txt,]|true
   assert_eq(@path.is_type("\u{4e2d}\u{6587}.txt", [".txt"]), false) // IT|isType|{u4e2d}{u6587}.txt|[.txt,]|false
-  assert_eq(@path.is_type("\u{4e2d}\u{6587}.txt", []), false) // IT|isType|{u4e2d}{u6587}.txt|[,]|false
+  assert_eq(@path.is_type("\u{4e2d}\u{6587}.txt", [""]), false) // IT|isType|{u4e2d}{u6587}.txt|[,]|false
   assert_eq(@path.is_type("\u{4e2d}\u{6587}.txt", []), false) // IT|isType|{u4e2d}{u6587}.txt|[]|false
-  assert_eq(@path.is_type("\u{4e2d}\u{6587}.txt", ["{null}"]), false) // IT|isType|{u4e2d}{u6587}.txt|[{null},]|false
-  assert_eq(@path.is_type("\u{4e2d}\u{6587}.txt", ["txt"]), true) // IT|isType|{u4e2d}{u6587}.txt|[txt,,]|true
+  assert_eq(@path.is_type("\u{4e2d}\u{6587}.txt", ["txt", ""]), true) // IT|isType|{u4e2d}{u6587}.txt|[txt,,]|true
   assert_eq(@path.is_type("\u{4e2d}\u{6587}.txt", ["gz"]), false) // IT|isType|{u4e2d}{u6587}.txt|[gz,]|false
   assert_eq(@path.is_type("\u{4e2d}\u{6587}.txt", ["tar.gz"]), false) // IT|isType|{u4e2d}{u6587}.txt|[tar.gz,]|false
   assert_eq(@path.is_type("\u{4e2d}\u{6587}.txt", ["Tar.GZ"]), false) // IT|isType|{u4e2d}{u6587}.txt|[Tar.GZ,]|false
   assert_eq(@path.is_type("\u{4e2d}\u{6587}.txt", ["ar.gz"]), false) // IT|isType|{u4e2d}{u6587}.txt|[ar.gz,]|false
-  assert_eq(@path.is_type("null", ["txt"]), false) // IT|isType|null|[txt,]|false
-  assert_eq(@path.is_type("null", ["TXT"]), false) // IT|isType|null|[TXT,]|false
-  assert_eq(@path.is_type("null", ["txt", "jpg"]), false) // IT|isType|null|[txt,jpg,]|false
-  assert_eq(@path.is_type("null", ["jpg", "txt"]), false) // IT|isType|null|[jpg,txt,]|false
-  assert_eq(@path.is_type("null", [".txt"]), false) // IT|isType|null|[.txt,]|false
-  assert_eq(@path.is_type("null", []), false) // IT|isType|null|[,]|false
-  assert_eq(@path.is_type("null", []), false) // IT|isType|null|[]|false
-  assert_eq(@path.is_type("null", ["{null}"]), true) // IT|isType|null|[{null},]|true
-  assert_eq(@path.is_type("null", ["txt"]), false) // IT|isType|null|[txt,,]|false
-  assert_eq(@path.is_type("null", ["gz"]), false) // IT|isType|null|[gz,]|false
-  assert_eq(@path.is_type("null", ["tar.gz"]), false) // IT|isType|null|[tar.gz,]|false
-  assert_eq(@path.is_type("null", ["Tar.GZ"]), false) // IT|isType|null|[Tar.GZ,]|false
-  assert_eq(@path.is_type("null", ["ar.gz"]), false) // IT|isType|null|[ar.gz,]|false
 }
 
 // 不落断言的读数：参照 `getSuffix`/`getPrefix` 各 62 条 —— 它们是 `extName`/`mainName`
 //   的委托，腿里两侧逐档同读数（并排钉在 spec），本库不出第二个同义件；
-//   null 入参与 `File` 重载档共 14 条 —— 本库无对位形状（String 不收 null、零 FFI）。
+//   null 入参与 `File` 重载档共 36 条 —— 本库无对位形状（String 不收 null、零 FFI）。

@@ -594,7 +594,7 @@ test "text.escape #1.17 escape_by 的过滤器四档" {
   assert_eq(
     @text.escape_by("abc ABC 123", c => c.is_ascii_alphabetic()),
     "%61%62%63 %41%42%43 123",
-  ) // P|escape(filterAlpha)|abc ABC 123|%61%62%63 %41%42%43 123
+  ) // P|escape(filterAsciiAlpha)|abc ABC 123|%61%62%63 %41%42%43 123
   assert_eq(
     @text.escape_by("*@-_.+/ !", _c => true),
     "%2a%40%2d%5f%2e%2b%2f%20%21",
@@ -603,7 +603,7 @@ test "text.escape #1.17 escape_by 的过滤器四档" {
   assert_eq(
     @text.escape_by("*@-_.+/ !", c => c.is_ascii_alphabetic()),
     "*@-_.+/ !",
-  ) // P|escape(filterAlpha)|*@-_.+/ !|*@-_.+/ !
+  ) // P|escape(filterAsciiAlpha)|*@-_.+/ !|*@-_.+/ !
   assert_eq(
     @text.escape_by("\u{4e2d}\u{6587} a", _c => true),
     "%u4e2d%u6587%20%61",
@@ -614,20 +614,20 @@ test "text.escape #1.17 escape_by 的过滤器四档" {
   ) // P|escape(filterKeepNone)|{u4e2d}{u6587} a|{u4e2d}{u6587} a
   assert_eq(
     @text.escape_by("\u{4e2d}\u{6587} a", c => c.is_ascii_alphabetic()),
-    "%u4e2d%u6587 %61",
-  ) // P|escape(filterAlpha)|{u4e2d}{u6587} a|%u4e2d%u6587 %61
+    "\u{4e2d}\u{6587} %61",
+  ) // P|escape(filterAsciiAlpha)|{u4e2d}{u6587} a|{u4e2d}{u6587} %61
   assert_eq(@text.escape_by("\u{1f600}", _c => true), "%ud83d%ude00") // P|escape(filterKeepAll)|{ud83d}{ude00}|%ud83d%ude00
   assert_eq(@text.escape_by("\u{1f600}", _c => false), "\u{1f600}") // P|escape(filterKeepNone)|{ud83d}{ude00}|{ud83d}{ude00}
   assert_eq(
     @text.escape_by("\u{1f600}", c => c.is_ascii_alphabetic()),
     "\u{1f600}",
-  ) // P|escape(filterAlpha)|{ud83d}{ude00}|{ud83d}{ude00}
+  ) // P|escape(filterAsciiAlpha)|{ud83d}{ude00}|{ud83d}{ude00}
   assert_eq(@text.escape_by("", _c => true), "") // P|escape(filterKeepAll)||
   assert_eq(@text.escape_by("", _c => false), "") // P|escape(filterKeepNone)||
-  assert_eq(@text.escape_by("", c => c.is_ascii_alphabetic()), "") // P|escape(filterAlpha)||
+  assert_eq(@text.escape_by("", c => c.is_ascii_alphabetic()), "") // P|escape(filterAsciiAlpha)||
   assert_eq(@text.escape_by("%41", _c => true), "%25%34%31") // P|escape(filterKeepAll)|%41|%25%34%31
   assert_eq(@text.escape_by("%41", _c => false), "%41") // P|escape(filterKeepNone)|%41|%41
-  assert_eq(@text.escape_by("%41", c => c.is_ascii_alphabetic()), "%41") // P|escape(filterAlpha)|%41|%41
+  assert_eq(@text.escape_by("%41", c => c.is_ascii_alphabetic()), "%41") // P|escape(filterAsciiAlpha)|%41|%41
   assert_eq(
     @text.escape_by("~`!@#$%^&*()_+-=[]\u{007b}\u{007d}\\|;':\",./<>?", _c => {
       true
@@ -645,7 +645,7 @@ test "text.escape #1.17 escape_by 的过滤器四档" {
       c.is_ascii_alphabetic()
     }),
     "~`!@#$%^&*()_+-=[]\u{007b}\u{007d}\\|;':\",./<>?",
-  ) // P|escape(filterAlpha)|~`!@#$%^&*()_+-=[]{}\{u007c};':",./<>?|~`!@#$%^&*()_+-=[]{}\{u007c};':",./<>?
+  ) // P|escape(filterAsciiAlpha)|~`!@#$%^&*()_+-=[]{}\{u007c};':",./<>?|~`!@#$%^&*()_+-=[]{}\{u007c};':",./<>?
   assert_eq(
     @text.escape_by("abc ABC 123", c => {
       !(c.is_ascii_alphabetic() || c.is_ascii_digit())
@@ -933,7 +933,7 @@ test "text.unicode #1.18 闭环（to_unicode ∘ unicode_to_string）" {
     "\u{4e2d}\u{6587}",
   ) // I|roundtrip|\u4e2d\u6587|{u4e2d}{u6587}
   assert_eq(
-    @text.unicode_to_string(@text.to_unicode_all("\\u4e2d\\u6587")),
+    @text.unicode_to_string(@text.to_unicode("\\u4e2d\\u6587")),
     "\u{4e2d}\u{6587}",
   ) // I|roundtrip(true)|\u4e2d\u6587|{u4e2d}{u6587}
   assert_eq(
@@ -941,30 +941,27 @@ test "text.unicode #1.18 闭环（to_unicode ∘ unicode_to_string）" {
     "\u{1f600}",
   ) // I|roundtrip|\uD83D\uDE00|{ud83d}{ude00}
   assert_eq(
-    @text.unicode_to_string(@text.to_unicode_all("\\uD83D\\uDE00")),
+    @text.unicode_to_string(@text.to_unicode("\\uD83D\\uDE00")),
     "\u{1f600}",
   ) // I|roundtrip(true)|\uD83D\uDE00|{ud83d}{ude00}
   assert_eq(@text.unicode_to_string(@text.to_unicode("\\u0041\\u0042")), "AB") // I|roundtrip|\u0041\u0042|AB
-  assert_eq(
-    @text.unicode_to_string(@text.to_unicode_all("\\u0041\\u0042")),
-    "AB",
-  ) // I|roundtrip(true)|\u0041\u0042|AB
+  assert_eq(@text.unicode_to_string(@text.to_unicode("\\u0041\\u0042")), "AB") // I|roundtrip(true)|\u0041\u0042|AB
   assert_eq(
     @text.unicode_to_string(@text.to_unicode("\\uZZZZ\\u12")),
     "\\uZZZZ\\u12",
   ) // I|roundtrip|\uZZZZ\u12|\uZZZZ\u12
   assert_eq(
-    @text.unicode_to_string(@text.to_unicode_all("\\uZZZZ\\u12")),
+    @text.unicode_to_string(@text.to_unicode("\\uZZZZ\\u12")),
     "\\uZZZZ\\u12",
   ) // I|roundtrip(true)|\uZZZZ\u12|\uZZZZ\u12
   assert_eq(@text.unicode_to_string(@text.to_unicode("\\u")), "\\u") // I|roundtrip|\u|\u
-  assert_eq(@text.unicode_to_string(@text.to_unicode_all("\\u")), "\\u") // I|roundtrip(true)|\u|\u
+  assert_eq(@text.unicode_to_string(@text.to_unicode("\\u")), "\\u") // I|roundtrip(true)|\u|\u
   assert_eq(
     @text.unicode_to_string(@text.to_unicode("no escapes")),
     "no escapes",
   ) // I|roundtrip|no escapes|no escapes
   assert_eq(
-    @text.unicode_to_string(@text.to_unicode_all("no escapes")),
+    @text.unicode_to_string(@text.to_unicode("no escapes")),
     "no escapes",
   ) // I|roundtrip(true)|no escapes|no escapes
   assert_eq(
@@ -972,32 +969,29 @@ test "text.unicode #1.18 闭环（to_unicode ∘ unicode_to_string）" {
     "\\\u{4e2d}",
   ) // I|roundtrip|\\u4e2d|\{u4e2d}
   assert_eq(
-    @text.unicode_to_string(@text.to_unicode_all("\\\\u4e2d")),
+    @text.unicode_to_string(@text.to_unicode("\\\\u4e2d")),
     "\\\u{4e2d}",
   ) // I|roundtrip(true)|\\u4e2d|\{u4e2d}
   assert_eq(@text.unicode_to_string(@text.to_unicode("\\")), "\\") // I|roundtrip|\|\
-  assert_eq(@text.unicode_to_string(@text.to_unicode_all("\\")), "\\") // I|roundtrip(true)|\|\
+  assert_eq(@text.unicode_to_string(@text.to_unicode("\\")), "\\") // I|roundtrip(true)|\|\
   assert_eq(
     @text.unicode_to_string(@text.to_unicode("\\u0000\\u0009")),
     "\u{0000}\u{0009}",
   ) // I|roundtrip|\u0000\u0009|{u0000}{u0009}
   assert_eq(
-    @text.unicode_to_string(@text.to_unicode_all("\\u0000\\u0009")),
+    @text.unicode_to_string(@text.to_unicode("\\u0000\\u0009")),
     "\u{0000}\u{0009}",
   ) // I|roundtrip(true)|\u0000\u0009|{u0000}{u0009}
   assert_eq(@text.unicode_to_string(@text.to_unicode("\\uFFFF")), "\u{ffff}") // I|roundtrip|\uFFFF|{uffff}
-  assert_eq(
-    @text.unicode_to_string(@text.to_unicode_all("\\uFFFF")),
-    "\u{ffff}",
-  ) // I|roundtrip(true)|\uFFFF|{uffff}
+  assert_eq(@text.unicode_to_string(@text.to_unicode("\\uFFFF")), "\u{ffff}") // I|roundtrip(true)|\uFFFF|{uffff}
   assert_eq(
     @text.unicode_to_string(@text.to_unicode("x\\u4e2dy")),
     "x\u{4e2d}y",
   ) // I|roundtrip|x\u4e2dy|x{u4e2d}y
   assert_eq(
-    @text.unicode_to_string(@text.to_unicode_all("x\\u4e2dy")),
+    @text.unicode_to_string(@text.to_unicode("x\\u4e2dy")),
     "x\u{4e2d}y",
   ) // I|roundtrip(true)|x\u4e2dy|x{u4e2d}y
   assert_eq(@text.unicode_to_string(@text.to_unicode("")), "") // I|roundtrip||
-  assert_eq(@text.unicode_to_string(@text.to_unicode_all("")), "") // I|roundtrip(true)||
+  assert_eq(@text.unicode_to_string(@text.to_unicode("")), "") // I|roundtrip(true)||
 }

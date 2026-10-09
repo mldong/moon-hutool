@@ -157,6 +157,17 @@ hutool 对位 `CharUtil.isBlankChar` ｜ 差异：入参是 `Char`（码位）�
 3. **不转义集与"表外只剩永远转"是同一件事**：非 BMP 的字符在参照侧是两个代理码元、各自判，
    两个都不属数字/大小写 ⇒ 永远转。所以区间表只需覆盖 BMP，`EscapeLeg3` 的 ASTRAL 行五对现读全 false。
 
+> **期望面两条就地更正（10-10，本笔）**——都不是"参照读数变了"，是我这边把形状写错，按 G5 单独一笔走：
+> ① §1.17 的过滤器四档里，`filterAlpha` 那档腿原先喂的是 `Character.isLetter`（Unicode 类别表），
+>   MoonBit core 没有对位谓词，造出来的用例在实现侧只能再抄一张表 ⇒ 腿改成 ASCII 字母档
+>   （`is_ascii_alphabetic` 精确对位），**重跑了腿取数**；`escape_by` 这件的语义没动（谓词由调用方给）。
+> ② §1.18 的闭环两档在参照里都是 `toUnicode(s, true)`（= 本库 `to_unicode`），生成器把
+>   `roundtrip(true)` 错映射成 `to_unicode_all` ⇒ 改为两档都走 `to_unicode`；
+>   `false` 档的闭环**没有读数**，就不补断言（不许凭形状造一条"应该是这样"的期望）。
+> 同两笔生成器修正还削掉了三条**根本不是参照档**的假断言（`is_type` 的 null 文件名被印成字面量 `"null"`、
+>   `data_uri` 的 charset null 档印成 `"{null}"` 串），计数从 285/177 降到 263/150；
+>   腿 `FileNameLeg.java` 现在走 `esc(null)` 打 `{null}`，生成器据此把"本库无对位形状"的档跳过并计数。
+
 ## 1.16 实体族：`escape_xml` / `unescape_xml` / `escape_html4` / `unescape_html4`
 
 签名：`String -> String`（转义侧两件）与 `String -> String raise TextError`（还原侧两件，理由见下）。

@@ -69,7 +69,7 @@ test "text.replacer #1.20 链的叠加形状（腿 C|empty/dup/overlap）" {
 test "text.replacer #1.20 链：每位置只问第一个命中的（腿 C|chain）" {
   assert_eq(
     @text.replacer_chain([
-      @text.lookup_replacer([("ab", "X")]),
+      @text.lookup_replacer([("ab", "1")]),
       @text.lookup_replacer([("bc", "2")]),
       @text.lookup_replacer([("cd", "3")]),
     ]).replace("abcd"),
@@ -77,7 +77,7 @@ test "text.replacer #1.20 链：每位置只问第一个命中的（腿 C|chain�
   ) // C|chain|abcd|13
   assert_eq(
     @text.replacer_chain([
-      @text.lookup_replacer([("ab", "X")]),
+      @text.lookup_replacer([("ab", "1")]),
       @text.lookup_replacer([("bc", "2")]),
       @text.lookup_replacer([("cd", "3")]),
     ]).replace("ab"),
@@ -85,7 +85,7 @@ test "text.replacer #1.20 链：每位置只问第一个命中的（腿 C|chain�
   ) // C|chain|ab|1
   assert_eq(
     @text.replacer_chain([
-      @text.lookup_replacer([("ab", "X")]),
+      @text.lookup_replacer([("ab", "1")]),
       @text.lookup_replacer([("bc", "2")]),
       @text.lookup_replacer([("cd", "3")]),
     ]).replace("bc"),
@@ -93,7 +93,7 @@ test "text.replacer #1.20 链：每位置只问第一个命中的（腿 C|chain�
   ) // C|chain|bc|2
   assert_eq(
     @text.replacer_chain([
-      @text.lookup_replacer([("ab", "X")]),
+      @text.lookup_replacer([("ab", "1")]),
       @text.lookup_replacer([("bc", "2")]),
       @text.lookup_replacer([("cd", "3")]),
     ]).replace("zz"),
@@ -101,7 +101,7 @@ test "text.replacer #1.20 链：每位置只问第一个命中的（腿 C|chain�
   ) // C|chain|zz|zz
   assert_eq(
     @text.replacer_chain([
-      @text.lookup_replacer([("ab", "X")]),
+      @text.lookup_replacer([("ab", "1")]),
       @text.lookup_replacer([("bc", "2")]),
       @text.lookup_replacer([("cd", "3")]),
     ]).replace(""),

@@ -217,3 +217,6 @@ hutool `UrlBuilder` 的价值在两处：把一个 URL 串拆成组件（`of(url
 连同参照那件四参 `getDataUri(String, Charset, String, String)`（第 3 参是**属性段**、
 第 4 参才是数据，且 charset 出 `Charset.name()` 的 `UTF-8` 而非传入的 `utf-8`——腿 `D|getDataUri(4)` 五行）
 一起拍。
+
+> 本笔附带同一条修正：`getDataUri` 的 charset 为 null 那一档在腿里被印成字面量 `{null}`，
+> 生成器把它当合法入参造出断言；现按"本库 `String` 无 null 档"跳过并计数，§12 冻结期望 177 → **150** 条。

@@ -106,10 +106,12 @@ public class EscapeLeg {
             row("P", "escapeAll", s, () -> EscapeUtil.escapeAll(s));
             row("P", "unescape", s, () -> EscapeUtil.unescape(s));
             row("P", "safeUnescape", s, () -> EscapeUtil.safeUnescape(s));
-            // Filter 变体：三条判据各打一档——全收、全拒、只收字母
+            // Filter 变体：三条判据各打一档——全收、全拒、只收 ASCII 字母
+            //（原先那档用 `Character.isLetter` 的 Unicode 类别表，MoonBit core 没有对位谓词，
+            //  造出来的用例在实现侧只能再抄一张表——收范围到 ASCII，两侧就是同一张嘴）
             row("P", "escape(filterKeepAll)", s, () -> EscapeUtil.escape(s, c -> true));
             row("P", "escape(filterKeepNone)", s, () -> EscapeUtil.escape(s, c -> false));
-            row("P", "escape(filterAlpha)", s, () -> EscapeUtil.escape(s, c -> c != null && Character.isLetter(c)));
+            row("P", "escape(filterAsciiAlpha)", s, () -> EscapeUtil.escape(s, c -> c != null && Character.isLetter(c.charValue()) && c.charValue() < 0x80));
         }
         row("P", "escape(null)", null, () -> EscapeUtil.escape((CharSequence) null));
         row("P", "escapeAll(null)", null, () -> EscapeUtil.escapeAll((CharSequence) null));

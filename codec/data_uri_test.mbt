@@ -89,30 +89,6 @@ test "@codec #12.1 data_uri 组装（腿 D 行；charset 串**原样带过**、�
     "data:text/plain,x\u{000a}y",
   ) // D|getDataUri(3)|text/plain||x{u000a}y|data:text/plain,x{u000a}y
   assert_eq(
-    @codec.data_uri("text/plain", "\u{007b}null\u{007d}", "hello world"),
-    "data:text/plain,hello world",
-  ) // D|getDataUri(3)|text/plain|{null}|hello world|data:text/plain,hello world
-  assert_eq(
-    @codec.data_uri("text/plain", "\u{007b}null\u{007d}", "a b&c=d"),
-    "data:text/plain,a b&c=d",
-  ) // D|getDataUri(3)|text/plain|{null}|a b&c=d|data:text/plain,a b&c=d
-  assert_eq(
-    @codec.data_uri("text/plain", "\u{007b}null\u{007d}", "\u{4e2d}\u{6587}"),
-    "data:text/plain,\u{4e2d}\u{6587}",
-  ) // D|getDataUri(3)|text/plain|{null}|{u4e2d}{u6587}|data:text/plain,{u4e2d}{u6587}
-  assert_eq(
-    @codec.data_uri("text/plain", "\u{007b}null\u{007d}", ""),
-    "data:text/plain,",
-  ) // D|getDataUri(3)|text/plain|{null}||data:text/plain,
-  assert_eq(
-    @codec.data_uri("text/plain", "\u{007b}null\u{007d}", "100%"),
-    "data:text/plain,100%",
-  ) // D|getDataUri(3)|text/plain|{null}|100%|data:text/plain,100%
-  assert_eq(
-    @codec.data_uri("text/plain", "\u{007b}null\u{007d}", "x\u{000a}y"),
-    "data:text/plain,x\u{000a}y",
-  ) // D|getDataUri(3)|text/plain|{null}|x{u000a}y|data:text/plain,x{u000a}y
-  assert_eq(
     @codec.data_uri("text/plain", "utf-16", "hello world"),
     "data:text/plain;utf-16,hello world",
   ) // D|getDataUri(3)|text/plain|utf-16|hello world|data:text/plain;utf-16,hello world
@@ -199,24 +175,6 @@ test "@codec #12.1 data_uri 组装（腿 D 行；charset 串**原样带过**、�
   assert_eq(@codec.data_uri("", "", ""), "data:,") // D|getDataUri(3)||||data:,
   assert_eq(@codec.data_uri("", "", "100%"), "data:,100%") // D|getDataUri(3)|||100%|data:,100%
   assert_eq(@codec.data_uri("", "", "x\u{000a}y"), "data:,x\u{000a}y") // D|getDataUri(3)|||x{u000a}y|data:,x{u000a}y
-  assert_eq(
-    @codec.data_uri("", "\u{007b}null\u{007d}", "hello world"),
-    "data:,hello world",
-  ) // D|getDataUri(3)||{null}|hello world|data:,hello world
-  assert_eq(
-    @codec.data_uri("", "\u{007b}null\u{007d}", "a b&c=d"),
-    "data:,a b&c=d",
-  ) // D|getDataUri(3)||{null}|a b&c=d|data:,a b&c=d
-  assert_eq(
-    @codec.data_uri("", "\u{007b}null\u{007d}", "\u{4e2d}\u{6587}"),
-    "data:,\u{4e2d}\u{6587}",
-  ) // D|getDataUri(3)||{null}|{u4e2d}{u6587}|data:,{u4e2d}{u6587}
-  assert_eq(@codec.data_uri("", "\u{007b}null\u{007d}", ""), "data:,") // D|getDataUri(3)||{null}||data:,
-  assert_eq(@codec.data_uri("", "\u{007b}null\u{007d}", "100%"), "data:,100%") // D|getDataUri(3)||{null}|100%|data:,100%
-  assert_eq(
-    @codec.data_uri("", "\u{007b}null\u{007d}", "x\u{000a}y"),
-    "data:,x\u{000a}y",
-  ) // D|getDataUri(3)||{null}|x{u000a}y|data:,x{u000a}y
   assert_eq(
     @codec.data_uri("", "utf-16", "hello world"),
     "data:;utf-16,hello world",
@@ -325,30 +283,6 @@ test "@codec #12.1 data_uri 组装（腿 D 行；charset 串**原样带过**、�
     @codec.data_uri("image/png", "", "x\u{000a}y"),
     "data:image/png,x\u{000a}y",
   ) // D|getDataUri(3)|image/png||x{u000a}y|data:image/png,x{u000a}y
-  assert_eq(
-    @codec.data_uri("image/png", "\u{007b}null\u{007d}", "hello world"),
-    "data:image/png,hello world",
-  ) // D|getDataUri(3)|image/png|{null}|hello world|data:image/png,hello world
-  assert_eq(
-    @codec.data_uri("image/png", "\u{007b}null\u{007d}", "a b&c=d"),
-    "data:image/png,a b&c=d",
-  ) // D|getDataUri(3)|image/png|{null}|a b&c=d|data:image/png,a b&c=d
-  assert_eq(
-    @codec.data_uri("image/png", "\u{007b}null\u{007d}", "\u{4e2d}\u{6587}"),
-    "data:image/png,\u{4e2d}\u{6587}",
-  ) // D|getDataUri(3)|image/png|{null}|{u4e2d}{u6587}|data:image/png,{u4e2d}{u6587}
-  assert_eq(
-    @codec.data_uri("image/png", "\u{007b}null\u{007d}", ""),
-    "data:image/png,",
-  ) // D|getDataUri(3)|image/png|{null}||data:image/png,
-  assert_eq(
-    @codec.data_uri("image/png", "\u{007b}null\u{007d}", "100%"),
-    "data:image/png,100%",
-  ) // D|getDataUri(3)|image/png|{null}|100%|data:image/png,100%
-  assert_eq(
-    @codec.data_uri("image/png", "\u{007b}null\u{007d}", "x\u{000a}y"),
-    "data:image/png,x\u{000a}y",
-  ) // D|getDataUri(3)|image/png|{null}|x{u000a}y|data:image/png,x{u000a}y
   assert_eq(
     @codec.data_uri("image/png", "utf-16", "hello world"),
     "data:image/png;utf-16,hello world",
@@ -491,32 +425,6 @@ test "@codec #12.1 data_uri 组装（腿 D 行；charset 串**原样带过**、�
     "data:application/json,x\u{000a}y",
   ) // D|getDataUri(3)|application/json||x{u000a}y|data:application/json,x{u000a}y
   assert_eq(
-    @codec.data_uri("application/json", "\u{007b}null\u{007d}", "hello world"),
-    "data:application/json,hello world",
-  ) // D|getDataUri(3)|application/json|{null}|hello world|data:application/json,hello world
-  assert_eq(
-    @codec.data_uri("application/json", "\u{007b}null\u{007d}", "a b&c=d"),
-    "data:application/json,a b&c=d",
-  ) // D|getDataUri(3)|application/json|{null}|a b&c=d|data:application/json,a b&c=d
-  assert_eq(
-    @codec.data_uri(
-      "application/json", "\u{007b}null\u{007d}", "\u{4e2d}\u{6587}",
-    ),
-    "data:application/json,\u{4e2d}\u{6587}",
-  ) // D|getDataUri(3)|application/json|{null}|{u4e2d}{u6587}|data:application/json,{u4e2d}{u6587}
-  assert_eq(
-    @codec.data_uri("application/json", "\u{007b}null\u{007d}", ""),
-    "data:application/json,",
-  ) // D|getDataUri(3)|application/json|{null}||data:application/json,
-  assert_eq(
-    @codec.data_uri("application/json", "\u{007b}null\u{007d}", "100%"),
-    "data:application/json,100%",
-  ) // D|getDataUri(3)|application/json|{null}|100%|data:application/json,100%
-  assert_eq(
-    @codec.data_uri("application/json", "\u{007b}null\u{007d}", "x\u{000a}y"),
-    "data:application/json,x\u{000a}y",
-  ) // D|getDataUri(3)|application/json|{null}|x{u000a}y|data:application/json,x{u000a}y
-  assert_eq(
     @codec.data_uri("application/json", "utf-16", "hello world"),
     "data:application/json;utf-16,hello world",
   ) // D|getDataUri(3)|application/json|utf-16|hello world|data:application/json;utf-16,hello world
@@ -564,28 +472,23 @@ test "@codec #12.1 data_uri 组装（腿 D 行；charset 串**原样带过**、�
     @codec.data_uri("application/json", "nope", "x\u{000a}y"),
     "data:application/json;nope,x\u{000a}y",
   ) // D|getDataUri(3)|application/json|nope|x{u000a}y|data:application/json;nope,x{u000a}y
+}
+
+///|
+test "@codec #12.2 data_uri_base64 组装（腿 D 行；base64 串**不校验**）" {
   assert_eq(
-    @codec.data_uri("text/plain", "UTF-8", "aGk="),
+    @codec.data_uri_base64("text/plain", "aGk="),
     "data:text/plain;base64,aGk=",
   ) // D|getDataUriBase64|text/plain|aGk=|data:text/plain;base64,aGk=
+  assert_eq(@codec.data_uri_base64("text/plain", ""), "data:text/plain;base64,") // D|getDataUriBase64|text/plain||data:text/plain;base64,
   assert_eq(
-    @codec.data_uri("text/plain", "UTF-8", ""),
-    "data:text/plain;base64,",
-  ) // D|getDataUriBase64|text/plain||data:text/plain;base64,
-  assert_eq(
-    @codec.data_uri("text/plain", "UTF-8", "not-base64!!"),
+    @codec.data_uri_base64("text/plain", "not-base64!!"),
     "data:text/plain;base64,not-base64!!",
   ) // D|getDataUriBase64|text/plain|not-base64!!|data:text/plain;base64,not-base64!!
-  assert_eq(@codec.data_uri("text/plain", "UTF-8", "aGk="), "data:;base64,aGk=") // D|getDataUriBase64|{null}|aGk=|data:;base64,aGk=
-  assert_eq(@codec.data_uri("text/plain", "UTF-8", ""), "data:;base64,") // D|getDataUriBase64|{null}||data:;base64,
+  assert_eq(@codec.data_uri_base64("", "aGk="), "data:;base64,aGk=") // D|getDataUriBase64||aGk=|data:;base64,aGk=
+  assert_eq(@codec.data_uri_base64("", ""), "data:;base64,") // D|getDataUriBase64|||data:;base64,
   assert_eq(
-    @codec.data_uri("text/plain", "UTF-8", "not-base64!!"),
-    "data:;base64,not-base64!!",
-  ) // D|getDataUriBase64|{null}|not-base64!!|data:;base64,not-base64!!
-  assert_eq(@codec.data_uri("text/plain", "UTF-8", "aGk="), "data:;base64,aGk=") // D|getDataUriBase64||aGk=|data:;base64,aGk=
-  assert_eq(@codec.data_uri("text/plain", "UTF-8", ""), "data:;base64,") // D|getDataUriBase64|||data:;base64,
-  assert_eq(
-    @codec.data_uri("text/plain", "UTF-8", "not-base64!!"),
+    @codec.data_uri_base64("", "not-base64!!"),
     "data:;base64,not-base64!!",
   ) // D|getDataUriBase64||not-base64!!|data:;base64,not-base64!!
 }
@@ -594,4 +497,4 @@ test "@codec #12.1 data_uri 组装（腿 D 行；charset 串**原样带过**、�
 //   的判断委托给 `java.net.URL` 的协议处理器：`data:`/`tel:`/`urn:`/`javascript:` 一律
 //   ERR:UtilException（本库收不到这种"协议白名单"），无 scheme 的基串又被它补成 `http://`，
 //   且 `http://a` + `./b` 那档**不做点段归一**（与 RFC 3986 不同）。判 deferred 的理由与
-//   逐条读数见 docs/spec/05-codec.md §5.10；本库无对位形状档 81 条。
+//   逐条读数见 docs/spec/05-codec.md §5.10；本库无对位形状档 108 条。

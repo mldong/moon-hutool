@@ -45,17 +45,17 @@ test "text #1.19 encode_blank 空白逐位与混合串（腿 B/W 行）" {
   assert_eq(@text.encode_blank("\u{001e}"), "%20") // W|encodeBlank|u001e|%20
   assert_eq(@text.encode_blank("\u{001f}"), "%20") // W|encodeBlank|u001f|%20
   assert_eq(@text.encode_blank(" "), "%20") // W|encodeBlank|u0020|%20
-  assert_eq(@text.encode_blank("\u{007f}"), "isWhitespace=false") // W|encodeBlank|u007f|{u007f}|isWhitespace=false
-  assert_eq(@text.encode_blank("\u{0085}"), "isWhitespace=false") // W|encodeBlank|u0085|{u0085}|isWhitespace=false
-  assert_eq(@text.encode_blank("%20"), "isWhitespace=false") // W|encodeBlank|u00a0|%20|isWhitespace=false
-  assert_eq(@text.encode_blank("%20"), "isWhitespace=true") // W|encodeBlank|u1680|%20|isWhitespace=true
-  assert_eq(@text.encode_blank("%20"), "isWhitespace=true") // W|encodeBlank|u2000|%20|isWhitespace=true
-  assert_eq(@text.encode_blank("%20"), "isWhitespace=true") // W|encodeBlank|u200a|%20|isWhitespace=true
-  assert_eq(@text.encode_blank("%20"), "isWhitespace=true") // W|encodeBlank|u2028|%20|isWhitespace=true
-  assert_eq(@text.encode_blank("%20"), "isWhitespace=false") // W|encodeBlank|u202f|%20|isWhitespace=false
-  assert_eq(@text.encode_blank("%20"), "isWhitespace=true") // W|encodeBlank|u205f|%20|isWhitespace=true
-  assert_eq(@text.encode_blank("%20"), "isWhitespace=true") // W|encodeBlank|u3000|%20|isWhitespace=true
-  assert_eq(@text.encode_blank("%20"), "isWhitespace=false") // W|encodeBlank|ufeff|%20|isWhitespace=false
+  assert_eq(@text.encode_blank("\u{007f}"), "\u{007f}") // W|encodeBlank|u007f|{u007f}|isWhitespace=false
+  assert_eq(@text.encode_blank("\u{0085}"), "\u{0085}") // W|encodeBlank|u0085|{u0085}|isWhitespace=false
+  assert_eq(@text.encode_blank("\u{00a0}"), "%20") // W|encodeBlank|u00a0|%20|isWhitespace=false
+  assert_eq(@text.encode_blank("\u{1680}"), "%20") // W|encodeBlank|u1680|%20|isWhitespace=true
+  assert_eq(@text.encode_blank("\u{2000}"), "%20") // W|encodeBlank|u2000|%20|isWhitespace=true
+  assert_eq(@text.encode_blank("\u{200a}"), "%20") // W|encodeBlank|u200a|%20|isWhitespace=true
+  assert_eq(@text.encode_blank("\u{2028}"), "%20") // W|encodeBlank|u2028|%20|isWhitespace=true
+  assert_eq(@text.encode_blank("\u{202f}"), "%20") // W|encodeBlank|u202f|%20|isWhitespace=false
+  assert_eq(@text.encode_blank("\u{205f}"), "%20") // W|encodeBlank|u205f|%20|isWhitespace=true
+  assert_eq(@text.encode_blank("\u{3000}"), "%20") // W|encodeBlank|u3000|%20|isWhitespace=true
+  assert_eq(@text.encode_blank("\u{feff}"), "%20") // W|encodeBlank|ufeff|%20|isWhitespace=false
   assert_eq(@text.encode_blank(" \u{0009}\u{000a}"), "%20%20%20") // W|encodeBlank|mix| {u0009}{u000a}|%20%20%20
   assert_eq(@text.encode_blank("a\u{0009}b"), "a%20b") // W|encodeBlank|mix|a{u0009}b|a%20b
   assert_eq(@text.encode_blank("\u{00a0}x"), "%20x") // W|encodeBlank|mix|{u00a0}x|%20x
@@ -63,13 +63,13 @@ test "text #1.19 encode_blank 空白逐位与混合串（腿 B/W 行）" {
   assert_eq(@text.encode_blank("  a  "), "%20%20a%20%20") // W|encodeBlank|mix|  a  |%20%20a%20%20
   assert_eq(@text.encode_blank("\u{000d}\u{000a}"), "%20%20") // W|encodeBlank|mix|{u000d}{u000a}|%20%20
   assert_eq(@text.encode_blank("\u{00a0}"), "%20") // W|encodeBlank|mix|{u00a0}|%20
-  assert_eq(@text.encode_blank("u10000"), "\u{10000}") // W|encodeBlank|astral|u10000|{ud800}{udc00}
-  assert_eq(@text.encode_blank("u20000"), "\u{20000}") // W|encodeBlank|astral|u20000|{ud840}{udc00}
-  assert_eq(@text.encode_blank("u1f600"), "\u{1f600}") // W|encodeBlank|astral|u1f600|{ud83d}{ude00}
+  assert_eq(@text.encode_blank("\u{10000}"), "\u{10000}") // W|encodeBlank|astral|u10000|{ud800}{udc00}
+  assert_eq(@text.encode_blank("\u{20000}"), "\u{20000}") // W|encodeBlank|astral|u20000|{ud840}{udc00}
+  assert_eq(@text.encode_blank("\u{1f600}"), "\u{1f600}") // W|encodeBlank|astral|u1f600|{ud83d}{ude00}
 }
 
 // 不落断言的读数：`C|completeUrl` 共 340 条 —— 它不是纯串面（参照把"是不是绝对 URL"
 //   的判断委托给 `java.net.URL` 的协议处理器：`data:`/`tel:`/`urn:`/`javascript:` 一律
 //   ERR:UtilException（本库收不到这种"协议白名单"），无 scheme 的基串又被它补成 `http://`，
 //   且 `http://a` + `./b` 那档**不做点段归一**（与 RFC 3986 不同）。判 deferred 的理由与
-//   逐条读数见 docs/spec/05-codec.md §5.10；本库无对位形状档 81 条。
+//   逐条读数见 docs/spec/05-codec.md §5.10；本库无对位形状档 108 条。

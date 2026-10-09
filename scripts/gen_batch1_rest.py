@@ -89,8 +89,10 @@ def gen_replacer(leg):
         elif p[0] == "C":
             m = p[1]
             if m == "chain":
+                # 腿里这条链的三个孩子是 a=`ab→1`、b=`bc→2`、c=`cd→3`（ReplacerLeg.java 原文），
+                # 不是 sets[0] 那张表——序号只是腿内部的编号，落到测试里必须还原成表原文
                 call = ("@text.replacer_chain([@text.lookup_replacer(%s), @text.lookup_replacer(%s), "
-                        "@text.lookup_replacer(%s)]).replace(%s)" % (arr(SETS[0][:1]), arr([("bc", "2")]),
+                        "@text.lookup_replacer(%s)]).replace(%s)" % (arr([("ab", "1")]), arr([("bc", "2")]),
                                                                     arr([("cd", "3")]), lit(p[2])))
                 add("text.replacer #1.20 链：每位置只问第一个命中的（腿 C|chain）",
                     "  assert_eq(%s, %s) // %s" % (call, lit(p[3]) or '"ME"', ln))
@@ -162,9 +164,14 @@ def gen_filename(leg):
         elif p[0] == "IT":
             # IT|isType|<name>|<types[]>|<out>
             _, _m, name, typeshs, out = ln.split("|", 4)
-            parts = [x for x in typeshs.strip("[]").split(",") if x != ""]
+            # 腿的 typesOf() 给每个元素后都加一个逗号 ⇒ 末尾那个空串是分隔符伪影，不是元素；
+            # 但 `[""]`（真空串类型）是参照的真值档，不能被当成伪影丢掉（腿 IT 行：`noext` 对 `[""]` 给 true）
             if name == "{null}" or typeshs == "[{nullArray}]":
                 skipped["no_pair"] += 1
+                continue
+            parts = typeshs[1:-1].split(",")[:-1]
+            if "{null}" in parts:
+                skipped["no_pair"] += 1     # 表里含 null 元素：本库 Array[String] 无该形状
                 continue
             arg_types = "[%s]" % ", ".join('"%s"' % t for t in parts)
             arg = lit(name)
@@ -203,11 +210,18 @@ def gen_urlpure(leg):
                 continue
             if p[0] == "B":
                 inp, out = p[2], p[3]
-            elif len(p) == 4 and p[2].startswith("u"):
-                inp, out = ("u%x" % int(p[2][1:], 16)), p[3]
-                inp = "{u%04x}" % int(p[2][1:], 16)
-            else:
+            elif p[2] == "astral":
+                # `W|encodeBlank|astral|u10000|读数`：输入是码位记号，不是 esc() 形状
+                cp = int(p[3][1:], 16)
+                inp, out = "{u%04x}" % (0xD800 + ((cp - 0x10000) >> 10)), p[4]
+                inp = inp + "{u%04x}" % (0xDC00 + ((cp - 0x10000) & 0x3FF))
+            elif p[2] == "mix":
                 inp, out = p[3], p[4]
+            elif p[2].startswith("u") and p[2][1:].isalnum():
+                # `W|encodeBlank|u0085|读数[|isWhitespace=false]`：末段是旁注，不是读数
+                inp, out = "{u%04x}" % int(p[2][1:], 16), p[3]
+            else:
+                continue
             if inp == "{null}":
                 skipped["no_pair"] += 1
                 continue
@@ -217,23 +231,36 @@ def gen_urlpure(leg):
                 continue
             add("text #1.19 encode_blank 空白逐位与混合串（腿 B/W 行）",
                 "  assert_eq(@text.encode_blank(%s), %s) // %s" % (arg, exp, ln))
-        elif p[0] == "D" and p[1].startswith("getDataUri"):
-            # D|getDataUri(3)|<mime>|<charset>|<data>|<out>
-            if len(p) == 6:
-                mime, cs, data, out = p[2], p[3], p[4], p[5]
-            elif len(p) == 5:
-                mime, cs, data, out = "text/plain", "UTF-8", p[3], p[4]
-            else:
+        elif p[0] == "D":
+            # 三种行要分清楚：`getDataUri(3)`（6 段）／`getDataUri(4)`（5 段，四参重载不收）／
+            # `getDataUriBase64`（5 段，但字段是 mime|base64|读数）
+            if p[1] == "getDataUriBase64":
+                if len(p) != 5:
+                    continue
+                a_mime, a_data, out = p[2], p[3], p[4]
+                if "{null}" in (a_mime, a_data):
+                    skipped["no_pair"] += 1
+                    continue
+                m, d = lit(a_mime), lit(a_data)
+                exp = lit(out)
+                if None in (m, d, exp):
+                    skipped["no_pair"] += 1
+                    continue
+                add("@codec #12.2 data_uri_base64 组装（腿 D 行；base64 串**不校验**）",
+                    "  assert_eq(@codec.data_uri_base64(%s, %s), %s) // %s" % (m, d, exp, ln))
                 continue
-            if "{null}" in (mime, data) or cs == "null":
-                skipped["no_pair"] += 1     # 参照把 null 打成字符串 "null"/整段省略，本库无 null 档
+            if p[1] == "getDataUri(4)":
+                skipped["deferred4"] = skipped.get("deferred4", 0) + 1
+                continue      # 四参重载（第 3 参是属性段、第 4 参才是数据）本批不收，理由见 spec §12.1
+            if p[1] != "getDataUri(3)" or len(p) != 6:
                 continue
+            mime, cs, data, out = p[2], p[3], p[4], p[5]
+            if "{null}" in (mime, cs, data):
+                skipped["no_pair"] += 1     # 参照把 null 打成字符串 "null"（数据位）或整段省略（charset 位），
+                continue                    # 本库 String 无 null 档 ⇒ 无对位形状，只在 spec 里交代
             a1, a2, a3 = lit(mime), lit(cs), lit(data)
-            if None in (a1, a2, a3):
-                skipped["no_pair"] += 1
-                continue
             exp = lit(out)
-            if exp is None:
+            if None in (a1, a2, a3, exp):
                 skipped["no_pair"] += 1
                 continue
             add("@codec #12.1 data_uri 组装（腿 D 行；charset 串**原样带过**、数据**不编码**）",

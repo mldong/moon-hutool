@@ -239,7 +239,7 @@ def emit_tests(leg1, leg2, leg3, entity):
     # 2) 百分号族（P / UN 行；filter 档另组）
     FILT = {"escape(filterKeepAll)": "_c => true",
             "escape(filterKeepNone)": "_c => false",
-            "escape(filterAlpha)": "c => c.is_ascii_alphabetic()",
+            "escape(filterAsciiAlpha)": "c => c.is_ascii_alphabetic()",
             "escape(filterNotAlnum)": "c => !(c.is_ascii_alphabetic() || c.is_ascii_digit())"}
     for src in (leg1, leg2):
         for ln in src:
@@ -283,8 +283,9 @@ def emit_tests(leg1, leg2, leg3, entity):
             if inner is None:
                 continue
             fn = "unicode_to_string"
-            call = "@text.unicode_to_string(%s(%s))" % (
-                "@text.to_unicode" if meth == "roundtrip" else "@text.to_unicode_all", inner)
+            # 腿的两档 `roundtrip` / `roundtrip(true)` 在参照里都是 `toUnicode(s, true)`
+            # （= 本库的 `to_unicode`）；`false` 档的闭环**没有读数**，不许凭形状补一条
+            call = "@text.unicode_to_string(@text.to_unicode(%s))" % inner
             kind, exp = g.expect(fn, out, ln)
             if exp:
                 g.add("text.unicode #1.18 闭环（to_unicode ∘ unicode_to_string）",

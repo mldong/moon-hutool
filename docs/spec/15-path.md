@@ -363,3 +363,7 @@ null 入参在参照六件里有四件给 null、`containsInvalid(null)` 给 **f
 `File` 重载、null 入参档、`FileNameUtil` 里的 `EXT_JAVA/EXT_CLASS/EXT_JAR` 三个常量
 （腿 CONST 行读数 `.java/.class/.jar`——它们是给 `isType` 当参数用的串，本包不出常量表，
 调用点直接写字面量即可；要收的话得先拍"常量表算不算 API 面"，见 `00-hutool-map.md` §7 的 gap 档讨论）。
+
+> 本笔附带一条生成器修正：`FileNameLeg.java` 原先把 null 文件名印成字面量 `null`，
+> 生成器据此造出三条 `is_type("null", ...)` 的**假断言**（参照那一档是"入参为 null"，本库 `String` 无该形状）；
+> 腿改走 `esc(null)` 打 `{null}` 后，这三条就地删除，§11 冻结期望 285 → **263** 条，逐条删除理由见 `01-text.md` §1.15 末注。
