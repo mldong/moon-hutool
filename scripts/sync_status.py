@@ -225,6 +225,66 @@ def spec_files():
     return sorted(f for f in os.listdir(d) if f.endswith(".md")) if os.path.isdir(d) else []
 
 
+def log_files():
+    d = os.path.join("docs", "roadmap-log")
+    return sorted(f for f in os.listdir(d)) if os.path.isdir(d) else []
+
+
+def roadmap_case_cells():
+    """按出现顺序返回逐包表的 [(行号, 包名, 用例列)]。
+
+    `roadmap_rows()` 只给到**契约列**（那是 G13 第一半要看的东西），详记链接在第 5 列，
+    所以这里另取一列——别改 roadmap_rows 的返回形状，别处按三列在用。
+    """
+    path = os.path.join(os.getcwd(), "docs", "ROADMAP.md")
+    if not os.path.isfile(path):
+        return []
+    out = []
+    for i, line in enumerate(
+            io.open(path, encoding="utf-8", errors="replace").read().splitlines(), 1):
+        m = ROW.match(line)
+        if not m:
+            continue
+        cells = [c.strip() for c in line.strip().strip("|").split("|")]
+        out.append((len(out) + 1, m.group(1), cells[4] if len(cells) > 4 else ""))
+    return out
+
+
+def log_number_findings(rows, files):
+    """详记件（docs/roadmap-log/NN-<pkg>.md）的文件号必须等于该包在逐包表里的行号。
+
+    G13 的第二半，10-09 补。起因就是拆件那一笔自己造的漂移：工装照着旧日志里“第 N 节”的
+    **顺序号**编文件名，而那个顺序号在 `mac`（表第 13 行，判不做、没有详记件）那里少编了一次
+    ⇒ 第 13 行往后 12 件全体差一号（`13-dfa.md` 对着 `docs/spec/14-dfa.md`）。
+    号是稳定 ID 的话，就不该有两套号。
+    """
+    bad = []
+    linked = set()
+    for i, pkg, cell in rows:
+        m = re.search(r"roadmap-log/([0-9]{2}-[a-z0-9_\-]+\.md)", cell)
+        if not m:
+            continue
+        expect = "%02d-%s.md" % (i, pkg.replace("_", "-"))
+        linked.add(expect)
+        if m.group(1) != expect:
+            bad.append("逐包表第 {} 行是 `{}`，详记链接却指 {}（应为 {}）".format(
+                i, pkg, m.group(1), expect))
+    for f in files:
+        if f not in linked:
+            bad.append("docs/roadmap-log/{} 没有被逐包表任何一行指到（孤儿件）".format(f))
+    return bad
+
+
+def log_selftest():
+    """阳性对照：把一件的号挪错一格，判据必须抓到；顺手也要能抓到孤儿件。"""
+    filler = [(k, "pad%02d" % k, "") for k in range(1, 14)]   # 让 dfa 落在表第 14 行
+    rows = filler + [(14, "dfa", "[`roadmap-log/13-dfa.md`](x)"),
+                     (24, "sched", "[`roadmap-log/15-sched.md`](x)")]
+    bad = log_number_findings(rows, ["13-dfa.md", "15-sched.md", "99-orphan.md"])
+    return (any("应为 14-dfa.md" in b for b in bad) and any("应为 24-sched.md" in b for b in bad)
+            and any("孤儿件" in b for b in bad))
+
+
 def number_findings(rows, files):
     """spec 文件名序号必须等于该包在逐包表里的行号（门禁 G13）。
 
@@ -299,6 +359,17 @@ def numbers_only():
             print("    ", b)
         return 1
     print("  PASS docs/spec/NN-<pkg>.md 的 NN 与逐包表行号一一对应")
+    lb = log_number_findings(roadmap_case_cells(), log_files())
+    if lb:
+        print("  FAIL 详记件号与逐包表行号不一致（{} 处）：".format(len(lb)))
+        for b in lb:
+            print("    ", b)
+        return 1
+    if not log_selftest():
+        print("  FAIL G13 自身失效：详记件号的阳性对照没过（挪错一格没被抓到）")
+        return 1
+    print("  PASS docs/roadmap-log/NN-<pkg>.md 的 NN 与逐包表行号一一对应"
+          "（{} 件，含阳性对照：错一格与孤儿件都要被抓到）".format(len(log_files())))
     return selftest() if "--selftest" in sys.argv else 0
 
 
