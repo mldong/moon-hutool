@@ -12,12 +12,18 @@
 #   deferred  已登记在 ROADMAP「暂不做」档（加密、压缩、码表、流式摘要…）
 #   gap       够得着、既没做也没登记 ⇒ 这一档就是要人拍板的清单，不许为空判绿
 #
-# 取类面：只读 jar（zipfile 列 .class，剥内部类），不依赖 javap ⇒ 快且无编码坑。
+# 取类面：优先读**仓内清单生成物** `docs/spec/hutool-classes.tsv`（zipfile 列 .class 的结果，
+# 带版本与 sha256 头），只在"升级 hutool"那一笔才需要 $HUTOOL_JAR 去重生成。
+# 为什么这么改（10-09）：hutool 版本是钉死的，类面变化频率≈0，而原方案每个 PR 都要去
+# Maven Central 拉一份 jar——日常只在做重复劳动，还多一个故障源（Central 抖一下这格就红，
+# 红因与本次提交毫无关系）。清单进仓后两条判据（漏档 / 死条目）仍然成立，且不联网。
+# 版本一致性是新加的一条：本轮拿 5.8.35 跑 census，`VersionUtil`/`YearQuarter` 被判"表里有
+# jar 里没有的死条目"——那两类是 5.8.37 才有的。判据没错，错在没人拦"用错版本去核对"。
 # 用法：
-#   python scripts/core_surface.py --write    # 生成 docs/spec/core-surface.tsv
-#   python scripts/core_surface.py --check    # 漂移 + 漏档检查（漂移或漏档退出 1）
-#   python scripts/core_surface.py --selftest # 三档对照
-# 参照 jar：$HUTOOL_JAR（指 hutool-all 或 hutool-core 都行）；取不到 ⇒ 退出码 2 = SKIP，不判通过。
+#   python scripts/core_surface.py --write    # 生成 core-surface.tsv；有 jar 时同时刷新类面清单
+#   python scripts/core_surface.py --check    # 漂移 + 漏档 + 死条目 + 版本一致（任一红退出 1）
+#   python scripts/core_surface.py --selftest # 四档对照
+# 取不到 jar 也取不到清单 ⇒ 退出码 2 = SKIP，不判通过。
 import io
 import os
 import re
@@ -25,7 +31,12 @@ import sys
 import zipfile
 
 OUT = "docs/spec/core-surface.tsv"
+MANIFEST = "docs/spec/hutool-classes.tsv"   # 类面清单（离线判据的真相源），由 --write 生成
+REF_VERSION = "5.8.37"                      # census 参照版本；与清单/ jar 不一致 ⇒ 红
 CORE_PREFIX = "cn.hutool.core."
+
+# 运行期解析出来的类面来源（active_classes 填），None 表示本轮没取到任何一边
+_ACTIVE = {"classes": None, "source": None, "version": None}
 
 # 包前缀默认档（**含子包**：cn.hutool.core.bean 也吃掉 bean.copier.*）。越具体越靠前。
 RULES = [
@@ -247,7 +258,7 @@ def classify(cls, fqn):
 
 def build(jar):
     rows = []
-    for cls, fqn in classes_from_jar(jar):
+    for cls, fqn in active_classes():
         tier, reason = classify(cls, fqn)
         rows.append((cls, fqn, tier, reason))
     return rows
@@ -273,24 +284,122 @@ def read_committed():
     return rows
 
 
+def check_version(ver):
+    """版本口径一致性：核对用的类面必须与 census 声明的同一版。返回 (ok, 说明)。"""
+    if ver != REF_VERSION:
+        return False, ("类面来源版本 %r ≠ census 口径 REF_VERSION %r"
+                       "（换版要先 --write 重生成清单，别拿旧表对新 jar、也别拿新表对旧 jar）"
+                       % (ver, REF_VERSION))
+    return True, None
+
+
+def write_manifest(jar, version):
+    """把 jar 里的 cn.hutool.core.* 顶层类摊成仓内清单（带版本与 sha256 头）。"""
+    import hashlib
+    sha = hashlib.sha256(io.open(jar, 'rb').read()).hexdigest()
+    rows = classes_from_jar(jar)
+    head = ("# hutool-core 顶层类面清单 —— 由 `python scripts/core_surface.py --write` 生成，勿手改\n"
+            "# 列：类名<TAB>全限定名\n"
+            "# 来源：hutool-all jar（zipfile 列 .class，剥内部类与 package-info/module-info）\n"
+            "# version = %s\n# sha256 = %s\n" % (version, sha))
+    io.open(MANIFEST, 'w', encoding='utf-8', newline='\n').write(
+        head + ''.join('%s\t%s\n' % r for r in rows))
+    return len(rows), sha
+
+
+def read_manifest():
+    """返回 (类面, 版本, sha256)；文件缺失 ⇒ (None, None, None)。"""
+    if not os.path.exists(MANIFEST):
+        return None, None, None
+    cls, ver, sha = [], None, None
+    for line in io.open(MANIFEST, encoding='utf-8'):
+        s = line.strip()
+        if s.startswith('#'):
+            m = re.match(r'#\s*(version|sha256)\s*=\s*(\S+)', s)
+            if m:
+                if m.group(1) == 'version':
+                    ver = m.group(2)
+                else:
+                    sha = m.group(2)
+            continue
+        if not s:
+            continue
+        p = s.split('\t')
+        if len(p) == 2:
+            cls.append((p[0], p[1]))
+    return cls, ver, sha
+
+
+def active_classes():
+    """类面只从这里取：一次解析，多处复用（build / 死条目 / 自检都走这一条）。"""
+    if _ACTIVE['classes'] is None:
+        raise RuntimeError('类面来源未解析——main() 里先 resolve_source()')
+    return _ACTIVE['classes']
+
+
+def resolve_source(jar):
+    """定来源并做版本一致性检查。返回 (ok, 说明)；ok is None ⇒ 两边都没有（SKIP）。"""
+    if jar:
+        ver = jar_version(jar)
+        good, why = check_version(ver)
+        _ACTIVE.update(classes=classes_from_jar(jar), source='jar ' + os.path.basename(jar),
+                       version=ver)
+        return (False, why if ver else version_note(jar)) if not good else (True, None)
+    cls, ver, _sha = read_manifest()
+    if cls is None:
+        return None, None
+    if not cls:
+        return False, '清单里一条类都没有（生成物被改坏？）'
+    good, why = check_version(ver)
+    _ACTIVE.update(classes=cls, source='清单 ' + MANIFEST, version=ver)
+    return (False, why) if not good else (True, None)
+
+
+def jar_version(jar):
+    m = re.search(r'(\d+\.\d+\.\d+)', os.path.basename(jar))
+    return m.group(1) if m else None
+
+
+def version_note(jar):
+    return ("这份 jar 的文件名里没有版本号（%s）⇒ 无法确认它是不是 census 口径的那一版，"
+            "拒绝猜；要么显式给一份带版本名的 hutool-all-<ver>.jar，要么走仓内清单"
+            % os.path.basename(jar))
+
+
 def resolve_jar():
     env = os.environ.get("HUTOOL_JAR")
     if env and os.path.exists(env):
         return env
     import glob
     import tempfile
-    for c in sorted(glob.glob(os.path.join(tempfile.gettempdir(), "convsrc", "hutool-*.jar"))):
-        if not c.endswith("-sources.jar") and "-src" not in os.path.basename(c):
+    cands = [c for c in sorted(glob.glob(os.path.join(tempfile.gettempdir(), "convsrc", "hutool-*.jar")))
+             if not c.endswith("-sources.jar") and "-src" not in os.path.basename(c)]
+    # 兜底只认**文件名带版本号**的那份：本轮实测 temp 目录里别的会话留下的 hutool-bloom.jar
+    # 会抢到第一位，让"没清单"退化成一条与本次提交无关的红。宁缺勿猜——猜不出版本就交回 SKIP。
+    for c in cands:
+        if re.search(r"hutool-(all|core|cron)-\d+\.\d+\.\d+\.jar$", os.path.basename(c)):
             return c
     return None
 
 
 def main():
     os.chdir(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    jar = resolve_jar()
-    if not jar:
-        print("  SKIP 没有参照 jar（设 HUTOOL_JAR 指 hutool-all/hutool-core）⇒ 三档归类本轮无法核对")
+    # 来源优先级：显式 $HUTOOL_JAR > 仓内清单 > （清单也没有时）temp 目录里现成的 jar。
+    # 上一版直接调 resolve_jar()，被 temp 里别的会话留下的 hutool-bloom.jar（文件名不带版本）劫持，
+    # 于是"离线判据"报成"版本 None"——清单进仓之后就不该再去猜外部 jar。
+    jar = os.environ.get("HUTOOL_JAR")
+    if jar and not os.path.exists(jar):
+        jar = None
+    if not jar and not os.path.exists(MANIFEST):
+        # 仓内没有清单时才退化去 temp 目录找现成 jar（旧姿势）；有清单就走离线判据
+        jar = resolve_jar()
+    ok, why = resolve_source(jar)
+    if ok is None:
+        print("  SKIP 既没有仓内清单 %s，也没给 $HUTOOL_JAR ⇒ 三档归类本轮无法核对" % MANIFEST)
         return 2
+    if not ok:
+        print("  FAIL 类面来源不可用：%s" % why)
+        return 1
     rows = build(jar)
     if not rows:
         print("  SKIP 这份 jar 里没有 cn.hutool.core.* 的类（%s）⇒ 类面无法核对，不当通过也不当红" % jar)
@@ -298,16 +407,24 @@ def main():
     unclassified = [r for r in rows if r[2] == UNCLASSIFIED]
     if "--write" in sys.argv:
         io.open(OUT, "w", encoding="utf-8", newline="\n").write(render(rows))
+        if jar:
+            n, sha = write_manifest(jar, _ACTIVE['version'])
+            print("  OK 刷新类面清单 %s：%d 个类（version=%s sha256=%s…）"
+                  % (MANIFEST, n, _ACTIVE['version'], sha[:12]))
+        else:
+            print("  INFO 未给 $HUTOOL_JAR ⇒ 只重写归类表，类面清单保持不动（来源：%s）"
+                  % _ACTIVE['source'])
         print("  OK 写入 %s：%d 个类，漏档 %d" % (OUT, len(rows), len(unclassified)))
         for r in unclassified[:20]:
             print("     漏档 %s (%s)" % (r[0], r[1]))
         return 0 if not unclassified else 1
     if "--selftest" in sys.argv:
         n = selftest(jar, rows, unclassified)
-        if n == 3:
-            print("  PASS 三档对照全过（现表零漏档放行 / 撤规则必掉漏档 / 假类名必被抓）")
+        n += selftest_version()
+        if n == 4:
+            print("  PASS 四档对照全过（现表零漏档放行 / 撤规则必掉漏档 / 假类名必被抓 / 版本口径不一致必被抓）")
             return 0
-        print("  FAIL 自检只有 %d/3 档通过 ⇒ 这条判据不可信" % n)
+        print("  FAIL 自检只有 %d/4 档通过 ⇒ 这条判据不可信" % n)
         return 1
     committed = read_committed()
     if committed is None:
@@ -320,7 +437,7 @@ def main():
         return 1
     # 死条目：覆盖表里写了 jar 中不存在的类名（凭记忆建表的形状），必须显式清掉，
     # 否则下一轮会照着一条不存在的对位关系去判档。
-    known2 = {c for c, _ in classes_from_jar(jar)}
+    known2 = {c for c, _ in active_classes()}
     dead = sorted(c for c in OVERRIDES if c not in known2)
     if dead:
         print("  FAIL 覆盖表里有 %d 个类名在这份 jar 中不存在：%s" % (len(dead), ", ".join(dead[:12])))
@@ -342,6 +459,23 @@ def main():
     return 0
 
 
+def selftest_version():
+    """第四档对照：版本口径不一致必须被抓。三个方向各测一次——
+       错版本 jar 的文件名 / 清单里写的版本 / 与常量相等的那一侧必须放行。
+       没有这一档，"版本一致"这半条判据就是摆设（本轮我自己就是拿 5.8.35 跑 census 跑出假红的）。
+       不碰文件系统：直接验 check_version 与 jar_version 这两个纯函数，再加一条"清单读出的版本
+       必须等于常量"（不等的话主判据本来就会红，这里只是确认对照不是空转）。"""
+    good = check_version(REF_VERSION)[0]
+    bad1 = not check_version("5.8.35")[0]
+    bad2 = not check_version(jar_version("hutool-all-9.9.9.jar"))[0]
+    ver = read_manifest()[1]
+    if good and bad1 and bad2 and ver == REF_VERSION:
+        return 1
+    print("  FAIL 自检④：版本判据不可信（放行对版=%s / 抓 5.8.35=%s / 抓 9.9.9=%s / 清单版本=%r≠%r）"
+          % (good, bad1, bad2, ver, REF_VERSION))
+    return 0
+
+
 def selftest(jar, rows, unclassified):
     ok = 0
     # ① 现表必须放行（且零漏档）
@@ -351,7 +485,7 @@ def selftest(jar, rows, unclassified):
         print("  FAIL 自检①：现表之下就有 %d 个漏档，或表文件缺失" % len(unclassified))
     # ② 抽一个"由包级规则落档"的类（不是逐条覆盖来的），撤掉那条规则 ⇒ 它必须掉进漏档。
     #    这一档对照的存在理由：没有它，"全部落档"可能是规则表里某条永远为真在兜底（永真判据）。
-    cls_by_rule = [(c, f) for c, f in classes_from_jar(jar) if c not in OVERRIDES and classify(c, f)[0] != UNCLASSIFIED]
+    cls_by_rule = [(c, f) for c, f in active_classes() if c not in OVERRIDES and classify(c, f)[0] != UNCLASSIFIED]
     if cls_by_rule:
         c, f = cls_by_rule[0]
         pkg = f.rsplit(".", 1)[0]
@@ -371,7 +505,7 @@ def selftest(jar, rows, unclassified):
     else:
         print("  FAIL 自检②：全部类都走逐条覆盖，包级规则一格没被走过 ⇒ 对照取不到样本")
     # ③ 覆盖表里写了 jar 中不存在的类名 ⇒ 必须点名（防"凭记忆建表"，本仓犯过三次）
-    known = {c for c, _ in classes_from_jar(jar)}
+    known = {c for c, _ in active_classes()}
     ghosts = [c for c in OVERRIDES if c not in known]
     planted = "NoSuchClassForSelftestZzz"
     OVERRIDES[planted] = ("gap", "对照样本")

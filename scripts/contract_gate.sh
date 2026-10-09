@@ -354,18 +354,18 @@ else
   bad "G15 自身失效：三档对照没全过——这条判据不可信（见下）"; sed -n '1,14p' /tmp/mh_ratchet_self.log | sed 's/^/    /'
 fi
 
-echo "== G16 hutool-core 顶层类 census（每类必须落一档；漏档与类面漂移都判红）=="
+echo "== G16 hutool-core 顶层类 census（每类必须落一档；漏档、类面漂移、版本口径不一致都判红）=="
 python scripts/core_surface.py --selftest >/tmp/mh_surface_self.log 2>&1; rc=$?
 if [ "$rc" = "2" ]; then
-  skip "G16 没有参照 jar（设 HUTOOL_JAR 指 hutool-all/hutool-core）⇒ 类面本轮不判"
+  skip "G16 既无仓内类面清单 docs/spec/hutool-classes.tsv 也没给 HUTOOL_JAR ⇒ 类面本轮不判"
 elif [ "$rc" = "0" ]; then
   grep -E "^  (PASS|INFO)" /tmp/mh_surface_self.log
   python scripts/core_surface.py --check >/tmp/mh_surface.log 2>&1; rc2=$?
   if [ "$rc2" = "0" ]; then grep -E "^  PASS" /tmp/mh_surface.log
   elif [ "$rc2" = "2" ]; then skip "G16 类面为空 ⇒ 不判"
-  else bad "类面漏档或表与 jar 漂移（见下）："; sed -n '1,12p' /tmp/mh_surface.log | sed 's/^/    /'; fi
+  else bad "类面漏档、表与清单漂移，或版本口径不一致（见下）："; sed -n '1,12p' /tmp/mh_surface.log | sed 's/^/    /'; fi
 else
-  bad "G16 自身失效：三档对照没全过——这条判据不可信（见下）"; sed -n '1,12p' /tmp/mh_surface_self.log | sed 's/^/    /'
+  bad "G16 自身失效：四档对照没全过——这条判据不可信（见下）"; sed -n '1,12p' /tmp/mh_surface_self.log | sed 's/^/    /'
 fi
 
 echo "== G17 死格形状棘轮（断言实参位上不许出现参照期望值字面串）=="
