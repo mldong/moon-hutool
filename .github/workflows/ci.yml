@@ -30,6 +30,12 @@ jobs:
           curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash
           echo "$HOME/.moon/bin" >> $GITHUB_PATH
 
+      # 10-09 踩到的：安装脚本只装二进制 + bundle core（日志里只有 "Downloading moonbit/core"、"Bundling core"），
+      # **不带注册表索引**。本仓零依赖时期这条看不出来（压根不查索引）；sched 引入 moonbitlang/async 之后
+      # 四档编译 + 门禁全红，moon 自己给的下一步就是那句 `Warning: you may need to run \`moon update\``。
+      - name: moon update（刷新注册表索引，否则解析不到 moonbitlang/async）
+        run: moon update
+
       - name: moon version
         run: moon version --all
 
@@ -43,13 +49,14 @@ jobs:
       - name: Coverage trace for G15（未覆盖行棘轮要有数据，否则那一格只能 SKIP）
         run: moon test --target wasm --enable-coverage >/dev/null 2>&1 || echo "覆盖率数据没生成：G15 会在门禁里显式 SKIP，不会伪装成通过"
 
-      - name: Run contract gate G1-G17
-        # 基线 393 = text 23 + digest 20 + date 47 + id 32 + codec 38 + coll 16 + mapx 28 + num 67 + conv 33 + re 22 + valid 11 + rand 11 + dfa 10 + path 11 + cache 14 + hash 10
-        #（契约冻结态也计数：
-          # 骨架期红是设计态，但用例必须被收集到，收不到就是静默丢套件）。用例只许增不许减：
-          # 减到低于基线就是有用例被悄悄删掉（负向对照：本机把基线抬到 314 当场 RED）
+      - name: Run contract gate G1-G18
+        # 地板 = `moon test --target <档>` 汇总行里的 Total tests（10-09 本机现读 wasm、js 两档同为 1531；
+        # 负向对照：本机把地板改成 1532 当场判红 `test wasm 只收集 1531 条 < 基线 1532`）。
+        # 这个数与 scripts/contract_gate.sh 里的默认值是同一个——两处不一致就是门禁自己漂了。
+        # 这里原先还写着一张「393 = text 23 + digest 20 + …」的分解表，那是 16 个包时代的切片、
+        # 与现读不符，已删；要逐包条数就现读 ROADMAP.md 末的 READINGS 生成块（G11 每轮重生成）。
         env:
-          BASELINE_TESTS: "393"
+          BASELINE_TESTS: "1531"
           GATE_TARGETS: "wasm js"
         run: bash scripts/contract_gate.sh
 
@@ -68,18 +75,30 @@ jobs:
           curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash
           echo "$HOME/.moon/bin" >> $GITHUB_PATH
 
-      # 零依赖 + 零 FFI + 零 async 的推论：四档都必须编得过。任一档红就是破坏了本库的立身之本。
+      # 同 gate job：不刷索引就解析不到 moonbitlang/async（见该处注释）。
+      - name: moon update
+        run: moon update
+
+      # 四档都必须编得过（本库立身之本）。唯一的例外是 `sched`：它 import moonbitlang/async，
+      # wasm-gc 档没有异步可执行入口，已由包级 supported_targets 摘掉那一档（读数见 docs/spec/24-sched.md §1）。
       - name: moon check --target ${{ matrix.target }}
         run: moon check --target ${{ matrix.target }}
 
       - name: 收集用例数（不要求通过，骨架期实现是 abort）
         env:
           TARGET: ${{ matrix.target }}
+          # 地板 1519＝四档里最低那一档（wasm-gc）的现读条数（10-09 本机 `moon test --target wasm-gc`
+          # = 1519，且 sched 的 12 条 async 用例在该档根本不收集——该包 supported_targets 摘掉了 wasm-gc，
+          # 见 docs/spec/24-sched.md §1；wasm/js 两档本机都是 1531）。钉在等值上 ⇒ 掉一条就红。
+          # 旧写在这里的 `-ge 20` 对一个 1500+ 条用例的仓是空转格：整包用例被删掉它都不会红。
+          # 负向对照（本机把这段正文原样抽出来跑）：FLOOR=1519 ⇒ exit 0 并打 collected=1519 passed:1519；
+          # FLOOR=1520 ⇒ exit 1。
+          FLOOR: "1519"
         run: |
           out=$(moon test --target "$TARGET" 2>&1 || true)
           total=$(printf '%s\n' "$out" | grep -oE 'Total tests: [0-9]+' | grep -oE '[0-9]+' | head -1)
-          echo "target=$TARGET collected=${total:-0}"
-          if [ "${total:-0}" -ge 20 ]; then exit 0; fi
+          echo "target=$TARGET collected=${total:-0} $(printf '%s\n' "$out" | grep -oE 'passed: [0-9]+, failed: [0-9]+' | head -1)"
+          if [ "${total:-0}" -ge "$FLOOR" ]; then exit 0; fi
           # native 档的骨架期例外，判据三条同时成立才豁免（缺一即 FAIL）：
           #   ① 这一档确实是 native；② 失败方式是 SIGABRT（native 测试驱动不兜 panic，
           #   一个未实现的 abort 就把整个测试进程打死，拿不到 Total tests 汇总）；
@@ -107,11 +126,22 @@ jobs:
         with:
           fetch-depth: 0
 
+      # 这一 job 原来不装工具链就跑 contract_gate.sh。本机实测（把 moon 从 PATH 摘掉再跑门禁）：
+      # G3 直接 `moon: command not found` 并判红，不是静默跳过。它只在 PR 上跑，而本仓至今
+      # 零个 PR 运行记录（现读 `gh run list --event pull_request` 为空），所以这条没被照见过。
+      - name: Install MoonBit toolchain
+        run: |
+          curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash
+          echo "$HOME/.moon/bin" >> $GITHUB_PATH
+
+      - name: moon update
+        run: moon update
+
       # 实现 PR 不许动测试期望值与 spec 的"读数来源"列；要动必须单独一笔（人工评审）。
       # 给了 GATE_FREEZE_BASE 才激活 G5（脚本内其余判据照常跑）。
       - name: G5
         env:
           GATE_FREEZE_BASE: ${{ github.event.pull_request.base.sha }}
           GATE_TARGETS: "wasm"
-          BASELINE_TESTS: "393"   # 与主门禁同一基线（曾滞后在 227 上，成了只走过场的弱判据）
+          BASELINE_TESTS: "1531"   # 与主门禁同一基线（曾滞后在 227 上，成了只走过场的弱判据）
         run: bash scripts/contract_gate.sh
