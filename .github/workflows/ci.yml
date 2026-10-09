@@ -96,8 +96,25 @@ jobs:
           FLOOR: "1519"
         run: |
           out=$(moon test --target "$TARGET" 2>&1 || true)
-          total=$(printf '%s\n' "$out" | grep -oE 'Total tests: [0-9]+' | grep -oE '[0-9]+' | head -1)
-          echo "target=$TARGET collected=${total:-0} $(printf '%s\n' "$out" | grep -oE 'passed: [0-9]+, failed: [0-9]+' | head -1)"
+          # 汇总行按 `^Total tests: ` 锚定再取数（真样本实测：失败明细那几行长的是
+          # `[包名] test 文件:行 ("<用例名>") failed: Error`，不带数字；只有汇总行才是 `failed: <数字>`。
+          # 早先按"全文第一个匹配"取数会被这类消息里的数字抢先，锚定汇总行才是那一条）。
+          summ=$(printf '%s\n' "$out" | grep -E '^Total tests: ' | tail -1)
+          total=$(printf '%s' "$summ" | grep -oE 'Total tests: [0-9]+' | grep -oE '[0-9]+')
+          failed=$(printf '%s' "$summ" | grep -oE 'failed: [0-9]+' | grep -oE '[0-9]+')
+          echo "target=$TARGET collected=${total:-0} failed=${failed:-无汇总行}"
+          # 这一步的**断言**是"用例收没收到"，不是"过没过"，所以有红它本来会一声不响地绿过去
+          # （10-09 实测就是这个形状：native 档 collected=1531 passed=1530 failed=1，job 仍 success）。
+          # 现在把红点名打出来并挂 ::warning::——先解决"看不见"；要不要升级成硬检查，
+          # 等这条红的根因读到位再定（native 的 Int 是 64 位而 wasm/js 是 32 位，两族都可能）。
+          if [ "${failed:-0}" != "0" ] && [ -n "$summ" ]; then
+            echo "::warning::$TARGET 档有 $failed 条红用例（本步骤不断言通过，故不判红——升级成硬检查前先读这条 warning 的根因）"
+            echo "::group::$TARGET 红用例点名（失败行 + 汇总行 + 末 30 行原文）"
+            printf '%s\n' "$out" | grep -E ' failed: ' | head -30
+            echo "$summ"
+            printf '%s\n' "$out" | tail -30
+            echo "::endgroup::"
+          fi
           if [ "${total:-0}" -ge "$FLOOR" ]; then exit 0; fi
           # native 档的骨架期例外，判据三条同时成立才豁免（缺一即 FAIL）：
           #   ① 这一档确实是 native；② 失败方式是 SIGABRT（native 测试驱动不兜 panic，
