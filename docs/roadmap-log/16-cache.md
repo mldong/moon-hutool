@@ -1,7 +1,8 @@
-# 第 15 节 · `cache`（逐包表原行逐字留痕）
+# 16 · `cache`（逐包表原行逐字留痕）
 
-来源：`docs/ROADMAP.md` 逐包表第 15 行（`cache`）的“用例”列原文；
-状态与条数的真相见该行与文末 READINGS 生成块，索引在 [`../ROADMAP-log.md`](../ROADMAP-log.md)。
+来源：`docs/ROADMAP.md` 逐包表第 16 行（`cache`）“用例”列的逐字原文。
+编号 16 是稳定 ID：与该包契约 `docs/spec/16-…md`、与该行在表里的行号同源同值（第 13 号位是 `mac`，判不做、无详记件），门禁 G13 钉这条不许各漂各的。
+状态与条数的真相见该行与 `ROADMAP.md` 末的 READINGS 生成块；索引在 [`../ROADMAP-log.md`](../ROADMAP-log.md)。
 
 
 ````text
