@@ -14,7 +14,7 @@
 
 | hutool | core 直接可用 | 本库补 | 不做 |
 |---|---|---|---|
-| `isEmpty/isBlank` | `String::is_empty`、`String::is_blank`、`Char::is_whitespace`（Unicode 子集） | ① `text.is_blank`（并集 hutool 独有 7 码点，含 U+0000） | 逐字符再抄一遍 Unicode 表 |
+| `isEmpty/isBlank` | `String::is_empty`、`String::is_blank`；`Char::is_whitespace` **只是原料、不等价**（10-10 实测差四位：core 不算 U+001C–U+001F，core 多算 U+0085） | ① `text.is_blank` ② `text.is_blank_char`（对位 `CharUtil.isBlankChar`，35 位实测码表，整仓唯一一张：`ini`/`typex` 的两份副本已删） | 星平面逐码元的 Unicode 空白属性（参照按 UTF-16 码元走，代理码元一律非空白，本库同判） |
 | `trim/trimToNull/trimToEmpty` | `String::trim`（给 `StringView`，要 `.to_owned()`） | ① `text.trim`、`text.trim_opt` | — |
 | `split/splitTrim` | `String::split`（多分隔符、迭代器） | ① `text.split`（空段保留 + 逐段 trim） | — |
 | `startWith/endWith/contains/indexOf/equals(ignCase)` | `has_prefix/has_suffix/contains/contains_any/find/equal_ignore_ascii_case` | — | **不转发** |
@@ -97,10 +97,10 @@
 
 | 档 | 含义 | 现读类数（hutool-all **5.8.37**，632 个顶层类，固化在 `docs/spec/hutool-classes.tsv`） |
 |---|---|---|
-| `done` | **逐条登记过**对位件（`OVERRIDES` 里点名哪个包哪件承接） | 135 |
+| `done` | **逐条登记过**对位件（`OVERRIDES` 里点名哪个包哪件承接） | 136 |
 | `unattested` | 包级规则**整片声称已做但没逐条指回实现件**（10-09 紧闸新增档，棘轮只许降） | 0 |
 | `excluded` | 结构上不属于本库：反射/动态代理/宿主 IO/网络/线程/AWT/JVM 内部机制 | 355 |
-| `core` | MoonBit core 已有同义能力，本库按规则不写转发层 | 54 |
+| `core` | MoonBit core 已有同义能力，本库按规则不写转发层 | 53 |
 | `deferred` | 已登记在 [`docs/ROADMAP.md`](https://github.com/mldong/moon-hutool/blob/master/docs/ROADMAP.md) 的「暂不做」档 | 29 |
 | `gap` | **够得着、既没做也没登记** ⇒ 这一档就是要拍板的清单 | 59 |
 

@@ -1531,6 +1531,7 @@ owner 点头后另起一笔收口。腿仍是 `Temp/convsrc/hktw_rows.tsv`（同
 参照腿 `TypexLeg4.java`（hutool-core 5.8.35 · JDK 17.0.14 · `-Dfile.encoding=UTF-8`）四族出口：`PageUtil.rainbow(pageNo,totalPage,displayCount)`、`Version.compareTo`/`toString`、`DataSizeUtil.parse`、`IdcardUtil.isValidHKCard`/`isValidTWCard`。**69 块**进断言，一条一块；全仓 **1252 = 绿 1252 / 红 0**（wasm / js / wasm-gc 三档一致），G15 基线 207 → **198 行**（typex 41 → 32），`.mbti` 一字未动。
 
 **不可见码点夹具的形状**（这条是本轮唯一的新工装做法）：`ds_is_blank` 打的三档（`U+001C..1F`、`U+2007/FEFF/202A`、`U+0085`）不能把双向控制字符写进源文件。做法是腿里用 `Character.toChars(0x2007)` 现构、读数行打 `0xNN` 码点序列（`DP|31+2007+4b+42|…`），生成器 `cps_to_moonbit()` 按同一序列还原成 MoonBit 字面量（可打印 ASCII 原样、其余 `\u{...}`）。**人不手打一个字符，夹具也不依赖文件编码**。
+> 10-10 换代一条：`ds_is_blank` 已删，判据走 `@text.is_blank_char`（整仓一张表，见 `01-text.md` §1.14 与 `22-ini.md` §3-1）。删的原因是**它少抄了四位**——`U+0000`/`U+180E`/`U+2800`/`U+3164` 在参照的 `isBlankChar` 里都算空白，`scripts/BlankScanLeg.java` 对 `cleanBlank(c)` 逐位扫过：单字符清成空串的集合是 35 位，与 `isBlank`/`trim`/`encodeBlank` 完全同表。上面这三档读数本身没错（`1c..1f` 清、`0085` 不清都在新表里），少的是没被夹具覆盖的那四位。
 
 钉住的档与它对应的支路：
 

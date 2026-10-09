@@ -62,11 +62,16 @@
 
 ## 3. 语义（每条挂读数标签；读数由 §4 的腿灌入）
 
-1. **剥边用的空白码位表不是 `Character.isWhitespace`**：腿对**整个 BMP 逐位扫**（`trim(c+"x"+c)=="x"` 与
-   `isBlank(c)` 两档），命中集完全一致，共 34 位：
-   `00 09 0a 0b 0c 0d 1c 1d 1e 1f 20 a0 1680 180e 2000-200a 2028 2029 202a 202f 205f 2800 3000 3164 feff`。
-   比 Java 多出 `00`、`a0`、`180e`、`202a`、`2800`、`3164`、`feff`；`0085`（NEL）与 `200b-200f`（ZW 系列）**不在表内**。
-   两侧同表 ⇒ 本库只需一个 `is_blank_char`。BMP 外未扫（`Character.isWhitespace` 在 Unicode 里没有星平面真值），
+1. **剥边用的空白码位表不是 `Character.isWhitespace`**：腿对**整个 BMP 逐位扫**（`trim(c+"x"+c)=="x"`、
+   `isBlank(c)`，10-10 又补了 `cleanBlank`/`encodeBlank`/`isBlankChar` 三路 ⇒ 五个出口命中集完全一致），共 35 位：
+   `00 09 0a 0b 0c 0d 1c 1d 1e 1f 20 a0 1680 180e 2000-200a 200c 2028 2029 202a 202f 205f 2800 3000 3164 feff`。
+   比 Java 多出 `00`、`a0`、`180e`、`200c`、`202a`、`2800`、`3164`、`feff`；`0085`（NEL）与 `200b`/`200d-200f` **不在表内**。
+   ~~`200b-200f`（ZW 系列）不在表内~~ —— 本行旧写如此，是**照 5.8.35 的读数**：`200c` 是 hutool **5.8.37** 才加进
+   `CharUtil.isBlankChar` 的一位（javap 现读两版常量表，37 那代多一枚 `sipush 8204`；同一支腿分别跑两个 jar，
+   `isBlank("\u200c")` 在 35 给 false、在 37 给 true）。参照版本已统一成 5.8.37（`00-hutool-map.md` §7b），故本表含它。
+   五个出口同表 ⇒ 整仓只留**一张**表，位置在 `text.is_blank_char`（本包 10-10 前自带的第二份副本已删，
+   它正好少抄 `200c` 这一位）；`typex` 的第三份副本少抄 `00/180e/2800/3164` 四位，也一并删掉。
+   BMP 外未扫（`Character.isWhitespace` 在 Unicode 里没有星平面真值），
    实现按"码位 > 0xffff 一律非空白"处理，`i.emoji_key`/`i.emoji_value` 是这条的现读旁证（键 `\U0001f600k` 原样保留）。
    `i.form_feed`（`a=\f b` ⇒ 值 `b`）、`i.nbsp`（⇒ `b`）、`i.bom_line`（`\ufeffa=1` ⇒ 键 `a`）、
    `i.u2028_in_value`（`\u2028` 在**值中间**原样留着——它是剥边字符，不是行分隔符）、
@@ -136,7 +141,7 @@
 | 解析路 | `new SettingLoader(gm, UTF_8, isUseVariable)` + `setAssignFlag(c)` + `load(new ByteArrayInputStream(text.getBytes(UTF_8)))`——就是参照自己 `Setting.load` 的下游 |
 | 写侧路 | 反射取 `SettingLoader` 的 `private store(PrintWriter)`（`setAccessible`），`StringWriter` 收字节；`File`/`InputStream` 那批入口只在腿里出现，不在本库公开面 |
 | 摊平规则 | `Setting.create()` → 逐条 `putByGroup` → `toProperties()`，把 `Hashtable` 的键**排序后**对账：本库按"组顺序 × 键顺序"给出的扁平集，必须与腿的键集逐字相同 ⇒ 生成脚本内断言（82 个输入逐条核，`i.group_reopen` 给 `g.a/g.c/h.b`，空串组给裸键） |
-| 空白表 | `IniRef3` 对 BMP 全量扫（`0x0000-0xD7FF` + `0xE000-0xFFFF`），`trim(c+"x"+c)` 与 `isBlank(c)` 两档一致 ⇒ 34 位表 |
+| 空白表 | `BlankScanLeg`/`IniRef3` 对 BMP 全量扫（`0x0000-0xD7FF` + `0xE000-0xFFFF`），五个出口（`trim`/`isBlank`/`cleanBlank`/`encodeBlank`/`isBlankChar`）命中集一致 ⇒ 35 位表；**表体在 `text.is_blank_char`，本包不留副本** |
 | 夹具 | `gen_cases.py`/`gen_cases2.py`/`gen_cases3.py`/`gen_ops_final.py` 生成 `cases*.tsv`（文本 base64 承载，杜绝转义层歧义）+ `opsF.tsv`（113 步操作脚本），腿输出与 MoonBit 测试都由同一批 JSON 灌入 |
 | 读数 | 612 + 366 + 139（本轮补跑）+ BMP 扫描行；测试文件 14 块 634 条断言，逐条挂 `i.<夹具>.<档>` / `o.<脚本>.<步>.<档>` / `s.<探针>` / `w.<脚本>.<步>.store` |
 | 分隔符口径 | 参照的 `store` 走 `PrintWriter.println` ⇒ **平台量**，本机腿现读 `lineSep=\r\n`。本库钉死 `\n`：期望值由腿读数做"整串按 `\r\n` 切、用 `\n` 拼回"的变换（切分是机械的、非手打）。腿读数里出现 `\r\r\n`（值尾带 CR 紧贴分隔符）的夹具**不做对拍**，在测试里就地标注——本轮实际命中的是 `w.S15.store` 那一条（值 `x\ry` 后跟分隔符） |
@@ -186,10 +191,12 @@
 | M10 | 查不到的变量替换成空串 | 红 1 / 14 | `i.var_missing` 等"原样留着 `${...}`"档 |
 | M11 | `store` 对值里的换行做转义 | 红 1 / 14 | `w.S15.store`（值含 `\n` 就写出多行） |
 | M14 | 值一律写成空串（抹掉 null 档与真空串档的差别） | 红 11 / 14 | 覆盖面最广的一条，说明形状断言不是摆设 |
-| M12 | 空白码表去掉 `feff` | **未挂载** | `moon fmt` 把 17 项布尔式折成多行，按源码字面挂锚点失败。判据本身可达（`i.bom_line` 的键 `a` 就靠这条），留第二批连同 M13 一起补挂（改法是把码表数据化成数组再判） |
-| M13 | 空白码表加入 `0085` | **未挂载** | 同上锚点问题；另注：现有夹具只在**值中间**放过 `0085`（`i.u0085_in_value`），没在行/键/值的**边上**放过 ⇒ 即便挂上也仍是等价变异，要连夹具一起补 |
+| M12 | 空白码表去掉 `feff` | 红（**已挂载，位置换了**）| 表收到 `text.is_blank_char` 之后，`moon fmt` 折行导致的锚点问题自动消失：`text.is_blank #1.14` 那条逐位钉表里有 `'\u{FEFF}'`（本包 `i.bom_line` 的键 `a` 也跟着红） |
+| M13 | 空白码表加入 `0085` | 红（**已挂载，位置换了**）| 同上，`assert_false(@text.is_blank_char('\u{0085}'))` 直接可达；旧注里"夹具没在边上放过 0085"这句对本包仍成立，但判据不再依赖本包夹具 |
 
-等价变异一条（M1 首测）已用补夹具的方式转成可达判据；两条未挂载（M12/M13）如实记着，不写成"已覆盖"。
+等价变异一条（M1 首测）已用补夹具的方式转成可达判据；M12/M13 原记"未挂载"，10-10 空白表收敛到
+`text.is_blank_char` 之后两条都可达（读数与逐位钉表见 `01-text.md` §1.14），状态已就地改成"红"，
+不是把旧账当"已覆盖"——这条改判的依据是 `scripts/BlankScanLeg.java` 与新的断言位置，可复跑。
 
 ## 7. 状态
 
@@ -229,7 +236,7 @@ PR-B 对契约的**两处更正**都记在案：
    这一轮 4 条 `ERR` 读数全在这一族）⇒ 第二批必须决定这一档映射成 `raise` 还是丢行，
    **这是本格第一个可能的 raise 面**。
 7. **NBSP / 全角空格不当空白**：`nbsp_value`、`ideo_value` 的值里 `\u00a0`/`\u3000` **原样保留**——
-   与第一批（§3-1 的 34 位表会把它们剥掉）**逐字符相反**，两批不能共用同一个 trim。
+   与第一批（§3-1 的 35 位表会把它们剥掉）**逐字符相反**，两批不能共用同一个 trim。
 8. **`Properties` 是 `Hashtable`，顺序不可用**：腿的 `STORE` 输出顺序跨运行不稳定 ⇒ 第二批的键序只能是**本库自定**
    （候选是"首次出现顺序"，并在 §5 记明参照无序这一侧）；内容用排序后的 `PAIR` 集对账，
    顺序另用"逐行喂入求得的 `ORDER` 序列"作旁证。
@@ -272,7 +279,7 @@ PR-B 对契约的**两处更正**都记在案：
 | 5 | `\t`/`\n`/`\r`/`\f`/`\\` 各还原成真字符；**被转义的分隔符归进键名**（不再充当分隔符）；未知转义丢掉反斜杠 | `p.key_escaped_tab`（键 `a<TAB>b`）、`p.key_escaped_eq`、`p.key_escaped_colon`、`p.value_escaped_ff`、`p.value_double_bs`、`Q.16`（`\q` ⇒ `q`） |
 | 6 | `\uXXXX` 真解码，键位也解 | `p.value_unicode_esc`（值 `\u4e2d`）、`p.key_unicode_esc`（键 `Ab`）、`p.value_nul_esc`（值是真 NUL） |
 | 7 | BMP 外码位逐 UTF-16 码元往返 | `p.value_astral`（值 `\ud83d\ude00b`）、`p.o3` 的 `uni` 值 |
-| 8 | 空白表与第一批的 34 位表**不同**：`00a0`/`3000` 在这里不当事务空白 | `p.value_ideo_raw`（值两侧全角空格原样留）、`Q.*` 的 `nbsp` 档 |
+| 8 | 空白表与第一批的 35 位表**不同**：`00a0`/`3000` 在这里不当事务空白 | `p.value_ideo_raw`（值两侧全角空格原样留）、`Q.*` 的 `nbsp` 档 |
 | 9 | 键/值都允许空串；重复键后写覆盖值（顺序见 9.1 第 2 条） | `p.empty_key_colon`、`p.only_separators`、`p.dup_order` |
 | 10 | 行分隔符是 `\n`/`\r`/`\r\n` 三种，`U+2028`/`U+0085` 不算 | `p.crlf_input`、`p.lone_cr`、`p.cr_only_values` |
 | 11 | `set` 返回旧值、`remove` 返回被删值、`getProperty` 两档；**参照存不了 null 值**（`put(k,null)` ⇒ `NullPointerException`） | `o.O1.1`–`o.O1.10`、`o.O2.1`–`o.O2.7`、`ERR` 行 `o.O2.3` ⇒ 本库值类型收成非空 `String`，该档在类型层排除 |
@@ -315,7 +322,7 @@ PR-B 对契约的**两处更正**都记在案：
 | N6 | 畸形 `\u` 不抛（当字面留着） | 红 1 / 21 | 本包唯一的 raise 档确实被钉住 |
 | N7 | 裸键的空值被丢掉 | 红 1 / 21 | `p.bare_then_sep`（参照"裸键给空值"这一侧） |
 | N8 | `=` `:` `#` `!` 只在值侧转义 | 红 2 / 21 | 键侧转义与值侧转义两侧都有夹具 |
-| N9 | 行首空白改用第一批的 34 位表 | 红 1 / 21 | 两批的空白表确实不通用（`00a0`/`3000` 这一半不是空白） |
+| N9 | 行首空白改用第一批的 35 位表 | 红 1 / 21 | 两批的空白表确实不通用（`00a0`/`3000` 这一半不是空白） |
 | N11 | `\uXXXX` 解码后游标只走 2 格 | 红 1 / 21 | `p.value_unicode_esc` 一族 |
 | N10 | 续行不吃下一行行首空白 | **红 0（等价变异）** | 夹具缺口：第二批现有 36 个夹具里没有一个"续行后的下一行带前导空格"——第一批的 `Q.29`（`k=v\` + ` w` ⇒ 值 `vw`）在 props1 腿里跑过，但没做成 props2 夹具 ⇒ 该判据此刻**不可达**，与第一批 M1 同性质，留作补夹具项 |
 | N12 | `store` 行分隔符改回平台量 CRLF | **未挂载** | 锚点是生成的字符串字面量拼接处，脚本按字面挂不上；不写成"已覆盖" |

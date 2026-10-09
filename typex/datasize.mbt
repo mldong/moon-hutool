@@ -50,28 +50,10 @@ let ds_unit_names : Array[String] = ["B", "KB", "MB", "GB", "TB"]
 let ds_unit_bytes : Array[Int64] = [1L, DS_KB, DS_MB, DS_GB, DS_TB]
 
 ///|
-/// 参照 `StrUtil.cleanBlank` 走的 `CharUtil.isBlankChar`：`isWhitespace || isSpaceChar || U+FEFF || U+202A`。
-/// 与 MoonBit `Char.is_whitespace` 的差集是硬写出来的四处：参照**还清** `U+001C`–`U+001F`、`U+2007`、
-/// `U+FEFF`、`U+202A`，而**不清** `U+0085`（Java 的 `isWhitespace` 与 `isSpaceChar` 都不认它）。
-fn ds_is_blank(c : Char) -> Bool {
-  let x = c.to_int()
-  if x >= 0x1c && x <= 0x1f {
-    return true
-  }
-  if x == 0x2007 || x == 0xfeff || x == 0x202a {
-    return true
-  }
-  if x == 0x85 {
-    return false
-  }
-  c.is_whitespace()
-}
-
-///|
 fn ds_clean_blank(text : String) -> String {
   let out : Array[Char] = []
   for c in text.to_array() {
-    if !ds_is_blank(c) {
+    if !@text.is_blank_char(c) {
       out.push(c)
     }
   }

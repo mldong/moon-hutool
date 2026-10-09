@@ -117,18 +117,43 @@ test "text.upper_first #1.13 ASCII 档" {
   assert_eq(@text.upper_first(""), "")
 }
 
-// 门禁 G8 的实证腿：is_blank 的空白档建立在 core `Char::is_whitespace` 之上（并集，只可更宽）。
-// 这条断言把"core 判空白 ⇒ 本库必判空白"钉住：core 若在未来版本改了语义，这里先红，由我们决定跟不跟，
-// 而不是等用户在线上发现漂移。方向是单向的（本库可额外覆盖 hutool 独有码点），所以只断这个方向。
+// 门禁 G8 的实证腿：空白判据的权威**不是** core `Char::is_whitespace`，是参照那张实测码表
+// （`scripts/BlankScanLeg.java` 对 `isBlank`/`trim`/`cleanBlank`/`encodeBlank`/`isBlankChar`
+// 五个出口逐位对撞，命中集完全一致）。旧写法断的是单向包含"core 判空白 ⇒ 本库判空白"，
+// 这句话已被读数推翻两处：U+0085 core 判空白而参照不判（本库跟着参照判 false）、
+// U+001C–U+001F 参照判空白而 core 不判（本库跟着参照判 true）。
+// 所以这里改成**逐位钉表**：把两处差集各钉一位，再把整仓共用的那一条谓词钉在 `is_blank_char` 上
+// ——core 的语义若再变，本包不跟随，红在这里由我们读腿决定。
 
 ///|
-test "text.is_blank #1.2 对拍 core Char::is_whitespace（G8）" {
-  let marks : Array[Char] = [
-    ' ', '\t', '\n', '\u{00A0}', '\u{1680}', '\u{2000}', '\u{2028}', '\u{3000}',
-  ]
-  for c in marks {
-    assert_true(c.is_whitespace()) // core 侧读数先成立
-    let s : String = "\{c}"
-    assert_true(@text.is_blank(s)) // 子集关系：core 判空白处本库不许判假
+test "text.is_blank #1.14 空白码表逐位钉表（G8）" {
+  // core 判空白、参照不判 ⇒ 跟参照
+  assert_true('\u{0085}'.is_whitespace()) // core 这一位是 true；哪天变了就红在这里，去读腿
+  assert_false(@text.is_blank_char('\u{0085}'))
+  assert_false(@text.is_blank("\u{0085}"))
+  // 参照判空白、core 不判的四位 ⇒ 跟参照
+  for c in ['\u{001C}', '\u{001D}', '\u{001E}', '\u{001F}'] {
+    assert_false(c.is_whitespace()) // core 侧读数先成立（这一位 core 不算空白）
+    assert_true(@text.is_blank_char(c))
+    assert_true(@text.is_blank("\{c}"))
   }
+  // 参照独有、core 也认不到的两位（旧口径靠并集补的那批）
+  assert_true(@text.is_blank_char('\u{0000}'))
+  assert_true(@text.is_blank_char('\u{202A}'))
+  // 表里其余"参照独有"的位逐位钉死 —— ini 那批 M12/M13 两条变异原先因 `moon fmt` 折行挂不上锚点，
+  // 表收到这里之后由这几条断言直接可达（少一位、多一位都有块红）
+  for
+    c in [
+      '\u{00A0}', '\u{1680}', '\u{180E}', '\u{2007}', '\u{2028}', '\u{2029}', '\u{202F}',
+      '\u{205F}', '\u{2800}', '\u{3000}', '\u{3164}', '\u{FEFF}',
+    ] {
+    assert_true(@text.is_blank_char(c))
+  }
+  // 5.8.37 换代加进来的一位（同腿跑 5.8.35 的 jar 给 false —— 别照旧版本"改回去"）
+  assert_true(@text.is_blank_char('\u{200C}'))
+  // 双向对照：一位普通空格与一位非空白字符
+  assert_true(@text.is_blank_char(' '))
+  assert_false(@text.is_blank_char('a'))
+  // 星平面：参照按 UTF-16 码元走，代理码元不算空白 ⇒ 码位档一律 false
+  assert_false(@text.is_blank_char('😀'))
 }

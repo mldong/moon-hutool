@@ -29,16 +29,31 @@ pub fn is_empty(s : String) -> Bool {
 }
 
 ///|
-/// 空白字符判定：core 的 Unicode 白名单 ∪ hutool 独有的 7 个码点（spec 1.1 第 2 条）
-fn is_blank_char(c : Char) -> Bool {
-  c.is_whitespace() ||
-  c == '\u{0000}' ||
-  c == '\u{200C}' ||
-  c == '\u{180E}' ||
-  c == '\u{2800}' ||
-  c == '\u{3164}' ||
-  c == '\u{FEFF}' ||
-  c == '\u{202A}'
+/// 空白字符判定：hutool `CharUtil.isBlankChar` 的**实测码表**（整 BMP 逐位扫，35 位）。
+/// 公开的原因不是"给用户一个谓词"，是本仓只许有一张这样的表——`ini`（`is_blank_cp`）与
+/// `typex`（`ds_is_blank`）原先各抄一份，三份互不相同：本包多算了 U+0085、少算了 U+001C–U+001F，
+/// `typex` 少算了 U+0000/U+180E/U+2800/U+3164，`ini` 少算了 U+200C。腿（`scripts/BlankScanLeg.java`）
+/// 对五个出口（`isBlank`/`trim`/`cleanBlank`/`encodeBlank`/`isBlankChar`）逐位对撞，
+/// 命中集**完全一致** ⇒ 参照那边本来就是一条谓词，三份副本是移植时抄漏，不是刻意的分档。
+/// 与 core `Char::is_whitespace` 的四处差（U+0085 参照不算、U+001C–U+001F 参照算、
+/// U+200C 是 5.8.37 才加进 `isBlankChar` 的）一律**跟参照**，见 spec 1.1 第 3 行的更正。
+pub fn is_blank_char(c : Char) -> Bool {
+  let cp = c.to_int()
+  cp == 0 ||
+  (cp >= 9 && cp <= 13) ||
+  (cp >= 0x1c && cp <= 0x20) ||
+  cp == 0xa0 ||
+  cp == 0x1680 ||
+  cp == 0x180e ||
+  (cp >= 0x2000 && cp <= 0x200a) ||
+  cp == 0x200c ||
+  (cp >= 0x2028 && cp <= 0x202a) ||
+  cp == 0x202f ||
+  cp == 0x205f ||
+  cp == 0x2800 ||
+  cp == 0x3000 ||
+  cp == 0x3164 ||
+  cp == 0xfeff
 }
 
 ///|

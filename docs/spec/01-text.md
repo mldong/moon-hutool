@@ -12,7 +12,7 @@
 |---|---|---|
 | 入参类型 | 一律 `String`，不在每个函数上铺 `Option` | MoonBit 无 null。hutool `isBlank(null)=true` 由调用方边界 `unwrap_or("")` 等价达成；只有"缺失本身是业务语义"的两处保留 Option（1.4 `trim_opt`、1.10 `first_non_blank`） |
 | 返回类型 | 一律 `String`，**不把 `StringView` 作对外契约** | 编译器实证：`String` 字面量不隐式转 `StringView`，且 `String` **没有** `as_view` 方法 ⇒ 视图入参会让每个调用点手工转换 |
-| 空白判定 | core `Char::is_whitespace`（Unicode White_Space 子集）**并集** hutool 独有 7 码点 | core 侧已覆盖 U+0085/U+00A0/U+1680/U+2000–U+200A/U+2028/U+2029/U+202F/U+205F/U+3000；hutool 另算 **U+0000 U+200C U+180E U+2800 U+3164 U+FEFF U+202A** ⇒ U+0000 这条必须保留（多数实现会漏） |
+| 空白判定 | **一张实测码表**（35 位，`text.is_blank_char`，整仓共用），不再是"core 白名单 ∪ 独有码点" | `scripts/BlankScanLeg.java` 对整个 BMP 逐位扫参照的**五个出口**（`StrUtil.isBlank`/`StrUtil.trim`/`StrUtil.cleanBlank`/`URLUtil.encodeBlank`/`CharUtil.isBlankChar`），命中集**逐位相同** ⇒ 参照侧本来就是一条谓词。表：`00 09-0d 1c-20 a0 1680 180e 2000-200a 200c 2028-202a 202f 205f 2800 3000 3164 feff`。**本轮更正两处旧账**：① 旧口径写的"core 已覆盖 U+0085"——core 认 U+0085 而参照**不认**，照旧口径就多剥一位；② core 的 ASCII 档只到 `09-0d|20`，参照还算 `1c-1f`，旧口径**少剥四位**。另记一条换代读数：`200c` 是 hutool **5.8.37** 才加进 `isBlankChar` 的（同一支腿跑 5.8.35 的 jar 给 false；javap 现读两版常量表，37 多一枚 `sipush 8204`）⇒ 参照版本统一到这代之后本表才含它。`ini`/`typex` 原有两份副本（各自抄漏：ini 少 `200c`、typex 少 `00/180e/2800/3164`），已收敛到本包这一处 |
 | 转义限制 | `\u{...}` 只能写在 **char 字面量**，不能写进字符串 | 写进字符串会被切成插值 ⇒ `Lexing error: missing expression in string interpolation`（本机实测） |
 
 ## 1.2 `is_blank(s : String) -> Bool`
@@ -24,7 +24,7 @@
 | U+0000 / U+3000 单字符 | true | 见 1.1 第三行 |
 | `"a"` / `" a"` | false | 有一个非空白即假 |
 
-hutool 对位 `StrUtil.isBlank` ｜ 差异：不收 null ｜ 读数来源：hutool v5-master 实测（`CharUtil.isBlankChar` 码点清单）+ core `builtin/char.mbt:166` ｜ 血统：`CharSequenceUtil` 源自 Apache Commons Lang 3.5
+hutool 对位 `StrUtil.isBlank` ｜ 差异：不收 null ｜ 读数来源：`scripts/BlankScanLeg.java`（整 BMP 逐位扫参照五个出口，命中集逐位相同；表见 1.1 第 3 行）｜ 血统：`CharSequenceUtil` 源自 Apache Commons Lang 3.5
 
 ## 1.3 `is_empty(s : String) -> Bool`
 
@@ -121,6 +121,21 @@ hutool 对位 `NamingCase`（全仓唯一实现处，`StrUtil.*` 全是委托）
 `upper_first("hutool")` → `"Hutool"`；`upper_first("")` → `""`。
 **差异声明（重要）**：core `String::to_upper/to_lower` 文档原文只处理 `A–Z`/`a–z`，非 ASCII 字母原样返回 ⇒ 本库**不承诺 Unicode 大小写**（不假装 hutool/Java 的 `toUpperCase()`）。要 Unicode 档就等数据表件（hub 方案 `docs/ROADMAP.md` 的「暂不做」档），届时另开函数名而不是改这里的语义。
 
-## 1.14 本包不承诺清单
+## 1.14 `is_blank_char(c : Char) -> Bool`（hutool `CharUtil.isBlankChar`）
+
+公开的用途是**让整仓共用一张表**，不是给调用方一个泛用谓词：`ini` 的剥边、`typex` 的 `clean_blank`、
+本包的 `is_blank`/`trim`/`trim_opt`/`first_non_blank` 与 1.16 的 `encode_blank` 全走这一处。
+表体与两处旧账更正（U+0085 参照不算、U+001C–U+001F 参照算）在 1.1 第 3 行，逐位读数在 `scripts/BlankScanLeg.java`。
+
+| 输入 | 期望 | 要点 |
+|---|---|---|
+| `' '` / `'\t'` / `'\u{0000}'` / `'\u{202A}'` / `'\u{200C}'` | true | 后三位都是参照自己表的出口，core 的白名单里没有（`0000`/`202a` 靠并集补，`200c` 是 5.8.37 换代加的） |
+| `'\u{001C}'`..`'\u{001F}'` | true | core `Char::is_whitespace` 判 false —— 旧口径就是在这里少剥四位 |
+| `'\u{0085}'`（NEL） | **false** | core 判 true，参照判 false ⇒ 跟参照，不跟 core |
+| `'a'` / `'\u{00a0}'`… 见 1.1 表 | 按 1.1 第 3 行那张表逐位判 | 星平面（码位 > `0xffff`）一律 false：参照按 UTF-16 码元走，代理码元不属于任何空白类 |
+
+hutool 对位 `CharUtil.isBlankChar` ｜ 差异：入参是 `Char`（码位），参照是 `char`（码元）；非 BMP 在参照里落成两个代理码元、各自判非空白，本库直接给一个 `false`，同判 ｜ 读数来源：`scripts/BlankScanLeg.java`（五个出口逐位对撞，差异清单为空）。
+
+## 1.15 本包不承诺清单
 
 `pad_start/pad_end/repeat/has_prefix/contains/replace/split_once/to_upper(ASCII)/trim_space` 等 **core 已有同义能力，本包一律不转发**（边界规则见 `AGENTS.md`「与 core 的边界」）。需要时在调用点直接用 `@string` / `String::*`。判据与理由见 `AGENTS.md`；对拍腿（门禁 G8）只适用于"包了语义层"的格子，这里没有格子可拍。

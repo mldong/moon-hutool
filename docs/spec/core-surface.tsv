@@ -122,7 +122,7 @@ CharMatcherFinder	cn.hutool.core.text.finder.CharMatcherFinder	gap	查找器族�
 CharPool	cn.hutool.core.text.CharPool	excluded	Java 常量类（规避字面量重复用），MoonBit 直接写字面量 ⇒ 无对位面
 CharSequenceResource	cn.hutool.core.io.resource.CharSequenceResource	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
 CharSequenceUtil	cn.hutool.core.text.CharSequenceUtil	done	text 首批
-CharUtil	cn.hutool.core.util.CharUtil	core	Char 谓词（Unicode 档在 deferred）
+CharUtil	cn.hutool.core.util.CharUtil	done	text.is_blank_char 对位 CharUtil.isBlankChar（scripts/BlankScanLeg.java 逐位扫出 35 位实测码表，整仓唯一一张）；其余 ASCII 档 Char 谓词走 core
 CharacterConverter	cn.hutool.core.convert.impl.CharacterConverter	done	conv.to_char
 CharsetConverter	cn.hutool.core.convert.impl.CharsetConverter	deferred	非 UTF 字符集名表在 ROADMAP 暂不做档（同 CharsetUtil 判例）
 CharsetDetector	cn.hutool.core.io.CharsetDetector	deferred	同上

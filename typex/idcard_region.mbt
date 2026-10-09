@@ -284,7 +284,7 @@ pub fn idcard_is_valid_card(id : String, this_year : Int) -> Bool {
   let cs = id.to_array()
   let mut blank = true
   for c in cs.iter() {
-    if !ds_is_blank(c) {
+    if !@text.is_blank_char(c) {
       blank = false
     }
   }

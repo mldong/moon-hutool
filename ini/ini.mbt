@@ -8,7 +8,7 @@
 // 腿用 `hutool-setting-5.8.35.jar`，运行期还要 `hutool-log-5.8.35.jar`（`SettingLoader` 的静态 `Log` 是类初始化依赖）。
 // 契约真相在 `docs/spec/22-ini.md`。
 //
-// 一句话口径：整行先按实测的 34 位空白码表剥边（比 `Character.isWhitespace` 宽，见 `is_blank_cp`）；
+// 一句话口径：整行先按实测的 35 位空白码表剥边（比 `Character.isWhitespace` 宽，表在 `@text.is_blank_char`，整仓一张）；
 // 剥完为空或以 `#` 起头的行跳过（`;` 不是注释符）；剥完后整行被 `[` `]` 包住才算分组行，分组名再剥一次边，
 // 分组行本身不进数据、组在首次写入时才出现；其余行按 `assign_flag`（默认 `=`）只切第一刀，
 // 切不开就整行丢弃（与 `java.util.Properties` "裸键当空值"正相反）；键与值各自再剥边（两侧都可为空串，
@@ -46,40 +46,16 @@ pub(all) struct IniParseOpts {
 }
 
 ///|
-// 实测空白码表（腿对整个 BMP 逐位扫 `trim(c+"x"+c)` 与 `isBlank(c)`，两档命中集完全一致，共 34 位）。
-// 比 Java `Character.isWhitespace` 多 00/00a0/180e/202a/2800/3164/feff，而 0085 与 200b-200f 不在表内。
-// 星平面未扫（Unicode 的空白字符全在 BMP）⇒ 码位 > 0xffff 一律判非空白。
-fn is_blank_cp(cp : Int) -> Bool {
-  cp == 0 ||
-  (cp >= 9 && cp <= 13) ||
-  (cp >= 0x1c && cp <= 0x1f) ||
-  cp == 0x20 ||
-  cp == 0xa0 ||
-  cp == 0x1680 ||
-  cp == 0x180e ||
-  (cp >= 0x2000 && cp <= 0x200a) ||
-  cp == 0x2028 ||
-  cp == 0x2029 ||
-  cp == 0x202a ||
-  cp == 0x202f ||
-  cp == 0x205f ||
-  cp == 0x2800 ||
-  cp == 0x3000 ||
-  cp == 0x3164 ||
-  cp == 0xfeff
-}
-
-///|
 // 参照 `StrUtil.trim`：按上表剥首尾，整串空白给空串（参照给 `EMPTY_STR`，不是 null）
 fn hb_trim(s : String) -> String {
   let cs = s.to_array()
   let n = cs.length()
   let mut lo = 0
   let mut hi = n
-  while lo < hi && is_blank_cp(cs[lo].to_int()) {
+  while lo < hi && @text.is_blank_char(cs[lo]) {
     lo += 1
   }
-  while hi > lo && is_blank_cp(cs[hi - 1].to_int()) {
+  while hi > lo && @text.is_blank_char(cs[hi - 1]) {
     hi -= 1
   }
   if lo == 0 && hi == n {
@@ -97,7 +73,7 @@ fn hb_is_blank(s : String) -> Bool {
   let mut i = 0
   let mut blank = true
   while i < n {
-    if !is_blank_cp(cs[i].to_int()) {
+    if !@text.is_blank_char(cs[i]) {
       blank = false
       i = n
     } else {
@@ -763,7 +739,7 @@ pub fn ini_store_with_opts(gm : GroupedMap, opts : IniParseOpts) -> String {
 // `load0` / `LineReader.readLine` / `loadConvert` / `saveConvert` 四段原文已就地读出照抄语义）。
 // 与第一批的 INI 面**同名不同语义**：分隔符是 `=`/`:`/空格三档、裸键给空值、注释符 `#` 与 `!` 两个、
 // 反斜杠参与语法（续行 + `\t\n\f\r\\` + `\uXXXX`）、"空白"只认 `' '`/`'\t'`/`'\f'` 三个
-// （`00a0`/`3000` 在这里原样保留，与 §3-1 的 34 位表逐字符相反）。
+// （`00a0`/`3000` 在这里原样保留，与 §3-1 的 35 位表（在 `@text.is_blank_char`）逐字符相反）。
 
 ///|
 /// #22.26 解析错误面。参照唯一实测可复现的失败：畸形的 `\uXXXX`（长度不足或含非十六进制字符）⇒
@@ -783,7 +759,7 @@ pub struct Props {
 }
 
 ///|
-// `LineReader` 认的三个空白（不是 `Character.isWhitespace`，也不是第一批的 34 位表）
+// `LineReader` 认的三个空白（不是 `Character.isWhitespace`，也不是第一批的 35 位表（在 `@text.is_blank_char`））
 fn is_ws3(cp : Int) -> Bool {
   cp == 0x20 || cp == 0x09 || cp == 0x0c
 }

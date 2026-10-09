@@ -12,6 +12,8 @@ pub fn hide(String, Int, Int, Char) -> String
 
 pub fn is_blank(String) -> Bool
 
+pub fn is_blank_char(Char) -> Bool
+
 pub fn is_empty(String) -> Bool
 
 pub fn join(Array[String], String) -> String

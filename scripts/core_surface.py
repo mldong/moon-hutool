@@ -153,7 +153,7 @@ OVERRIDES = {
     "CollStreamUtil": ("core", "Iter 组合"),
     "StrBuilder": ("core", "StringBuf/StringBuilder"),
     "StrJoiner": ("core", "Array.join"),
-    "CharUtil": ("core", "Char 谓词（Unicode 档在 deferred）"),
+    "CharUtil": ("done", "text.is_blank_char 对位 CharUtil.isBlankChar（scripts/BlankScanLeg.java 逐位扫出 35 位实测码表，整仓唯一一张）；其余 ASCII 档 Char 谓词走 core"),
     "BooleanUtil": ("core", "conv.to_bool 已承接文本档"),
     "ObjectUtil": ("gap", "null-safe 族在 MoonBit 是 Option 惯用法，但 default_if_null/is_all_null 这类没人登记——待拍"),
     "HexUtil": ("core", "encoding/hex；hexToInt 与颜色档另判"),
