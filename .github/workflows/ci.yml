@@ -84,15 +84,17 @@ jobs:
       - name: moon check --target ${{ matrix.target }}
         run: moon check --target ${{ matrix.target }}
 
-      - name: 收集用例数（不要求通过，骨架期实现是 abort）
+      - name: 逐档全绿 + 用例数地板（骨架期那条例外的三条判据见正文）
         env:
           TARGET: ${{ matrix.target }}
           # 地板 1519＝四档里最低那一档（wasm-gc）的现读条数（10-09 本机 `moon test --target wasm-gc`
           # = 1519，且 sched 的 12 条 async 用例在该档根本不收集——该包 supported_targets 摘掉了 wasm-gc，
           # 见 docs/spec/24-sched.md §1；wasm/js 两档本机都是 1531）。钉在等值上 ⇒ 掉一条就红。
           # 旧写在这里的 `-ge 20` 对一个 1500+ 条用例的仓是空转格：整包用例被删掉它都不会红。
-          # 负向对照（本机把这段正文原样抽出来跑）：FLOOR=1519 ⇒ exit 0 并打 collected=1519 passed:1519；
-          # FLOOR=1520 ⇒ exit 1。
+          # 三段判据（本机把这段正文原样抽出来跑，10-09 实测）：
+          #   FLOOR=1519 真跑 wasm-gc ⇒ exit 0 并打 collected=1519 failed=0；
+          #   FLOOR=1520 ⇒ exit 1（"收集用例数不足"）；
+          #   喂一份真有 2 红的样本 ⇒ exit 1（::error:: + 两条 文件:行 与 label 全打出来）。
           FLOOR: "1519"
         run: |
           out=$(moon test --target "$TARGET" 2>&1 || true)
@@ -103,17 +105,17 @@ jobs:
           total=$(printf '%s' "$summ" | grep -oE 'Total tests: [0-9]+' | grep -oE '[0-9]+')
           failed=$(printf '%s' "$summ" | grep -oE 'failed: [0-9]+' | grep -oE '[0-9]+')
           echo "target=$TARGET collected=${total:-0} failed=${failed:-无汇总行}"
-          # 这一步的**断言**是"用例收没收到"，不是"过没过"，所以有红它本来会一声不响地绿过去
-          # （10-09 实测就是这个形状：native 档 collected=1531 passed=1530 failed=1，job 仍 success）。
-          # 现在把红点名打出来并挂 ::warning::——先解决"看不见"；要不要升级成硬检查，
-          # 等这条红的根因读到位再定（native 的 Int 是 64 位而 wasm/js 是 32 位，两族都可能）。
-          if [ "${failed:-0}" != "0" ] && [ -n "$summ" ]; then
-            echo "::warning::$TARGET 档有 $failed 条红用例（本步骤不断言通过，故不判红——升级成硬检查前先读这条 warning 的根因）"
+          # 10-09 之前这一步**只数收集数、不断通过**，于是 native 档那条
+          # `collected=1531 passed=1530 failed=1` 一路绿了好几轮（根因与收法见 docs/spec/23-typex.md §17.10）。
+          # 现在红即 exit 1，并把红逐条点名——失败行自带 文件:行 与 label，够定位。
+          if [ -n "$summ" ] && [ "${failed:-0}" != "0" ]; then
+            echo "::error::$TARGET 档有 $failed 条红用例"
             echo "::group::$TARGET 红用例点名（失败行 + 汇总行 + 末 30 行原文）"
             printf '%s\n' "$out" | grep -E ' failed: ' | head -30
             echo "$summ"
             printf '%s\n' "$out" | tail -30
             echo "::endgroup::"
+            exit 1
           fi
           if [ "${total:-0}" -ge "$FLOOR" ]; then exit 0; fi
           # native 档的骨架期例外，判据三条同时成立才豁免（缺一即 FAIL）：
@@ -122,7 +124,8 @@ jobs:
           #   ③ wasm 档当场确有红用例（红来自骨架，不是这台机器坏了）。
           # 全部转绿后 ③ 不成立 ⇒ 这条自动变回硬检查，不会留成永真死格。
           wasm=$(moon test --target wasm 2>&1 || true)
-          red=$(printf '%s\n' "$wasm" | grep -oE 'failed: [0-9]+' | head -1 | grep -oE '[0-9]+')
+          wsumm=$(printf '%s\n' "$wasm" | grep -E '^Total tests: ' | tail -1)
+          red=$(printf '%s' "$wsumm" | grep -oE 'failed: [0-9]+' | head -1 | grep -oE '[0-9]+')
           if [ "$TARGET" = "native" ] && printf '%s\n' "$out" | grep -q "SIGABRT" \
              && [ "${red:-0}" -gt 0 ]; then
             echo "::notice::SKIP native 用例计数：骨架期 $red 条红用例在 native 档以 SIGABRT 终止测试进程（该档驱动不兜 panic，wasm/js 档兜）。实现转绿后这条自动恢复成硬检查。"
