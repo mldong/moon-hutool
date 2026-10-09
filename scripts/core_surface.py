@@ -201,6 +201,35 @@ OVERRIDES = {
     "KetamaHash": ("deferred", "hash 第二批排期"),
     "Number128": ("deferred", "128 位族要先定返回形状"),
     "Hashids": ("deferred", "可逆编码，归属另判（见 00-hutool-map）"),
+    # —— 10-10 消化第四批：io.checksum.crc16 11 + lang.hash 4 + codec 11 共 26 类逐条指认
+    # （CRC16 十变体指到 hash.Crc16Variant 的枚举档——17-hash §51 明写它“对位十个 CRC16* 类”，
+    #  这是结构层差异不是语义差异：本库不建十个同名件，参数化状态机逐变体给读数）
+    "BCD": ("excluded", "ROADMAP codec 行已判不做：上游 @Deprecated 且语义即 core hex（digest/hash 的 hex 出口在）"),
+    "Base16Codec": ("done", "codec.radix_encode/radix_decode 的 16 进档（hex 出口另见 digest 的 *_hex 族）"),
+    "Base32Codec": ("done", "codec.b32_encode / b32_decode"),
+    "Base58Codec": ("done", "codec.b58_encode / b58_decode + b58_check_encode / b58_check_decode（Check 档）"),
+    "Base62Codec": ("done", "codec.b62_encode / b62_decode"),
+    "CRC16Ansi": ("done", "hash.Crc16Variant 的一档 + new_crc16(variant)/crc16_update*/crc16_value/crc16_hex_value（17-hash §51 明写“对位十个 CRC16* 类”，本库用枚举+状态机承接，不建十个同名件）"),
+    "CRC16CCITT": ("done", "hash.Crc16Variant 的一档 + new_crc16(variant)/crc16_update*/crc16_value/crc16_hex_value（17-hash §51 明写“对位十个 CRC16* 类”，本库用枚举+状态机承接，不建十个同名件）"),
+    "CRC16CCITTFalse": ("done", "hash.Crc16Variant 的一档 + new_crc16(variant)/crc16_update*/crc16_value/crc16_hex_value（17-hash §51 明写“对位十个 CRC16* 类”，本库用枚举+状态机承接，不建十个同名件）"),
+    "CRC16Checksum": ("excluded", "hutool 的抽象基类；本库是 Crc16 struct + variant 枚举，无基类对位面"),
+    "CRC16DNP": ("done", "hash.Crc16Variant 的一档 + new_crc16(variant)/crc16_update*/crc16_value/crc16_hex_value（17-hash §51 明写“对位十个 CRC16* 类”，本库用枚举+状态机承接，不建十个同名件）"),
+    "CRC16IBM": ("done", "hash.Crc16Variant 的一档 + new_crc16(variant)/crc16_update*/crc16_value/crc16_hex_value（17-hash §51 明写“对位十个 CRC16* 类”，本库用枚举+状态机承接，不建十个同名件）"),
+    "CRC16Maxim": ("done", "hash.Crc16Variant 的一档 + new_crc16(variant)/crc16_update*/crc16_value/crc16_hex_value（17-hash §51 明写“对位十个 CRC16* 类”，本库用枚举+状态机承接，不建十个同名件）"),
+    "CRC16Modbus": ("done", "hash.Crc16Variant 的一档 + new_crc16(variant)/crc16_update*/crc16_value/crc16_hex_value（17-hash §51 明写“对位十个 CRC16* 类”，本库用枚举+状态机承接，不建十个同名件）"),
+    "CRC16USB": ("done", "hash.Crc16Variant 的一档 + new_crc16(variant)/crc16_update*/crc16_value/crc16_hex_value（17-hash §51 明写“对位十个 CRC16* 类”，本库用枚举+状态机承接，不建十个同名件）"),
+    "CRC16X25": ("done", "hash.Crc16Variant 的一档 + new_crc16(variant)/crc16_update*/crc16_value/crc16_hex_value（17-hash §51 明写“对位十个 CRC16* 类”，本库用枚举+状态机承接，不建十个同名件）"),
+    "CRC16XModem": ("done", "hash.Crc16Variant 的一档 + new_crc16(variant)/crc16_update*/crc16_value/crc16_hex_value（17-hash §51 明写“对位十个 CRC16* 类”，本库用枚举+状态机承接，不建十个同名件）"),
+    "Caesar": ("gap", "凯撒移位：纯算法、够得着，既没做也没登记 ⇒ 待拍"),
+    "Decoder": ("excluded", "hutool 内部接口件（Codec 的解码半），非能力面"),
+    "Encoder": ("excluded", "同上（编码半）"),
+    "Hash": ("excluded", "hutool 哈希结果抽象基类（byte[]/hex 双出口），本库各哈希件直接返回 Int/Int64 数值"),
+    "Hash128": ("deferred", "128 位族（city/metro/murmur128）要先定 Number128 的返回形状——17-hash §6 已记为排期，不顺手做"),
+    "Hash32": ("excluded", "同上：32 位结果包装类，本库出口是 Int（溢出语义已在 08 §0.1 与 17 §5 钉）"),
+    "Hash64": ("excluded", "同上：64 位结果包装类，本库出口是 Int64"),
+    "Morse": ("gap", "摩尔斯码：要做必须先按「码表独立成数据件」定落点，现在既没做也没登记 ⇒ 待拍"),
+    "PunyCode": ("deferred", "IDN/Punycode 已在 codec 行记「另批」（00-map §5 与 05-codec 的 IDN 那格），不混进本批"),
+    "Rot": ("gap", "ROT13 族：同 Caesar，够得着却没人登记 ⇒ 待拍"),
     # —— 10-10 消化第三批：date 族（date 14 + date.chinese 2 + date.format 9）全 25 类逐条指认
     # 口径与前两批一致：done 必须点名 date/pkg.generated.mbti 现读到的件（该文件 73 个名字，
     # 含 offset_*/begin_of_*/end_of_*/zone_*/clock_*——注意抽取要带方法形式，

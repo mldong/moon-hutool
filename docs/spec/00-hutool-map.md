@@ -97,12 +97,12 @@
 
 | 档 | 含义 | 现读类数（hutool-all **5.8.37**，632 个顶层类，固化在 `docs/spec/hutool-classes.tsv`） |
 |---|---|---|
-| `done` | **逐条登记过**对位件（`OVERRIDES` 里点名哪个包哪件承接） | 109 |
-| `unattested` | 包级规则**整片声称已做但没逐条指回实现件**（10-09 紧闸新增档，棘轮只许降） | 70 |
-| `excluded` | 结构上不属于本库：反射/动态代理/宿主 IO/网络/线程/AWT/JVM 内部机制 | 326 |
+| `done` | **逐条登记过**对位件（`OVERRIDES` 里点名哪个包哪件承接） | 123 |
+| `unattested` | 包级规则**整片声称已做但没逐条指回实现件**（10-09 紧闸新增档，棘轮只许降） | 44 |
+| `excluded` | 结构上不属于本库：反射/动态代理/宿主 IO/网络/线程/AWT/JVM 内部机制 | 333 |
 | `core` | MoonBit core 已有同义能力，本库按规则不写转发层 | 52 |
-| `deferred` | 已登记在 [`docs/ROADMAP.md`](https://github.com/mldong/moon-hutool/blob/master/docs/ROADMAP.md) 的「暂不做」档 | 24 |
-| `gap` | **够得着、既没做也没登记** ⇒ 这一档就是要拍板的清单 | 51 |
+| `deferred` | 已登记在 [`docs/ROADMAP.md`](https://github.com/mldong/moon-hutool/blob/master/docs/ROADMAP.md) 的「暂不做」档 | 26 |
+| `gap` | **够得着、既没做也没登记** ⇒ 这一档就是要拍板的清单 | 54 |
 
 
 > 这六个数**不是手抄**：`scripts/core_surface.py --check` 会解析本表并与归类表现算的条数逐档比对，任一处对不上或表形状变了（读不到六个档）直接判红（10-10 从临时比对脚本升级成判据，两侧对照进自检⑤：等值镜像必须为空、某一档多 1 条必须被抓到）。
@@ -134,7 +134,9 @@
 
 **第三批已落（10-10，date 族 25 类：`date` 14 + `date.format` 9 + `date.chinese` 2）**：`unattested` 95 → **70**，构成 12 done + 4 excluded + 2 deferred + 7 gap = 25，与档位增量逐条对得上（`done` +12、`excluded` +4、`deferred` +2、`gap` +7、`core` 不变）。done 全部点名 `date/pkg.generated.mbti` 现读到的件（`offset_*`、`begin_of_*`/`end_of_*`、`zone_names`/`zone_offset_minutes`/`zone_offsets_at_wall`、`parse*`/`format*`/`to_rfc3339*`、`clock_system`/`clock_fixed`、`week_of_year`/`is_weekend` 等）；两条 deferred 是 `ChineseMonth`/`LunarFestival`（农历码表在暂不做档）；7 条 gap 都写明缺什么：`BetweenFormatter`（时长差格式化串）、`DateRange`（区间逐日迭代）、`GlobalCustomFormat`（全局格式表——要做必须走 `set_default_zone` 那条显式可覆盖口径）、`GroupTimeInterval`/`TimeInterval`/`StopWatch`（有状态计时件，与本库“时钟显式注入 + G18 只放行一处裸读”冲突）、`Month`（12 月枚举本体要不要单建）。**这一批还纠了我自己一个抽取错**：第一版只 grep `pub fn ` 会漏掉 `pub fn Date::xxx` 这种方法形式，差点把 `offset_*`/`begin_of_*` 判成“没有该件”；改成按 73 个名字重抽才敢写 done。
 
-**消化计划（剩余 70 条，现读前缀分布）**：④ `io.checksum.crc16` 11 + `lang.hash` 4（hash 包已交付，好指认）+ `codec` 11；⑤ `text` 片 15（`text` 7 + `text.finder` 7 + `text.split` 1）+ `text.csv` 7；⑥ 散片 `exceptions` 6 + `convert` 6 + `builder` 6 + `math` 2 + `lang.id` 2。每批单独一笔，`--write` 顺带降棘轮基线（只许降，抬高即红；文档六个数由对账判据钉）。已完：第一批 `convert.impl` 35、第二批 66、第三批 25。
+**第四批已落（10-10，`io.checksum.crc16` 11 + `lang.hash` 4 + `codec` 11 共 26 类）**：`unattested` 70 → **44**，构成 14 done + 7 excluded + 3 gap + 2 deferred = 26，与档位增量逐条对得上。CRC16 那十个变体类统一指到 `hash.Crc16Variant` 的枚举档（`17-hash` §51 自己写着“对位十个 `CRC16*` 类”，本库是参数化状态机 + 枚举，不建十个同名件——**结构层差异、不是语义差异**，逐变体的初值/多项式读数在 §5 两侧都钉过）；`CRC16Checksum` 与 `Hash`/`Hash32`/`Hash64` 是 hutool 的基类与结果包装类，本库出口直接是数值 ⇒ excluded；`Hash128` 归 deferred（128 位族要先定 `Number128` 形状，17-hash §6 已记排期）；四个 `Base*Codec` 指到 `codec.b32_*`/`b58_*`/`b58_check_*`/`b62_*`/`radix_*`；`BCD` 沿用 codec 行的“不做”判定，`Decoder`/`Encoder` 是内部接口件；`Caesar`/`Rot`/`Morse` 落 gap（纯算法够得着却没登记，Morse 还要先拍码表落点）；`PunyCode` 归 deferred（IDN 在 codec 行已记“另批”）。
+
+**消化计划（剩余 44 条，现读前缀分布）**：⑤ `text` 片 22（`text` 7 + `text.finder` 7 + `text.csv` 7 + `text.split` 1）；⑥ 散片 22（`exceptions` 6 + `convert` 6 + `builder` 6 + `math` 2 + `lang.id` 2）。每批单独一笔，`--write` 顺带降棘轮基线（只许降，抬高即红；文档六个数由对账判据钉）。已完：第一批 `convert.impl` 35、第二批 66、第三批 25、第四批 26（累计指认 152 类）。
 
 - 取法：`python scripts/core_surface.py --write` 生成 `docs/spec/core-surface.tsv`（类名｜全限定名｜档｜一句话理由）；`--check` 既查漏档也查"表与 jar 类面漂移"；判状态只认 jar，不依赖 `javap`。
 - 版本口径：census 用 **hutool-all 5.8.37**，且这版类面已固化成仓内生成物 `docs/spec/hutool-classes.tsv`（头两行记 `version` 与 `sha256`）；日常判据离线跑，不再联网取 jar。`scripts/core_surface.py` 的常量 `REF_VERSION` 与清单头不一致就判红——这条是 10-09 补的：当时有人拿 5.8.35 去核对 5.8.37 的表，造出一条"表里有 jar 里没有"的假红（一份件覆盖全部 artifact，`$HUTOOL_JAR` 指它），而各包参照腿多数是 5.8.35——**类面是普查、读数腿是逐包**，两件事不同源，换版本时 `--check` 的漂移格会先报出来。

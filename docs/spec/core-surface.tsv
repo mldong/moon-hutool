@@ -48,16 +48,16 @@ AtomicLoader	cn.hutool.core.lang.loader.AtomicLoader	excluded	反射派生/JVM �
 AtomicLongArrayConverter	cn.hutool.core.convert.impl.AtomicLongArrayConverter	excluded	同上
 AtomicReferenceConverter	cn.hutool.core.convert.impl.AtomicReferenceConverter	excluded	同上
 AvgPartition	cn.hutool.core.collection.AvgPartition	done	coll.partition + coll.page_count 的平均分段档
-BCD	cn.hutool.core.codec.BCD	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
+BCD	cn.hutool.core.codec.BCD	excluded	ROADMAP codec 行已判不做：上游 @Deprecated 且语义即 core hex（digest/hash 的 hex 出口在）
 BOMInputStream	cn.hutool.core.io.BOMInputStream	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
 BackgroundRemoval	cn.hutool.core.img.BackgroundRemoval	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
-Base16Codec	cn.hutool.core.codec.Base16Codec	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
+Base16Codec	cn.hutool.core.codec.Base16Codec	done	codec.radix_encode/radix_decode 的 16 进档（hex 出口另见 digest 的 *_hex 族）
 Base32	cn.hutool.core.codec.Base32	done	codec
-Base32Codec	cn.hutool.core.codec.Base32Codec	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
+Base32Codec	cn.hutool.core.codec.Base32Codec	done	codec.b32_encode / b32_decode
 Base58	cn.hutool.core.codec.Base58	done	codec
-Base58Codec	cn.hutool.core.codec.Base58Codec	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
+Base58Codec	cn.hutool.core.codec.Base58Codec	done	codec.b58_encode / b58_decode + b58_check_encode / b58_check_decode（Check 档）
 Base62	cn.hutool.core.codec.Base62	done	codec
-Base62Codec	cn.hutool.core.codec.Base62Codec	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
+Base62Codec	cn.hutool.core.codec.Base62Codec	done	codec.b62_encode / b62_decode
 Base64	cn.hutool.core.codec.Base64	done	codec
 Base64Decoder	cn.hutool.core.codec.Base64Decoder	done	codec
 Base64Encoder	cn.hutool.core.codec.Base64Encoder	done	codec
@@ -88,21 +88,21 @@ Builder	cn.hutool.core.builder.Builder	unattested	text/conv/codec/coll/mapx/hash
 ByteUtil	cn.hutool.core.util.ByteUtil	deferred	字节序族挂在 conv 第二批（见 ROADMAP conv 行）
 BytesResource	cn.hutool.core.io.resource.BytesResource	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
 CRC16	cn.hutool.core.io.checksum.CRC16	done	hash
-CRC16Ansi	cn.hutool.core.io.checksum.crc16.CRC16Ansi	unattested	hash 包的 CRC8/CRC16 十变体对位 ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
-CRC16CCITT	cn.hutool.core.io.checksum.crc16.CRC16CCITT	unattested	hash 包的 CRC8/CRC16 十变体对位 ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
-CRC16CCITTFalse	cn.hutool.core.io.checksum.crc16.CRC16CCITTFalse	unattested	hash 包的 CRC8/CRC16 十变体对位 ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
-CRC16Checksum	cn.hutool.core.io.checksum.crc16.CRC16Checksum	unattested	hash 包的 CRC8/CRC16 十变体对位 ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
-CRC16DNP	cn.hutool.core.io.checksum.crc16.CRC16DNP	unattested	hash 包的 CRC8/CRC16 十变体对位 ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
-CRC16IBM	cn.hutool.core.io.checksum.crc16.CRC16IBM	unattested	hash 包的 CRC8/CRC16 十变体对位 ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
-CRC16Maxim	cn.hutool.core.io.checksum.crc16.CRC16Maxim	unattested	hash 包的 CRC8/CRC16 十变体对位 ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
-CRC16Modbus	cn.hutool.core.io.checksum.crc16.CRC16Modbus	unattested	hash 包的 CRC8/CRC16 十变体对位 ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
-CRC16USB	cn.hutool.core.io.checksum.crc16.CRC16USB	unattested	hash 包的 CRC8/CRC16 十变体对位 ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
-CRC16X25	cn.hutool.core.io.checksum.crc16.CRC16X25	unattested	hash 包的 CRC8/CRC16 十变体对位 ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
-CRC16XModem	cn.hutool.core.io.checksum.crc16.CRC16XModem	unattested	hash 包的 CRC8/CRC16 十变体对位 ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
+CRC16Ansi	cn.hutool.core.io.checksum.crc16.CRC16Ansi	done	hash.Crc16Variant 的一档 + new_crc16(variant)/crc16_update*/crc16_value/crc16_hex_value（17-hash §51 明写“对位十个 CRC16* 类”，本库用枚举+状态机承接，不建十个同名件）
+CRC16CCITT	cn.hutool.core.io.checksum.crc16.CRC16CCITT	done	hash.Crc16Variant 的一档 + new_crc16(variant)/crc16_update*/crc16_value/crc16_hex_value（17-hash §51 明写“对位十个 CRC16* 类”，本库用枚举+状态机承接，不建十个同名件）
+CRC16CCITTFalse	cn.hutool.core.io.checksum.crc16.CRC16CCITTFalse	done	hash.Crc16Variant 的一档 + new_crc16(variant)/crc16_update*/crc16_value/crc16_hex_value（17-hash §51 明写“对位十个 CRC16* 类”，本库用枚举+状态机承接，不建十个同名件）
+CRC16Checksum	cn.hutool.core.io.checksum.crc16.CRC16Checksum	excluded	hutool 的抽象基类；本库是 Crc16 struct + variant 枚举，无基类对位面
+CRC16DNP	cn.hutool.core.io.checksum.crc16.CRC16DNP	done	hash.Crc16Variant 的一档 + new_crc16(variant)/crc16_update*/crc16_value/crc16_hex_value（17-hash §51 明写“对位十个 CRC16* 类”，本库用枚举+状态机承接，不建十个同名件）
+CRC16IBM	cn.hutool.core.io.checksum.crc16.CRC16IBM	done	hash.Crc16Variant 的一档 + new_crc16(variant)/crc16_update*/crc16_value/crc16_hex_value（17-hash §51 明写“对位十个 CRC16* 类”，本库用枚举+状态机承接，不建十个同名件）
+CRC16Maxim	cn.hutool.core.io.checksum.crc16.CRC16Maxim	done	hash.Crc16Variant 的一档 + new_crc16(variant)/crc16_update*/crc16_value/crc16_hex_value（17-hash §51 明写“对位十个 CRC16* 类”，本库用枚举+状态机承接，不建十个同名件）
+CRC16Modbus	cn.hutool.core.io.checksum.crc16.CRC16Modbus	done	hash.Crc16Variant 的一档 + new_crc16(variant)/crc16_update*/crc16_value/crc16_hex_value（17-hash §51 明写“对位十个 CRC16* 类”，本库用枚举+状态机承接，不建十个同名件）
+CRC16USB	cn.hutool.core.io.checksum.crc16.CRC16USB	done	hash.Crc16Variant 的一档 + new_crc16(variant)/crc16_update*/crc16_value/crc16_hex_value（17-hash §51 明写“对位十个 CRC16* 类”，本库用枚举+状态机承接，不建十个同名件）
+CRC16X25	cn.hutool.core.io.checksum.crc16.CRC16X25	done	hash.Crc16Variant 的一档 + new_crc16(variant)/crc16_update*/crc16_value/crc16_hex_value（17-hash §51 明写“对位十个 CRC16* 类”，本库用枚举+状态机承接，不建十个同名件）
+CRC16XModem	cn.hutool.core.io.checksum.crc16.CRC16XModem	done	hash.Crc16Variant 的一档 + new_crc16(variant)/crc16_update*/crc16_value/crc16_hex_value（17-hash §51 明写“对位十个 CRC16* 类”，本库用枚举+状态机承接，不建十个同名件）
 CRC8	cn.hutool.core.io.checksum.CRC8	done	hash 非标准表构造照搬
 CacheableAnnotationAttribute	cn.hutool.core.annotation.CacheableAnnotationAttribute	excluded	无运行时反射/动态代理/内联编译器
 CacheableSynthesizedAnnotationAttributeProcessor	cn.hutool.core.annotation.CacheableSynthesizedAnnotationAttributeProcessor	excluded	无运行时反射/动态代理/内联编译器
-Caesar	cn.hutool.core.codec.Caesar	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
+Caesar	cn.hutool.core.codec.Caesar	gap	凯撒移位：纯算法、够得着，既没做也没登记 ⇒ 待拍
 Calculator	cn.hutool.core.math.Calculator	done	num 第四批 num_calculate
 CalendarConverter	cn.hutool.core.convert.impl.CalendarConverter	done	date 的 begin_of_* 周边界族（现读命中 9 处，Java Calendar 形状摊平成件）
 CalendarUtil	cn.hutool.core.date.CalendarUtil	done	date
@@ -205,7 +205,7 @@ DateRange	cn.hutool.core.date.DateRange	gap	区间逐日迭代那半没登记（
 DateTime	cn.hutool.core.date.DateTime	done	date.DateTime 型本体与 Date 互转（to_datetime / date_of）
 DateUnit	cn.hutool.core.date.DateUnit	done	date.TimeUnit
 DateUtil	cn.hutool.core.date.DateUtil	done	date 五批
-Decoder	cn.hutool.core.codec.Decoder	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
+Decoder	cn.hutool.core.codec.Decoder	excluded	hutool 内部接口件（Codec 的解码半），非能力面
 DefaultCloneable	cn.hutool.core.clone.DefaultCloneable	excluded	无运行时反射/动态代理/内联编译器
 DefaultNodeParser	cn.hutool.core.lang.tree.parser.DefaultNodeParser	gap	纯数据结构却既没做也没登记（本轮新发现的档）
 DefaultSegment	cn.hutool.core.lang.DefaultSegment	core	同上
@@ -225,7 +225,7 @@ DynaBeanValueProvider	cn.hutool.core.bean.copier.provider.DynaBeanValueProvider	
 Editor	cn.hutool.core.lang.Editor	core	Array 自带原地方法族
 ElementAnnotationScanner	cn.hutool.core.annotation.scanner.ElementAnnotationScanner	excluded	无运行时反射/动态代理/内联编译器
 EmptyAnnotationScanner	cn.hutool.core.annotation.scanner.EmptyAnnotationScanner	excluded	无运行时反射/动态代理/内联编译器
-Encoder	cn.hutool.core.codec.Encoder	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
+Encoder	cn.hutool.core.codec.Encoder	excluded	同上（编码半）
 EntryConverter	cn.hutool.core.convert.impl.EntryConverter	gap	Map 键值对档：本库无对位件；core 的 Map 是否给 items 视图本轮没核到（grep 姿势未命中），不硬指认 ⇒ 待拍
 EnumConverter	cn.hutool.core.convert.impl.EnumConverter	excluded	枚举 by-name 反射查表；本库枚举互转一律手写 match（见 rand/typex 各包）
 EnumItem	cn.hutool.core.lang.EnumItem	excluded	反射枚举项
@@ -288,10 +288,10 @@ GraphicsUtil	cn.hutool.core.img.GraphicsUtil	excluded	文件系统/网络/线程
 GroupTimeInterval	cn.hutool.core.date.GroupTimeInterval	gap	分组计时件未登记；本库计时一律显式传 now（G18 白名单只 date.now_millis 一处裸读）⇒ 待拍
 GroupedTypeGetter	cn.hutool.core.getter.GroupedTypeGetter	excluded	无运行时反射/动态代理/内联编译器
 Gzip	cn.hutool.core.compress.Gzip	deferred	DEFLATE/gzip/zip 在暂不做档
-Hash	cn.hutool.core.lang.hash.Hash	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
-Hash128	cn.hutool.core.lang.hash.Hash128	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
-Hash32	cn.hutool.core.lang.hash.Hash32	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
-Hash64	cn.hutool.core.lang.hash.Hash64	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
+Hash	cn.hutool.core.lang.hash.Hash	excluded	hutool 哈希结果抽象基类（byte[]/hex 双出口），本库各哈希件直接返回 Int/Int64 数值
+Hash128	cn.hutool.core.lang.hash.Hash128	deferred	128 位族（city/metro/murmur128）要先定 Number128 的返回形状——17-hash §6 已记为排期，不顺手做
+Hash32	cn.hutool.core.lang.hash.Hash32	excluded	同上：32 位结果包装类，本库出口是 Int（溢出语义已在 08 §0.1 与 17 §5 钉）
+Hash64	cn.hutool.core.lang.hash.Hash64	excluded	同上：64 位结果包装类，本库出口是 Int64
 HashCodeBuilder	cn.hutool.core.builder.HashCodeBuilder	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
 HashUtil	cn.hutool.core.util.HashUtil	done	hash
 Hashids	cn.hutool.core.codec.Hashids	deferred	可逆编码，归属另判（见 00-hutool-map）
@@ -381,7 +381,7 @@ MirroredAnnotationAttribute	cn.hutool.core.annotation.MirroredAnnotationAttribut
 ModifierUtil	cn.hutool.core.util.ModifierUtil	excluded	反射修饰位
 Money	cn.hutool.core.math.Money	done	num 薄 Money 分定宽
 Month	cn.hutool.core.date.Month	gap	12 月枚举本体（含首末日）没单建件；能力散在 begin_of_month/end_of_month/days_in_month/offset_month ⇒ 要不要建枚举待拍
-Morse	cn.hutool.core.codec.Morse	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
+Morse	cn.hutool.core.codec.Morse	gap	摩尔斯码：要做必须先按「码表独立成数据件」定落点，现在既没做也没登记 ⇒ 待拍
 MoveVisitor	cn.hutool.core.io.file.visitor.MoveVisitor	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
 MultiFileResource	cn.hutool.core.io.resource.MultiFileResource	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
 MultiResource	cn.hutool.core.io.resource.MultiResource	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
@@ -460,7 +460,7 @@ PropDesc	cn.hutool.core.bean.PropDesc	excluded	无运行时反射/动态代理/�
 PropIgnore	cn.hutool.core.annotation.PropIgnore	excluded	无运行时反射/动态代理/内联编译器
 PropertyComparator	cn.hutool.core.comparator.PropertyComparator	excluded	反射取属性值
 ProxySocketFactory	cn.hutool.core.net.ProxySocketFactory	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
-PunyCode	cn.hutool.core.codec.PunyCode	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
+PunyCode	cn.hutool.core.codec.PunyCode	deferred	IDN/Punycode 已在 codec 行记「另批」（00-map §5 与 05-codec 的 IDN 那格），不混进本批
 Quarter	cn.hutool.core.date.Quarter	core	date.Date::quarter 同档
 RFC3986	cn.hutool.core.net.RFC3986	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
 RadixUtil	cn.hutool.core.util.RadixUtil	done	codec
@@ -486,7 +486,7 @@ ResourceUtil	cn.hutool.core.io.resource.ResourceUtil	excluded	classpath 资源
 ReverseComparator	cn.hutool.core.comparator.ReverseComparator	core	比较结果取反一行
 RingIndexUtil	cn.hutool.core.collection.RingIndexUtil	gap	环形下标算式，够得着没人登记——待拍
 RobotUtil	cn.hutool.core.swing.RobotUtil	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
-Rot	cn.hutool.core.codec.Rot	unattested	text/conv/codec/coll/mapx/hash/id/typex 对位（逐条见 overrides） ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）
+Rot	cn.hutool.core.codec.Rot	gap	ROT13 族：同 Caesar，够得着却没人登记 ⇒ 待拍
 RowKeyTable	cn.hutool.core.map.multi.RowKeyTable	done	mapx.Table（行键 + 列键双索引就是 RowKeyTable 的形状）
 RuntimeUtil	cn.hutool.core.util.RuntimeUtil	excluded	起进程
 SSLContextBuilder	cn.hutool.core.net.SSLContextBuilder	excluded	文件系统/网络/线程/AWT 需宿主能力（URL 语法与 io.unit 另判）
