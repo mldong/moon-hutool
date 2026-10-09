@@ -108,7 +108,7 @@ PR-A 的合入标准：`moon check` 必须全绿（签名与类型自洽、文�
 | 2 | 上游 0.x 的破坏性变更 | `moonbitlang/async` 本机缓存里已有 0.20.2→0.22.4 六个版本 | 发版 SOP 里把 pin 同步做成固定步骤（同 jeeflow-moon 那条接力 pin 教训） |
 | 3 | 四条没逐条绑定门禁（`extern` 有 G2，"全同步"没有） | 现读 G1~G18 清单，无"同步性"判据（G18 管的是裸读 OS 时钟，不是同步性） | 待拍：纯计算半加一条 `async` 关键字命中闸 |
 | 4 | 体积与安装面 | registry publish 的包体校验会取依赖源码 | 首发前在 README 明写依赖代价 |
-| 5 | 依赖边界的"轴"：`moon.mod` 的 import 是**模块级**，包级豁免只是构建期约定 | 现读 `moon.mod` 一条 import 全模块可见，tree 判据也按模块判 | G1 按包归属只拦"代码里真 import"，`moon.mod` 那一行必须留着并加注释说明作用域 |
+| 5 | 依赖边界的"轴"：`moon.mod` 的 import 是**模块级**，包级豁免只是构建期约定 | 现读 `moon.mod` 一条 import 全模块可见；tree 那条腿**到 10-09 才被证实是死的**（旧代码走 `deps/children` 嵌套，而 `moon tree --json` 给的是扁平 `modules`+`edges` ⇒ 一个节点都没读到却报 PASS，见文末那条） | G1 按包归属只拦"代码里真 import"，`moon.mod` 那一行必须留着并加注释说明作用域 |
 | 6 | **裸 OS 时钟没有结构闸**，"可注入"是约定不是结构 | 现读：全库唯一读 OS 时钟的入口是 `date/date.mbt` 的 `now_millis()`（体即 `@env.now()`，注释自述"全库唯一"），`clock_system()` 是它的函数值形态、`clock_fixed()` 才是假钟；任何公开件都能直接走前两条，仓里没有一道闸禁止公开面裸读 `@env.now()`。G8 那条"与 core 同输入同输出"的对拍腿**永远绿**——它比的是"和 core 一样"，不是"可注入" | **已落地（10-09）：闸是 G18**——全仓代码里裸读 `@env.now()` 只许 `date/date.mbt` 的 `now_millis()` 一处，
 按文件计数（上限调 0 必须报红，防"计数"这半条是摆设），另两档自证：仓内临时坏样本必被抓、白名单本身不误报。
 建这条闸时第一次跑就被自己的文档误报两处（`sched` 与 `id` 的**注释**里都写着 `env.now()`）⇒ 判据改成先剥注释再数，
@@ -796,3 +796,26 @@ core 数值语义侧（全部当场实测，三档 `wasm`/`js`/`wasm-gc` 读数�
   （29 条里 27 false / 22 条 rainbow）都不符——计数要从 TSV 当场 `awk` 出来再写，凭印象写等于再造一个过期源。
 - **批量改名别用全串替换**：把 `first_page_no` 换成 `first_page_cell[0]` 时顺手把 `typex_first_page_no` / `typex_set_first_page_no`
   两个**公开函数名**也打坏了（编译报"unexpected token"才发现）——标识符替换要加词边界或先排除 `pub fn` 行；签名是冻结面，改坏就是契约事故。
+
+## sched 之后那一轮（10-09 · 只有 CI 能照见的三条）
+
+- **`moon` 依赖一进仓，CI 必须先 `moon update`**。官方安装脚本只装二进制 + bundle core，**不带注册表索引**；
+  零依赖时期这条完全看不出来（压根不查索引），加了 `moonbitlang/async` 之后四档编译与门禁**一起**红在
+  `Failed to resolve registry dependency ... module was not found in the registry`，而 moon 自己就在上一行给了下一步：
+  `Warning: you may need to run \`moon update\` to update the registry`。本机复现法（不碰真工具链目录）：
+  用硬链接拷一份 `bin`+`lib` 当 `MOON_HOME`、故意不建 `registry/`，同一句错当场重现；跑一次 `moon update`
+  （"Registry index cloned successfully"）再 `moon check --target wasm` 就过，并把 `moonbitlang/async@0.22.4` 取下来。
+  判"这条修好了没有"要看的不是编译，是**用例数**：修好后 wasm/js 各 1531、wasm-gc 1519。
+- **只在 PR 上跑的 job 等于没跑过的 job**。`expect-freeze` 一直没装工具链就跑 `contract_gate.sh`，
+  为什么整轮没人发现：本仓零个 PR 运行记录（现读 `gh run list --event pull_request` 为空），那条 job 从未执行过。
+  本机把 `moon` 从 PATH 摘掉复跑门禁 ⇒ G3 直接 `moon: command not found` 并判红——**不是静默跳过**，
+  所以它一旦被激活就是必红。开新 job 时至少手工造一次运行（`workflow_dispatch` 或临时放宽 `on:`）。
+- **读不到节点 ≠ 通过，这两件事必须在判据里分开**（G1 传递依赖腿就是这么藏了一整轮的）。本版
+  `moon tree --json` 的形状是扁平 `{version, status, root, modules:[{name,...}], edges:[...]}`，
+  而旧代码去走 `deps`/`children` 嵌套 ⇒ `bad` 恒空 ⇒ 明明一个节点都没读到却打 PASS。修法三半：
+  ①按 `modules[].name` 取全集；②节点数 `< 2`（本仓 + 那条例外）判红，点名"这条腿没读到节点，PASS 不算数"；
+  ③阳性对照喂一段合成 JSON（塞 `evilcorp/stealth`）要求既抓到又数到 3 个节点。
+  变异复跑：把取名字那行退回旧的嵌套走法 ⇒ 自检当场判红并打出"只读到 0 个模块节点"，
+  这条腿从此不可能再无声变绿。**同类弱判据同批抬**：`BASELINE_TESTS`（脚本默认与 CI 两处）从 16 包时代的 393
+  改成现读 1531，`targets` job 里"`moon test` 收集数 ≥ 20"改成钉在四档最低那档 1519 上（少的正是 sched 那 12 条
+  async 用例，wasm-gc 档不收集）；两处都做了 `+1` 负向对照，当场红。

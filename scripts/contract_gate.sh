@@ -16,12 +16,15 @@ ok()  { echo "  PASS $*"; }
 bad() { echo "  FAIL $*"; FAILS=$((FAILS+1)); }
 skip(){ echo "  SKIP $*"; SKIPS=$((SKIPS+1)); }
 GATE_TARGETS="${GATE_TARGETS:-wasm js}"
-BASELINE_TESTS="${BASELINE_TESTS:-678}"
+# 地板＝`moon test --target <档>` 汇总行的 Total tests（10-09 本机现读 wasm、js 两档同为 1531；
+# 负向对照：把这里改成 1532 当场判红——`test wasm 只收集 1531 条 < 基线 1532`）。
+# 逐包条数别抄在这里，现读 ROADMAP.md 末的 READINGS 生成块（G11 每次都会重生成）。
+BASELINE_TESTS="${BASELINE_TESTS:-1531}"
 
 echo "== G1 零第三方 + async 按包归属（10-09 口径翻案：白名单不再等于零依赖）=="
 # 三条判据一起跑，任何一条红即 G1 红；判据自身另有三档对照，对照不过 ⇒ 报"G1 自身失效"而不是放过。
 if python - <<'PY'
-import io, os, re, subprocess, sys
+import io, json, os, re, subprocess, sys
 
 ROOT = subprocess.run(["git", "rev-parse", "--show-toplevel"],
                       capture_output=True, text=True).stdout.strip()
@@ -121,29 +124,45 @@ if not b3:
     print("  FAIL G1 自身失效：把唯一使用者摘掉后，悬空 pin 没被抓到（判据对'例外没人用'是瞎的）")
     rc = 1
 
-def tree_bad():
-    """传递依赖腿：`moon tree` 里除 core / 本仓 / 那一条例外之外一律红。
+ALLOW = {"moonbitlang/core", "mldong/moon-hutool", ASYNC}
+
+def tree_names(raw):
+    """传递依赖腿：`moon tree --json` 的**全部模块名**里，除 core / 本仓 / 那一条例外之外一律红。
     这条是原 G1 的主判据，不能因为改成包级扫描就丢——包级只看得到直接 import，
-    传递进来的第三方只有树里照得见。取不到树 ⇒ SKIP 并说明，绝不当通过。"""
-    ALLOW = ("moonbitlang/core", "mldong/moon-hutool", ASYNC)
+    传递进来的第三方只有树里照得见。取不到树 ⇒ SKIP 并说明，绝不当通过。
+    10-09 现读本版格式是扁平的 `{version, status, modules:[{name,version,source…}], edges:[…]}`，
+    **没有 deps/children 嵌套**：旧代码去走嵌套树 ⇒ 一个节点都没读到、永远返回空集，
+    是一条比红灯更危险的永真死格（本机 `moon tree --json` 只吐 2 个模块它也报 PASS）。
+    所以这里同时判"读到几个节点"，节点数低于 2（本仓 + 那条例外）就是这条腿瞎了。"""
+    d = json.loads(raw)
+    mods = sorted({(m.get("name") or "") for m in (d.get("modules") or []) if m.get("name")})
+    return mods, sorted(set(mods) - ALLOW)
+
+# 阳性对照：塞一个真第三方进扁平 modules 段必须被抓到，且节点数要跟着涨——
+# 没有这一档，"改成读 modules"这件事本身是不可证的（旧死格就是这么藏了一整轮）。
+_s_seen, _s_bad = tree_names(json.dumps({
+    "version": 1, "status": "success", "root": 0,
+    "modules": [{"name": "mldong/moon-hutool"}, {"name": ASYNC}, {"name": "evilcorp/stealth"}],
+    "edges": []}))
+if _s_bad != ["evilcorp/stealth"] or len(_s_seen) != 3:
+    print("  FAIL G1 自身失效：传递依赖腿的阳性对照没过（塞进扁平 modules 段的第三方没被抓到）")
+    rc = 1
+
+def tree_leg():
     r = subprocess.run(["moon", "tree", "--json"], capture_output=True, text=True, cwd=ROOT)
     if r.returncode != 0 or not r.stdout.strip():
-        return None
-    bad = set()
-    def walk(n):
-        name = n.get("name") or n.get("package") or ""
-        if name and not name.startswith(ALLOW):
-            bad.add(name)
-        for c in n.get("deps") or n.get("children") or []:
-            walk(c)
-    import json
+        return "skip", []
     try:
-        d = json.loads(r.stdout)
-    except Exception:
-        return None
-    for root in (d if isinstance(d, list) else [d]):
-        walk(root)
-    return sorted(bad)
+        seen, bad = tree_names(r.stdout)
+    except Exception as e:
+        return ("fail", ["`moon tree --json` 的 JSON 读不出 modules 段（%s）——格式变了，"
+                         "这条腿会瞎，判红不判过" % e])
+    if len(seen) < 2:
+        return ("fail", ["只读到 %d 个模块节点（本仓 + %s 至少该有 2 个）"
+                         "⇒ 这条腿没读到节点，PASS 不算数" % (len(seen), ASYNC)])
+    if bad:
+        return ("fail", ["传递依赖里有未登记模块：%s" % "，".join(bad)])
+    return ("ok", seen)
 
 
 real = scan(imports, mods)
@@ -151,14 +170,16 @@ rc |= show("G1 三条判据（async 只归属 %s · 零真第三方 · moon.mod 
 print("     （现读：moon.mod import 段 = %s；import %s 的包 = %s）"
       % (mods or "空", ASYNC, [p for p, ns in imports.items() if ASYNC in ns]))
 
-tree = tree_bad()
-if tree is None:
+kind, detail = tree_leg()
+if kind == "skip":
     print("  SKIP 传递依赖腿：`moon tree --json` 取不到（本机 moon 或网络）——本轮只判了包级三条")
-elif tree:
-    print("  FAIL 传递依赖树里有未登记节点：%s" % "，".join(tree))
+elif kind == "fail":
+    for m in detail:
+        print("  FAIL 传递依赖腿：" + m)
     rc = 1
 else:
-    print("  PASS 传递依赖树里除 core / 本仓 / %s 无其它节点" % ASYNC)
+    print("  PASS 传递依赖树里除 core / 本仓 / %s 无其它节点（现读 %d 个模块节点：%s）"
+          % (ASYNC, len(detail), "，".join(detail)))
 sys.exit(rc)
 PY
 then ok "G1 绿"
