@@ -57,6 +57,7 @@
 | #24.18 `scheduler_tick(s) -> Int` | 跑一拍（不循环） | `executeTaskIfMatch` 整体 | 返回执行条数；时刻取自注入时钟 ⇒ 可测 |
 | #24.19 `scheduler_start` / `scheduler_stop` / `scheduler_is_started` | 启停与状态 | `CronUtil.start`/`stop` + `Scheduler.started` | `start` 是全仓唯一使用 async 定时器处；任务体异常**吞掉**（跟随参照，§6 P1）、`stop` **不等不切**（§6 P2）、同 unit 内**不去重**（§6 N2） |
 | #24.20 `suberror SchedError { UnknownTask \| DuplicatedTask \| BadCron }` | 错误三档 | `CronException extends RuntimeException`（只带消息） | 消息不进契约；`DuplicatedTask` 是否可达取决于 §6 N1，不可达就撤档 |
+| #24.22 `scheduler_on_failed(s, handler)`，`handler : (String, Error) -> Unit` | 注册失败回调；**缺省不注册 ⇒ 任务体错误被忽略**（与参照同形） | `listener/TaskListener.onFailed(TaskExecutor, Throwable)` | P9 已拍：只收这一件。回调是同步的（不参与事件循环），要在 `start` 前注册；没注册时的行为就是参照那个吞掉，注册了等于把参照"进 Log"那一半显式交给调用方 |
 
 ## 4. 本库改判（逐条给理由，不给"统一口径"这种话）
 
@@ -76,7 +77,7 @@
 | `task/RunnableTask` | 参照用它是把 `java.lang.Runnable` 适配成 `Task`；本库任务体直接收 `&Task`，没有需要适配的第二种形状 |
 | `CronTimer` | 现读 `extends Thread` ⇒ 线程模型不收 |
 | `TaskExecutor` / `TaskExecutorManager` / `TaskLauncher` / `TaskLauncherManager` | 参照的线程池与发射器状态机；本库单事件循环 + 注入时延源，无对应物 |
-| `listener/*`（`TaskListener` 三法 `onStart`/`onSucceeded`/`onFailed(TaskExecutor, Throwable)`） | 三个回调都以 `TaskExecutor` 为参数，没有执行器线程模型就没有挂载点；且 `onFailed` 的载荷是 `Throwable`——本库错误面是档位枚举。待 §6 P2 拍完再评估是否以"每拍结果列表"形态重开 |
+| `listener/*`（`TaskListener` 三法 `onStart`/`onSucceeded`/`onFailed(TaskExecutor, Throwable)`） | 10-09 已拍 P9：**只收失败那一件**（`on_failed`，见 §3 表 #24.22）——参照的三个回调都以 `TaskExecutor` 为参数，本库没有执行器对象，所以载荷取「触发失败的那条 id + 错误本身」，不照抄 `TaskExecutor`+`Throwable` 的形状。`onStart`/`onSucceeded` 仍不收（本库既没有执行器生命周期，也没有成功事件的可观测需求） |
 | `timingwheel/*`（`TimingWheel`/`SystemTimer`/`TimerTask`/`TimerTaskList`） | `SystemTimer` 现读依赖 `DelayQueue` + `bossThreadPool`；`TimingWheel` 的 slot 计算（`tickMs`/`wheelSize`/`advanceClock`）倒是可纯测件，**登记第二批**，本批不开面 |
 | `CronUtil` 的 `Setting` 通道（`setCronSetting`/`schedule(Setting)`） | 读配置文件 ⇒ 违反"OS 能力只走 `env` 三件" |
 | `CronConfig` 的 `TimeZone` 对象 | 跨对象搬 Java 时区类型无意义，本库用区名字符串 |
@@ -89,13 +90,16 @@
 | # | 事项 | 参照侧读数（腿） | 本库处置 |
 |---|---|---|---|
 | N1 | 重复 id 的 `add` | `CronException: Id [dup] has been existed!`；表**原样不动**（`size=1`、`ids=[dup]`、三条 List 各 1、`getTask` 仍是第一个、`getPattern` 仍是第一个） | **跟随**：`table_add` 对重复 id `raise DuplicatedTask(id)`，且失败后表不变。`DuplicatedTask` 这一档由"可能不可达"转成**在案可达**（§3 那条 note 就地作废） |
-| P1 | 任务体抛异常 | 异常**不外漏**：换了 `UncaughtExceptionHandler` 也收到 `surfaced=none`；抛异常那条与同期正常那条**都照常按秒续触发**（`boomHits=4` / `okHits=4`） | **跟随参照**（10-09 owner 定：参照侧语义必须与 hutool 一致，本库不自创）：任务体抛出的错误在 `tick` 里被忽略，调度照常继续。代价要写明白——本库没有日志通道，所以这里是**静默丢弃**，不像参照还能进它的 `Log`；要可见只能靠第二批收 `listener` 族（对位 `TaskListener.onFailed(TaskExecutor, Throwable)`，见 §5 那一行），**新挂 P9 待拍** |
+| P1 | 任务体抛异常 | 异常**不外漏**：换了 `UncaughtExceptionHandler` 也收到 `surfaced=none`；抛异常那条与同期正常那条**都照常按秒续触发**（`boomHits=4` / `okHits=4`） | **跟随参照**（10-09 owner 定：参照侧语义必须与 hutool 一致，本库不自创）：任务体抛出的错误在 `tick` 里被忽略，调度照常继续。代价要写明白——本库没有日志通道，所以这里是**静默丢弃**，不像参照还能进它的 `Log`；要可见只有把参照 `listener` 族的失败那一件收进来——**P9 已拍（10-09）：收 `on_failed` 一件**（#24.22），不注册就照参照吞掉 |
 | P2 | `stop` 撞上执行中的任务 | 任务体睡 1800 ms、900 ms 处 `stop`，结果 `hits=1` **`done=1`** ⇒ 参照**不打断**在跑的任务，放完再收 | **跟随**：`scheduler_stop` 只摘后续定时器、不等不切；本库这条从"待拍"转为已定（要"等到跑完"的语义另说，参照没有） |
 | N2 | 同一毫秒连喂两次 `executeTaskIfMatch` | `hits=2` ⇒ **重复触发**。参照的去重不在匹配路径上：`spawnExecutor` 每次都新建一个 `TaskExecutor` 丢进线程池，秒对齐只发生在 `CronTimer.run` 的唤醒时刻 `(now / unit + 1) * unit`（`unit` 由 `matchSecond` 取 1000 或 60000） | **跟随参照，P8 已闭**（10-09 owner 定）：`scheduler_tick` **不做幂等、不去重**，同 unit 内重复喂同一瞬间就重复执行。原本我建议"记住上次已触发瞬间"是自创语义，撤。调用方要防重复，责任在它自己的唤醒对齐上（参照也是这么做的：`CronTimer.run` 的 `(now / unit + 1) * unit`） |
 
 ⚠ 本轮更正一条我自己写错的读数：先前把"秒栅格 `millis / 1000 * 1000`"记在 `TaskTable.executeTaskIfMatch`
 上，`javap -c` 现读否掉了——匹配路径直接拿原始 `millis` 调 `CronPattern.match(TimeZone, long, boolean)`，
 对齐在 `CronTimer.run`。这条更正也说明 §2 验收线里"同刻再调一次不重复"当时是**按我的设想写的，不是参照行为**。
+
+| P5 | `cron_expr` 独立包建不建 | **已拍（10-09）：不建**。`sched` 已经依赖 `cron`+`date`，拆包不会让它少一个依赖，只会多出一份要靠比对门禁按住的重复实现；`docs/spec/25-cron_expr.md` 作决策留痕保留，逐包表第 25 行保持未开工 |
+| P10 | 落地后要不要同轮接进 mldong-moon 的 `sys/timer` | **已拍（10-09）：先不接**，本包按库收口。现读 `scripts/contract-tests/contract_runner.py` 没有 timer 用例 ⇒ 跨栈矩阵不含调度触发；接进去等于改一栈的运行行为，且要先跟 boot2 `TimerTaskRunListener` 的「启动灌表 + start」逐件对表，另开一单 |
 
 ## 7. 门禁影响（口径翻案的机械部分）
 
