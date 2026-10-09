@@ -66,6 +66,11 @@ PR-A 的合入标准：`moon check` 必须全绿（签名与类型自洽、文�
 - 允许包：① 补 hutool 契约形状（null-safe 分档、`{}` 占位、`sub_between`）；② 环境显式化（`Clock`、`offset_minutes`、base64 严格/宽松双档）；③ 把 core 分散零件收成可测出口（`\d\w\s` 语法翻译层、`Map` 插入序上的 LRU、`diff` 外的归一化相似度）。
 - **禁止**：给 core 已有函数换名转发同一语义（`@coll.map` 套 `Array::map` 一律拒）。要迁移手感请看 `docs/spec/00-hutool-map.md` 的四列对照表，代码不承担。
 - 凡"包 core"的格子，用例里必须带一条**与 core 原函数同输入同输出**的对拍断言（门禁 G8）：core 升级改了语义，这条先红，由我们主动决定跟不跟。
+- **归档 `done` 必须逐条指回实现件**（10-09 紧闸）：census 的包级规则**不许直接判 done**——
+  一条 `(text|convert|codec|collection|map|…)` 的规则历史上给了 161 个 done，理由串写着"逐条见 overrides"
+  而它们并没有逐条条目，抽验 `text.escape.*`+`text.replacer.*` 9 类在 `text` 公开面命中 0 就是空头。
+  现在这类整片声称落 `unattested` 档，受棘轮约束（`scripts/unattested_baseline.txt`，只许降）；
+  要把它变 `done`，得在 `OVERRIDES` 里点名"哪个包哪件承接"，或改判 `gap`/`excluded`/`deferred`。
 - **不许包出 core 给不了的承诺**：例如把 `to_upper` 包成 `to_upper_case` 却只在 ASCII 生效。要么真做（数据表，二期），要么函数名与文档都写 ASCII 档。
 
 ### 两条红线

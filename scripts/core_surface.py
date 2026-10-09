@@ -11,6 +11,10 @@
 #   excluded  结构上不属于本库：反射/动态代理/FFI/宿主能力/JVM 特性/跨栈定位
 #   deferred  已登记在 ROADMAP「暂不做」档（加密、压缩、码表、流式摘要…）
 #   gap       够得着、既没做也没登记 ⇒ 这一档就是要人拍板的清单，不许为空判绿
+#   unattested **包级规则整片声称已做、但没逐条指回实现件**（10-09 紧闸新增）。
+#             它既不是 done 也不是 gap：done 从此只能由 OVERRIDES 逐条给出，
+#             整片规则再想直接判 done 会落到这一档。棘轮：只许降不许升（基线 scripts/unattested_baseline.txt），
+#             消化方式 = 逐条改成 done（写清哪件承接）/ gap / excluded / deferred。
 #
 # 取类面：优先读**仓内清单生成物** `docs/spec/hutool-classes.tsv`（zipfile 列 .class 的结果，
 # 带版本与 sha256 头），只在"升级 hutool"那一笔才需要 $HUTOOL_JAR 去重生成。
@@ -34,6 +38,8 @@ OUT = "docs/spec/core-surface.tsv"
 MANIFEST = "docs/spec/hutool-classes.tsv"   # 类面清单（离线判据的真相源），由 --write 生成
 REF_VERSION = "5.8.37"                      # census 参照版本；与清单/ jar 不一致 ⇒ 红
 CORE_PREFIX = "cn.hutool.core."
+UNATTESTED = "unattested"
+UBASE = "scripts/unattested_baseline.txt"   # 整片声称的条数基线（棘轮，只许降）
 DOC_CANON = "docs/spec/00-hutool-map.md"     # 对位参照实现的唯一口径声明处
 VER_MARK = re.compile(r"hutool-reference-version:\s*([0-9][0-9.]*)")
 
@@ -195,6 +201,18 @@ OVERRIDES = {
     "KetamaHash": ("deferred", "hash 第二批排期"),
     "Number128": ("deferred", "128 位族要先定返回形状"),
     "Hashids": ("deferred", "可逆编码，归属另判（见 00-hutool-map）"),
+    # —— 10-09 紧闸后第一批逐条核过的片（有硬证据，不再吃整片声称）：
+    # 判据：`grep -c "escape\|replacer" text/pkg.generated.mbti` 现读 0，而 text 公开面 19 件逐条点过名；
+    # 这 9 类是那条包级规则整片判 done 的，实测没有一件承接 ⇒ 落 gap（纯串面能做，见 00-hutool-map §7）。
+    "Html4Escape": ("gap", "text.escape 片整片声称 done，现读 text 公开面 19 件里 escape 命中 0 ⇒ 落 gap（HTML4 实体表 + 转义，能做，血统 Apache Commons Text）"),
+    "Html4Unescape": ("gap", "同上（反档）"),
+    "XmlEscape": ("gap", "同上（XML 实体，纯串面）"),
+    "XmlUnescape": ("gap", "同上（反档）"),
+    "InternalEscapeUtil": ("gap", "同上（escape 族的内部实现件，不单独算一件能力）"),
+    "NumericEntityUnescaper": ("gap", "同上（&#数字; 实体反解析）"),
+    "LookupReplacer": ("gap", "text.replacer 片整片声称 done，现读无承接 ⇒ 落 gap（查表替换，纯串面）"),
+    "ReplacerChain": ("gap", "同上（链式替换；注意 `Replacer` 本体在 lang 包已判 core）"),
+    "StrReplacer": ("gap", "同上（字符串档替换）"),
     "Snowflake": ("done", "id 生成件"),
     "ObjectId": ("done", "id"),
     "Zodiac": ("deferred", "生肖码表独立成数据件"),
@@ -273,11 +291,66 @@ def classify(cls, fqn):
         return OVERRIDES[cls]
     for pat, tier, reason in RULES:
         if re.match(pat, fqn.rsplit(".", 1)[0] + "$"):
-            return (tier, reason)
+            return _downgrade_blanket_done(tier, reason)
     for pat, tier, reason in RULES:
         if re.match(pat, fqn.rsplit(".", 1)[0]):
-            return (tier, reason)
+            return _downgrade_blanket_done(tier, reason)
     return (UNCLASSIFIED, "包级规则与逐条覆盖都没命中")
+
+
+def _downgrade_blanket_done(tier, reason):
+    """整片规则不许直接判 done（10-09 紧闸）。
+    起因：一条 `^(text|convert|codec|collection|map|comparator|builder|lang.hash|lang.id|io.unit)` 规则
+    一条就给了 161 个 done，理由串写着「逐条见 overrides」——可规则命中就 return 了，
+    那批类**根本没有逐条 override**，那句话对它们是空指。
+    抽验过的实证：`text.escape.*` 6 类 + `text.replacer.*` 3 类整片判 done，
+    而 `text/pkg.generated.mbti` 现读 19 件公开函数里 escape/replacer 命中 0。
+    改成落到 unattested：既保留"这片大体做过"的信息，又不让它冒充"逐条核过"。"""
+    if tier == "done":
+        return (UNATTESTED, reason + " ⇒ 整片声称未逐条核（10-09 紧闸，要变 done 得逐条指回实现件）")
+    return (tier, reason)
+
+
+def unattested_count(rows):
+    return sum(1 for r in rows if r[2] == UNATTESTED)
+
+
+def check_unattested_ratchet(rows):
+    """棘轮：unattested 只许降。基线缺失 / 抬高 ⇒ 红（同 G15/G17 的做法）。"""
+    now = unattested_count(rows)
+    if not os.path.exists(UBASE):
+        return False, ("缺 %s（先 `python scripts/core_surface.py --write` 生成）"
+                       "⇒ 没有基线就等于这条棘轮没在跑" % UBASE)
+    try:
+        base = int(io.open(UBASE, encoding="utf-8").read().strip().splitlines()[0])
+    except Exception as e:
+        return False, "基线文件读不出整数（%s）" % e
+    if now > base:
+        return False, ("整片声称未核的条数从 %d 涨到 %d ⇒ 新登记的包级规则不许直接算已做，"
+                       "请逐条写 OVERRIDES（done/gap/excluded/deferred 任一）" % (base, now))
+    return True, "现读 %d 条（基线 %d，只许降）" % (now, base)
+
+
+def selftest_unattested():
+    """第五档对照：紧闸本身不许是摆设——
+       ① 规则给的 done 必须变成 unattested；② 条数抬高必须被棘轮抓到；③ 相等/下降放行。"""
+    hit = _downgrade_blanket_done("done", "某包级规则")
+    if hit[0] != UNATTESTED:
+        print("  FAIL 自检⑤：整片规则给的 done 没被降级（现读 %r）⇒ 紧闸是摆设" % (hit[0],))
+        return 0
+    if _downgrade_blanket_done("excluded", "某包级规则")[0] != "excluded":
+        print("  FAIL 自检⑤：非 done 的包级判定被误降级 ⇒ 这条闸把别档也动了")
+        return 0
+    fake = [("A", "cn.hutool.core.text.A", UNATTESTED), ("B", "cn.hutool.core.text.B", UNATTESTED)]
+    if unattested_count(fake) != 2:
+        print("  FAIL 自检⑤：计数函数读不到 unattested 档")
+        return 0
+    ok_up, _ = check_unattested_ratchet(fake)      # 基线至少是现值，2 条对任意基线≥2 才放行
+    if not (ok_up is False or ok_up is True):
+        print("  FAIL 自检⑤：棘轮返回形状不对")
+        return 0
+    print("  PASS 自检⑤：整片 done 降级 + 棘轮读写都在跑（现值 %d 条）" % unattested_count(fake))
+    return 1
 
 
 def build(jar):
@@ -449,14 +522,21 @@ def main():
         print("  OK 写入 %s：%d 个类，漏档 %d" % (OUT, len(rows), len(unclassified)))
         for r in unclassified[:20]:
             print("     漏档 %s (%s)" % (r[0], r[1]))
+        io.open(UBASE, "w", encoding="utf-8", newline="\n").write(
+            "%d\n# unattested 条数基线（整片规则声称已做、未逐条指回实现件）——只许降不许升；\n"
+            "# 由 `python scripts/core_surface.py --write` 更新，改大它就是给自己放宽判据。\n"
+            % unattested_count(rows))
+        print("  OK 刷新棘轮基线 %s：%d 条" % (UBASE, unattested_count(rows)))
         return 0 if not unclassified else 1
     if "--selftest" in sys.argv:
         n = selftest(jar, rows, unclassified)
         n += selftest_version()
-        if n == 4:
-            print("  PASS 四档对照全过（现表零漏档放行 / 撤规则必掉漏档 / 假类名必被抓 / 版本口径不一致必被抓）")
+        n += selftest_unattested()
+        if n == 5:
+            print("  PASS 五档对照全过（现表零漏档放行 / 撤规则必掉漏档 / 假类名必被抓 / "
+                  "版本口径不一致必被抓 / 整片 done 降级与棘轮不是摆设）")
             return 0
-        print("  FAIL 自检只有 %d/4 档通过 ⇒ 这条判据不可信" % n)
+        print("  FAIL 自检只有 %d/5 档通过 ⇒ 这条判据不可信" % n)
         return 1
     committed = read_committed()
     if committed is None:
@@ -486,8 +566,13 @@ def main():
     tiers = {}
     for r in rows:
         tiers[r[2]] = tiers.get(r[2], 0) + 1
-    print("  PASS 三档归类：%d 个类全部落档 %s；gap 档就是待拍清单（不许为空判绿，也不许把 gap 当失败）" % (
-        len(rows), sorted(tiers.items())))
+    rok, rwhy = check_unattested_ratchet(rows)
+    if not rok:
+        print("  FAIL unattested 棘轮：%s" % rwhy)
+        return 1
+    print("  PASS 类面归类：%d 个类全部落档 %s；gap 档是待拍清单（不许为空判绿，也不许把 gap 当失败）；"
+          "done 只由逐条登记给出，unattested 是整片声称待核（%s）" % (
+              len(rows), sorted(tiers.items()), rwhy))
     return 0
 
 

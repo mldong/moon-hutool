@@ -97,11 +97,38 @@
 
 | 档 | 含义 | 现读类数（hutool-all **5.8.37**，632 个顶层类，固化在 `docs/spec/hutool-classes.tsv`） |
 |---|---|---|
-| `done` | 本库有对位件（含"复用隔壁包同一判据"） | 272 |
+| `done` | **逐条登记过**对位件（`OVERRIDES` 里点名哪个包哪件承接） | 67 |
+| `unattested` | 包级规则**整片声称已做但没逐条指回实现件**（10-09 紧闸新增档，棘轮只许降） | 196 |
 | `excluded` | 结构上不属于本库：反射/动态代理/宿主 IO/网络/线程/AWT/JVM 内部机制 | 287 |
 | `core` | MoonBit core 已有同义能力，本库按规则不写转发层 | 35 |
 | `deferred` | 已登记在 [`docs/ROADMAP.md`](https://github.com/mldong/moon-hutool/blob/master/docs/ROADMAP.md) 的「暂不做」档 | 20 |
-| `gap` | **够得着、既没做也没登记** ⇒ 这一档就是要拍板的清单 | 18 |
+| `gap` | **够得着、既没做也没登记** ⇒ 这一档就是要拍板的清单 | 27 |
+
+
+**10-09 紧闸：`done` 从此只能逐条登记**（owner 拍"先让闸不再允许整片算已做，再分批补登记"）
+
+原来有一条包级规则 `(text|convert|codec|collection|map|comparator|builder|lang.hash|lang.id|io.unit)`
+**一条就给了 161 个 `done`**，理由串还写着「逐条见 overrides」——可规则命中就 `return` 了，
+那批类根本没有逐条 override，那句话对它们是空指。抽验的硬证据：`text.escape.*` 6 类 + `text.replacer.*` 3 类
+整片判 done，而 `text/pkg.generated.mbti` 现读 19 件公开函数里 escape/replacer 命中 **0**。
+
+改法（`scripts/core_surface.py`）：
+- `classify()` 里新增 `_downgrade_blanket_done()`——**包级规则给的 `done` 一律降成 `unattested`**，
+  `OVERRIDES` 的逐条 `done` 保持权威；非 done 档（excluded/core/deferred）不受影响（自检⑤钉着，误降也红）。
+- 新棘轮 `scripts/unattested_baseline.txt`：`unattested` 条数**只许降不许升**，基线缺失也判红
+  （"没有基线"等于这条棘轮没在跑）。两条负向实测：基线压到 195 ⇒ `FAIL …从 195 涨到 196`；
+  删掉基线文件 ⇒ `FAIL … 缺 scripts/unattested_baseline.txt`。
+- `--selftest` 从四档扩到**五档**，第⑤档专证"降级与棘轮不是摆设"。
+
+数字因此换代（现读，不是推算）：`done` 272 → **67**，新出 `unattested` **196**，`gap` 18 → **27**。
+涨的 9 条就是我抽验到的那批空头，已逐条落 `gap` 并写明证据：`Html4Escape`/`Html4Unescape`/`XmlEscape`/
+`XmlUnescape`/`InternalEscapeUtil`/`NumericEntityUnescaper`/`LookupReplacer`/`ReplacerChain`/`StrReplacer`
+（HTML/XML 实体与查表替换都是纯串面，能做，血统是 Apache Commons Text）。
+
+**消化计划**（`unattested` 归零的路，按片分批，每片都要指回具体承接件或改判 gap/excluded/deferred）：
+① `convert.impl` 35 条（conv 包的注册表族，先证 17 件公开面覆盖到哪些类）；② `collection` 24 + `map` 19 +
+`comparator` 17（coll/mapx/path 三包）；③ `codec` 11 + `text.finder` 7 + `text.csv` 7；④ 其余散片
+（`builder`/`lang.hash`/`lang.id`/`io.unit`/`map.multi`）。每批单独一笔，`--write` 顺带把基线降下来。
 
 - 取法：`python scripts/core_surface.py --write` 生成 `docs/spec/core-surface.tsv`（类名｜全限定名｜档｜一句话理由）；`--check` 既查漏档也查"表与 jar 类面漂移"；判状态只认 jar，不依赖 `javap`。
 - 版本口径：census 用 **hutool-all 5.8.37**，且这版类面已固化成仓内生成物 `docs/spec/hutool-classes.tsv`（头两行记 `version` 与 `sha256`）；日常判据离线跑，不再联网取 jar。`scripts/core_surface.py` 的常量 `REF_VERSION` 与清单头不一致就判红——这条是 10-09 补的：当时有人拿 5.8.35 去核对 5.8.37 的表，造出一条"表里有 jar 里没有"的假红（一份件覆盖全部 artifact，`$HUTOOL_JAR` 指它），而各包参照腿多数是 5.8.35——**类面是普查、读数腿是逐包**，两件事不同源，换版本时 `--check` 的漂移格会先报出来。
