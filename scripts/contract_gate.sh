@@ -7,7 +7,8 @@
 # 用法：
 #   scripts/contract_gate.sh                 # 全跑（本机默认 wasm 一档做深，其余档做 check）
 #   GATE_TARGETS="wasm" scripts/contract_gate.sh
-#   GATE_FREEZE_BASE=<commit> scripts/contract_gate.sh   # PR-B 时打开期望值冻结检查（G5）
+#   GATE_FREEZE_BASE=<commit> scripts/contract_gate.sh   # 打开期望值冻结检查（G5）——
+#     直推口径下 CI 不跑这条（10-09 拍 C），实现笔落地前由人在本地复跑这一条
 set -uo pipefail
 cd "$(git rev-parse --show-toplevel)"
 export PYTHONIOENCODING=utf-8
@@ -218,7 +219,7 @@ if command -v git >/dev/null && git rev-parse --git-dir >/dev/null 2>&1; then
 else skip "非 git 工作树，跳过 .mbti 漂移检查"
 fi
 
-echo "== G5 期望值冻结（PR-B）=="
+echo "== G5 期望值冻结（直推口径：CI 不跑，靠本地拿上一笔当基准复跑）=="
 if [ -n "${GATE_FREEZE_BASE:-}" ]; then
   # 基准号写错时 `git diff` 只会静默给空集 ⇒ 整条检查会变成"永远通过"的空转，
   # 而空转比红更难发现（10-07 实测：一个手打错的 sha 就让 G5 报了 ok）。先钉住它是个可解析的 rev。
@@ -226,11 +227,25 @@ if [ -n "${GATE_FREEZE_BASE:-}" ]; then
     bad "GATE_FREEZE_BASE=${GATE_FREEZE_BASE} 不是一个可解析的 commit —— G5 拒绝在空转状态下给 ok"
   else
     ch=$(git diff --name-only "$GATE_FREEZE_BASE" -- '*_test.mbt' 'docs/spec/*' 2>/dev/null)
-    if [ -z "$ch" ]; then ok "测试与 spec 未被实现 PR 触碰"
+    if [ -z "$ch" ]; then ok "测试与 spec 未被这一笔触碰"
     elif [ "${ALLOW_EXPECTATION_CHANGE:-0}" = "1" ]; then skip "已授权改动：$(echo "$ch" | tr '\n' ' ')"
     else bad "实现期改了期望值/契约，须单独一笔并给外部读数来源：$ch"; fi
   fi
-else skip "未给 GATE_FREEZE_BASE（仅 CI 的 PR-B job 与该检查有关）"
+else
+  # 没给基准 ≠ 没风险：这道闸现在没人自动跑，所以把它**碰了什么**当场念出来，
+  # 免得"恒 SKIP"变成"恒无人理会"（本仓照见过两次恒绿的死格了）。
+  touched=""
+  # 默认拿上一笔当参照来"念提醒"；给人留一个口子指到契约那一笔：
+  #   FREEZE_REMIND_BASE=<PR-A 的 sha> bash scripts/contract_gate.sh
+  RB="${FREEZE_REMIND_BASE:-HEAD~1}"
+  if git rev-parse --verify "${RB}^{commit}" >/dev/null 2>&1; then
+    touched=$(git diff --name-only "$RB" HEAD -- '*_test.mbt' 'docs/spec/*' 2>/dev/null)
+  fi
+  if [ -n "$touched" ]; then
+    skip "未给 GATE_FREEZE_BASE ⇒ G5 本轮没被执行，而上一笔碰了 $(printf '%s\n' "$touched" | wc -l | tr -d ' ') 个冻结面文件（$(printf '%s' "$touched" | tr '\n' ' ')）——复跑：GATE_FREEZE_BASE=<上一笔 sha> bash scripts/contract_gate.sh"
+  else
+    skip "未给 GATE_FREEZE_BASE ⇒ G5 本轮没被执行（上一笔没碰冻结面，或浅克隆够不到 HEAD~1）"
+  fi
 fi
 # 阳性对照：假基准号必须被识别为不可解析（否则上面那条校验就是摆设）。
 # 只在校验过 rev 的分支上跑，比对结果本身不参与判定。

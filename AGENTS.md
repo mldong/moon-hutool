@@ -71,6 +71,7 @@ PR-A 的合入标准：`moon check` 必须全绿（签名与类型自洽、文�
 ### 两条红线
 
 1. **期望值冻结**：PR-B 不许改 `*_test.mbt` 里的期望串与 spec 表的"读数来源"列。要改必须单独一笔，正文写清外部证据（hutool 实测输出 / RFC 向量 / FIPS 示例 / 评审记录）。多个并行会话会各自发明同一条错语义并改期望值自证绿——这条就是拦这个的。
+   **执行方式（10-09 拍 C 案）**：本仓直推 master、不走 PR，所以 G5 **不在 CI 上**（原先那个 `if: pull_request` 的 job 至今零次执行，一道从没被执行过的闸比没有闸更误导，已删）。落地笔动手前由人在本地复跑这一条：`GATE_FREEZE_BASE=<契约那一笔的 sha> bash scripts/contract_gate.sh`；门禁在没给基准时会把“上一笔碰了哪些冻结面文件”念出来（恒 SKIP 不许等于无人理会）。确需改期望值就单独一笔，正文给外部读数来源，本地复跑时带 `ALLOW_EXPECTATION_CHANGE=1` 并把差分证据写进提交信息。
 2. **不搬运表达**：实现里不许出现从 Java 翻译来的注释、成段结构或变量名对应表。移植的是语义与规范（思想侧），不是 hutool 的代码写法（表达侧）；hutool 源码只用来**反推期望值**。少数 hutool 自身也是移植件的格子（`CharSequenceUtil`、`date/format/*`、`ComparatorChain`、`AntPathMatcher`）真上游是 Apache Commons / Spring，spec 的"血统"列必须标注。
 
 ### 零依赖四条（核心包的宪法，违反任何一条直接红）
@@ -732,7 +733,8 @@ core 数值语义侧（全部当场实测，三档 `wasm`/`js`/`wasm-gc` 读数�
   单元素进数组用 `push`（`append` 是接另一个数组，报 "wanted ArrayView[...]"），`String.trim()` 出 `StringView` 不出 `String`；
   `while true { ... return x }` 判 "这个 while 要产出 DateTime，请加 nobreak 块" ⇒ 改成条件循环 + 末尾表达式。
 - **Windows 腿的两条老坑本轮各撞一次**：`javac -cp "a.jar;b.jar"` 用 `/c/...` 形式的 POSIX 路径会"包不存在"，
-  要先 `cygpath -w`；`grep -a` 之前忘了 `tr -d ''` 会让中文读数整段被当 Binary file 吞掉。
+  要先 `cygpath -w`；`grep -a` 之前忘了 `tr -d '
+'` 会让中文读数整段被当 Binary file 吞掉。
 
 
 ## csv PR-A（10-06：契约冻结一笔，432 = 绿 425 / 红 7）——新判据第一次真的拦下了东西

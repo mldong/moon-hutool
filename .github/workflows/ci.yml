@@ -15,6 +15,12 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
+# G5「期望值冻结」**不在 CI 上跑**（10-09 owner 拍 C 案）：本仓是直推 master 的口径，
+# 而 G5 需要"上一笔"当基准；原先那个 `if: pull_request` 的 job 至今零次执行
+# （现读 `gh run list --event pull_request` 为空）——一道从没被执行过的闸比没有闸更误导。
+# 复跑法是本地一条命令，写在这里以免下一个人再去找 CI：
+#   GATE_FREEZE_BASE=<上一笔 sha> bash scripts/contract_gate.sh
+# 该改期望值的那一笔必须在正文给外部读数来源（门禁会列出被碰的冻结面文件当提醒）。
 env:
   MOON_VERSION: latest
 
@@ -137,31 +143,3 @@ jobs:
           echo "::endgroup::"
           exit 1
 
-  expect-freeze:
-    name: 期望值冻结（仅 PR）
-    if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      # 这一 job 原来不装工具链就跑 contract_gate.sh。本机实测（把 moon 从 PATH 摘掉再跑门禁）：
-      # G3 直接 `moon: command not found` 并判红，不是静默跳过。它只在 PR 上跑，而本仓至今
-      # 零个 PR 运行记录（现读 `gh run list --event pull_request` 为空），所以这条没被照见过。
-      - name: Install MoonBit toolchain
-        run: |
-          curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash
-          echo "$HOME/.moon/bin" >> $GITHUB_PATH
-
-      - name: moon update
-        run: moon update
-
-      # 实现 PR 不许动测试期望值与 spec 的"读数来源"列；要动必须单独一笔（人工评审）。
-      # 给了 GATE_FREEZE_BASE 才激活 G5（脚本内其余判据照常跑）。
-      - name: G5
-        env:
-          GATE_FREEZE_BASE: ${{ github.event.pull_request.base.sha }}
-          GATE_TARGETS: "wasm"
-          BASELINE_TESTS: "1531"   # 与主门禁同一基线（曾滞后在 227 上，成了只走过场的弱判据）
-        run: bash scripts/contract_gate.sh
