@@ -26,6 +26,12 @@ pub fn b64_encode_mime(Bytes) -> String
 
 pub fn b64_encode_url(Bytes, padding? : Bool) -> String
 
+pub fn caesar_decode(String, Int) -> String raise CodecError
+
+pub fn caesar_encode(String, Int) -> String raise CodecError
+
+pub let caesar_table : String
+
 pub fn data_uri(String, String, String) -> String
 
 pub fn data_uri_base64(String, String) -> String
@@ -44,6 +50,14 @@ pub fn radix_decode(String, Int) -> Int64 raise CodecError
 
 pub fn radix_encode(Int64, Int) -> String raise CodecError
 
+pub fn rot13_decode(String, number_support? : Bool) -> String
+
+pub fn rot13_encode(String, number_support? : Bool) -> String
+
+pub fn rot_decode(String, Int, Bool) -> String
+
+pub fn rot_encode(String, Int, Bool) -> String
+
 pub fn url_of_http(String) -> Url raise CodecError
 
 // Errors
@@ -54,6 +68,7 @@ pub suberror CodecError {
   ValueOverflow(String)
   ChecksumMismatch
   BadUtf8(String)
+  ShiftUnderflow(Int)
 }
 
 // Types and methods

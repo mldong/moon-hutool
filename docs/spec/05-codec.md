@@ -216,7 +216,84 @@ hutool `UrlBuilder` 的价值在两处：把一个 URL 串拆成组件（`of(url
 `scripts/UrlPureLeg.java` 的 `C|completeUrl` 共 280 条里，拍板时要不要跟 JDK 的白名单形状，
 连同参照那件四参 `getDataUri(String, Charset, String, String)`（第 3 参是**属性段**、
 第 4 参才是数据，且 charset 出 `Charset.name()` 的 `UTF-8` 而非传入的 `utf-8`——腿 `D|getDataUri(4)` 五行）
-一起拍。
+## 13. 批③ 片一（10-10）：`Caesar` 与 `Rot` 两件移位
 
-> 本笔附带同一条修正：`getDataUri` 的 charset 为 null 那一档在腿里被印成字面量 `{null}`，
-> 生成器把它当合法入参造出断言；现按"本库 `String` 无 null 档"跳过并计数，§12 冻结期望 177 → **150** 条。
+> 状态：**契约笔**——签名与期望已冻（`codec/caesar.mbt`／`codec/rot.mbt` 体是 `PR-B：契约骨架` 的
+> `abort`，`moon check` 0 警告 0 错误，`moon test --package codec` 现读 **188 = 绿 51 / 红 137**，
+> 137 条红全是本批新块）。腿共四份：`scripts/CaesarLeg.java`（971 行读数）、`scripts/RotLeg.java`（2302 行）、
+> `scripts/LetterSetLeg.java` 与 `scripts/LetterRangesLeg.java`（守卫那张表），每份跑两遍逐字节相同。
+> 参照代次 5.8.37（口径见 `00-hutool-map.md` 的 `hutool-reference-version`）。
+
+### 13.1 `Caesar`——名字叫凯撒，算式不是教科书那个
+
+| 公开件 | 对位 | 算式（字节码 + 腿双证） | 边界／错误 | 读数来源 |
+|---|---|---|---|---|
+| `caesar_table` | `Caesar.TABLE`（`public static final String`） | 52 字符**交替**表 `AaBbCc…Zz`，不是 `A-Z` 再 `a-z` ⇒ `A`+1=`a`、`a`+1=`B`、`z`+1=`A` | 长度直接就是取模的模 | `CC|table-len`／`CC|table-esc`／`CC|table-codes` |
+| `caesar_encode(text, shift)` | `encode(String,int)` | 逐 **UTF-16 码元**：不是 Unicode 字母 ⇒ 原样；是字母 ⇒ `j = (table.indexOf(c) + shift) % 52`，取 `table[j]` | `j < 0` ⇒ `CodecError.ShiftUnderflow(j)` | `CC|enc` 组 15 shift × 21 夹具 = 315 档，其中 **57 档是抛错档** |
+| `caesar_decode(text, shift)` | `decode(String,int)` | 同式但用 `- shift`，**且多一步 `if (j < 0) j += 52`** | 从不抛（这一步归一就是全部原因） | `CC|dec` 组 315 档，零抛错；`CC|rt` 组给往返分布 |
+
+三条反直觉，都是腿打出来的、不是推的：
+
+1. **守卫是 Unicode 字母档**（`Character.isLetter(char)`），不是"在不在 52 字符表里"。
+   于是"算字母但不在表里"的码元走 `indexOf == -1` 那条：`é`/`中`/`Ω` 配 `shift=1` 得 `A`、
+   配 `shift=3` 让 `"中文"` 变 `"CC"`，配 `shift<=0` **抛**。窄成 ASCII 档是一处语义发明，
+   已按"自建判定表"处理，见 §13.2。
+2. **`encode` 不做负数归一、`decode` 做**——同一段字节码里两处只差这一行，后果是解码侧从不抛、
+   编码侧负 shift 必抛（`A`−1 就在抛的那 57 档里，不需要非拉丁字母也能撞到）。
+3. **异常消息带那个负下标**（`String index out of range: -14`），所以 `ShiftUnderflow(Int)` 的载荷
+   照原样交出这个数，不夹成正数、不改成 `String`。本包错误面一贯只带读数。
+
+### 13.2 字母守卫的数据件：`codec/letter_table.mbt`
+
+本版 MoonBit core 的 `Char` **没有任何 Unicode 字母谓词**（现读 `builtin/char.mbt`：公开 `is_*` 只有
+ASCII 档与 control/digit/whitespace/numeric/printable/bmp），所以这张判定表自己带：
+
+- **380 段半开区间 `[lo,hi)`**，覆盖 **48,909** 个码元；全域码位和 `mod 2147483647 = 1536313765`。
+- 判据不是"逐位钉表"（那等于抄第二遍），是**扫全 BMP 的三条全域读数逐条对撞** + 6 个跨界边界点 +
+  4 档代理码元，落在白盒件 `codec/letter_table_wbtest.mbt`（表与谓词都私有，不进 `.mbti`）。
+- **生产者指纹 `JDK 17.0.14 (Oracle)` 写进表头**：`isLetter` 的底层是 JDK 自带 Unicode 数据，
+  换大版本可能挪区间 ⇒ 这张表冻的是"与腿里那台 JDK 同判"，重跑腿重出表，不改期望。
+- **逐码元而非逐码位**：代理码位两半都判 false（`LR|surrogate` 四档），所以 emoji 这类非 BMP 字母
+  在参照里整体不参与移位；本库照这条摊码元。这与 `Morse`（那边是 `codePointAt`）相反，两件不许互相"统一"。
+
+### 13.3 `Rot`——三段 ASCII 区间，与 Caesar 正相反
+
+| 公开件 | 对位 | 算式 | 差异声明 |
+|---|---|---|---|
+| `rot_encode(text, shift, number_support)` | `Rot.encode(String,int,boolean)` | `number_support` 且 `0`~`9` ⇒ `(c-48+shift)%10+48`；`A`~`Z` ⇒ `(c-65+shift)%26+65`；`a`~`z` ⇒ `(c-97+shift)%26+97`；其余原样 | **不判字母**，是码位区间 ⇒ `é`/`中` 在此原样（Caesar 那侧却要移） |
+| `rot_decode(text, shift, number_support)` | `Rot.decode(...)` | 同三段，`+` 换 `-` | 同样**不做负数归一** |
+| `rot13_encode(text, number_support~=true)` | `encode13(String)` 与 `encode13(String,boolean)` 两档 | 等价 `rot_encode(text,13,ns)` | 默认档 `true` 由腿定：数字夹具 `0189` 只在 `true` 侧相等 |
+| `rot13_decode(text, number_support~=true)` | `decode13` 两档 | 等价 `rot_decode(text,13,ns)` | 与 `rot13_encode` **不互逆**（25 夹具里 18 条同值） |
+
+- 三段各自独立取模 ⇒ **负 shift 会把字符甩出字母表**并照样出字符：`A`−13 ⇒ `'4'`、`0`−1 ⇒ `'/'`、
+  `a`−13 ⇒ `'T'`（腿 `RT|enc` 组）。把这一档"夹回字母表"是一处语义发明，禁止。
+- 期望规模：`rot_test.mbt` 现读 **92 块 / 2332 条断言**（enc、dec、rt 各 15 shift × 22 夹具 × 2 开关档，
+  加默认档判别块与 `decode13` 分布块）。默认档那条用了**双向判别**——`num_off` 侧在 7 条含数字夹具上
+  与单参档**不等**（断言成 `assert_true(... != ...)`），只钉"等于"是定不死默认值的。
+- `number_support` 两档在测试里走具名常量 `num_on`/`num_off`，不写字面量：断言实参位上出现
+  `"true"`/`"false"` 会被门禁 G17（死格形状棘轮）计数。
+
+### 13.4 到不了与不收
+
+- **三条 `null` 入参档到不了**：`Caesar.encode/decode` 抛 `IllegalArgumentException: message must be not null!`
+  ／ `cipherText must be not null!`，`Rot.encode/decode` 抛 `message must not be null` ／ `rot must not be null`
+  （**两条文案不同，形参名不同**，读数留在两份测试件的头部注释里）。本库入参是 `String`（非空类型），
+  结构上到不了，不造假错误。
+- **`Rot` 没有 2 参重载**：参照只有 `encode(String,int,boolean)`，本库也不发明"省掉开关"的那一档。
+- **本批不含 `Morse`**：码表、二进制回退与 locale 敏感那条 `toUpperCase` 单独立片（腿已跑完，见任务留痕），
+  写进 §13.6 时一并交代分岔两侧读数。
+
+### 13.5 腿到档的映射与变异计划（读数由 PR-B 那笔如实回填）
+
+| 腿 | 行族 | 喂给 |
+|---|---|---|
+| `CaesarLeg.java` | `CC` | §13.1 三件的全部档：表三条、`isLetter` 分布、15×21 的 enc/dec、往返 SAME/DIFF 分布、两条 null |
+| `RotLeg.java` | `RT` | §13.3 的四件：`e13`/`d13` 默认档与自逆分布、15×22×2 的 enc/dec、rt 分布、两条 null |
+| `LetterRangesLeg.java` | `LR` | §13.2 的表本体与三条全域判据 |
+| `LetterSetLeg.java` | `LSET` | 当初判"core 有没有这个谓词"的对撞腿（分块计数），留作 §13.2 那条依赖的来路 |
+
+计划挂 8 档变异（PR-B 填逐档红位，空变异照记）：守卫换成 `is_ascii_alphabetic`（应打回——非拉丁字母那 57 档）、
+守卫整个去掉（表外字母也走 `indexOf`，与参照不同判）、`encode` 补上 `+52` 归一（57 条抛错档全变值）、
+`decode` 去掉归一（抛错档从 0 变多）、`% 52` 写成 `% 26`、`number_support` 判反、
+`A`/`a` 两段的基准字符写混（`65` 写成 `97`）、`rot13_*` 的默认档从 `true` 改 `false`。
+

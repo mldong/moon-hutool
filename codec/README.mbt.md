@@ -68,6 +68,9 @@ fn[A] err_text(g : () -> A raise @codec.CodecError) -> String {
     @codec.ValueOverflow(input) => "ValueOverflow \{input}"
     @codec.ChecksumMismatch => "ChecksumMismatch"
     @codec.BadUtf8(input) => "BadUtf8 \{input}"
+    // 批③新变体：这张错误形状表在文档里也要跟着长——编译器会点名（partial_match 是 error 级），
+    // 这条正是"文档即测试"兑现过一次的地方
+    @codec.ShiftUnderflow(j) => "ShiftUnderflow \{j}"
   }
 }
 ```

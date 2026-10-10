@@ -25,6 +25,10 @@ pub suberror CodecError {
   ChecksumMismatch
   /// `%XX` 流解出来的字节不是合法 UTF-8：只带输入不带下标（出错位置在字节层，硬给个文本下标会指错）
   BadUtf8(String)
+  /// 凯撒移位算出**负下标**（携带那个负数）：参照在这一档抛
+  /// `StringIndexOutOfBoundsException: String index out of range: <负数>`，消息里带的就是这个下标
+  /// ——本库把读数原样交出，不改成正数、也不"顺手"归一（`caesar_encode` 才有这一档，`caesar_decode` 归一后从不抛）
+  ShiftUnderflow(Int)
 }
 
 ///|

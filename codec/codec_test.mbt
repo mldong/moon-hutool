@@ -67,6 +67,8 @@ fn[A] err_shape(g : () -> A raise @codec.CodecError) -> String {
     @codec.ValueOverflow(input) => "ValueOverflow \{input}"
     @codec.ChecksumMismatch => "ChecksumMismatch"
     @codec.BadUtf8(input) => "BadUtf8 \{input}"
+    // 批③新变体：错误形状展示面必须跟着长，否则这一档在测试里读不出来（同 num 批第三条变体那回）
+    @codec.ShiftUnderflow(j) => "ShiftUnderflow \{j}"
   }
 }
 
