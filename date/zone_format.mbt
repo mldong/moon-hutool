@@ -18,9 +18,15 @@ pub fn format_in(
   pattern : String,
   zone : String,
 ) -> String? raise DateError {
-  match zone_offset_minutes(zone, millis) {
-    None => None
-    Some(off) => Some(DateTime::from_epoch_millis(millis, off).format(pattern))
+  if is_custom_format(pattern) {
+    // 参照挂载点在 DateUtil.format 的胶水上，命中就用表、区名与 pattern token 都不参与（§9.6）
+    custom_format(millis, pattern)
+  } else {
+    match zone_offset_minutes(zone, millis) {
+      None => None
+      Some(off) =>
+        Some(DateTime::from_epoch_millis(millis, off).format(pattern))
+    }
   }
 }
 
@@ -44,22 +50,28 @@ pub fn parse_in(
   pattern : String,
   zone : String,
 ) -> Int64? raise DateError {
-  if !zone_exists(zone) {
-    return None
-  }
-  // 串与 pattern 的判据一律沿用 §2.7 已冻那套，本件不改它
-  let wall = DateTime::parse(text, pattern)
-  let offs = wall_offsets(zone, wall, true)
-  if offs.length() == 0 {
-    // 空表有两种成因，出口必须不同：真的不存在（前跳空洞）⇒ 参照在这里主动抛，本库留变体；
-    // 只是超出表的覆盖窗口 ⇒ 与 §5 同形给 None（参照那边还能往 1900 前 / 2050 后查，本库不外推）
-    if wall_offsets(zone, wall, false).length() == 0 {
-      raise ZoneGap(wall.to_iso_string())
+  if is_custom_format(pattern) {
+    // 参照这一档没 parser 时给 null，其胶水 new DateTime(null) 在 hutool 里取"现在"；
+    // 本库不引入那条读时钟的副作用 ⇒ 照 GlobalCustomFormat.parse 那一半给 None（§9.8 第 6 行）
+    custom_parse(text, pattern)
+  } else {
+    if !zone_exists(zone) {
+      return None
     }
-    return None
+    // 串与 pattern 的判据一律沿用 §2.7 已冻那套，本件不改它
+    let wall = DateTime::parse(text, pattern)
+    let offs = wall_offsets(zone, wall, true)
+    if offs.length() == 0 {
+      // 空表有两种成因，出口必须不同：真的不存在（前跳空洞）⇒ 参照在这里主动抛，本库留变体；
+      // 只是超出表的覆盖窗口 ⇒ 与 §5 同形给 None（参照那边还能往 1900 前 / 2050 后查，本库不外推）
+      if wall_offsets(zone, wall, false).length() == 0 {
+        raise ZoneGap(wall.to_iso_string())
+      }
+      return None
+    }
+    // 末支 = 转换后那一支：参照 Calendar 在重叠档就是这么取的，三区读数同证（§7.3 第 2 行）
+    Some(wall.to_epoch_millis(offs[offs.length() - 1]))
   }
-  // 末支 = 转换后那一支：参照 Calendar 在重叠档就是这么取的，三区读数同证（§7.3 第 2 行）
-  Some(wall.to_epoch_millis(offs[offs.length() - 1]))
 }
 
 ///|

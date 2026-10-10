@@ -442,6 +442,111 @@ test "启动时设一次，之后到处不带区名" {
 }
 ```
 
+## 计时：读钟的活儿交给调用方
+
+`StopWatch` 对位 hutool 的 `cn.hutool.core.date.StopWatch`，差别只有一处：**本库一处都不读时钟**，
+纳秒读数由你给（`() -> Int64`）。这样做的收益就在下面这段里——时长成了确定的数，
+期望值才冻得住（契约面 `docs/spec/03-date.md` §9.2~§9.4、§9.7）。
+
+```mbt check
+///|
+fn tick_clock(ticks : Array[Int64]) -> () -> Int64 {
+  let i : Array[Int] = [0]
+  () => {
+    let k = i[0]
+    i[0] = k + 1
+    ticks[if k < ticks.length() { k } else { ticks.length() - 1 }]
+  }
+}
+
+///|
+test "秒表：两段任务、表号与三条读数" {
+  let sw = @date.stop_watch(
+    tick_clock([0L, 1500000L, 1500000L, 4500000L]),
+    id="构建",
+  )
+  sw.start(name=Some("编译")) catch {
+    _ => abort("夹具的 start 不该抛")
+  }
+  sw.stop() catch {
+    _ => abort("夹具的 stop 不该抛")
+  }
+  sw.start(name=Some("测试")) catch {
+    _ => abort("夹具的 start 不该抛")
+  }
+  sw.stop() catch {
+    _ => abort("夹具的 stop 不该抛")
+  }
+  assert_eq(sw.task_count(), 2)
+  assert_eq(sw.total_nanos(), 4500000L)
+  assert_eq(sw.last_task_nanos(), 3000000L)
+  assert_eq(sw.total_millis(), 4L)
+  assert_eq(sw.short_summary(), "StopWatch '构建': running time = 4500000 ns")
+  assert_eq(
+    sw.to_string(),
+    "StopWatch '构建': running time = 4500000 ns; [编译] took 1500000 ns = 33%; [测试] took 3000000 ns = 67%",
+  )
+  assert_eq(@date.Milliseconds.shot_name(), "ms")
+  assert_eq(@date.Microseconds.shot_name(), "μs")
+}
+```
+
+无名任务与"名字真的是空"是两档：`start()` 存的是空串（`Some("")`），
+`start(name=None)` 在参照那一侧等价于传 `null`——**等于什么都没开始**，之后 `is_running()` 恒 `false`。
+这条暗档不是洁癖，是参照 `isRunning()` 判的就是"当前名 != null"（腿 `SN` 行四档）。
+
+## 时长说成人话
+
+`format_between` 对位 `DateUtil.formatBetween(long)`：零值档整段跳过、非正一律 `0毫秒`
+（**不是**取绝对值），逐级借位而不是取模，所以天那一档必须是 `Int64`。
+
+```mbt check
+///|
+test "时长串：零值档跳过、负数不猜符号" {
+  assert_eq(@date.format_between(90061000L), "1天1小时1分1秒")
+  assert_eq(@date.format_between(604801000L), "7天1秒")
+  assert_eq(@date.format_between(86399999L), "23小时59分59秒999毫秒")
+  assert_eq(@date.format_between(0L), "0毫秒")
+  assert_eq(@date.format_between(-1000L), "0毫秒")
+  assert_eq(
+    @date.format_between(9223372036854775807L),
+    "106751991167天7小时12分55秒807毫秒",
+  )
+  let g = @date.group_time_interval(tick_clock([1000L, 90062000L]))
+  let _ = g.start(id="请求")
+  assert_eq(g.interval_pretty(id="请求"), "1天1小时1分1秒")
+  assert_eq(g.interval(id="没记过的键"), 0L)
+}
+```
+
+## 全局自定义格式表
+
+对位 `GlobalCustomFormat`：把某个 pattern 整串换成"查表算"。参照那张表是进程级静态的，
+本库按 `date` 包既有口径做成**显式 set、显式 reset**（同 `set_default_zone`），
+并且照抄它两张表不对称那件事——只登记 parser 的键在门面上是隐形的（spec §9.6 开头那段）。
+
+```mbt check
+///|
+test "内置两档 + 自己登记一档，用完复位" {
+  let t = 1700000000123L
+  assert_eq(@date.is_custom_format("#sss"), true)
+  assert_eq(@date.custom_format(t, "#sss"), Some("1700000000"))
+  assert_eq(@date.custom_format(-999L, "#sss"), Some("-1"))
+  assert_eq(@date.custom_format(t, "#SSS"), Some("1700000000123"))
+  assert_eq(@date.custom_parse("1700000000", "#sss"), Some(1700000000000L))
+  assert_eq(@date.format_local(t, "#sss"), Some("1700000000"))
+  assert_eq(@date.format_local(t, "yyyy-MM-dd"), Some("2023-11-15"))
+  @date.set_custom_format("epoch", ms => "E" + ms.to_string())
+  assert_eq(@date.format_local(t, "epoch"), Some("E1700000000123"))
+  assert_eq(@date.format_local(t, "yyyy-MM-dd"), Some("2023-11-15"))
+  @date.reset_custom_format("epoch")
+  assert_eq(@date.is_custom_format("epoch"), false)
+}
+```
+
+内置 `#sss` 的格式化是**向下取整**（`floorDiv`），解析那侧是 `multiplyExact`——
+一个是负半边给 `-1` 而不是 `0`，一个是溢出必抛而不是静默回绕，两处都有腿读数钉着（§9.6 末两行）。
+
 ## 这一层不做的事
 
-命名时区与 DST 已由内置表支持（见上，spec §5/§7）；本层仍不做的是：`java.text` 全套 pattern（`EEEE`/`MMM`/`a`/`Z`/`X`/`ww`/`D`）、JDK 的 lenient 滚动语义、闰秒、农历/节气/生肖、调休与法定节假日表、微秒/纳秒精度、RFC 7231 IMF 日期（要英文星期/月名表，随 `EEE`/`MMM` 一起再定）。逐条理由见 [`docs/ROADMAP.md`](https://github.com/mldong/moon-hutool/blob/master/docs/ROADMAP.md) 的「暂不做」「不做」两节。
+命名时区与 DST 已由内置表支持（见上，spec §5/§7）；本层仍不做的是：`java.text` 全套 pattern（`EEEE`/`MMM`/`a`/`Z`/`X`/`ww`/`D`）、JDK 的 lenient 滚动语义、闰秒、农历/节气/生肖、调休与法定节假日表、**微秒/纳秒精度的时钟源**（core 没有纳秒口，所以计时件的纳秒档只收注入的读数、本库不自带真钟——单位换算与 `pretty_print` 里的纳秒/微秒档已做，见上面那节与 spec §9.2），RFC 7231 IMF 日期（要英文星期/月名表，随 `EEE`/`MMM` 一起再定）。逐条理由见 [`docs/ROADMAP.md`](https://github.com/mldong/moon-hutool/blob/master/docs/ROADMAP.md) 的「暂不做」「不做」两节。
