@@ -1,6 +1,8 @@
 # 契约 03 · date（日期时间）
 
-> 状态：**五批都已收口**（首批 10-05；第二批内置时区表、第三批可注入时钟源、第四批命名时区版 format/parse 各两笔，10-06 完成；第五批默认区与无参便捷入口两笔，10-07 完成）。
+> 状态：**前五批都已收口，第六批契约已冻结**（首批 10-05；第二批内置时区表、第三批可注入时钟源、第四批命名时区版 format/parse 各两笔，10-06 完成；第五批默认区与无参便捷入口两笔，10-07 完成；
+> 第六批＝§9 计时三件 + 全局自定义格式表，10-10 契约笔——`date/timer.mbt`/`date/between.mbt`/`date/custom_format.mbt`
+> 的函数体是 `abort`，本批用例此刻红是设计态，实现笔只许把红变绿）。
 > 首批实现在 `date/date.mbt`，公开接口在 `date/pkg.generated.mbti`（契约先行到落地 **`.mbti` 零漂移**——
 > 公开签名一字未动），首批期望值在 `date/date_test.mbt` 与 `date/README.mbt.md`：47 条读数在
 > wasm / js / wasm-gc 三档一致，native 档由 CI 出证。第二批的数据与期望在 `date/zone_table.mbt` 与
@@ -424,7 +426,7 @@ hutool 的 `cn.hutool.core.date.SystemClock`（javap 现读公开面只有 `Syst
 | # | 不收 | 理由 |
 |---|---|---|
 | 1 | `SystemClock` 的缓存那一半（同毫秒恒等、1 ms 刷新） | 参照内部是 `ScheduledExecutorService` 线程；本库零 extern、全同步，既起不了线程，也无法冻结"同毫秒恒等"这种只能在并发下才成立的判据 |
-| 2 | 单调钟 / 秒表（`DateUtil.timer()`、`StopWatch`、`elapsed`） | 需要 monotonic 源。core 的 `env` 只给墙上毫秒；`core/bench` 里那三份 `monotonic_clock_{js,native,wasm}.mbt` 是 bench 自用、没做成公开包，而本库契约禁 extern ⇒ 没有可信的单调源，硬做就是拿墙上钟假装单调（NTP 往回拨就错） |
+| 2 | 单调钟 / 秒表（`DateUtil.timer()`、`StopWatch`、`elapsed`） | 需要 monotonic 源。core 的 `env` 只给墙上毫秒；`core/bench` 里那三份 `monotonic_clock_{js,native,wasm}.mbt` 是 bench 自用、没做成公开包，而本库契约禁 extern ⇒ 没有可信的单调源，硬做就是拿墙上钟假装单调（NTP 往回拨就错）<br>**10-10 第六批就地更正：这一行已被 §9 推翻**（owner 点名"注入"）。它拦的是"库自己读时钟并承诺单调"，拦不住"库不读时钟"——`StopWatch`/`TimeInterval`/`GroupTimeInterval` 现在都只吃调用方注入的 `() -> Int64`，G18 白名单一字未动，理由与判据见 §9.1。`DateUtil.timer()`（返回一个预启动的 `TimeInterval`）由 §9.4 的 `time_interval(clock)` 承接；`elapsed` 那族数值差仍由 §2.9 的 `between`/`difference` 承担 |
 | 3 | `nowDate()`（参照 `new Timestamp(ms).toString()`，形如 `2026-10-06 12:00:00.123`） | 参照吃默认时区 + 依赖 `Timestamp.toString` 的定宽格式；本库区名必填，而"要串"这一步 `DateTime::format` 已经能做 |
 | 4 | 时钟的时区自适应（"本机时区"隐式档） | 与 §0.1 冲突且 wasm 取不到宿主偏移 |
 | 5 | `Clock` 结构体 / 枚举抽象 | 一个 `() -> Int64` 就够，套一层类型要多一个公开类型与一份 `.mbti` 面，收益只有好看 |
@@ -742,3 +744,229 @@ owner 的裁定是原话：**"每个方法都传入肯定是不对的……环�
 红位与行一一对得上。相反的例子在同日的另三批：conv 5 红 1 等价、ini 6 红 1 等价、codec 6 红 1 等价，
 那三条各自撕到"覆盖到但不可判别"（`X6`/`M3`/`C7`，推导分别写在 `09-conv.md` §10、
 `22-ini.md` §10、`05-codec.md` §11）——共同点是夹具往既有形状上接，不是为那档新写。
+
+## 9. 计时三件与全局自定义格式表（第六批，10-10 owner 点名"注入"）
+
+> 状态：**第六批契约笔**（本节 + `date/timer.mbt` + `date/between.mbt` + `date/custom_format.mbt` 的
+> 签名骨架与冻结期望；函数体是 `abort`，用例此刻红是设计态）。实现笔只许把红变绿。
+> 读数来源是本仓新增的五条腿 `scripts/TimerLeg.java`（行族 `W`/`T`/`G`/`F`）、`TimerLeg2.java`（`Z`/`P`）、
+> `TimerLeg3.java`（`SH`/`LS`/`NF`/`PC`/`PP`/`FB`/`GF`）、`TimerLeg4.java`（`CU`/`NS`/`TI`/`SN`/`ID`/`EP`）、
+> `TimerLeg5.java`（`P5`）；参照代次 5.8.37（口径见 `00-hutool-map.md` 的 `hutool-reference-version`）。
+
+### 9.1 为什么要开这一批：§6.5 第 2 行的就地更正
+
+`§6.5` 那行原先判"单调钟 / 秒表（`DateUtil.timer()`、`StopWatch`、`elapsed`）**不收**"，理由是
+"core 只给墙上毫秒、没有可信单调源，硬做就是拿墙上钟假装单调（NTP 往回拨就错）"。
+**10-10 owner 裁定改判：做，走注入时钟**（原话"可推；注入"）。前提被新证据推翻的经过要写清：
+
+| 项 | 原判据的前提 | 本批的事实 |
+|---|---|---|
+| 谁读时钟 | **本库自己去读** ⇒ 只能读到墙上毫秒 ⇒ 承诺不了单调 | 本库**一处都不读**：读数由调用方按 `() -> Int64` 注入。G18 白名单一字未动（现读全仓裸读点仍只有 `date/date.mbt` 的 `now_millis()` 一处），本批新增的每个计时件都只能在拿到钟之后才算差值 |
+| 单调性是谁的责任 | 库背 | 注入方背：测试给假钟 ⇒ 读数确定；生产由宿主自己决定拿什么喂（能给单调源就给，给不了就用毫秒钟，本库不冒充） |
+| §6.5 第 5 行"不做 `Clock` 结构体抽象" | 仍然成立 | 本批所有构造口吃的都是 `() -> Int64`，没有新增时钟类型 |
+
+一句话：**"没有可信单调源"这条拦的是"库自己读时钟并承诺单调"，拦不住"库不读时钟"**。
+改判之后 §6.5 那行从"不收"变成"§9 收了"，原判据里对 `SystemClock` 缓存线程的那半条（第 1 行）不受影响。
+
+### 9.2 时钟从哪来：参照有两套时钟，本库因此有两个构造口
+
+现读字节码（`GroupTimeInterval.getTime()`）：参照按一个 `isNano` 布尔在**两个不同的 OS 时钟**之间二选一，
+`StopWatch` 则**恒定**读纳秒钟（它没有开关，字段就叫 `startTimeNanos`/`totalTimeNanos`）。
+
+| 参照时钟口 | 参照里谁在用 | 本库落点 | 为什么不能压成一个参数让调用方"顺手声明" |
+|---|---|---|---|
+| `System.currentTimeMillis()`（epoch 毫秒、墙上） | `getTime()` 的 `isNano=false` 支；`TimeInterval()` 与 `GroupTimeInterval(false)` 默认档 | `time_interval(clock)` / `group_time_interval(clock)` | 单位决定 `interval_in` 里"要不要先除 1_000_000"那一半判据（腿 `G` 行 + 字节码现读：`isNano` ⇒ `interval(key)/1000000` 再 `÷ unit.millis`）。若做成"一个钟 + 一个布尔"，传错就是**静默差 1e6 倍**且没有任何一档会红；做成两个具名构造口，单位与判据同时定死 |
+| `System.nanoTime()`（任意起点、单调） | `getTime()` 的 `isNano=true` 支；`StopWatch` 全部（`start`/`stop` 两处 invokestatic） | `time_interval_nanos(clock)` / `group_time_interval_nanos(clock)` / `stop_watch(clock)` | core 没有纳秒口（§1 头注那条：全树唯一 OS 时钟口是 `env.now()` 的毫秒档）⇒ **本库不自带纳秒真钟**，只收调用方给的读数源。要拿毫秒钟凑纳秒档就得自己乘 `1_000_000`，那等于自愿把分辨率降到毫秒——这条是宿主的选择，不是本库的承诺 |
+
+配套判据（都是腿里与时钟无关的确定档）：
+
+- 两个单位下 `interval` 的**算式相同**（`getTime() - 存档读数`，见字节码 `interval(String)`），
+  差别只在单位 ⇒ 差值算术、缺键给 `0`、`interval_restart` 的"先存再减旧值"三档两单位共用一套用例。
+- `TimeInterval` 的构造口**必须自动 `start()`**（腿 `Z|Ti.interval@fresh` 给的是小正数而非 0，
+  而 `GroupTimeInterval` 的 `interval@empty` 给 `0` ⇒ 差的就是 ctor 里那一次 start；字节码现读
+  `TimeInterval(boolean)` 第 6 行 `invokevirtual start:()J`）。参照的默认键是**空串**
+  （`private static final String DEFAULT_ID = ""`，字节码 `ldc #6` 现读为空串字面量）。
+- 参照的 `TimeInterval(boolean)` 参数名在字节码里是 **`isNano`**（不是 `isMillis`）——
+  本机被这条骗过一次：`new TimeInterval(true)` 拿到的是**纳秒档**（腿 `Z|isMillis=true|interval|497100`
+  对上毫秒档的 `1`），照着参数名猜"true=毫秒"会把两档的用例全写反。
+
+### 9.3 公开面 · StopWatch / TaskInfo / ChronoUnit
+
+`StopWatch` 的参照三个构造器（`()`、`(String)`、`(String, boolean)`）加一个 `create(String)` 在本库塌成
+**一个带标签默认值的构造口**；`create` 与 `new StopWatch(id)` 在参照里是同一件事（字节码现读：`create` 就是 `new StopWatch(String)`）。
+
+| 签名 | 语义 | 边界 / 错误 | hutool 对位 | 差异声明 | 读数来源 |
+|---|---|---|---|---|---|
+| `stop_watch(clock : () -> Int64, id~ : String = "", keep_task_list~ : Bool = true) -> StopWatch` | 秒表。`clock` 给**纳秒**读数（参照 `System.nanoTime()`） | 无 | `StopWatch()` / `StopWatch(String)` / `StopWatch(String,boolean)` / `create(String)` | ① 参照的 `id` 可以真是 `null`（腿 `ID|null-id-summary` 读出 `StopWatch 'null': ...`），本库 `id : String` **构造不出 null 档**；② 参照 `new StopWatch(String)` 的 `keep` 恒 `true`（字节码 `iconst_1` 现读）⇒ 默认值不是猜测 | 腿 `ID` 行 |
+| `StopWatch::id(self : StopWatch) -> String` | 表号 | — | `getId()` | 本库恒非空（同上） | — |
+| `StopWatch::set_keep_task_list(self : StopWatch, keep : Bool) -> Unit` | 开/关"逐条留存任务" | 无 | `setKeepTaskList(boolean)` | 判据照参照字节码：`true` **只在当前不保留时**新建空表（已保留 ⇒ 空操作、行还在）；`false` 直接把表置 null ⇒ **已经记下的行丢**。来回切一次就能观察到"行没了"（腿 `PP|keep-翻true后-pretty` 表头都在、行是空） | 腿 `PP` 行 |
+| `StopWatch::start(self : StopWatch, name~ : String? = Some("")) -> Unit` | 开始一条任务 | 已在跑 ⇒ `raise DateError::TimerAlreadyRunning` | `start()`（= `start("")`）与 `start(String)` | 参照的"是否在跑"判的是 `currentTaskName != null`，所以 **`start(name=None)` 等于什么都没开始**：之后 `is_running()` 恒 `false`、`stop()` 报"没在跑"、`start("real")` 还能进（腿 `SN` 行四档全冻）。本库把参数做成 `String?` 就是为了这条暗档仍然可达 | 腿 `W`/`SN` 行 |
+| `StopWatch::stop(self : StopWatch) -> Unit` | 结束当前任务 | 不在跑 ⇒ `raise TimerNotRunning` | `stop()` | 参照把 `总时长 += 末读数-起读数`、`last_task = TaskInfo(名, 差)`、**保留时才追进表**、`task_count += 1`、`current_task_name = null` 五步写死一个顺序；本库照同一顺序（`task_count` 与表长**可以不等**，`keep=false` 那档就是证据） | 腿 `W`/`ID` 行 |
+| `StopWatch::is_running(self : StopWatch) -> Bool` | 是否有一条在跑 | — | `isRunning()` | 等价于 `current_task_name() is Some(_)`，参照也是这么判的（字节码 `ifnull`） | 腿 `W` 行 |
+| `StopWatch::current_task_name(self : StopWatch) -> String?` | 当前任务名 | 没在跑 ⇒ `None` | `currentTaskName()` | `Some("")` 与 `None` 是两档：无名 `start()` 给 `Some("")`，`start(name=None)` 给 `None`（腿两档读数不同：前者空串、后者 `{null}`） | 腿 `W`/`SN` 行 |
+| `StopWatch::last_task_nanos / last_task_millis(self : StopWatch) -> Int64` | 上一条任务的时长 | 没跑过 ⇒ `raise NoLastTask` | `getLastTaskTimeNanos/Millis()` | 参照两条 message 不同（`No tasks run: can't get last task interval`），本库错误面不冻文案 ⇒ **一个变体**（§1 那条"只带读数不带文案"的规则） | 腿 `W` 行 |
+| `StopWatch::last_task_name(self : StopWatch) -> String?` | 上一条任务的名 | 同上 `raise NoLastTask` | `getLastTaskName()` | 无名任务给 `Some("")`、`start(null)` 之后给 `None`（腿 `W|lastTaskName@after-stop-unnamed` 是空档不是 ERR） | 腿 `W`/`SN` 行 |
+| `StopWatch::last_task_info(self : StopWatch) -> TaskInfo` | 上一条任务整条 | 同上 | `getLastTaskInfo()` | — | 腿 `W` 行 |
+| `StopWatch::total_in(self : StopWatch, unit : ChronoUnit) -> Int64` | 总时长按单位取 | 无（不抛） | `getTotal(TimeUnit)` | 参照 = `unit.convert(totalNanos, NANOSECONDS)`，整数**向零截断**（腿 `CU` 行负档为凭：`-999999999` 纳秒 ⇒ 毫秒 `-999`、秒 `0`） | 腿 `CU` 行 |
+| `StopWatch::total_nanos / total_millis(self : StopWatch) -> Int64`、`total_seconds(self : StopWatch) -> Double` | 三件便捷读数 | — | `getTotalTimeNanos/Millis/Seconds()` | 秒档参照走 `DateUtil.nanosToSeconds(n)` = `n / 1.0E9`（腿 `NS` 行；契约只取能精确表示的档，不断 `Double` 的十进制外形） | 腿 `NS` 行 |
+| `StopWatch::task_count(self : StopWatch) -> Int` | 结束过的任务条数 | — | `getTaskCount()` | **与留存表长解耦**：`keep=false` 时参照计数照加（腿 `keep=false|taskCount|2` 对 `taskInfoLen|ERR`） | 腿 `keep=false` 组 |
+| `StopWatch::task_infos(self : StopWatch) -> Array[TaskInfo]` | 留存的任务行（按结束顺序） | 不保留 ⇒ `raise TaskInfoNotKept` | `getTaskInfo()` | 参照抛 `UnsupportedOperationException("Task info is not being kept!")`，本库换成同条件的一个变体；返回**新数组**（参照 `toArray` 也是新数组，改它不影响内部） | 腿 `ID`/`keep=false` 组 |
+| `StopWatch::short_summary(self : StopWatch, unit~ : ChronoUnit = Nanoseconds) -> String` | 一行摘要 | 无 | `shortSummary()` / `shortSummary(TimeUnit)` | 模板逐字节冻：`StopWatch '<id>': running time = <total_in(unit)> <shot_name(unit)>`；无参档参照传的是 `null` ⇒ 落到 `NANOSECONDS`（字节码现读 `if_acmpne` 那一支） | 腿 `PP|shortSummary*` |
+| `StopWatch::pretty_print(self : StopWatch, unit~ : ChronoUnit = Nanoseconds) -> String` | 对齐表格 | 无 | `prettyPrint()` / `prettyPrint(TimeUnit)` | 排版规则整体见 **§9.7**（四条与时钟无关的判据：补零、百分号舍入、列宽、行分隔符） | 腿 `PP`/`NF`/`PC` 行 |
+| `StopWatch::to_string(self : StopWatch) -> String` | `toString()` 那行 | 无 | `toString()` | 百分号档参照走 `Math.round(100.0 × n / total)`（**不是** `prettyPrint` 那套 `NumberFormat`）：向数轴正向取整、NaN ⇒ `0`、不补零（腿 `SN|toString` 与 `PC` 行对照；`total=0` 那档参照给 `= 0%` 而 `prettyPrint` 给 `NaN`，两条都必须复现） | 腿 `SN`/`PC` 行 |
+| `pub struct TaskInfo { priv name : String?, priv nanos : Int64 }` | 一条任务读数 | 跨包只读（参照的构造器是**包级私有**） | `StopWatch.TaskInfo` | 参照只有 getter，本库同样不给公开构造口 | — |
+| `TaskInfo::task_name(self : TaskInfo) -> String?`、`time_nanos -> Int64`、`time_millis -> Int64`、`time_seconds -> Double`、`time_in(self, unit : ChronoUnit) -> Int64` | 五个读数 | 无 | 同名五件 | `time_millis` = `time_in(Millisecond)`、`time_seconds` = `nanosToSeconds(nanos)`，字节码现读的两条委托关系照抄（腿 `TI` 行逐档对上） | 腿 `TI` 行 |
+| `pub(all) enum ChronoUnit { Nanoseconds Microseconds Milliseconds Seconds Minutes Hours Days }` | 秒表用的时长单位（**七档**） | — | `java.util.concurrent.TimeUnit` | 与本包 `TimeUnit`（对位 hutool `DateUnit`，六档、无纳秒/微秒）**刻意分成两个类型**：参照自己就是两个枚举，`getTotal`/`prettyPrint` 吃 junit 那个、`interval(key, unit)` 吃 `DateUnit`。合成一个就要给 `TimeUnit` 加纳秒/微秒档，而那两档一进 `to_millis()` 就承诺了"1 纳秒 = 0 毫秒"这种静默归零。<br>**变体名一律用复数**不是口味：本版编译器对"同包两个枚举撞变体名"直接判 `4124 constructor is ambiguous`（实撞：`@date.Hour` 在 `date_test.mbt` 与 README 块里当场 ambiguous），而参照两侧的名字本来就是 junit 复数（`NANOSECONDS`）↔ hutool `DateUnit` 单数（`SECOND`）——**照参照的命名就自然不撞**，改名只是把这条现读事实落到形状上 | 腿 `SH` 行 + 本机编译器裁决 |
+| `ChronoUnit::shot_name(self : ChronoUnit) -> String` | 单位短名 | — | `DateUtil.getShotName(TimeUnit)` | 七档读数全部冻成常量：`ns` / `{u03bc}s`（**U+03BC GREEK SMALL LETTER MU**，不是 U+00B5）/ `ms` / `s` / `min` / `h` / `days`。参照那是 `DateUtil` 上的静态法，本库挂在枚举上（结构层，判据不变）。参照传 `null` 抛 NPE，本库没有这一档（类型到不了） | 腿 `SH` 行 |
+
+### 9.4 公开面 · 计时区间（参照 `GroupTimeInterval` + `TimeInterval` 两面合一）
+
+参照是**继承**：`TimeInterval extends GroupTimeInterval`，加一个固定键 `DEFAULT_ID = ""`（空串）和九个无参便捷法，
+其余全继承——所以 `TimeInterval` 的实例在参照里**也能**调 `start("别的键")`（腿 `T|extends-group?start(key)` 就是为这条打的）。
+MoonBit 没有继承。本库的做法是**一个类型承载两面**：键参数做成 `id~ : String = ""`，
+参照的"无参 = 走 DEFAULT_ID"因此就是同一件法的默认值档，两个参照类的公开面一次覆盖，
+判据只有一套（不留第二套算法）。
+
+| 签名 | 语义 | 边界 / 错误 | hutool 对位 | 差异声明 | 读数来源 |
+|---|---|---|---|---|---|
+| `group_time_interval(clock : () -> Int64) -> GroupTimeInterval` | 毫秒档分组计时器 | 无 | `GroupTimeInterval(false)` | 参照的 `groupMap` 是 `SafeConcurrentHashMap`（并发安全）；本库全同步，**不承诺并发可见性** | 字节码 ctor |
+| `group_time_interval_nanos(clock : () -> Int64) -> GroupTimeInterval` | 纳秒档 | 无 | `GroupTimeInterval(true)` | 同上；单位由构造口定，不再暴露布尔（§9.2） | 腿 `Z` 行两组 |
+| `time_interval(clock : () -> Int64) -> GroupTimeInterval` | 毫秒档 + **构造即 start 空键** | 无 | `TimeInterval()` | 参照返回的是子类实例；本库返回同一类型 ⇒ 类型层面的父子区别消失，行为区别（预启动）保留 | 腿 `Z|Ti.interval@fresh` 对 `G.interval@empty` |
+| `time_interval_nanos(clock : () -> Int64) -> GroupTimeInterval` | 纳秒档 + 预启动 | 无 | `TimeInterval(true)` | 同上 | 腿 `Z` 行 |
+| `GroupTimeInterval::start(self : GroupTimeInterval, id~ : String = "") -> Int64` | 给某键记起点，返回**那次读数** | 无（重复 start 就是覆盖） | `start(String)` / `TimeInterval::start()` | 键存在 ⇒ 覆盖旧读数，无"重复 start 报错"这种档（参照就是把同一个 key `put` 两次；腿 `G|start(k1) again` 照样给数）。返回值是**原始读数**不是差值：毫秒档就是 epoch 毫秒（腿 `T|start||#`，本库用假钟把它冻成确定值） | 腿 `G`/`T` 行 |
+| `GroupTimeInterval::restart(self : GroupTimeInterval, id~ : String = "") -> Unit` | 重新起表（参照 `TimeInterval::restart()`） | 无 | `TimeInterval::restart()` | 参照返回 `this` 供链式；本库返回 `Unit`（引用语义下不需要链式）——本包**不承诺链式** | 腿 `T|restart` |
+| `GroupTimeInterval::interval(self : GroupTimeInterval, id~ : String = "") -> Int64` | 从起点到此刻的差（原单位） | **键不存在 ⇒ `0`**（不抛、不 None） | `interval(String)` / `TimeInterval::interval()` | 参照字节码现读：先 `map.get`，`null` 就 `lconst_0; lreturn`。"没记过"与"记了但正好 0"两档在公开读数上**不可区分**，这是参照行为不是笔误 | 腿 `G|interval@empty`、`Z|G.interval-unstarted`、`T|interval(unknown-key)` |
+| `GroupTimeInterval::interval_restart(self : GroupTimeInterval, id~ : String = "") -> Int64` | 算差**并**把起点推到此刻 | 键不存在 ⇒ 返回**那次读数本身**（不是差） | `intervalRestart(String)` | 参照 = `t - defaultIfNull(map.put(key, t), 0)` ⇒ 未记过的键拿到的是原始读数（毫秒档就是 epoch 毫秒，是个巨大的数）。腿 `Z|Ti.intervalRestart@fresh|2` 那条是因为 ctor 已经 start 过；本库用假钟把"未记过"这一档冻成确定的大数 | 字节码 + 腿 `G|intervalRestart` |
+| `GroupTimeInterval::interval_in(self : GroupTimeInterval, unit : TimeUnit, id~ : String = "") -> Int64` | 按单位取差 | 键不存在 ⇒ `0` | `interval(String, DateUnit)` | 算式两步：纳秒档先 `÷1_000_000` 换成毫秒，再 `unit` 非 MS 时 `÷ unit 的毫秒数`；两次都是**向零截断**。`unit == MS` 那一支参照直接返回（等价于 `÷1`，本库不重复除） | 腿 `G|interval(k1,MS/SECOND)` |
+| `interval_ms / interval_second / interval_minute / interval_hour / interval_day / interval_week(self, id~ : String = "") -> Int64` | 六档便捷读数 | 同上 | 同名六件 | 全部委托 `interval_in`（参照也是这么委托的，字节码现读六处 `interval(String,DateUnit)`）⇒ 不留第二套算法 | 腿 `G|intervalMs/Second/Minute/Week` |
+| `GroupTimeInterval::interval_pretty(self : GroupTimeInterval, id~ : String = "") -> String` | 差值说成中文时长 | 键不存在 ⇒ `0` ⇒ `0毫秒` | `intervalPretty(String)` / `TimeInterval::intervalPretty()` | 参照 = `DateUtil.formatBetween(intervalMs(id))` ⇒ 本库 = `format_between(interval_ms(id~))`，**中间量已经是毫秒**，所以纳秒档在这里已经除过一次 1e6 | 腿 `Z|Ti.intervalPretty@fresh`、`FB` 行 |
+| `GroupTimeInterval::clear(self : GroupTimeInterval) -> Unit` | 清空所有键 | 无 | `clear()`（参照返回 `this`） | 参照是 `map.clear()`，**不重建 map**；本库同样只清。链式那半条不承诺（同 `restart`） | 腿 `G|clear then interval` |
+| —（不挂载） | 参照 `interval(null)` / `intervalPretty(null)` 抛 NPE | — | 同左 | MoonBit 的 `Map` 键不能是 null ⇒ **这条臂在本库结构上到不了**，不预留、不写"等价处理" | 腿 `Z|G.interval-null-key` 四条 ERR |
+
+### 9.5 公开面 · `format_between`（`interval_pretty` 的唯一依赖）
+
+参照链：`intervalPretty(id)` → `DateUtil.formatBetween(long)` → `new BetweenFormatter(ms, Level.MILLISECOND).format()`
+（**字节码现读**：一参版传的就是 `Level.MILLISECOND`，不是 `DAY`——腿 `FB` 行里 `3600000` 一参给"1小时"而 `DAY` 档给"0天"，
+这条就是它的对质）。`BetweenFormatter` 那个类本身（`Level` 五档、`levelMaxCount`、`separator`、`levelFormatter`）
+**仍挂 gap**，本批只收它默认那条路（census 理由已就地改成这句）。
+
+| 签名 | 语义 | 边界 / 错误 | hutool 对位 | 差异声明 | 读数来源 |
+|---|---|---|---|---|---|
+| `format_between(millis : Int64) -> String` | 时长毫秒数 → 中文串（`1天2小时3分钟4秒5毫秒` 那种，无分隔符） | 无抛错 | `DateUtil.formatBetween(long)` | 见下面三条判据；本库只出这一档（不带 `Level`、不带分隔符、不带条数上限） | 腿 `FB` 行 23 档 |
+
+三条判据（逐条都有腿读数兜着，不是从参照源码"看着像"推的）：
+
+1. **`millis <= 0` 一律 `0毫秒`**（腿 `FB|-1`、`FB|-1000`、`FB|-86400000` 三条全给 `0毫秒`）。
+   根因在参照字节码第一行：`betweenMs > 0` 不成立就整段跳过，落到"表空 ⇒ 补 `0` + 当档名"那一步。
+   ⇒ 负数**不是**带符号的时长，也不是绝对值。
+2. **零值档整段跳过**，最后一个非零档之后不再补零；一个都没进去 ⇒ 补 `0` + 档名。
+   证据：`604801000` ⇒ `7天1秒`（中间的 0 小时 0 分**不出现**，但秒出现）；`3600001` ⇒ `1小时1毫秒`；
+   `86399999` ⇒ `23小时59分59秒999毫秒`（天为 0 ⇒ 不出现，后面的都出现）。
+3. **五个档的算法是"逐级借位"不是"取模"**：参照字节码里 `hours = ms/HOUR - days*24`、
+   `minutes = ms/MINUTE - days*24*60 - hours*60`、`seconds = ms/SECOND - 累计秒`、`millis = ms - 累计秒*1000`，
+   全是**向零截断**的除法再相减。本库照这个算式（不是 `%`），因为两者在非负输入上同值、
+   在 `Long.MAX_VALUE` 这种边界上才能证明没多算：`9223372036854775807` ⇒
+   `106751991167天7小时12分55秒807毫秒`（腿 `FB` 行原样），天那一档必须用 `Int64`，装不进 32 位 `Int`。
+
+五个档名是常量（腿 `FB|level-name-*`）：`天` `小时` `分` `秒` `毫秒`；分隔符默认空串（参照在末尾会
+`delete` 掉多挂的那一段，本库没有分隔符那一步 ⇒ 不需要，也不承诺可配）。
+
+### 9.6 公开面 · 全局自定义格式表（参照 `GlobalCustomFormat`）与它的挂载点
+
+参照那张表是**进程级静态**，且**两张表不对称**——现读 `isCustomFormat` 只查 formatter 表：
+
+| 现读事实（腿 `P5`/`GF` 行） | 后果 |
+|---|---|
+| 只 `putParser("#ponly", …)` ⇒ `isCustomFormat("#ponly")` 是 `false` | `DateUtil.parse`/`format` 的挂载点被这个判据挡住，**根本不去查 parser 表**：`DateUtil.parse(x,"#ponly")` 反而拿它当 SimpleDateFormat 图案 ⇒ `IllegalArgumentException: Illegal pattern character 'p'` |
+| 只 `putFormatter("#fonly", …)` ⇒ `isCustomFormat` 是 `true`，而 parser 表里没有 | `DateUtil.parse("F1700000000123", "#fonly")` 给**当前时刻**（腿里带 `(是不是现在?true)` 的自证），根因是 `new DateTime((Date) null)` 在 hutool 里取 now；而 `GlobalCustomFormat.parse` 自己给 `null` |
+| `DateUtil.format(date, pattern)` 的第一道闸是 `date == null \|\| isBlank(pattern)` ⇒ `null` | 空串/空白图案**永远到不了这张表**：腿里我把 formatter 表 `""` 键注册成 `"EMPTY"`，`DateUtil.format(d,"")` 仍然给 `{null}` |
+
+⇒ 本库的注册表**照抄两张表 + 只查前者**这条不对称，不"顺手统一"（统一了就改了挂载行为）。
+"进程级暗全局"这一条按本包既有口径处理：**显式 set、显式 reset**（同 `set_default_zone`/`reset_default_zone`）。
+
+| 签名 | 语义 | 边界 / 错误 | hutool 对位 | 差异声明 | 读数来源 |
+|---|---|---|---|---|---|
+| `custom_format_seconds : String` = `"#sss"`、`custom_format_milliseconds : String` = `"#SSS"` | 两档内置键的常量 | — | `FORMAT_SECONDS` / `FORMAT_MILLISECONDS` | 值由腿现读，不手抄 | 腿 `GF|FORMAT_*` |
+| `is_custom_format(key : String) -> Bool` | 这个键在**formatter 表**里吗 | 无抛错 | `isCustomFormat(String)` | 参照传 `null` 抛 NPE（键不可为 null）⇒ 本库类型到不了；大小写**敏感**（腿：注册 `#MiX` 之后 `isCustomFormat("#mix")` 是 `false`） | 腿 `GF`/`P5` 行 |
+| `set_custom_format(key : String, fmt : (Int64) -> String) -> Unit` | 登记/覆盖一个键的格式化 | 无 | `putFormatter(String, Function<Date,String>)` | 参照的入参是 `Date`，本库是 **epoch 毫秒 `Int64`**（`Date` 在参照里也只被 `getTime()` 用了一次） | 腿 `GF|override-*` 三档 |
+| `set_custom_parser(key : String, parser : (String) -> Int64 raise DateError) -> Unit` | 登记一个键的解析 | 无 | `putParser(String, Function<CharSequence,Date>)` | 参照返回 `Date`，本库返回毫秒；参照的 `Function` 抛的是 unchecked（`NumberFormatException`/`ArithmeticException`），本库换成 `DateError` 两档（见 `custom_parse` 那行） | 腿 `P5|pair` 三档 |
+| `custom_format(millis : Int64, key : String) -> String?` | 直接查 formatter 表算串；**未登记 ⇒ `None`** | 不抛（用户闭包自己抛的除外） | `format(Date, CharSequence)` | 参照未登记给 `null`（腿 `GF|format(d,plain)`），本库 `None` 同档 | 腿 `GF|format(d,#sss/#SSS)` |
+| `custom_parse(text : String, key : String) -> Int64?` | 直接查 parser 表；**未登记 ⇒ `None`** | 坏数字 ⇒ `raise NotAnInteger(text)`；`#sss` 档 `×1000` 溢出 ⇒ `raise MillisOverflow(text)` | `parse(CharSequence, String)` | 参照两档分别抛 `NumberFormatException`（message 带原串）与 `ArithmeticException: long overflow`，本库换成携带原串的两个变体 | 腿 `GF|parse(...)` 12 档 + 腿 `P5|overflow臂` |
+| `reset_custom_format(key : String) -> Unit` | 撤销登记：内置两档**复原**、自定义键**删除** | 无 | —（参照没有删除口） | 本库自订档，理由同 `reset_default_zone`：没有它，一次注册就不可逆，测试现场也无法复位。**代价如实写**：它是进程级可变状态，同进程内跨用例可见 ⇒ 用例必须自己收尾（§9.8 第 4 行） | 本库形状 |
+| 挂载点：`format_in` 与 `parse_in` **两处**（`format_local`/`parse_local` 是它们的薄封装，现读 `zone_default.mbt` 的体子就是 `format_in(..., default_zone())` / `parse_in(...)` ⇒ 一处挂载自动作用到四件，不留两套判据） | 命中就用表里的闭包，**区名不参与** | 与四件各自的既有档不冲突（命中时不查表、不校验 pattern token、不查区名） | `DateUtil.format(Date,String)` 与 `DateUtil.parse(CharSequence,String,Locale)` 两处胶水 | 只挂这两个闸（吃**瞬间**的门面件）。**不挂** `Date::format`/`Date::parse`/`DateTime::format`/`DateTime::parse`：参照的挂载点全部要求手上有"瞬间/Date"，`#sss` 的定义就是 `floorDiv(getTime(),1000)`（腿字节码现读 `Math.floorDiv`），墙上值件里没有这个量；参照里与之对应的那两件（`LocalDateTimeUtil.format` 不查表、`LocalDateTimeUtil.parse` 要经 `ZoneId.systemDefault()` 把瞬间折回墙上值）本库都不复制那条默认区依赖 | 腿 `F` 行 + 挂载点现读（三处调用者：`DateUtil.format`、`DateUtil.parse`、`LocalDateTimeUtil.parse`） |
+| 内置两档的算法 | `#sss` ⇒ `十进制(floorDiv(millis, 1000))`；`#SSS` ⇒ `十进制(millis)` | 与区名/宿主 locale 无关 | 同左 | **`floorDiv` 不是 `/`**：`-999` 毫秒参照给 `-1`（向零截断会给 `0`），`-1001` 给 `-2`（腿 `EP` 行三档齐）——与本包 §0.3"epoch 除法向下取整"同族 | 腿 `EP` 行 |
+| 内置 `#sss` 解析 = `multiplyExact(parseLong(text), 1000)` | 溢出**必抛**（`9223372036854775` ⇒ 溢出；`9223372036` ⇒ `9223372036000` 通过） | 见 `custom_parse` 那行 | 同左 | MoonBit 的 `Int64` 乘法溢出是**静默回绕**（AGENTS 里 conv 轮那条），所以本库必须自己判溢出再 raise，不跟回绕 | 腿 `P5|overflow臂` |
+| `parseLong` 那侧的接受集：收 `+` 前缀、收负号、收 `-0`，**不 trim**、不收小数、不收空串、不收超 `long` 范围的纯数字串 | 六档全 ERR（`1.5`/`""`/`abc`/` 1700000000`/`1700000000 `/`99999999999999999999`） | — | `Long.parseLong` | 参照 message 里带原串（`For input string: " 1700000000"`），本库变体携带的就是那个原串 | 腿 `GF|parse(...)` |
+
+### 9.7 `pretty_print` 的排版规则：四条与时钟无关的判据
+
+参照那一段排版全靠 `java.text.NumberFormat` 与 `FileUtil.getLineSeparator()`，四条都能脱离时钟冻结：
+
+| # | 判据 | 参照怎么做 | 本库 | 读数来源 |
+|---|---|---|---|---|
+| 9.7.1 | **数字列补零到 9 位** | `NumberFormat.getNumberInstance()` + `setMinimumIntegerDigits(9)` + `setGroupingUsed(false)` ⇒ 任意值都出**恰好 9 个数字**（`0` ⇒ `000000000`，`1234567890` ⇒ 十位不截断）；负数把符号放在补齐**之前**：`-1` ⇒ `-000000001` | 同形状，自己补（core 没有 NumberFormat） | 腿 `NF` 行 12 档 |
+| 9.7.2 | **百分号档：×100 后 HALF_EVEN 取整、最少 2 位** | `NumberFormat.getPercentInstance()` + `setMinimumIntegerDigits(2)`；`maxFrac=0`、舍入模式现读 `HALF_EVEN` ⇒ `0.005`→`00%`、`0.006`→`01%`、`0.015`→`02%`、`0.025`→`02%`、`0.999`→`100%`、`2/3`→`67%`；`NaN` ⇒ **`NaN`（连 `%` 都不出）**、`±∞` ⇒ `∞%` / `-∞%`（U+221E） | 比值用 `Double` 除（照参照的 `time/total`）、乘 100、自写 HALF_EVEN、补到 2 位；`NaN`/`±∞` 两档照出 | 腿 `PC` 行 30 档 |
+| 9.7.3 | **列宽是字面空格，不是格式符** | 表头 = `shot_name` + 9 个空格 + `%` + 5 个空格 + `Task name`；数据行 = 9 位数字 + 2 空格 + 百分号 + 3 空格 + 任务名；分隔行 **45 个连字符**，共两行、整表 5 行（无任务时也是 5 行，只是没有数据行） | 逐字节照抄（腿 `PP|header-seg`、`PP|dash-len`） | 腿 `PP` 行 |
+| 9.7.4 | **行分隔符参照吃平台** | `FileUtil.getLineSeparator()` = `System.lineSeparator()`，本机现读 `\r\n` | **本库恒 `\n`**，不跟随宿主；差异写在这里而不是藏在实现里（ini 轮同一招：`PrintWriter.println` 那侧也是平台量） | 腿 `LS` 行两条 |
+
+还有一条必须明写的**参照不确定性**（不是本库的取舍）：9.7.1/9.7.2 那两个 `NumberFormat` 实例都是
+**默认 locale** 的，同一条腿换 locale 再跑，读数会变（本机四打，复跑命令写在 `scripts/TimerLeg3.java` 头部）：
+
+| locale | 数字列 | 百分号 |
+|---|---|---|
+| `zh_CN`（本仓取数档）/ `th_TH` | ASCII 补零 | `50%` |
+| `de_DE` | ASCII 补零 | `50{u00a0}%`（`%` 前一个不换行空格） |
+| `ar_SA` | `{u0660}{u0661}…` 阿拉伯-印度数码 | `{u0665}0{u066a}{u061c}`（百分号换成 U+066A，尾后还挂 U+061C 方向标记） |
+
+⇒ 本库**恒给 `zh_CN`/root/en 那一档的 ASCII 形状，不跟随宿主 locale**（`short_summary`/`to_string` 三档本来就相同，
+它们走 `Long.toString` + `StrUtil.format`，不经 `NumberFormat`）。这是"参照实现不确定 ⇒ 整支不跟随"那条老口径，
+不是本库做不到 locale。
+
+### 9.8 不收（本批范围内）
+
+| # | 不收 | 理由（都有现读依据） |
+|---|---|---|
+| 1 | `BetweenFormatter` 的四件可配旋钮（`Level` 五档、`levelMaxCount`、`separator`、`levelFormatter`） | `interval_pretty` 只用默认那条路；`Level`/`isLevelCountValid` 的字节码已读（腿 `FB` 行五档并排就是它的行为表），但把它做成公开面 = 本库要另立一个枚举 + 三个 setter，而 census 里 `BetweenFormatter` 那行仍该挂 gap（理由已就地改成"只收默认路"） |
+| 2 | `DateUtil.formatBetween(Date, Date[, Level])` 那三档双日期入口 | 本库没有 `Date` 值类型上的"瞬间对"表示，两个瞬间的差由 `between`/`difference`（§2.9）出数值，要串就 `format_between(between(..., Millisecond))` |
+| 3 | 纳秒真钟、单调性承诺 | core 无纳秒口；§9.1 已把这条责任交给注入方。本库**不**提供 `clock_system_nanos()` 之类的伪件（拿毫秒 ×1e6 冒充纳秒是"假装单调"的同一族问题） |
+| 4 | 进程级注册表的并发可见性与"谁改了"审计 | 参照用的是 `SafeConcurrentHashMap`（线程安全）；本库全同步、且 `Map` 不承诺跨线程可见。测试的收尾纪律写进用例：**每个碰过 `set_custom_*` 的用例必须自己 `reset_custom_format`**，否则同包后续用例读到的是一张被上一支改脏的全局表（这类"用例互盖"在 §6.3 那条 `Ref` 槽反例里已经付过一次学费） |
+| 5 | `TimeInterval`/`GroupTimeInterval` 的父子类型区别、以及 `StopWatch` 的 `null` id 与 `interval(null)` 两条 NPE 臂 | MoonBit 没有继承（§9.4 用"键参数默认值"一次覆盖两面）；类型里不存在 null ⇒ 那两条臂**结构上到不了**，不预留 `Option` 参数去模拟 Java 的 null。`start(name=null)` 那一档**保留**（它是真行为，不是 null 噪声，腿 `SN` 行四档为凭） |
+| 6 | `DateUtil.parse` 在"注册了 formatter、没注册 parser"时给**当前时刻**那条 quirk | 根因是 hutool 的 `new DateTime((Date) null)` 取 now（腿 `P5|formatter-only|DateUtil.parse` 带自证 `(是不是现在?true)`）。本库挂载点在这一档给 `None`：`parse_*` 的返回类型是 `Int64?`，把"读一次墙钟"塞进解析失败档会同时违反 §6.4 那条"不写计时依赖"与本批"库不读时钟"的立身前提。**分岔明写，两侧读数都留** |
+| 7 | `GlobalCustomFormat.format(TemporalAccessor, CharSequence)` 那一支 | 参照它经 `DateUtil.date(temporalAccessor)` 折成瞬间，`LocalTime` 那档实测连**今天的日期**都要读（腿 `GF|format(LocalTime,#sss)|1791565323` 两次跑不同）；本库无 Java-time 类型，且这一支会读墙钟 ⇒ 不复制 |
+| 8 | `LocalDateTimeUtil.parse(text, "#sss")` 那条挂载 | 参照挂载点现读存在（`isCustomFormat` 三处调用者之一），但它把注册表拿到的瞬间按 `ZoneId.systemDefault()` 折成墙上值（腿 `EP|LocalDateTimeUtil.parse(#sss)` ⇒ `2023-11-15T06:13:20`，+08 是这台机器的默认区）⇒ 与 §0.1"偏移一律显式"冲突，不跟随 |
+
+### 9.9 五条腿各打哪几档（哪几档刻意是掩码，不许进契约）
+
+| 腿 | 行族 | 性质 | 用法 |
+|---|---|---|---|
+| `TimerLeg.java` | `W`/`T`/`G`/`F` | **混合**：状态机、抛错臂、表内容是确定档；一切时长数字用 `mask()` 掩成 `#` | 确定档直接进契约；`#` 档只作"形状在此"的证据，值一律由本库的**假钟用例**出 |
+| `TimerLeg2.java` | `Z`/`P` | 零档打**原值**（本就是确定的 0 或 ERR），宽度档用逐位换 `0` 的保长度掩法（前导空格才看得见） | 零档进契约；宽度档只喂 §9.7.3 的列宽判据 |
+| `TimerLeg3.java` | `SH`/`LS`/`NF`/`PC`/`PP`/`FB`/`GF` | 全确定档：`NF`/`PC` 是**直接喂选定数**给 `NumberFormat`，不绕 `prettyPrint` | §9.7.1/9.7.2 的 30+12 档、§9.5 的 23×6 档 `formatBetween`、§9.6 的 `GF` 组 |
+| `TimerLeg4.java` | `CU`/`NS`/`TI`/`SN`/`ID`/`EP` | 全确定档：`TimeUnit.convert` 截断表、`nanosToSeconds`、反射构造 `TaskInfo` 喂选定纳秒、`start(null)` 暗档、`null` id 模板、负 epoch 的 `#sss` | §9.3 的六行、§9.6 的截断方向 |
+| `TimerLeg5.java` | `P5` | 全确定档（除那条自带 `(是不是现在?true)` 自证的 quirk） | §9.6 表格第一段的不对称三档 |
+
+**计时依赖的处置纪律**（沿用 §5.5/§6.4/#C 系列，本批没有例外）：腿里凡是"跨宿主、跨负载的时长数字"
+一律不进契约，本库侧对应改成**假钟显式读数**——注入 `() -> 5_000_000_000L` 恒定值 ⇒ 差值、单位换算、
+百分号、补零、`NaN` 与 `∞` 五档全部变成可冻的确定值。判据两条：① 用例里不出现 `clock_system()`；
+② 用例里不出现"两次读时钟之间比大小"这种断言（本包 `Int64` 档不承诺单调，见 §6.4 第 ② 条）。
+
+### 9.10 变异计划（PR-B 填读数；隔离副本 + 基线先断 0 红 + 按 fmt 后文本找锚点 + `finally` 还原 + 收尾字节比对）
+
+| # | 变异（打在实现哪一行） | 期望被破坏的判据 |
+|---|---|---|
+| T1 | `stop()` 里 `task_count` 与留存表**同一来源**（计数改成 `kept.length`） | §9.3 那条"`task_count` 与表长解耦"（`keep=false` 那档必红） |
+| T2 | `interval` 的"键不存在"改成 `raise` 或 `Option` | §9.4 判据第 1 条（参照给 `0` 且不抛） |
+| T3 | `interval_in` 去掉"纳秒档先除 1e6"那一步 | 纳秒档的 `interval_ms` 会大 1e6 倍 |
+| T4 | `interval_restart` 的 `defaultIfNull(旧值, 0)` 改成"键不存在就返回 0" | §9.4 那一行的"未记过 ⇒ 拿到原始读数"档 |
+| T5 | `format_between` 的负数档改成取绝对值 | §9.5 判据 1（三条负档全给 `0毫秒`） |
+| T6 | `format_between` 里"零值档照打"（去掉 `> 0` 判据） | `7天1秒` / `1小时1毫秒` 两条 |
+| T7 | `pretty_print` 的数字列改成不补零（`to_string` 直出） | §9.7.1 |
+| T8 | 百分号舍入从 HALF_EVEN 换成"四舍五入"（`>= 0.5` 进位） | 腿里 `0.005`→`00%`、`0.015`→`02%`、`0.025`→`02%` 三条平局档 |
+| T9 | `to_string` 的百分号从 `Math.round` 换成复用 `pretty_print` 那套 NumberFormat 规则 | `= 100%` 与 `NaN` 两档（参照两族混用是本批最容易"顺手统一"的地方） |
+| T10 | `#sss` 格式化用 `/`（向零截断）替 `floorDiv` | §9.6 最后一行：`-999` ⇒ 参照 `-1`、向零给 `0` |
+| T11 | `is_custom_format` 改成"两张表任一命中" | §9.6 的 `parser-only` 三档（挂载点行为会变） |
+| T12 | 注册表命中时**继续**校验 pattern token | 腿 `F` 行：注册后 `DateUtil.format` 走的就是表，普通档不受影响那条 |
+| T13 | `start(name=null)` 当"未传名字"处理（等同 `Some("")`） | §9.3 那条暗档四连（`is_running` 恒 false 等） |
+| T14 | 行分隔符跟随宿主（本库恒 `\n`） | §9.7.4：用例是逐字节比串，跟随宿主在 CI 上会整片红 |
+
+计划先挂在这里；实际抓红/等价与否的读数**由 PR-B 那笔如实回填**（空变异要照记，`rand`/`dfa` 两轮的先例）。

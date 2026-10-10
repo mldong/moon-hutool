@@ -285,7 +285,7 @@ OVERRIDES = {
     # 含 offset_*/begin_of_*/end_of_*/zone_*/clock_*——注意抽取要带方法形式，
     # 只 grep `pub fn ` 会漏掉 `pub fn Date::xxx` 而误判成“没有该件”）
     "AbstractDateBasic": ("excluded", "hutool 内部基类（Date/DateField 共用父类），不是能力面，同 TransCollection 判法"),
-    "BetweenFormatter": ("gap", "时长差格式化串（“X天Y小时”）未登记；date 只给 between/between_day/difference 的数值档 ⇒ 待拍"),
+    "BetweenFormatter": ("gap", "时长差格式化串（“X天Y小时”）的四件旋钮（Level 五档、levelMaxCount、separator、levelFormatter）仍未登记；**但默认那条路已由 date 包 #9.5 format_between 承接**（interval_pretty 的唯一依赖，一参版档位现读是 MILLISECOND 不是 DAY，字节码 + 腿 FB 行双证；23 档读数在 docs/spec/03-date.md §9.5）。类本体留 gap 的理由：要收就得公开一个枚举 + 三个 setter，而 03-date §9.8 第 1 行明写本批不收"),
     "ChineseMonth": ("deferred", "中文月名属农历码表，在暂不做档（同 Zodiac/GanZhi/LunarInfo 判例）"),
     "DateBasic": ("excluded", "hutool 内部接口件（Date/Calendar 共用形状）"),
     "DateBetween": ("done", "date.between / between_day / difference（单位档走 date.TimeUnit）"),
@@ -300,13 +300,13 @@ OVERRIDES = {
     "FastDateParser": ("done", "date.parse/parse_in/parse_local（同上）"),
     "FastDatePrinter": ("done", "同 FastDateFormat：hutool 该件是其内部格式化器，本库一件 format 族承接"),
     "FormatCache": ("excluded", "缓存 JDK 格式化器实例是为线程复用设计的，本库无宿主格式化对象可缓存"),
-    "GlobalCustomFormat": ("gap", "全局自定义格式表未登记。要做必须走 date.set_default_zone/reset_default_zone 那条同形口径（显式可覆盖），不能建进程级暗全局 ⇒ 待拍"),
-    "GroupTimeInterval": ("gap", "分组计时件未登记；本库计时一律显式传 now（G18 白名单只 date.now_millis 一处裸读）⇒ 待拍"),
+    "GlobalCustomFormat": ("done", "date 包 #9.6 八件 custom_format_seconds/custom_format_milliseconds/is_custom_format/set_custom_format/set_custom_parser/custom_format/custom_parse/reset_custom_format，挂载点在 format_in/parse_in（format_local/parse_local 是薄封装自动继承）。进程级暗全局那半条按 date 包既有口径落成显式 set + 显式 reset（同 set_default_zone）；两张表的不对称（isCustomFormat 只查 formatter 表）照参照保留，理由与三档读数在 docs/spec/03-date.md §9.6，腿 scripts/TimerLeg3.java 的 GF 行与 scripts/TimerLeg5.java 的 P5 行"),
+    "GroupTimeInterval": ("done", "date 包 #9.4 十三件（start/restart/interval/interval_restart/interval_in/interval_ms/second/minute/hour/day/week/interval_pretty/clear，键参 id~ 默认空串）+ 两个具名构造口分毫秒/纳秒档。参照的父子两面（TimeInterval extends GroupTimeInterval）在本库合成一个类型承载，判据只有一套；本库一处不读时钟，读数一律注入 () -> Int64，G18 白名单一字未动（docs/spec/03-date.md §9.1/§9.2），腿 scripts/TimerLeg.java 的 G/T 行与 scripts/TimerLeg2.java 的 Z 行"),
     "LunarFestival": ("deferred", "节日/农历码表在暂不做档"),
     "Month": ("gap", "12 月枚举本体（含首末日）没单建件；能力散在 begin_of_month/end_of_month/days_in_month/offset_month ⇒ 要不要建枚举待拍"),
-    "StopWatch": ("gap", "计时器是有状态件且要读墙钟；本库口径是时钟显式注入（date.clock_system/clock_fixed），StopWatch 从未登记 ⇒ 待拍"),
+    "StopWatch": ("done", "date 包 #9.3 二十件（stop_watch 一构造口塌参照四入口 + id/set_keep_task_list/start/stop/is_running/current_task_name/last_task_{nanos,millis,name,info}/total_in/total_{nanos,millis,seconds}/task_count/task_infos/short_summary/pretty_print/to_string）+ TaskInfo 五件 + ChronoUnit 七档 shot_name。补 §6.5 第 2 行的改判记录：原判'没有可信单调源所以不做'拦的是库自己读时钟，注入之后前提消失。列宽/补零/百分号舍入/行分隔符四条判据在 docs/spec/03-date.md §9.7，腿 scripts/TimerLeg3.java 的 NF/PC/PP/LS 行与 scripts/TimerLeg4.java 的 CU/NS/TI/SN/ID 行"),
     "SystemClock": ("done", "date.clock_system / clock_fixed（裸读 OS 时钟全库只 date/date.mbt 的 now_millis 一处，由 G18 钉）"),
-    "TimeInterval": ("gap", "计时区间件（start/end/pretty 串）未登记；数值差由 date.between/difference 承担 ⇒ 待拍"),
+    "TimeInterval": ("done", "date 包 #9.4 的 time_interval/time_interval_nanos 两个预启动构造口 + 同批九个走空键的便捷档（参照 DEFAULT_ID 现读是空串，字节码 ldc 现读）。参照的九件无参法在本库就是 id~ 的默认值档；数值差那半仍由 §2.9 between/difference 承担，两件不等价、也不互相替换（docs/spec/03-date.md §9.4），腿 scripts/TimerLeg.java 的 T 行与 scripts/TimerLeg2.java 的 Z 行"),
     "Week": ("done", "date.day_of_week + begin_of_week/end_of_week + week_of_year/week_based_year/is_weekend"),
     "ZoneUtil": ("done", "date.zone_names/zone_exists/zone_count/zone_offset_minutes/zone_offsets_at_wall/default_zone_source（内置 IANA 段表）"),
     # —— 10-10 消化第二批：collection / map / comparator 全 66 类逐条指认（口径与第一批一致：

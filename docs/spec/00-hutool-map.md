@@ -61,6 +61,8 @@
 | 日历换算 | 无 | ③ `date`（civil↔epoch，Hinnant 算法） | — |
 | 时区/DST | 无；`moonbitlang/x/time` 也只有固定偏移 + 自备 TZif | ② 显式 `offset_minutes` + **内置 IANA 段表**（第二批：`date/zone_table.mbt`，现读 603 区 / 36,701 段，窗口 [1970,2050)；`zone_names`/`zone_exists`/`zone_count`/`zone_offset_minutes`/`zone_offsets_at_wall` + 命名区版 `format_in`/`parse_in`/`to_rfc3339_in`；第五批默认区三级降级 `set_default_zone` → `TZ` → `fallback_zone`，`default_zone_source()` 把参照那个查不到来源的进程级全局量做成可查询） | **偏移承诺到整分钟**（窗口内只有 `Africa/Monrovia` 一区两年不是整分钟，已作分岔双栏读数）；表窗口外的墙上时刻判 `None`；不追 `java.time` 的规则求值器 |
 | `format/parse` | 无 | ① 封闭 pattern 子集（`y M d H h m s S E Z X a`，其余字符**显式拒绝**）+ ISO8601 / RFC 7231 两个专用解析器 | hutool 的"智能无格式 parse"、`java.text` 全套词法、lenient 语义 |
+| `StopWatch` / `TimeInterval` / `GroupTimeInterval` / `DateUtil.formatBetween` | 无（core 只有 `env.now()` 的毫秒档，没有纳秒口） | ② **第六批** `date/timer.mbt` + `date/between.mbt`（§9.2~§9.5：`StopWatch` 一构造口塌参照四入口、`TaskInfo` 五件、`ChronoUnit` 七档 `shot_name`；`GroupTimeInterval` 一个类型承参照父子两面，键参 `id~` 默认空串 = 参照 `DEFAULT_ID`；`format_between` 走 `BetweenFormatter` 的默认那条路）。**读数一律注入 `() -> Int64`，本库一处不读时钟**（G18 白名单一字未动），毫秒/纳秒两套参照时钟落成两个具名构造口 | 纳秒真钟与单调承诺（§9.8 第 3 行）；`BetweenFormatter` 的四件旋钮；`interval(null)` 与 `null` id 两条 NPE 臂（类型到不了）；参照 `prettyPrint` 那两处 `NumberFormat` 随宿主 locale 变（`ar_SA` 给阿拉伯-印度数码、`de_DE` 在 `%` 前插 NBSP，四档实测在 §9.7）⇒ 本库恒 ASCII 那档 |
+| `GlobalCustomFormat`（`#sss`/`#SSS` 两档 + 两张静态表） | 无 | ② **第六批** `date/custom_format.mbt` 八件，挂在 `format_in`/`parse_in` 两处闸上（`format_local`/`parse_local` 是薄封装自动继承）；进程级暗全局按本包既有口径落成**显式 set + 显式 reset**（同 `set_default_zone`） | "顺手统一"两张表的不对称（参照 `isCustomFormat` 只查 formatter 表，腿 `P5` 三档为凭，统一了就改挂载行为）；参照 `DateUtil.parse` 在"只有 formatter 没有 parser"时给**当前时刻**那条 quirk ⇒ 本库给 `None`（§9.8 第 6 行）；`format(TemporalAccessor, …)` 与 `LocalDateTimeUtil.parse` 两条挂载（都要经 `ZoneId.systemDefault()`） |
 | `ChineseDate`/农历/节气/生肖 | 无 | — | `docs/ROADMAP.md` 的「暂不做」档，且**码表独立成数据件** |
 
 ## 5. 编解码 / 正则 / 校验
@@ -101,12 +103,12 @@
 
 | 档 | 含义 | 现读类数（hutool-all **5.8.37**，632 个顶层类，固化在 `docs/spec/hutool-classes.tsv`） |
 |---|---|---|
-| `done` | **逐条登记过**对位件（`OVERRIDES` 里点名哪个包哪件承接） | 149 |
+| `done` | **逐条登记过**对位件（`OVERRIDES` 里点名哪个包哪件承接） | 153 |
 | `unattested` | 包级规则**整片声称已做但没逐条指回实现件**（10-09 紧闸新增档，棘轮只许降） | 0 |
 | `excluded` | 结构上不属于本库：反射/动态代理/宿主 IO/网络/线程/AWT/JVM 内部机制 | 355 |
 | `core` | MoonBit core 已有同义能力，本库按规则不写转发层 | 53 |
 | `deferred` | 已登记在 [`docs/ROADMAP.md`](https://github.com/mldong/moon-hutool/blob/master/docs/ROADMAP.md) 的「暂不做」档 | 29 |
-| `gap` | **够得着、既没做也没登记** ⇒ 这一档就是要拍板的清单 | 46 |
+| `gap` | **够得着、既没做也没登记** ⇒ 这一档就是要拍板的清单 | 42 |
 
 
 > 这六个数**不是手抄**：`scripts/core_surface.py --check` 会解析本表并与归类表现算的条数逐档比对，任一处对不上或表形状变了（读不到六个档）直接判红（10-10 从临时比对脚本升级成判据，两侧对照进自检⑤：等值镜像必须为空、某一档多 1 条必须被抓到）。
@@ -149,7 +151,7 @@
 **`gap` 从 18 涨到 59 是这轮的真实产出，不是退步**：原先这些格子被整片规则算成“已做”，逐条核下来一部分证实是别的包接的（转 done/core）、一部分证实没做（留 gap）。现在这张待拍清单能逐条读了，几族值得先说：
 - **tree 族**（`TreeUtil`/`Tree`/`TreeNode`/`TreeBuilder`/`Node`/`NodeParser`/`DefaultNodeParser`/`LinkedForestMap`/`TreeEntry`）——纯算法不踩线，先拍“节点载荷用什么形状、weight 用什么比较类型”；
 - **纯字符串面小件**（`UnicodeUtil`、`EscapeUtil` 的 HTML/XML 实体、`FileNameUtil` String 档、`codec` 的 `complete_url`/`data_uri`）——工作量小、判据好冻；
-- **计时与状态件**（`StopWatch`/`TimeInterval`/`GroupTimeInterval`/`GlobalCustomFormat`）——与本库“时钟显式注入、G18 只放行一处裸读”冲突，要做先拍口径；
+- **计时与状态件**（`StopWatch`/`TimeInterval`/`GroupTimeInterval`/`GlobalCustomFormat`）——**已拍并落档**（10-10 owner 点名"注入"）：四条全部走注入时钟与显式 set/reset，`03-date.md` §9.1 记着这次改判连同它推翻的原判据；
 - **查找器族**（`CharFinder`/`StrFinder`/`TextFinder`/`LengthFinder`/`CharMatcherFinder`）——“从起点找、返回位置”的语义没拍过；
 - 其余散件（`BoundedPriorityQueue`、`ComparatorChain`/`IndexedComparator`/`InstanceComparator`、`WindowsExplorerStringComparator`、`Month`/`YearQuarter`、`DurationConverter`/`PeriodConverter`/`EntryConverter`、`Caesar`/`Rot`/`Morse`、`ObjectUtil`/`URLUtil` 的纯串那半等）。
 

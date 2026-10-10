@@ -10,6 +10,14 @@ pub fn clock_fixed(Int64) -> () -> Int64
 
 pub fn clock_system() -> () -> Int64
 
+pub fn custom_format(Int64, String) -> String?
+
+pub let custom_format_milliseconds : String
+
+pub let custom_format_seconds : String
+
+pub fn custom_parse(String, String) -> Int64? raise DateError
+
 pub fn date_of(String, Int64) -> Date?
 
 pub let date_pattern : String
@@ -30,11 +38,19 @@ pub fn difference(DateTime, DateTime, TimeUnit) -> Int64
 
 pub let fallback_zone : String
 
+pub fn format_between(Int64) -> String
+
 pub fn format_in(Int64, String, String) -> String? raise DateError
 
 pub fn format_local(Int64, String) -> String? raise DateError
 
 pub fn from_rfc3339(String) -> Int64 raise DateError
+
+pub fn group_time_interval(() -> Int64) -> GroupTimeInterval
+
+pub fn group_time_interval_nanos(() -> Int64) -> GroupTimeInterval
+
+pub fn is_custom_format(String) -> Bool
 
 pub fn is_leap_year(Int) -> Bool
 
@@ -58,9 +74,21 @@ pub let pure_date_pattern : String
 
 pub let pure_datetime_pattern : String
 
+pub fn reset_custom_format(String) -> Unit
+
 pub fn reset_default_zone() -> Unit
 
+pub fn set_custom_format(String, (Int64) -> String) -> Unit
+
+pub fn set_custom_parser(String, (String) -> Int64 raise DateError) -> Unit
+
 pub fn set_default_zone(String) -> Bool
+
+pub fn stop_watch(() -> Int64, id? : String, keep_task_list? : Bool) -> StopWatch
+
+pub fn time_interval(() -> Int64) -> GroupTimeInterval
+
+pub fn time_interval_nanos(() -> Int64) -> GroupTimeInterval
 
 pub let time_pattern : String
 
@@ -93,9 +121,26 @@ pub suberror DateError {
   ParseFailed(String, Int)
   FutureBirth
   ZoneGap(String)
+  TimerAlreadyRunning
+  TimerNotRunning
+  NoLastTask
+  TaskInfoNotKept
+  NotAnInteger(String)
+  MillisOverflow(String)
 }
 
 // Types and methods
+pub(all) enum ChronoUnit {
+  Nanoseconds
+  Microseconds
+  Milliseconds
+  Seconds
+  Minutes
+  Hours
+  Days
+}
+pub fn ChronoUnit::shot_name(Self) -> String
+
 pub struct Date {
   year : Int
   month : Int
@@ -164,6 +209,55 @@ pub fn DateTime::op_lt(Self, Self) -> Bool
 pub fn DateTime::parse(String, String) -> Self raise DateError
 pub fn DateTime::to_epoch_millis(Self, Int) -> Int64
 pub fn DateTime::to_iso_string(Self) -> String
+
+pub struct GroupTimeInterval {
+  // private fields
+}
+pub fn GroupTimeInterval::clear(Self) -> Unit
+pub fn GroupTimeInterval::interval(Self, id? : String) -> Int64
+pub fn GroupTimeInterval::interval_day(Self, id? : String) -> Int64
+pub fn GroupTimeInterval::interval_hour(Self, id? : String) -> Int64
+pub fn GroupTimeInterval::interval_in(Self, TimeUnit, id? : String) -> Int64
+pub fn GroupTimeInterval::interval_minute(Self, id? : String) -> Int64
+pub fn GroupTimeInterval::interval_ms(Self, id? : String) -> Int64
+pub fn GroupTimeInterval::interval_pretty(Self, id? : String) -> String
+pub fn GroupTimeInterval::interval_restart(Self, id? : String) -> Int64
+pub fn GroupTimeInterval::interval_second(Self, id? : String) -> Int64
+pub fn GroupTimeInterval::interval_week(Self, id? : String) -> Int64
+pub fn GroupTimeInterval::restart(Self, id? : String) -> Unit
+pub fn GroupTimeInterval::start(Self, id? : String) -> Int64
+
+pub struct StopWatch {
+  // private fields
+}
+pub fn StopWatch::current_task_name(Self) -> String?
+pub fn StopWatch::id(Self) -> String
+pub fn StopWatch::is_running(Self) -> Bool
+pub fn StopWatch::last_task_info(Self) -> TaskInfo raise DateError
+pub fn StopWatch::last_task_millis(Self) -> Int64 raise DateError
+pub fn StopWatch::last_task_name(Self) -> String? raise DateError
+pub fn StopWatch::last_task_nanos(Self) -> Int64 raise DateError
+pub fn StopWatch::pretty_print(Self, unit? : ChronoUnit) -> String
+pub fn StopWatch::set_keep_task_list(Self, Bool) -> Unit
+pub fn StopWatch::short_summary(Self, unit? : ChronoUnit) -> String
+pub fn StopWatch::start(Self, name? : String?) -> Unit raise DateError
+pub fn StopWatch::stop(Self) -> Unit raise DateError
+pub fn StopWatch::task_count(Self) -> Int
+pub fn StopWatch::task_infos(Self) -> Array[TaskInfo] raise DateError
+pub fn StopWatch::to_string(Self) -> String
+pub fn StopWatch::total_in(Self, ChronoUnit) -> Int64
+pub fn StopWatch::total_millis(Self) -> Int64
+pub fn StopWatch::total_nanos(Self) -> Int64
+pub fn StopWatch::total_seconds(Self) -> Double
+
+pub struct TaskInfo {
+  // private fields
+}
+pub fn TaskInfo::task_name(Self) -> String?
+pub fn TaskInfo::time_in(Self, ChronoUnit) -> Int64
+pub fn TaskInfo::time_millis(Self) -> Int64
+pub fn TaskInfo::time_nanos(Self) -> Int64
+pub fn TaskInfo::time_seconds(Self) -> Double
 
 pub(all) enum TimeUnit {
   Millisecond

@@ -74,6 +74,18 @@ pub suberror DateError {
   FutureBirth
   /// 墙上时刻在该区**不存在**（前跳空洞）：携带那个不存在的墙上时刻的 ISO 串
   ZoneGap(String)
+  /// 秒表已有一条在跑却又 `start`（第六批 §9.3；参照 `IllegalStateException: Can't start StopWatch: it's already running`）
+  TimerAlreadyRunning
+  /// 秒表没在跑却 `stop`（§9.3；参照 `Can't stop StopWatch: it's not running`，两档 message 同句）
+  TimerNotRunning
+  /// 一条任务都没跑完过却要取上一条（§9.3；参照四条 getter 各一句 message、**条件同一条** ⇒ 本库一个变体）
+  NoLastTask
+  /// `keep_task_list=false` 时取留存任务行（§9.3；参照 `UnsupportedOperationException: Task info is not being kept!`）
+  TaskInfoNotKept
+  /// 自定义格式表的解析器拿到不是整数的串（§9.6；参照 `NumberFormatException`，携带原串）
+  NotAnInteger(String)
+  /// `#sss` 那档秒数 ×1000 溢出 `Int64`（§9.6；参照 `ArithmeticException: long overflow`，携带原串）
+  MillisOverflow(String)
 }
 
 ///|

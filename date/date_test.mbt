@@ -53,6 +53,15 @@ fn show(err : @date.DateError) -> String {
     @date.ParseFailed(input, at) => "ParseFailed \{input} @\{at}"
     @date.FutureBirth => "FutureBirth"
     @date.ZoneGap(w) => "ZoneGap \{w}"
+    // 以下六档是第六批（§9 计时三件 + 全局格式表）新增的错误面；本函数只**加臂**，
+    // 上面已冻的期望串一字未动。编译器用 `partial_match` 逼着这张表跟错误面同步——
+    // 这正是"新变体不会悄悄漏出错误形状展示面"的机制（同 num 第三批那条教训）。
+    @date.TimerAlreadyRunning => "TimerAlreadyRunning"
+    @date.TimerNotRunning => "TimerNotRunning"
+    @date.NoLastTask => "NoLastTask"
+    @date.TaskInfoNotKept => "TaskInfoNotKept"
+    @date.NotAnInteger(t) => "NotAnInteger \{t}"
+    @date.MillisOverflow(t) => "MillisOverflow \{t}"
   }
 }
 
