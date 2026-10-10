@@ -193,6 +193,49 @@ test "date #9.6.7 两张表的不对称（parser-only 隐形 / formatter-only �
 }
 
 ///|
+test "date #9.6.9 parseLong 文法边界、非 ASCII 数码的主动窄一档与 #SSS 的 reset" {
+  // 参照 Long.parseLong 走 Character.digit(ch, 10)，它**认非 ASCII 的十进制数码**；
+  // 本库只收 ASCII 0-9（core 没有 Unicode Nd 表，做假承诺比窄一档更坏）⇒ 这两档是明写的分岔，
+  // 期望串是本库形状、参照那一侧的原读数留在注释里（spec §9.6 末行）。
+  assert_eq(shape(() => @date.custom_parse("+", "#sss")), "NotAnInteger +") // 读数腿  JU|parseLong|+||ERR:NumberFormatException:For input string: "+"
+  assert_eq(shape(() => @date.custom_parse("-", "#sss")), "NotAnInteger -") // 读数腿  JU|parseLong|-||ERR:NumberFormatException:For input string: "-"
+  assert_eq(shape(() => @date.custom_parse("--1", "#sss")), "NotAnInteger --1") // 读数腿  JU|parseLong|--1||ERR:NumberFormatException:For input string: "--1"
+  assert_eq(
+    shape(() => @date.custom_parse("0x10", "#sss")),
+    "NotAnInteger 0x10",
+  ) // 读数腿  JU|parseLong|0x10||ERR:NumberFormatException:For input string: "0x10"
+  assert_eq(@date.custom_parse("-0", "#sss"), Some(0L)) // 读数腿  JU|parseLong|-0||0
+  assert_eq(@date.custom_parse("010", "#sss"), Some(10000L)) // 读数腿  JU|parseLong|010||10 ⇒ 前导零照收，GCF#sss 那侧 10000
+  assert_eq(
+    shape(() => @date.custom_parse("9223372036854775808", "#SSS")),
+    "NotAnInteger 9223372036854775808",
+  ) // 读数腿  JU|parseLong|9223372036854775808||ERR:NumberFormatException:For input string: "9223372036854775808"
+  assert_eq(
+    @date.custom_parse("9223372036854775807", "#SSS"),
+    Some(9223372036854775807L),
+  ) // 读数腿  JU|parseLong|9223372036854775807||9223372036854775807
+  assert_eq(
+    shape(() => @date.custom_parse("-9223372036854775809", "#SSS")),
+    "NotAnInteger -9223372036854775809",
+  ) // 读数腿  JU|parseLong|-9223372036854775809||ERR:NumberFormatException:For input string: "-9223372036854775809" —— 负半边的界与正半边差 1，两侧各一条才夹得住
+  assert_eq(
+    @date.custom_parse("-9223372036854775808", "#SSS"),
+    Some(-9223372036854775808L),
+  ) // 读数腿  JU|parseLong|-9223372036854775808||-9223372036854775808
+  assert_eq(
+    shape(() => @date.custom_parse("9223372036854775807", "#sss")),
+    "MillisOverflow 9223372036854775807",
+  ) // 读数腿  JU|GCF#sss|9223372036854775807||ERR:ArithmeticException:long overflow ⇒ parseLong 过得去、乘 1000 溢出，是另一种错
+  assert_eq(shape(() => @date.custom_parse("٣", "#SSS")), "NotAnInteger ٣") // 读数腿  JU|parseLong|{u0663}||3 —— 参照给 3，本库按 ASCII 档拒
+  assert_eq(shape(() => @date.custom_parse("1٣", "#SSS")), "NotAnInteger 1٣") // 读数腿  JU|parseLong|1{u0663}||13 —— 参照给 13，本库整串拒
+  // 撤销**毫秒档**内置键：覆盖立刻生效、reset 之后回到内置算法（与 #9.6.6 那档同判据的另一侧）
+  @date.set_custom_format("#SSS", ms => "Z" + ms.to_string())
+  assert_eq(@date.custom_format(CF_MILLIS, "#SSS"), Some("Z1700000000123")) // 规则腿  同 #9.6.6：覆盖内置键改的是共享表
+  @date.reset_custom_format("#SSS")
+  assert_eq(@date.custom_format(CF_MILLIS, "#SSS"), Some("1700000000123")) // 读数腿  GF|format(d,#SSS)||1700000000123 ⇒ reset 复原内置
+}
+
+///|
 test "date #9.6.8 挂载点：命中查表、普通档不被污染、reset 后交回 pattern 判据" {
   // 挂进门面件：命中键就查表，区名与 pattern token 都不参与（腿 F 行）
   assert_eq(

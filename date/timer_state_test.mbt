@@ -108,6 +108,12 @@ test "date #9.3.10 set_keep_task_list 的两次真行为（关会丢行、开只
   assert_eq(m.task_infos().length(), 0) // 读数腿  PP|keep-翻true后-pretty||表头与分隔行都在、行是空 ⇒ 参照把表置 null 之后新建的是**空**表
   m.set_keep_task_list(true)
   assert_eq(m.task_infos().length(), 0) // 规则腿  字节码现读：true 只在 taskList == null 时新建 ⇒ 已保留时是空操作
+  // 上面那条把「已保留时是不是空操作」留在**未判别**状态：把实现改成「每次都新建空表」
+  // 仍然全绿。补这一档对照（m2 全程 keep=true，再 set 一次 true，行必须还在），
+  // 变异 T15 就是挂在这条上的。
+  let m2 = tm_run([1L], ["a"], "keep", true)
+  m2.set_keep_task_list(true)
+  assert_eq(m2.task_infos().length(), 1) // 规则腿  同一条字节码：taskList != null ⇒ true 那支什么都不做
   m.set_keep_task_list(false)
   assert_eq(shape(() => m.task_infos()), "TaskInfoNotKept") // 规则腿  同上一条字节码：false 把表置 null ⇒ 已经记下的行丢
 }
@@ -117,7 +123,7 @@ test "date #9.7.3 整张表的五段与两处字面空格" {
   let pp = tm_one(1000000L, "pp")
   assert_eq(
     pp.pretty_print(),
-    "StopWatch 'pp': running time = 1000000 ns\n---------------------------------------------\nns         %     Task name\n---------------------------------------------\n000100000  100%   t\n",
+    "StopWatch 'pp': running time = 1000000 ns\n---------------------------------------------\nns         %     Task name\n---------------------------------------------\n001000000  100%   t\n",
   ) // 读数腿  PP|one-task-nanos||StopWatch·'pp':·running·time·=·DDD·ns\r\n---...\r\nns·········%·····Task·name\r\n---...\r\nDDDDDDDDD··DDD%···alpha\r\n（· 是腿里显形空格的记号；行分隔符按 §9.7.4 落成 LF；数字 NF|1000000、百分号 PC|1.0）
   assert_eq(
     tm_line(@date.stop_watch(tm_fixed(0L)).pretty_print(), 1).length(),
@@ -209,14 +215,14 @@ test "date #9.4.2 interval_in 的两步算式与两个单位档" {
   assert_eq(n.interval_second(id="k"), 1L) // 读数腿  CU|1000000000|SECONDS=1 同族：1500/1000 向零截断
   assert_eq(tm_group([0L, 999999999L], ["k"], true).interval_ms(id="k"), 999L) // 读数腿  CU|999999999|MILLISECONDS=999 ⇒ 不四舍五入
   assert_eq(
-    tm_group([0L, 90061000000L], ["k"], true).interval_pretty(id="k"),
+    tm_group([0L, 90061000000000L], ["k"], true).interval_pretty(id="k"),
     "1天1小时1分1秒",
-  ) // 读数腿  FB|90061000||1{u5929}1{u5c0f}{u65f6}1{u5206}1{u79d2} ⇒ 90061000000 ns ÷1e6 = 90061 ms
+  ) // 读数腿  FB|90061000||1{u5929}1{u5c0f}{u65f6}1{u5206}1{u79d2} ⇒ 90061000000000 ns ÷1e6 = 90061000 ms
 }
 
 ///|
 test "date #9.4.3 两键互不干扰、clear 之后照给 0、预启动构造口" {
-  let g2 = tm_group([1000L, 2000L, 4000L, 9000L], ["a", "b"], false)
+  let g2 = tm_group([1000L, 2000L, 9000L, 9000L], ["a", "b"], false)
   assert_eq(g2.interval(id="a"), 8000L) // 读数腿  G|两个键互不干扰||#<=true,true ⇒ 两键各存各的起点
   assert_eq(g2.interval(id="b"), 7000L) // 读数腿  同一条的第二列
   g2.clear()

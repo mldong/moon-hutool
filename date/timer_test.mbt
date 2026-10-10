@@ -289,6 +289,7 @@ test "date #9.3.3 TaskInfo 五个读数与 total 同表（参照那两条委托�
   assert_eq(tm_one(0L, "ti").last_task_info().time_nanos(), 0L) // 读数腿  TI|0 的 nanos= 列
   assert_eq(tm_one(0L, "ti").last_task_info().time_millis(), 0L) // 读数腿  TI|0 的 ms= 列
   assert_eq(tm_one(0L, "ti").last_task_info().time_seconds(), 0.0) // 读数腿  TI|0 的 sec= 列
+  assert_eq(tm_one(0L, "ti").last_task_millis(), 0L) // 读数腿  TI|0 的 ms= 列（StopWatch::last_task_millis 委托 TaskInfo）
   assert_eq(tm_one(0L, "ti").last_task_info().task_name(), Some("t")) // 规则腿  TI 行的 name=k 列证「名字原样存」；本库名字由夹具给
   // TI|1000||name=k NANOSECONDS=1000 MICROSECONDS=1 MILLISECONDS=0 SECONDS=0 MINUTES=0 HOURS=0 DAYS=0 ms=0 sec=1.0E-6 nanos=1000
   assert_eq(
@@ -310,6 +311,7 @@ test "date #9.3.3 TaskInfo 五个读数与 total 同表（参照那两条委托�
   assert_eq(tm_one(1000L, "ti").last_task_info().time_nanos(), 1000L) // 读数腿  TI|1000 的 nanos= 列
   assert_eq(tm_one(1000L, "ti").last_task_info().time_millis(), 0L) // 读数腿  TI|1000 的 ms= 列
   assert_eq(tm_one(1000L, "ti").last_task_info().time_seconds(), 1.0e-6) // 读数腿  TI|1000 的 sec= 列
+  assert_eq(tm_one(1000L, "ti").last_task_millis(), 0L) // 读数腿  TI|1000 的 ms= 列（StopWatch::last_task_millis 委托 TaskInfo）
   assert_eq(tm_one(1000L, "ti").last_task_info().task_name(), Some("t")) // 规则腿  TI 行的 name=k 列证「名字原样存」；本库名字由夹具给
   // TI|1000000||name=k NANOSECONDS=1000000 MICROSECONDS=1000 MILLISECONDS=1 SECONDS=0 MINUTES=0 HOURS=0 DAYS=0 ms=1 sec=0.001 nanos=1000000
   assert_eq(
@@ -331,6 +333,7 @@ test "date #9.3.3 TaskInfo 五个读数与 total 同表（参照那两条委托�
   assert_eq(tm_one(1000000L, "ti").last_task_info().time_nanos(), 1000000L) // 读数腿  TI|1000000 的 nanos= 列
   assert_eq(tm_one(1000000L, "ti").last_task_info().time_millis(), 1L) // 读数腿  TI|1000000 的 ms= 列
   assert_eq(tm_one(1000000L, "ti").last_task_info().time_seconds(), 0.001) // 读数腿  TI|1000000 的 sec= 列
+  assert_eq(tm_one(1000000L, "ti").last_task_millis(), 1L) // 读数腿  TI|1000000 的 ms= 列（StopWatch::last_task_millis 委托 TaskInfo）
   assert_eq(tm_one(1000000L, "ti").last_task_info().task_name(), Some("t")) // 规则腿  TI 行的 name=k 列证「名字原样存」；本库名字由夹具给
   // TI|999999999||name=k NANOSECONDS=999999999 MICROSECONDS=999999 MILLISECONDS=999 SECONDS=0 MINUTES=0 HOURS=0 DAYS=0 ms=999 sec=0.999999999 nanos=999999999
   assert_eq(
@@ -361,6 +364,7 @@ test "date #9.3.3 TaskInfo 五个读数与 total 同表（参照那两条委托�
     tm_one(999999999L, "ti").last_task_info().time_seconds(),
     0.999999999,
   ) // 读数腿  TI|999999999 的 sec= 列
+  assert_eq(tm_one(999999999L, "ti").last_task_millis(), 999L) // 读数腿  TI|999999999 的 ms= 列（StopWatch::last_task_millis 委托 TaskInfo）
   assert_eq(tm_one(999999999L, "ti").last_task_info().task_name(), Some("t")) // 规则腿  TI 行的 name=k 列证「名字原样存」；本库名字由夹具给
   // TI|86400000000000||name=k NANOSECONDS=86400000000000 MICROSECONDS=86400000000 MILLISECONDS=86400000 SECONDS=86400 MINUTES=1440 HOURS=24 DAYS=1 ms=86400000 sec=86400.0 nanos=86400000000000
   assert_eq(
@@ -403,6 +407,7 @@ test "date #9.3.3 TaskInfo 五个读数与 total 同表（参照那两条委托�
     tm_one(86400000000000L, "ti").last_task_info().time_seconds(),
     86400.0,
   ) // 读数腿  TI|86400000000000 的 sec= 列
+  assert_eq(tm_one(86400000000000L, "ti").last_task_millis(), 86400000L) // 读数腿  TI|86400000000000 的 ms= 列（StopWatch::last_task_millis 委托 TaskInfo）
   assert_eq(
     tm_one(86400000000000L, "ti").last_task_info().task_name(),
     Some("t"),
@@ -439,6 +444,7 @@ test "date #9.3.3 TaskInfo 五个读数与 total 同表（参照那两条委托�
     tm_one(-999999999L, "ti").last_task_info().time_seconds(),
     -0.999999999,
   ) // 读数腿  TI|-999999999 的 sec= 列
+  assert_eq(tm_one(-999999999L, "ti").last_task_millis(), -999L) // 读数腿  TI|-999999999 的 ms= 列（StopWatch::last_task_millis 委托 TaskInfo）
   assert_eq(tm_one(-999999999L, "ti").last_task_info().task_name(), Some("t")) // 规则腿  TI 行的 name=k 列证「名字原样存」；本库名字由夹具给
 }
 
@@ -468,8 +474,9 @@ test "date #9.3.4 total_seconds = nanos / 1.0E9（腿 NS 行十六档）" {
 ///|
 test "date #9.7.1 数字列补零到 9 位（含十位不截断、负号在补齐之前）" {
   // 数字列走参照 `NumberFormat.getNumberInstance()` + setMinimumIntegerDigits(9) + setGroupingUsed(false)（腿 NF 行是直接喂数取的读数）
-  // 单任务 ⇒ 比值恒 1.0 ⇒ 百分号取 PC|1.0 那一档
-  assert_eq(tm_line(tm_one(0L, "nf").pretty_print(), 4), "000000000  100%   t") // 读数腿  NF|0||000000000 ＋ PC|1.0||100%（列宽 PP|one-task-nanos）
+  // 单任务的比值：任务时长非 0 ⇒ 比值 1.0（PC|1.0）；**恰好 0 那一档总时长也是 0 ⇒ 0/0 = NaN**
+  // （腿 PC|NaN||NaN）。上一笔把这两档一律配成 PC|1.0，是把比值当常数抄错了——单独一笔更正，读数来源就是这两条腿。
+  assert_eq(tm_line(tm_one(0L, "nf").pretty_print(), 4), "000000000  NaN   t") // 读数腿  NF|0||000000000 ＋ PC|NaN||NaN（列宽 PP|one-task-nanos）
   assert_eq(tm_line(tm_one(1L, "nf").pretty_print(), 4), "000000001  100%   t") // 读数腿  NF|1||000000001 ＋ PC|1.0||100%（列宽 PP|one-task-nanos）
   assert_eq(tm_line(tm_one(5L, "nf").pretty_print(), 4), "000000005  100%   t") // 读数腿  NF|5||000000005 ＋ PC|1.0||100%（列宽 PP|one-task-nanos）
   assert_eq(tm_line(tm_one(99L, "nf").pretty_print(), 4), "000000099  100%   t") // 读数腿  NF|99||000000099 ＋ PC|1.0||100%（列宽 PP|one-task-nanos）
@@ -744,4 +751,58 @@ test "date #9.5.2 非正档一律 0毫秒，五档档名逐个出场" {
   // 参照 Level.MINUTE 的档名 = 分（腿 FB|level-name-MINUTE）
   // 参照 Level.SECOND 的档名 = 秒（腿 FB|level-name-SECOND）
   // 参照 Level.MILLISECOND 的档名 = 毫秒（腿 FB|level-name-MILLISECOND）
+}
+
+///|
+test "date #9.3.12 to_string 的 Math.round：平局进位、负半边 floor、饱和与 NaN 四档" {
+  // 100.0 × n / total 直接喂给 JDK 的 Math.round 取读数（scripts/TimerLeg6.java 的 JU|round 组）
+  assert_eq(
+    tm_run([1L, 199L], ["a", "b"], "u", true).to_string(),
+    "StopWatch 'u': running time = 200 ns; [a] took 1 ns = 1%; [b] took 199 ns = 100%",
+  ) // 读数腿  JU|round|0.5||1（[a] 那档：0.5 进位，与 pretty_print 的 HALF_EVEN 给的 0 分岔）
+  assert_eq(
+    tm_run([-24999999999L, 1024999999999L], ["a", "b"], "u", true).to_string(),
+    "StopWatch 'u': running time = 1000000000000 ns; [a] took -24999999999 ns = -2%; [b] took 1024999999999 ns = 102%",
+  ) // 读数腿  JU|round|-2.4999999999||-2 与 JU|round|2.4999999999||2（负半边是 floor(x+0.5)，不是四舍五入）
+  assert_eq(
+    tm_run([9000000000000000000L, -8999999999999999999L], ["a", "b"], "u", true).to_string(),
+    "StopWatch 'u': running time = 1 ns; [a] took 9000000000000000000 ns = 9223372036854775807%; [b] took -8999999999999999999 ns = -9223372036854775808%",
+  ) // 读数腿  JU|round|1.0E30||9223372036854775807 与 JU|round|-1.0E30||-9223372036854775808（饱和）
+  assert_eq(
+    tm_run([0L, 0L], ["a", "b"], "u", true).to_string(),
+    "StopWatch 'u': running time = 0 ns; [a] took 0 ns = 0%; [b] took 0 ns = 0%",
+  ) // 读数腿  JU|round|NaN||0（同夹具的 pretty_print 给 NaN ⇒ 两族分岔的最分一处）
+}
+
+///|
+test "date #9.7.4 百分号的超长整数部分与负号位置（9.2E16 两侧都不夹）" {
+  // 19 位整数部分照打、不夹不截（`NF` 那两条「超宽不夹」的规则在百分号同族；总时长 1 ns 由两条互相抵消的任务凑出来）
+  assert_eq(
+    tm_line(
+      tm_run([92000000000000000L, -91999999999999999L], ["a", "b"], "big", true).pretty_print(),
+      4,
+    ),
+    "92000000000000000  9200000000000000000%   a",
+  ) // 读数腿  JU|pct|9.2E16||9200000000000000000%；数字列 = NF|1234567890||1234567890 同族（超 9 位不夹）
+  assert_eq(
+    tm_line(
+      tm_run([92000000000000000L, -91999999999999999L], ["a", "b"], "big", true).pretty_print(),
+      5,
+    ),
+    "-91999999999999999  -9200000000000000000%   b",
+  ) // 读数腿  JU|pct|-9.2E16||-9200000000000000000%；负号在补齐之前 = NF|-12345||-000012345 同族
+}
+
+///|
+test "date #9.4.4 纳秒档预启动、interval_restart 的已记过档、interval_hour" {
+  let gn = @date.time_interval_nanos(tm_fixed(7L))
+  assert_eq(gn.interval(), 0L) // 规则腿  Z|Ti.interval@fresh 的形状 ⇒ 纳秒档的预启动构造口；同一读数之差为 0
+  let gr = @date.group_time_interval(tm_steps([5000L, 5123L]))
+  let _ = gr.start(id="k")
+  assert_eq(gr.interval_restart(id="k"), 123L) // 规则腿  字节码 t - defaultIfNull(put(key,t), 0)：键已记过 ⇒ 走 Some 那一支，123 = 5123-5000
+  assert_eq(tm_group([0L, 90061000L], ["k"], false).interval_hour(id="k"), 25L) // 读数腿  G|intervalMs/Second/Minute/Week||#/#/#/# 同族 ＋ §2.9 已冻 to_millis（Hour=3600000）
+  assert_eq(
+    tm_line(tm_one(-1234567890L, "nf").pretty_print(), 4),
+    "-1234567890  100%   t",
+  ) // 读数腿  NF|-12345||-000012345（负号在补齐之前）＋ NF|1234567890||1234567890（超 9 位不夹）两条规则叠加，本档同时用得上
 }

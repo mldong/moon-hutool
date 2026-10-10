@@ -5,7 +5,7 @@
 用法（五条腿的读数文件按腿序给，落在工作树外、不提交）：
 
     python scripts/gen_timer_test.py \\
-        <TimerLeg.txt> <TimerLeg2.txt> <TimerLeg3.txt> <TimerLeg4.txt> <TimerLeg5.txt>
+        <TimerLeg.txt> <TimerLeg2.txt> <TimerLeg3.txt> <TimerLeg4.txt> <TimerLeg5.txt> <TimerLeg6.txt>
 
 产出两份：`date/timer_test.mbt`（单位换算/补零/百分号/时长格式化四张大表）、
 `date/custom_format_test.mbt`（全局格式表的键匹配、内置算法、解析与挂载）。
@@ -32,6 +32,9 @@ DASH = "---------------------------------------------"      # PP|dash-len||45
 HEAD_MID = "         %     Task name"                       # PP|header-seg（shot 名之后那一段）
 ROW_MID = "  "                                              # PP|one-task-nanos：数字列后两空格
 ROW_TAIL = "   "                                            # 百分号后三空格再任务名
+
+# 阿拉伯-印度数码 ٣：参照 `Long.parseLong` 认它（走 Character.digit），本库只收 ASCII ⇒ 明写的分岔
+ARABIC3 = chr(0x663)
 
 UNITS = ["NANOSECONDS", "MICROSECONDS", "MILLISECONDS", "SECONDS",
          "MINUTES", "HOURS", "DAYS"]
@@ -281,6 +284,9 @@ def gen_timer(d):
                         "读数腿", "TI|{} 的 ms= 列".format(k)))
         lines.append(eq("{}.time_seconds()".format(base), dbl(c["sec"]),
                         "读数腿", "TI|{} 的 sec= 列".format(k)))
+        # StopWatch 那侧的 last_task_millis 走的是同一条委托；不在这里点一次，它就没人调（覆盖率现读过）
+        lines.append(eq('tm_one({}, "ti").last_task_millis()'.format(i64(k)), i64(c["ms"]),
+                        "读数腿", "TI|{} 的 ms= 列（StopWatch::last_task_millis 委托 TaskInfo）".format(k)))
         lines.append(eq("{}.task_name()".format(base), 'Some("t")',
                         "规则腿", "TI 行的 name=k 列证「名字原样存」；本库名字由夹具给"))
     doc.test("date #9.3.3 TaskInfo 五个读数与 total 同表（参照那两条委托关系）", lines)
@@ -292,14 +298,17 @@ def gen_timer(d):
     lines = [
         "  // 数字列走参照 `NumberFormat.getNumberInstance()` + setMinimumIntegerDigits(9)"
         " + setGroupingUsed(false)（腿 NF 行是直接喂数取的读数）",
-        "  // 单任务 ⇒ 比值恒 1.0 ⇒ 百分号取 PC|1.0 那一档"]
+        "  // 单任务的比值：任务时长非 0 ⇒ 比值 1.0（PC|1.0）；**恰好 0 那一档总时长也是 0 ⇒ 0/0 = NaN**",
+        "  // （腿 PC|NaN||NaN）。上一笔把这两档一律配成 PC|1.0，是把比值当常数抄错了——"
+        "单独一笔更正，读数来源就是这两条腿。"]
     for k in NF_KEYS:
         pad = decode(d[("NF", k)])
-        pct = decode(d[("PC", "1.0")])
+        pct = decode(d[("PC", "NaN" if k == "0" else "1.0")])
         lines.append(eq(
             'tm_line(tm_one({}, "nf").pretty_print(), 4)'.format(i64(k)),
             slit(pad + ROW_MID + pct + ROW_TAIL + "t"),
-            "读数腿", "NF|{}||{} ＋ PC|1.0||{}（列宽 PP|one-task-nanos）".format(k, pad, pct)))
+            "读数腿", "NF|{}||{} ＋ PC|{}||{}（列宽 PP|one-task-nanos）".format(
+                k, pad, "NaN" if k == "0" else "1.0", pct)))
     doc.test("date #9.7.1 数字列补零到 9 位（含十位不截断、负号在补齐之前）", lines)
 
     lines = [
@@ -335,6 +344,62 @@ def gen_timer(d):
         lines.append("  // 参照 Level.{} 的档名 = {}（腿 FB|level-name-{}）".format(
             name, decode(d[("FB", "level-name-" + name)]), name))
     doc.test("date #9.5.2 非正档一律 0毫秒，五档档名逐个出场", lines)
+    # 块 18：`to_string` 那一族的取整边界（腿 `JU|round` 行——第六批第二条腿 TimerLeg6.java 现读）
+    lines = [
+        "  // 100.0 × n / total 直接喂给 JDK 的 Math.round 取读数（scripts/TimerLeg6.java 的 JU|round 组）",
+        eq('tm_run([1L, 199L], ["a", "b"], "u", true).to_string()',
+           slit("StopWatch 'u': running time = 200 ns; [a] took 1 ns = 1%; "
+                "[b] took 199 ns = 100%"),
+           "读数腿", "JU|round|0.5||1（[a] 那档：0.5 进位，与 pretty_print 的 HALF_EVEN 给的 0 分岔）"),
+        eq('tm_run([-24999999999L, 1024999999999L], ["a", "b"], "u", true).to_string()',
+           slit("StopWatch 'u': running time = 1000000000000 ns; [a] took -24999999999 ns = -2%; "
+                "[b] took 1024999999999 ns = 102%"),
+           "读数腿", "JU|round|-2.4999999999||-2 与 JU|round|2.4999999999||2（负半边是 floor(x+0.5)，不是四舍五入）"),
+        eq('tm_run([9000000000000000000L, -8999999999999999999L], ["a", "b"], "u", true).to_string()',
+           slit("StopWatch 'u': running time = 1 ns; [a] took 9000000000000000000 ns = "
+                "9223372036854775807%; [b] took -8999999999999999999 ns = -9223372036854775808%"),
+           "读数腿", "JU|round|1.0E30||9223372036854775807 与 JU|round|-1.0E30||-9223372036854775808（饱和）"),
+        eq('tm_run([0L, 0L], ["a", "b"], "u", true).to_string()',
+           slit("StopWatch 'u': running time = 0 ns; [a] took 0 ns = 0%; [b] took 0 ns = 0%"),
+           "读数腿", "JU|round|NaN||0（同夹具的 pretty_print 给 NaN ⇒ 两族分岔的最分一处）"),
+    ]
+    doc.test("date #9.3.12 to_string 的 Math.round：平局进位、负半边 floor、饱和与 NaN 四档", lines)
+
+    # 块 19：百分号那侧的超长整数部分（腿 JU|pct 两档；比 Int64 更极端的档写在 spec §9.8 不承诺）
+    big = 'tm_run([92000000000000000L, -91999999999999999L], ["a", "b"], "big", true)'
+    lines = [
+        "  // 19 位整数部分照打、不夹不截（`NF` 那两条「超宽不夹」的规则在百分号同族；"
+        "总时长 1 ns 由两条互相抵消的任务凑出来）",
+        eq('tm_line({}.pretty_print(), 4)'.format(big),
+           slit("92000000000000000" + ROW_MID + decode(d[("JU", "pct|9.2E16")])
+                + ROW_TAIL + "a"),
+           "读数腿", "JU|pct|9.2E16||" + d[("JU", "pct|9.2E16")]
+           + "；数字列 = NF|1234567890||1234567890 同族（超 9 位不夹）"),
+        eq('tm_line({}.pretty_print(), 5)'.format(big),
+           slit("-91999999999999999" + ROW_MID + decode(d[("JU", "pct|-9.2E16")])
+                + ROW_TAIL + "b"),
+           "读数腿", "JU|pct|-9.2E16||" + d[("JU", "pct|-9.2E16")]
+           + "；负号在补齐之前 = NF|-12345||-000012345 同族"),
+    ]
+    doc.test("date #9.7.4 百分号的超长整数部分与负号位置（9.2E16 两侧都不夹）", lines)
+
+    # 块 20：几条没被点到的委托档
+    lines = [
+        '        let gn = @date.time_interval_nanos(tm_fixed(7L))'.replace("        ", "  ", 1),
+        eq("gn.interval()", "0L", "规则腿",
+           "Z|Ti.interval@fresh 的形状 ⇒ 纳秒档的预启动构造口；同一读数之差为 0"),
+        '        let gr = @date.group_time_interval(tm_steps([5000L, 5123L]))'.replace("        ", "  ", 1),
+        '        let _ = gr.start(id="k")'.replace("        ", "  ", 1),
+        eq('gr.interval_restart(id="k")', "123L", "规则腿",
+           "字节码 t - defaultIfNull(put(key,t), 0)：键已记过 ⇒ 走 Some 那一支，123 = 5123-5000"),
+        eq('tm_group([0L, 90061000L], ["k"], false).interval_hour(id="k")', "25L", "读数腿",
+           "G|intervalMs/Second/Minute/Week||#/#/#/# 同族 ＋ §2.9 已冻 to_millis（Hour=3600000）"),
+        eq('tm_line(tm_one(-1234567890L, "nf").pretty_print(), 4)',
+           slit("-1234567890" + ROW_MID + decode(d[("PC", "1.0")]) + ROW_TAIL + "t"),
+           "读数腿", "NF|-12345||-000012345（负号在补齐之前）＋ NF|1234567890||1234567890"
+           "（超 9 位不夹）两条规则叠加，本档同时用得上"),
+    ]
+    doc.test("date #9.4.4 纳秒档预启动、interval_restart 的已记过档、interval_hour", lines)
     doc.write("date/timer_test.mbt")
 
 
@@ -497,6 +562,61 @@ def gen_custom(d):
     ]
     doc.test("date #9.6.7 两张表的不对称（parser-only 隐形 / formatter-only 看得见 / 收尾自证）", lines)
 
+    # 块 9：parseLong 文法的边界档 + 本库主动窄一档的那处（腿 JU 组，scripts/TimerLeg6.java）
+    lines = [
+        "  // 参照 Long.parseLong 走 Character.digit(ch, 10)，它**认非 ASCII 的十进制数码**；",
+        "  // 本库只收 ASCII 0-9（core 没有 Unicode Nd 表，做假承诺比窄一档更坏）⇒ 这两档是明写的分岔，",
+        "  // 期望串是本库形状、参照那一侧的原读数留在注释里（spec §9.6 末行）。",
+        eq('shape(() => @date.custom_parse("+", "#sss"))', '"NotAnInteger +"', "读数腿",
+           "JU|parseLong|+||" + d[("JU", "parseLong|+")]),
+        eq('shape(() => @date.custom_parse("-", "#sss"))', '"NotAnInteger -"', "读数腿",
+           "JU|parseLong|-||" + d[("JU", "parseLong|-")]),
+        eq('shape(() => @date.custom_parse("--1", "#sss"))', '"NotAnInteger --1"', "读数腿",
+           "JU|parseLong|--1||" + d[("JU", "parseLong|--1")]),
+        eq('shape(() => @date.custom_parse("0x10", "#sss"))', '"NotAnInteger 0x10"', "读数腿",
+           "JU|parseLong|0x10||" + d[("JU", "parseLong|0x10")]),
+        eq('@date.custom_parse("-0", "#sss")', "Some(0L)", "读数腿",
+           "JU|parseLong|-0||" + d[("JU", "parseLong|-0")]),
+        eq('@date.custom_parse("010", "#sss")', "Some(10000L)", "读数腿",
+           "JU|parseLong|010||{} ⇒ 前导零照收，GCF#sss 那侧 {}".format(
+               d[("JU", "parseLong|010")], d[("JU", "GCF#sss|010")])),
+        eq('shape(() => @date.custom_parse("9223372036854775808", "#SSS"))',
+           '"NotAnInteger 9223372036854775808"', "读数腿",
+           "JU|parseLong|9223372036854775808||" + d[("JU", "parseLong|9223372036854775808")]),
+        eq('@date.custom_parse("9223372036854775807", "#SSS")',
+           "Some(9223372036854775807L)", "读数腿",
+           "JU|parseLong|9223372036854775807||" + d[("JU", "parseLong|9223372036854775807")]),
+        eq('shape(() => @date.custom_parse("-9223372036854775809", "#SSS"))',
+           '"NotAnInteger -9223372036854775809"', "读数腿",
+           "JU|parseLong|-9223372036854775809||"
+           + d[("JU", "parseLong|-9223372036854775809")]
+           + " —— 负半边的界与正半边差 1，两侧各一条才夹得住"),
+        eq('@date.custom_parse("-9223372036854775808", "#SSS")',
+           "Some(" + i64("-9223372036854775808") + ")", "读数腿",
+           "JU|parseLong|-9223372036854775808||" + d[("JU", "parseLong|-9223372036854775808")]),
+        eq('shape(() => @date.custom_parse("9223372036854775807", "#sss"))',
+           '"MillisOverflow 9223372036854775807"', "读数腿",
+           "JU|GCF#sss|9223372036854775807||" + d[("JU", "GCF#sss|9223372036854775807")]
+           + " ⇒ parseLong 过得去、乘 1000 溢出，是另一种错"),
+        eq('shape(() => @date.custom_parse("' + ARABIC3 + '", "#SSS"))',
+           '"NotAnInteger ' + ARABIC3 + '"', "读数腿",
+           "JU|parseLong|{u0663}||" + d[("JU", "parseLong|{u0663}")]
+           + " —— 参照给 3，本库按 ASCII 档拒"),
+        eq('shape(() => @date.custom_parse("1' + ARABIC3 + '", "#SSS"))',
+           '"NotAnInteger 1' + ARABIC3 + '"', "读数腿",
+           "JU|parseLong|1{u0663}||" + d[("JU", "parseLong|1{u0663}")]
+           + " —— 参照给 13，本库整串拒"),
+        "  // 撤销**毫秒档**内置键：覆盖立刻生效、reset 之后回到内置算法（与 #9.6.6 那档同判据的另一侧）",
+        '  @date.set_custom_format("#SSS", ms => "Z" + ms.to_string())',
+        eq('@date.custom_format(CF_MILLIS, "#SSS")', 'Some("Z1700000000123")', "规则腿",
+           "同 #9.6.6：覆盖内置键改的是共享表"),
+        '  @date.reset_custom_format("#SSS")',
+        eq('@date.custom_format(CF_MILLIS, "#SSS")',
+           "Some(" + slit(decode(d[("GF", "format(d,#SSS)")])) + ")", "读数腿",
+           "GF|format(d,#SSS)||" + d[("GF", "format(d,#SSS)")] + " ⇒ reset 复原内置"),
+    ]
+    doc.test("date #9.6.9 parseLong 文法边界、非 ASCII 数码的主动窄一档与 #SSS 的 reset", lines)
+
     f_sss = decode(d[("F", "DateUtil.format(#sss)")])
     lines = [
         "  // 挂进门面件：命中键就查表，区名与 pattern token 都不参与（腿 F 行）",
@@ -527,7 +647,7 @@ def gen_custom(d):
 CF_MILLIS = 1700000000123
 
 if __name__ == "__main__":
-    if len(sys.argv) != 6:
+    if len(sys.argv) != 7:
         print(__doc__)
         sys.exit(1)
     D = load(sys.argv[1:])
