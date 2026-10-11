@@ -243,6 +243,10 @@ hutool `UrlBuilder` 的价值在两处：把一个 URL 串拆成组件（`of(url
 3. **异常消息带那个负下标**（`String index out of range: -14`），所以 `ShiftUnderflow(Int)` 的载荷
    照原样交出这个数，不夹成正数、不改成 `String`。本包错误面一贯只带读数。
 
+4. **`caesar_decode` 的签名不带错误面**（0.1.1 起）：decode 恒有解（归一就是全部原因），spec 这条
+   "从不抛"与 PR-A 给的 `raise CodecError` 自相矛盾——0.1.0 那一代本件还是 abort 体从未可用，
+   0.1.1 收窄签名，`ShiftUnderflow` 只挂在 `caesar_encode` 上。
+
 ### 13.2 字母守卫的数据件：`codec/letter_table.mbt`
 
 本版 MoonBit core 的 `Char` **没有任何 Unicode 字母谓词**（现读 `builtin/char.mbt`：公开 `is_*` 只有
@@ -260,8 +264,8 @@ ASCII 档与 control/digit/whitespace/numeric/printable/bmp），所以这张判
 
 | 公开件 | 对位 | 算式 | 差异声明 |
 |---|---|---|---|
-| `rot_encode(text, shift, number_support)` | `Rot.encode(String,int,boolean)` | `number_support` 且 `0`~`9` ⇒ `(c-48+shift)%10+48`；`A`~`Z` ⇒ `(c-65+shift)%26+65`；`a`~`z` ⇒ `(c-97+shift)%26+97`；其余原样 | **不判字母**，是码位区间 ⇒ `é`/`中` 在此原样（Caesar 那侧却要移） |
-| `rot_decode(text, shift, number_support)` | `Rot.decode(...)` | 同三段，`+` 换 `-` | 同样**不做负数归一** |
+| `rot_encode(text, shift, number_support)` | `Rot.encode(String,int,boolean)` | `number_support` 且 `0`~`9` ⇒ `(c-48+shift)%10+48`；`A`~`Z` ⇒ `(c-65+shift)%26+65`；`a`~`z` ⇒ `(c-97+shift)%26+97`；其余原样。截断取模，负余数配合 `(char)` 的 16 位回绕与直算同余 ⇒ 任意 `shift` 直算即对 | **不判字母**，是码位区间 ⇒ `é`/`中` 在此原样（Caesar 那侧却要移） |
+| `rot_decode(text, shift, number_support)` | `Rot.decode(...)` | **与 encode 不是取负再取模的对称件**（真源码 `Rot.decodeChar` 为凭，5.8.37 tag）：数字段 `while(temp<0) temp+=10` 补到非负；**大写段 `while(temp<0) temp=26+temp` 同样补到非负**（`A`/`Z` 在 shift=104 档原样回环，`RT|dec|A|104`）；**小写段 `if(temp<0) temp=26+temp` 只补一次 26**，大负值带负落 `(char)` 16 位回绕（`a`-104⇒19、`z`-104⇒44）；数字段改写后**不截断流程**，还要过两段字母判断。初版表格写的"同三段 `+` 换 `-`、同样不做负数归一"是对字节码的误读，落地笔照源码更正——腿读数一个没动，错的只是这条解释 | 三段归一策略各异是参照的怪味，不许顺手统一 |
 | `rot13_encode(text, number_support~=true)` | `encode13(String)` 与 `encode13(String,boolean)` 两档 | 等价 `rot_encode(text,13,ns)` | 默认档 `true` 由腿定：数字夹具 `0189` 只在 `true` 侧相等 |
 | `rot13_decode(text, number_support~=true)` | `decode13` 两档 | 等价 `rot_decode(text,13,ns)` | 与 `rot13_encode` **不互逆**（25 夹具里 18 条同值） |
 
@@ -296,4 +300,17 @@ ASCII 档与 control/digit/whitespace/numeric/printable/bmp），所以这张判
 守卫整个去掉（表外字母也走 `indexOf`，与参照不同判）、`encode` 补上 `+52` 归一（57 条抛错档全变值）、
 `decode` 去掉归一（抛错档从 0 变多）、`% 52` 写成 `% 26`、`number_support` 判反、
 `A`/`a` 两段的基准字符写混（`65` 写成 `97`）、`rot13_*` 的默认档从 `true` 改 `false`。
+
+**PR-B 落地笔回填（2026-10-11，副本变异 8/8 全抓红，`moon test --target wasm -p codec` 读数）**：
+
+| 变异 | 红位（188 块中） | 判读 |
+|---|---|---|
+| M1 守卫换 `is_ascii_alphabetic` | 39 红 | 非拉丁字母那批档全被点名 |
+| M2 守卫整个去掉 | 45 红 | 表外字母走 `indexOf` 与参照不同判 |
+| M3 `encode` 补 `+52` 归一 | 6 红 | 恰好是 6 个含抛错档的 shift 块（-104/-52/-26/-13/-1/0），其余 shift 无抛错档不受扰 |
+| M4 `decode` 去掉归一 | 19 红 | 负 `j` 直落数组越界，decode 档大面积翻红 |
+| M5 `% 52`→`% 26` | 43 红 | 表长 52 的移位语义整体塌 |
+| M6 `number_support` 判反 | 64 红 | 数字档两面互换 |
+| M7 `A`/`a` 基准写混（65→97） | 92 红 | 大写段输出整体错位 |
+| M8 `rot13_*` 默认档翻反 | 2 红 | 默认档判别块——判别面窄是参照给的，不是变异没打到 |
 

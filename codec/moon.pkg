@@ -3,10 +3,8 @@
 // §7/§8 落地后骨架豁免整行删除（G12）；§12 data URI 两件同例（10-10 批① PR-B 撤掉豁免）：
 // 体里没有 `abort` 了，那两类警告若再响就是真死码，不再豁免。
 
-// 批③ PR-A（Caesar/Rot 两件）重新压上一行：两类警告都是"新变体 `ShiftUnderflow` 还没人构造"
-// 的机械后果（raise 写在签名里、体是 abort），落地那一笔整行删除（G12 只认函数体里的
-// `PR-B：契约骨架` 字样）。`unused_error_type` 管类型本身没人用，`unused_constructor` 管那一个变体。
-warnings = "-unused_error_type-unused_constructor"
+// 批③ 落地笔（0.1.1）已把上面的豁免整行删除（G12）：Caesar/Rot 七件体里没有 `abort` 了，
+// 那两类警告若再响就是真死码，不再豁免。
 
 import {
   "moonbitlang/core/encoding/utf8",

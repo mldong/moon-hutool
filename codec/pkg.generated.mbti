@@ -26,7 +26,7 @@ pub fn b64_encode_mime(Bytes) -> String
 
 pub fn b64_encode_url(Bytes, padding? : Bool) -> String
 
-pub fn caesar_decode(String, Int) -> String raise CodecError
+pub fn caesar_decode(String, Int) -> String
 
 pub fn caesar_encode(String, Int) -> String raise CodecError
 

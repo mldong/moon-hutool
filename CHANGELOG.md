@@ -7,6 +7,12 @@
 - **公开件签名只前进**：`.mbti` 里既有件的签名不改；要改必须另开主版本。
 - **期望值冻结**：断言右侧（参照读数）不因实现而改；确需更正，单独一条并在对应 spec 里写清外部读数来源。
 
+## 0.1.1（2026-10-11 · codec 批③ 片一落地）
+
+- **`codec` 的 `caesar_encode` / `caesar_decode` / `rot_encode` / `rot_decode` / `rot13_encode` / `rot13_decode` 从契约骨架落地为真实现**（0.1.0 里这六件调用即 `abort`）。`decodeChar` 的三段归一策略各不相同（数字段/大写段 `while` 补到非负、小写段 `if` 只补一次 26 落 `(char)` 16 位回绕），照 hutool 5.8.37 真源码逐字直译，腿读数一条没动；变异对照 8/8 抓红（`docs/spec/05-codec.md` §13.5 回填）。
+- **`caesar_decode` 签名收窄**：去掉 `raise CodecError`（decode 恒有解，spec §13.1"从不抛"与旧签名自相矛盾；0.1.0 该件是 abort 体从未可用）。`ShiftUnderflow` 只挂在 `caesar_encode` 上。
+- **期望面三处更正**（单独证据，见对应提交信息）：`rot13_encode("")`／`rot13_decode("")` 两处空夹具期望被生成脚本的 `rpartition("||")` 塌缩解析灌成了腿行判别尾巴（`true?1|false?1`／`dec13selfinv|1`），更正为空串；`cc3` 夹具助手从"码位数组"更正为"UTF-16 码元数组"（😀 夹具 `[55357,56832]` 是代理对两半，按码位构造会炸）。
+
 ## 0.1.0（2026-10-11 · 首发）
 
 首个对外版本，包数与用例条数以 `docs/ROADMAP.md` 的逐包表与生成读数块为准（`moon test --target wasm` 现读，不写死——本节初稿的「672」已被后续补档越过多轮）。**除 `sched` 外**的包零第三方依赖、零 `extern`、全同步、四目标可编译（wasm / wasm-gc / js / native）；`sched` 依赖官方 `moonbitlang/async`（触发面绕不开事件循环），只承诺三档（wasm / js / native），`wasm-gc` 档该依赖没有异步可执行入口（`moon check` 能过，`moon run`／`moon test` 报 `[4021] Value run_async_main not found`），已按包级 `supported_targets` 摘掉那一档。

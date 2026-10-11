@@ -39,12 +39,23 @@ pub let caesar_table : String = "AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwX
 /// - Note: 参照的 `null` 入参档（`IllegalArgumentException: message must be not null!`）在本库
 ///   **结构上到不了**——`String` 非空，不需要也不能造那一条。
 pub fn caesar_encode(text : String, shift : Int) -> String raise CodecError {
-  let _ = (text, shift)
-  // 骨架期点一下私有谓词：字母守卫的真调用在实现那一笔，这里只为让零警告门禁不把它报成未使用
-  let _ = is_letter_unit(0)
-  abort(
-    "PR-B：契约骨架，docs/spec/05-codec.md §13.1 与腿 CC|enc 组 105×15 档",
-  )
+  let t = caesar_table.to_array()
+  let buf = StringBuilder()
+  for c in text {
+    let u = c.to_int()
+    if is_letter_unit(u) {
+      // 表内字母：j = (indexOf(c) + shift) % 52；表外字母 indexOf 给 -1，
+      // 于是 shift <= 0 时 j 落负——参照在这里抛，负下标原样交出（spec §13.1 第 3 条）
+      let j = (table_index_of(t, c) + shift) % 52
+      if j < 0 {
+        raise ShiftUnderflow(j)
+      }
+      buf.write_char(t[j])
+    } else {
+      buf.write_char(c)
+    }
+  }
+  buf.to_string()
 }
 
 ///|
@@ -54,12 +65,38 @@ pub fn caesar_encode(text : String, shift : Int) -> String raise CodecError {
 /// **并且**取模后多做一步 `if (j < 0) j += 52`。
 ///
 /// - Returns: 恒有解——这一步归一就是解码侧从不抛错的全部原因（腿 `CC|dec` 组 105×15 档零抛错）。
+///   签名因此**不带错误面**（0.1.0 曾带 `raise CodecError`，那一代本件还是 abort 体从未可用；
+///   spec §13.1"从不抛"的读数与签名自洽，0.1.1 收窄）。
 /// - Note: 于是 `decode(encode(x, k), k) == x` **不恒成立**：`encode` 在负档先抛了，
 ///   而 `decode` 对表外字母照样出字符（`é` 解码给 `z`/`Z` 那一族，腿 `CC|dec|é|*`）。
 ///   往返判据只在"两边都不抛"的档上钉（腿 `CC|rt` 组）。
-pub fn caesar_decode(text : String, shift : Int) -> String raise CodecError {
-  let _ = (text, shift)
-  abort(
-    "PR-B：契约骨架，docs/spec/05-codec.md §13.1 与腿 CC|dec 组 105×15 档",
-  )
+pub fn caesar_decode(text : String, shift : Int) -> String {
+  let t = caesar_table.to_array()
+  let buf = StringBuilder()
+  for c in text {
+    let u = c.to_int()
+    if is_letter_unit(u) {
+      // 与 encode 只差两处：用 -shift，且负 j 归一（这一步就是解码侧从不抛的全部原因）
+      let mut j = (table_index_of(t, c) - shift) % 52
+      if j < 0 {
+        j += 52
+      }
+      buf.write_char(t[j])
+    } else {
+      buf.write_char(c)
+    }
+  }
+  buf.to_string()
+}
+
+///|
+/// 码元在 52 字符交替表里的下标；表外（`indexOf == -1` 档）给 -1。
+/// 表固定 52 字符，逐格扫描即可，不为这一件引入额外数据件。
+fn table_index_of(t : Array[Char], c : Char) -> Int {
+  for k in 0..<52 {
+    if t[k] == c {
+      return k
+    }
+  }
+  -1
 }
