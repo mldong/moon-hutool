@@ -47,8 +47,10 @@ jobs:
           echo "$HOME/.moon/bin" >> $GITHUB_PATH
           "$HOME/.moon/bin/moon" version    # 留痕：本次实际使用的工具链版本
 
+      # validate_only 也要写：--dry-run 实测同样要求 credentials.json 存在（否则
+      # "failed to open credentials file" 先于任何校验发生，run 38113870454）；
+      # 上传步骤有自己的 if 条件挡着，写了凭据也不会被 validate_only 通道用于上传
       - name: Write mooncakes credentials
-        if: ${{ !inputs.validate_only }}
         run: |
           # 两个 secret 少一个就直接点名"secrets 没配"——不写空文件：
           # {"token":"","username":""} 长得像有效凭据，moon publish 会拿一个服务端报错来
