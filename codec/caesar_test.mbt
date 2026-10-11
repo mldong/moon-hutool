@@ -6,11 +6,19 @@
 ///|
 /// 由码位数组现造夹具与期望串。
 fn cc3(codes : Array[Int]) -> String {
+  // 夹具语义是**UTF-16 码元数组**不是码位数组：腿的转义是 Java 层逐码元转义，
+  // 代理对的两半（笑脸夹具 [55357,56832]）各自成码元落在这里——按码位构造会在代理段
+  // to_char=None 上炸红（0.1.1 前那版的错法）；代理段按码元收，其余非码位值照旧炸红
   let out : Array[Char] = []
   for c in codes {
     match c.to_char() {
       Some(ch) => out.push(ch)
-      None => abort("夹具码位非法：" + c.to_string())
+      None =>
+        if c is (0xD800..=0xDFFF) {
+          out.push(c.unsafe_to_char())
+        } else {
+          abort("夹具码位非法：" + c.to_string())
+        }
     }
   }
   String::from_array(out)

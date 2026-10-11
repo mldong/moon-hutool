@@ -25,18 +25,12 @@ let num_off : Bool = false
 
 ///|
 test "codec #13.3 encode13 的默认档：number_support 实测是 true（不是 false）" {
-  assert_eq(
-    @codec.rot13_encode(cc3([])),
-    cc3([116, 114, 117, 101, 63, 49, 124, 102, 97, 108, 115, 101, 63, 49]),
-  ) // 读数腿  RT|e13  ⇒ true?1|false?1
-  assert_eq(
-    @codec.rot_encode(cc3([]), 13, num_on),
-    cc3([116, 114, 117, 101, 63, 49, 124, 102, 97, 108, 115, 101, 63, 49]),
-  ) // 规则腿  单参档走 true 侧
-  assert_true(
-    @codec.rot_encode(cc3([]), 13, num_off) !=
-    cc3([116, 114, 117, 101, 63, 49, 124, 102, 97, 108, 115, 101, 63, 49]),
-  ) // 读数腿  同夹具 false 侧是  ⇒ 默认值只能是 true
+  // 空夹具更正（期望值冻结线的合法更正笔，证据见提交信息）：腿行
+  // `RT|e13|||true?1|false?1` 的 `||` 在空夹具处塌缩，生成脚本 rpartition 把判别尾巴
+  // 灌成了期望值；Rot.encode13("") 循环零次必然返回空串，且尾巴 true?1|false?1 本身
+  // 就读作"true 侧同、false 侧同"——两侧都是空串，这一档判别不了默认值（判别由数字夹具承担）
+  assert_eq(@codec.rot13_encode(cc3([])), cc3([])) // 读数腿  RT|e13  ⇒ （空）
+  assert_eq(@codec.rot_encode(cc3([]), 13, num_on), cc3([])) // 规则腿  单参档走 true 侧
   assert_eq(@codec.rot13_encode(cc3([65])), cc3([78])) // 读数腿  RT|e13 A ⇒ N
   assert_eq(@codec.rot_encode(cc3([65]), 13, num_on), cc3([78])) // 规则腿  单参档走 true 侧
   assert_eq(@codec.rot13_encode(cc3([97])), cc3([110])) // 读数腿  RT|e13 a ⇒ n
@@ -145,10 +139,9 @@ test "codec #13.3 encode13 的默认档：number_support 实测是 true（不是
 ///|
 test "codec #13.3 decode13 与 encode13 不是互逆（腿逐条给分布）" {
   // 25 条夹具里 18 条 `decode13 == encode13`，其余不等 ⇒ 自逆只能逐档钉
-  assert_eq(
-    @codec.rot13_decode(cc3([])),
-    cc3([100, 101, 99, 49, 51, 115, 101, 108, 102, 105, 110, 118, 124, 49]),
-  ) // 读数腿  RT|d13  ⇒ dec13selfinv|1
+  // 空夹具更正（同上，`||` 塌缩把 dec13selfinv|1 尾巴灌成了期望值）；Rot.decode13("") 必然空串，
+  // 且 dec13selfinv|1 读作"decode13("")==encode13("")"——两侧都是空串，恒真
+  assert_eq(@codec.rot13_decode(cc3([])), cc3([])) // 读数腿  RT|d13  ⇒ （空）
   assert_eq(@codec.rot13_decode(cc3([65])), cc3([78])) // 读数腿  RT|d13 A ⇒ N
   assert_eq(@codec.rot13_decode(cc3([97])), cc3([110])) // 读数腿  RT|d13 a ⇒ n
   assert_eq(@codec.rot13_decode(cc3([90])), cc3([77])) // 读数腿  RT|d13 Z ⇒ M

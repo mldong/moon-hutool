@@ -199,6 +199,11 @@ for p, val in rows(rlines, "RT"):
         r_null += 1
         rnull[f] = val
     elif f in ("e13", "d13"):
+        # 空夹具行 `RT|e13|||true?1|false?1` 的 `||` 在 rpartition 处塌缩：val 会以判别尾巴
+        # （true?…／dec13selfinv…）开头而值段丢失——此时值段必为空串（encode13/decode13 对
+        # 空串循环零次）。不修这个，判别尾巴会被灌成期望值（0.1.1 前的那批期望就是这么错的）
+        if val.startswith("true?") or val.startswith("dec13selfinv"):
+            val = ""
         (re13 if f == "e13" else rd13).append((p[2], val))
     elif f == "enc":
         key, shift, num = p[2], p[3], p[4]
