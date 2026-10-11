@@ -48,12 +48,19 @@ else
 fi
 cat "$out"
 
-# 判状态只认状态行：202 = 受理，409 = 该版本已存在（都算通道本身没坏）
-if grep -qE 'Server status: (202|409)' "$out"; then
+# 判状态只认状态行。三码实测读数（v0.1.0 run 38113690544 起各有出处）：
+#   200 = 真发成功（moon publish 实测——dry-run 才回 202，当初白名单只认 202 就是被 dry-run 实测带偏的）
+#   202 = --dry-run 校验受理（不落库）
+#   409 = 该版本已存在（重入）
+if grep -qE 'Server status: (200|202|409)' "$out"; then
   status=$(grep -oE 'Server status: [0-9]+' "$out" | head -1 | awk '{print $3}')
   echo "   状态行：$status"
 else
-  echo "   ❌ 输出里没有 Server status 行 ⇒ 上传环节之前就把活失败了（看上面的原始输出），本次不算成功"
+  if grep -qE 'Server status: [0-9]+' "$out"; then
+    echo "   ❌ 有状态行但不在成功白名单（200/202/409）⇒ 服务端没受理，本次不算成功"
+  else
+    echo "   ❌ 输出里没有 Server status 行 ⇒ 上传环节之前就把活失败了（看上面的原始输出），本次不算成功"
+  fi
   rm -f "$out"; exit 1
 fi
 
