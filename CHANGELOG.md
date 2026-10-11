@@ -7,7 +7,7 @@
 - **公开件签名只前进**：`.mbti` 里既有件的签名不改；要改必须另开主版本。
 - **期望值冻结**：断言右侧（参照读数）不因实现而改；确需更正，单独一条并在对应 spec 里写清外部读数来源。
 
-## 未发布（0.1.0 · 首发）
+## 0.1.0（2026-10-11 · 首发）
 
 首个对外版本，包数与用例条数以 `docs/ROADMAP.md` 的逐包表与生成读数块为准（`moon test --target wasm` 现读，不写死——本节初稿的「672」已被后续补档越过多轮）。**除 `sched` 外**的包零第三方依赖、零 `extern`、全同步、四目标可编译（wasm / wasm-gc / js / native）；`sched` 依赖官方 `moonbitlang/async`（触发面绕不开事件循环），只承诺三档（wasm / js / native），`wasm-gc` 档该依赖没有异步可执行入口（`moon check` 能过，`moon run`／`moon test` 报 `[4021] Value run_async_main not found`），已按包级 `supported_targets` 摘掉那一档。
 
