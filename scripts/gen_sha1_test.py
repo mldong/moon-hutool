@@ -172,11 +172,11 @@ HEAD = """///|
 // 分岔即拒绝出文件 ⇒ 期望串不经过手打这一环。
 // 夹具复用 `hmac_family_test.mbt` 的 `k_of` / `rep` / `bs_of`（同包多个 `_test.mbt` 共享顶层命名空间，
 // 不重复定义）；`seq` 只在本文件定义（后续要用直接引用，别复制）。
-// 契约笔落地时体是 `PR-B：契约骨架` 的 abort ⇒ 这批用例红是设计态（门禁 G5：落地笔只许把红变绿）。
+// 本批已落地（10-15，0.1.2）：契约笔冻的期望一条未改（落地笔对 `*_test.mbt` 零触碰），`digest` 包现读 27 条全绿。
 
 ///|
 /// 顺序字节夹具：`0x00, 0x01, …`（NIST 案例的键形状；`rep` 表达不了等差序列，故补这一件）。
-fn seq(n : Int) -> Bytes {
+fn seq(n : Int32) -> Bytes {
   let buf = @buffer.Buffer()
   for i in 0..<n {
     buf.write_byte(i.to_byte())
@@ -195,27 +195,34 @@ test "sha1 #2.8 RFC 3174 §7.3 四条经典测试串（含恰整除 640 字节�
     @digest.sha1_hex("01234567".repeat(80)),
     "@@s1.exact@@",
   )
-  assert_eq(@digest.sha1_hex("a".repeat(1000000)), "@@s1.million@@")
+  assert_eq(
+    @digest.sha1_hex("a".repeat(1000000)),
+    "@@s1.million@@",
+  )
 }
 
 ///|
 test "sha1 #2.8 空串 / UTF-8 中文 / 裸字节流 / 长度与 of_bytes 对拍" {
   assert_eq(@digest.sha1_hex(""), "@@s1.empty@@")
-  assert_eq(@digest.sha1_hex("中文"), "@@s1.cn@@")
+  assert_eq(
+    @digest.sha1_hex("中文"),
+    "@@s1.cn@@",
+  )
   assert_eq(@digest.sha1_bytes("abc").length(), 20)
   assert_eq(
     @hex.encode(@digest.sha1_of_bytes(@utf8.encode("abc"))),
     "@@s1.abc@@",
   )
   assert_true(
-    @digest.sha1_of_bytes(@utf8.encode("中文")) == @digest.sha1_bytes("中文"),
+    @digest.sha1_of_bytes(@utf8.encode("中文")) ==
+    @digest.sha1_bytes("中文"),
   )
   assert_eq(
     @hex.encode(
       @digest.sha1_of_bytes(
         Bytes::from_array([
-          0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c,
-          0x0d, 0x0e, 0x0f,
+          0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b,
+          0x0c, 0x0d, 0x0e, 0x0f,
         ]),
       ),
     ),
@@ -230,7 +237,10 @@ test "hmac_sha1 #2.8 RFC 2202 §3 全部七条 TC（裸字节键与数据）" {
     "@@hs1.tc1@@",
   )
   assert_eq(
-    @digest.hmac_sha1_hex_of_bytes(k_of("Jefe"), k_of("what do ya want for nothing?")),
+    @digest.hmac_sha1_hex_of_bytes(
+      k_of("Jefe"),
+      k_of("what do ya want for nothing?"),
+    ),
     "@@hs1.tc2@@",
   )
   assert_eq(
@@ -240,8 +250,8 @@ test "hmac_sha1 #2.8 RFC 2202 §3 全部七条 TC（裸字节键与数据）" {
   assert_eq(
     @digest.hmac_sha1_hex_of_bytes(
       bs_of([
-        1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23,
-        24, 25,
+        1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21,
+        22, 23, 24, 25,
       ]),
       rep(50, 0xcd),
     ),
@@ -272,11 +282,17 @@ test "hmac_sha1 #2.8 RFC 2202 §3 全部七条 TC（裸字节键与数据）" {
 ///|
 test "hmac_sha1 #2.8 NIST 示例两档（keylen=blocklen 64 恰边界 / keylen=100 超块）" {
   assert_eq(
-    @digest.hmac_sha1_hex_of_bytes(seq(0x40), k_of("Sample message for keylen=blocklen")),
+    @digest.hmac_sha1_hex_of_bytes(
+      seq(0x40),
+      k_of("Sample message for keylen=blocklen"),
+    ),
     "@@hs1.nist64@@",
   )
   assert_eq(
-    @digest.hmac_sha1_hex_of_bytes(seq(100), k_of("Sample message for keylen=blocklen")),
+    @digest.hmac_sha1_hex_of_bytes(
+      seq(100),
+      k_of("Sample message for keylen=blocklen"),
+    ),
     "@@hs1.nist100@@",
   )
 }
@@ -287,10 +303,19 @@ test "hmac_sha1 #2.8 键长 65 档 + String 档与字节档同读" {
     @digest.hmac_sha1_hex_of_bytes(rep(65, 0x0b), k_of("Hi There")),
     "@@hs1.k65@@",
   )
-  assert_eq(@digest.hmac_sha1_hex("key", ""), "@@hs1.emptydata@@")
-  assert_eq(@digest.hmac_sha1_hex("密钥K", "中文数据"), "@@hs1.cn@@")
   assert_eq(
-    @digest.hmac_sha1_hex_of_bytes(k_of("Jefe"), k_of("what do ya want for nothing?")),
+    @digest.hmac_sha1_hex("key", ""),
+    "@@hs1.emptydata@@",
+  )
+  assert_eq(
+    @digest.hmac_sha1_hex("密钥K", "中文数据"),
+    "@@hs1.cn@@",
+  )
+  assert_eq(
+    @digest.hmac_sha1_hex_of_bytes(
+      k_of("Jefe"),
+      k_of("what do ya want for nothing?"),
+    ),
     @digest.hmac_sha1_hex("Jefe", "what do ya want for nothing?"),
   )
 }
@@ -299,11 +324,36 @@ test "hmac_sha1 #2.8 键长 65 档 + String 档与字节档同读" {
 test "hmac_sha1 #2.8 verify（真 / 改一位 / 大写 / 非十六进制 / 奇数长度）" {
   let k = k_of("Jefe")
   let d = k_of("what do ya want for nothing?")
-  assert_eq(@digest.hmac_sha1_verify_hex(k, d, "@@hs1.tc2@@"), true)
-  assert_eq(@digest.hmac_sha1_verify_hex(k, d, "@@hs1.tc2.flip@@"), false)
-  assert_eq(@digest.hmac_sha1_verify_hex(k, d, "@@hs1.tc2.upper@@"), true)
-  assert_eq(@digest.hmac_sha1_verify_hex(k, d, "@@hs1.tc2.badhex@@"), false)
-  assert_eq(@digest.hmac_sha1_verify_hex(k, d, "@@hs1.tc2.odd@@"), false)
+  assert_eq(
+    @digest.hmac_sha1_verify_hex(
+      k, d, "@@hs1.tc2@@",
+    ),
+    true,
+  )
+  assert_eq(
+    @digest.hmac_sha1_verify_hex(
+      k, d, "@@hs1.tc2.flip@@",
+    ),
+    false,
+  )
+  assert_eq(
+    @digest.hmac_sha1_verify_hex(
+      k, d, "@@hs1.tc2.upper@@",
+    ),
+    true,
+  )
+  assert_eq(
+    @digest.hmac_sha1_verify_hex(
+      k, d, "@@hs1.tc2.badhex@@",
+    ),
+    false,
+  )
+  assert_eq(
+    @digest.hmac_sha1_verify_hex(
+      k, d, "@@hs1.tc2.odd@@",
+    ),
+    false,
+  )
 }
 """
 

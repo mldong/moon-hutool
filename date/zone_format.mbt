@@ -1,6 +1,6 @@
 ///|
 // moon-hutool/date —— 命名时区版格式化与解析（ROADMAP 第 3 行第四批）
-// 契约真相在 `docs/spec/03-date.md` §7。本文件的实现体在 PR-B 落地；现在是契约骨架。
+// 契约真相在 `docs/spec/03-date.md` §7。本文件的实现体已随 PR-B 第四批（`8b14dac`）落地。
 
 ///|
 /// 瞬间 + 本包 pattern 子集 + 区名 → 串。

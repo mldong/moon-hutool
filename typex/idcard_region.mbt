@@ -3,11 +3,8 @@
 // 对位 hutool `cn.hutool.core.util.IdcardUtil` 的 `isValidTWCard` / `isValidHKCard` / `isValidCard`。
 // 契约真相在 `docs/spec/23-typex.md` §19。
 //
-// 【这是 PR-B 的落地草稿，放在临时目录，未进仓】落仓前要先过一遍：
-//   1) 用 Temp/convsrc/fill_tw_table.py 把下面那张 26 枚表从腿灌满（不许手打）；
-//   2) 删掉 typex/moon.pkg 里那行 `warnings = "-unused_value"`（G12：体里已无 abort）；
-//   3) 棘轮 BASELINE_TESTS 515 保持（本笔不减块）；
-//   4) 变异 T1–T7 在 tar 出的隔离副本挂载，基线＝本包 6 块设计态红，判据是"红块数是否增加"。
+// 本文件已随港澳台族落地：原「落地草稿四项待办」均已完成——表由腿灌、`warnings` 豁免随
+// `typex/moon.pkg` 拆除、变异 T1–T7 七条全抓红零等价（留痕：`docs/spec/23-typex.md` §19.4）。
 //
 // 四条决定实现形状、且都有腿读数为凭的事实：
 // - 三件的出口都是 `Bool`：参照 `isValidCard` 本身就是 `boolean`，而它内部对十位那一支只问

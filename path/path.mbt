@@ -1,8 +1,8 @@
 ///|
 /// moon-hutool/path —— Ant 风格路径模式匹配（hutool `cn.hutool.core.text.AntPathMatcher` 的 MoonBit 对位·第一批）
 ///
-/// 契约：`docs/spec/15-path.md`；进度：`docs/ROADMAP.md`。这一批**只有签名与冻结期望值，函数体是 `abort`**
-/// （状态＝契约已冻结，用例预期红）；实现那一笔只许把红变绿（门禁 G5）。
+/// 契约：`docs/spec/15-path.md`；进度：`docs/ROADMAP.md`。本批已落地（PR-B `8b5e5b0`，11 块全绿）：
+/// 签名与期望冻结于契约笔、实现笔只把红变绿（门禁 G5）。
 ///
 /// **血统先说清**：参照实现那张类是 Spring-framework `org.springframework.util.AntPathMatcher` 的 vendored 拷贝
 /// （hutool 只是把它搬进 `hutool-core`，15 个 `public` 成员 + 4 个内部类，源码 945 行）。

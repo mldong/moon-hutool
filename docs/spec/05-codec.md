@@ -218,9 +218,9 @@ hutool `UrlBuilder` 的价值在两处：把一个 URL 串拆成组件（`of(url
 第 4 参才是数据，且 charset 出 `Charset.name()` 的 `UTF-8` 而非传入的 `utf-8`——腿 `D|getDataUri(4)` 五行）
 ## 13. 批③ 片一（10-10）：`Caesar` 与 `Rot` 两件移位
 
-> 状态：**契约笔**——签名与期望已冻（`codec/caesar.mbt`／`codec/rot.mbt` 体是 `PR-B：契约骨架` 的
-> `abort`，`moon check` 0 警告 0 错误，`moon test --package codec` 现读 **188 = 绿 51 / 红 137**，
-> 137 条红全是本批新块）。腿共四份：`scripts/CaesarLeg.java`（971 行读数）、`scripts/RotLeg.java`（2302 行）、
+> 状态：**已实现**（10-11 落地笔 `d3c42a1`，0.1.1）——契约骨架已全部落成真实现，**期望面零改写**
+> （落地笔对两份测试件零触碰；`067f7d9` 一笔按外部证据更正三处夹具、单独授权留痕），
+> `moon test --package codec` 现读 **188 条全绿**、三档一致；变异 8/8 抓红见 §13.5。腿共四份：`scripts/CaesarLeg.java`（971 行读数）、`scripts/RotLeg.java`（2302 行）、
 > `scripts/LetterSetLeg.java` 与 `scripts/LetterRangesLeg.java`（守卫那张表），每份跑两遍逐字节相同。
 > 参照代次 5.8.37（口径见 `00-hutool-map.md` 的 `hutool-reference-version`）。
 
