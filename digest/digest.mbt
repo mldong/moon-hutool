@@ -512,3 +512,104 @@ fn hex_digit(c : Char) -> Int32 {
     -1
   }
 }
+
+///|
+// ===== 第三批：SHA-1 与 HMAC-SHA1（八件；需求登记：本仓 Issues #1）。契约与读数见 spec 2.8 =====
+
+///|
+/// SHA-1 原始 20 字节。与 `sha256_bytes` 同族：大端取字，共用那台零分配的虚拟消息机器。
+///
+/// - Parameters: `data` 参与摘要的文本，按 **UTF-8** 成字节（全包口径）
+/// - Returns: 20 字节原始摘要
+/// - Note: 官方向量在两处原文互证——NIST 示例文档（FIPS 180-4 附录 A.2 指向的 `SHA1.pdf`）
+///   与 RFC 3174 §7.3 的测试驱动；`"abc"` 与 56 字节两分块两条在两处逐字相同，见 spec §2.8
+pub fn sha1_bytes(data : String) -> Bytes {
+  let _ = data
+  abort(
+    "PR-B：契约骨架，docs/spec/02-digest.md §2.8（SHA-1 官方向量）",
+  )
+}
+
+///|
+/// SHA-1 十六进制小写 40 位
+/// - Raises: 无——纯计算，`data` 是文本不是可失败输入
+pub fn sha1_hex(data : String) -> String {
+  let _ = data
+  abort(
+    "PR-B：契约骨架，docs/spec/02-digest.md §2.8（SHA-1 官方向量）",
+  )
+}
+
+///|
+/// SHA-1 对**任意字节流**（`sha1_bytes` 的字节版入口，算法完全同一个）
+///
+/// - Parameters: `data` 任意 `Bytes`——含 `0x00`、非 UTF-8 序列、或多段拼接的结果都行
+/// - Returns: 20 字节原始摘要
+/// - Note: 存在的理由与 `md5_of_bytes`/`sha256_of_bytes` 两档同形（spec §2.1.1/§2.1.2）：
+///   有一类输入不是任何字符串。`id` 包的 UUID v5 会对 `namespace 字节 ‖ name 字节` 做 SHA-1，
+///   走 `String` 入口进不去——本批只补原语，v5 的调用点另案（spec §2.7 相位表）
+pub fn sha1_of_bytes(data : Bytes) -> Bytes {
+  let _ = data
+  abort(
+    "PR-B：契约骨架，docs/spec/02-digest.md §2.8（SHA-1 官方向量）",
+  )
+}
+
+///|
+/// HMAC-SHA-1（RFC 2104 §5）：block size 64（与 MD5/SHA-256 相同，共用同一台私有 `hmac_of` 机器）；
+/// 键长 > 64 先把键哈希一次，不足右侧补零；`String` 入参按 **UTF-8** 成字节。
+///
+/// - Raises: 无——纯计算，`key`/`data` 是文本不是可失败输入
+/// - Note: 官方向量见 spec §2.8——RFC 2202 §3 全七条，另加 NIST 示例的 `keylen=blocklen`（64 恰在
+///   "不哈希键"一侧的边界上）与 `keylen=100` 两条
+pub fn hmac_sha1_bytes(key : String, data : String) -> Bytes {
+  let _ = (key, data)
+  abort(
+    "PR-B：契约骨架，docs/spec/02-digest.md §2.8（HMAC-SHA1 官方向量）",
+  )
+}
+
+///|
+/// HMAC-SHA-1 十六进制小写 40 位
+/// - Raises: 无——纯计算，`key`/`data` 是文本不是可失败输入
+pub fn hmac_sha1_hex(key : String, data : String) -> String {
+  let _ = (key, data)
+  abort(
+    "PR-B：契约骨架，docs/spec/02-digest.md §2.8（HMAC-SHA1 官方向量）",
+  )
+}
+
+///|
+/// HMAC-SHA-1 的**字节键**档（密钥是原始二进制时用这一档；RFC 2202 与 NIST 的官方向量都是裸字节键）
+/// - Raises: 无——纯计算，`key`/`data` 是字节不是可失败输入
+pub fn hmac_sha1_of_bytes(key : Bytes, data : Bytes) -> Bytes {
+  let _ = (key, data)
+  abort(
+    "PR-B：契约骨架，docs/spec/02-digest.md §2.8（HMAC-SHA1 官方向量）",
+  )
+}
+
+///|
+/// HMAC-SHA-1 字节键 → 十六进制小写
+/// - Raises: 无——纯计算，`key`/`data` 是字节不是可失败输入
+pub fn hmac_sha1_hex_of_bytes(key : Bytes, data : Bytes) -> String {
+  let _ = (key, data)
+  abort(
+    "PR-B：契约骨架，docs/spec/02-digest.md §2.8（HMAC-SHA1 官方向量）",
+  )
+}
+
+///|
+/// 校验：重算 HMAC-SHA-1 再与给定十六进制比。比较走 §2.5 `equal_digest` 的常量时间路径；
+/// 十六进制按标准解（大小写都收）；奇数长度或含非十六进制字符 ⇒ 解出空字节、长度必然不等 ⇒ 判假。
+/// - Raises: 无——纯计算，`key`/`data` 是字节不是可失败输入
+pub fn hmac_sha1_verify_hex(
+  key : Bytes,
+  data : Bytes,
+  expected : String,
+) -> Bool {
+  let _ = (key, data, expected)
+  abort(
+    "PR-B：契约骨架，docs/spec/02-digest.md §2.8（HMAC-SHA1 官方向量）",
+  )
+}

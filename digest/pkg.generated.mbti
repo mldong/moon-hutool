@@ -14,6 +14,16 @@ pub fn hmac_md5_of_bytes(Bytes, Bytes) -> Bytes
 
 pub fn hmac_md5_verify_hex(Bytes, Bytes, String) -> Bool
 
+pub fn hmac_sha1_bytes(String, String) -> Bytes
+
+pub fn hmac_sha1_hex(String, String) -> String
+
+pub fn hmac_sha1_hex_of_bytes(Bytes, Bytes) -> String
+
+pub fn hmac_sha1_of_bytes(Bytes, Bytes) -> Bytes
+
+pub fn hmac_sha1_verify_hex(Bytes, Bytes, String) -> Bool
+
 pub fn hmac_sha256_bytes(String, String) -> Bytes
 
 pub fn hmac_sha256_hex(String, String) -> String
@@ -31,6 +41,12 @@ pub fn md5_hex(String) -> String
 pub fn md5_hex16(String) -> String
 
 pub fn md5_of_bytes(Bytes) -> Bytes
+
+pub fn sha1_bytes(String) -> Bytes
+
+pub fn sha1_hex(String) -> String
+
+pub fn sha1_of_bytes(Bytes) -> Bytes
 
 pub fn sha256_bytes(String) -> Bytes
 

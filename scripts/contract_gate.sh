@@ -23,7 +23,9 @@ GATE_TARGETS="${GATE_TARGETS:-wasm js}"
 #   G3 判的是"用例收没收到"，红绿由 targets 那一步逐条点名，两者不混）。
 # 负向对照：把这里改成 1558 当场判红 `test wasm 只收集 1557 条 < 基线 1558`。
 # 逐包条数别抄在这里，现读 ROADMAP.md 末的 READINGS 生成块（G11 每次都会重生成）。
-BASELINE_TESTS="${BASELINE_TESTS:-1557}"
+# 10-15 换代：moonc 0.10.15 全仓迁移笔后现读 wasm/js 1731 / wasm-gc 1719；
+# 第三批（SHA-1）契约笔 +7 条（6 个用例块 + 1 个 README 文档块）→ 1738 / 1726。
+BASELINE_TESTS="${BASELINE_TESTS:-1738}"
 
 echo "== G1 零第三方 + async 按包归属（10-09 口径翻案：白名单不再等于零依赖）=="
 # 三条判据一起跑，任何一条红即 G1 红；判据自身另有三档对照，对照不过 ⇒ 报"G1 自身失效"而不是放过。

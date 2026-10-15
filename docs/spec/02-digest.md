@@ -1,6 +1,6 @@
 # 契约 02 · digest（摘要）
 
-> 状态：**已实现**（10-04，`digest/digest.mbt`，14 条用例全绿）。本页期望值先冻结后实现；
+> 状态：**已实现**（首批 10-04 + 第二批 10-05，既有 20 条用例全绿）；第三批（SHA-1 / HMAC-SHA1，§2.8）契约与期望已冻结（10-15），实现笔紧随——现读 `digest` 包 26 = 绿 20 / 红 6，红全是本批新块。本页期望值先冻结后实现；
 > 冻结过程中确实抓出两处我自己的错：MD5 第六条向量誊错一位（`419c9f`→`419d9f`）、`md5_hex16` 的中段口径需对 v5-master 反推——
 > **冻结不等于正确**，它的作用是逼每处改动都拿出外部证据。
 > **权威是规范文本，不是 hutool**：hutool-crypto 自己几乎不实现算法（是 `javax.crypto`/JCE 门面，全模块只有 RC4/XXTEA/Vigenere 是手写位运算），所以照它的"实现"抄没有意义；本包对着 RFC 1321 / FIPS 180-4 / RFC 2104 写，**验收只认官方向量**（门禁 G6）。
@@ -167,8 +167,67 @@ hutool 对位：无（hutool 直接用 `equals`）⇒ **本库主动加的一条
 | `md5*` / `sha256*` / `hmac_sha256*` / `equal_digest` | **P1（见 ROADMAP）** | 登录口令列、签名、消息校验的最小集 |
 | HMAC 家族八件（`hmac_md5*` / `*_of_bytes` / `*_verify_hex`） | **已实现（第二批，10-05，§2.6）** | 与 P1 同一张嘴，只是放开"键必须是文本"的假定 |
 | `mac` 独立包（ROADMAP 第 13 行） | **判不做，内容并入 §2.6** | `HMac` 在 hutool-crypto 且是有状态对象；一次性用法已由八件覆盖 |
-| `sha1*`（含 UUID v5 依赖）、`sha512*` | P6 | 官方向量同法冻结后再实现 |
+| `sha1*`（含 UUID v5 依赖） | **第三批（10-15，§2.8）：契约与期望已冻结，实现笔紧随** | 官方向量＝NIST 示例文档（FIPS 180-4 附录 A.2 指向）+ RFC 3174 §7.3，两处原文互证；UUID v5 的调用点另案 |
+| `sha512*` | P6 | 官方向量同法冻结后再实现 |
 | `sm3`、`ripemd160`、`sha3/keccak` | `docs/ROADMAP.md` 的「暂不做」档 | 国密合规出口 / 需要新算法工程 |
 | `Digester`（salt + saltPosition + digestCount 迭代） | P6 | hutool 私有行为，期望值全量对 v5-master 反推后才进契约 |
 | AES / RSA / EC / BCrypt / Argon2 / PBKDF2 | `docs/ROADMAP.md` 的「暂不做」档不排期 | 非对称要自写 `gcd`/`mod_inverse`（core 无）+ ASN.1 DER |
 | 流式/增量摘要（`Digest` 对象一次喂一块） | `docs/ROADMAP.md` 的「暂不做」档 | core 无 io；本库不做带状态的写接口 |
+
+## 2.8 第三批：SHA-1 与 HMAC-SHA1（10-15）
+
+> 状态：**契约笔**（10-15）——八件签名与期望已冻结（`digest/digest.mbt` 体是 `PR-B：契约骨架` 的 `abort`），
+> 实现笔紧随。需求登记：本仓 Issues #1——moon-file-storage 二期要接 OSS / COS 原生签名（OSS Signature v1
+> 与 COS 四级 HMAC-SHA1 链），签名原语按「基础件归口」约定落本包；UUID v5 对 SHA-1 的依赖同批解掉原语侧，
+> v5 的调用点另案。
+
+公开件八件，签名以 `digest/pkg.generated.mbti` 为准：
+
+| 项 | 签名 | 对位 hutool | 说明 |
+|---|---|---|---|
+| `sha1_bytes` | `(String) -> Bytes` | `DigestUtil.sha1` | 20 字节；与 §2.3 `sha256_bytes` 同族（大端、同一台虚拟消息机器） |
+| `sha1_hex` | `(String) -> String` | `DigestUtil.sha1Hex` | 小写十六进制 40 位 |
+| `sha1_of_bytes` | `(Bytes) -> Bytes` | `Digester.digest(byte[])` | 形状与 §2.1.1／§2.1.2 两档同形 |
+| `hmac_sha1_bytes` / `hmac_sha1_hex` | `(String, String) -> Bytes` / `String` | `HMac(HmacSHA1, String key)` | 键/数据固定 UTF-8 |
+| `hmac_sha1_of_bytes` / `hmac_sha1_hex_of_bytes` | `(Bytes, Bytes) -> Bytes` / `String` | `HMac(HmacSHA1, byte[] key)` | 裸字节键——两套官方向量都是这一档 |
+| `hmac_sha1_verify_hex` | `(Bytes, Bytes, String) -> Bool` | `HMac#verify` 的十六进制形态 | 走 §2.5 `equal_digest` 常量时间比较 |
+
+HMAC 五件与 §2.6 的 hmac_sha256 族**逐件同形**，且共用同一台私有 `hmac_of` 机器（第三把摘要接入）——
+pad/xor 不存在第二份实现；块长同样 64、长键同样先哈希一次。
+
+### 官方向量（验收只认这批；门禁 G6）
+
+**SHA-1**（`abc` 与 56 字节两分块两条在 NIST 示例文档与 RFC 3174 §7.3 两处逐字相同）：
+
+| 输入 | 期望 | 来源 |
+|---|---|---|
+| `"abc"` | `a9993e364706816aba3e25717850c26c9cd0d89d` | NIST `SHA1.pdf` One Block Sample／RFC 3174 §7.3 Test1 |
+| 56 字节两分块串（`abcdbcde…nopnopq`） | `84983e441c3bd26ebaae4aa1f95129e5e54670f1` | NIST `SHA1.pdf` Two Block Sample／RFC 3174 §7.3 Test2 |
+| `"01234567"` × 80（640 字节，恰为 512 位整数倍） | `dea356a2cddd90c7a7ecedc5ebb563934f460452` | RFC 3174 §7.3 Test4（原文按 64 字符块喂十次） |
+| `"a"` × 1,000,000 | `34aa973cd4c4daa4f61eeb2bdbad27316534016f` | RFC 3174 §7.3 Test3 |
+
+**HMAC-SHA1**（RFC 2202 §3 全部七条 + NIST 示例两档）：
+
+| 用例 | key | data | 期望 |
+|---|---|---|---|
+| RFC 2202 TC1 | `0x0b`×20 | `"Hi There"` | `b617318655057264e28bc0b6fb378c8ef146be00` |
+| RFC 2202 TC2 | `"Jefe"` | `"what do ya want for nothing?"` | `effcdf6ae5eb2fa2d27416d5f184df9c259a7c79` |
+| RFC 2202 TC3 | `0xaa`×20 | `0xdd`×50 | `125d7342b9ac11cd91a39af48aa17b4f63f175d3` |
+| RFC 2202 TC4 | `0x01 02 … 19`（25 字节） | `0xcd`×50 | `4c9007f4026250c6bc8414f9bf50c86c2d7235da` |
+| RFC 2202 TC5 | `0x0c`×20 | `"Test With Truncation"` | `4c1a03424b55e07fe7f27be1d58bb9324a9a5a04` |
+| RFC 2202 TC6 | `0xaa`×80（> 块长 64） | `"Test Using Larger Than Block-Size Key - Hash Key First"` | `aa4ae5e15272d00e95705637ce8a3b55ed402112` |
+| RFC 2202 TC7 | `0xaa`×80 | `"Test Using Larger Than Block-Size Key and Larger Than One Block-Size Data"` | `e8e99d0f45237d786d6bbaa7965c7808bbff1a91` |
+| NIST 示例（**恰在 64 边界**） | `00 01 … 3f`（64 字节） | `"Sample message for keylen=blocklen"` | `5fd596ee78d5553c8ff4e72d266dfd192366da29` |
+| NIST 示例（超块） | `00 01 … 63`（100 字节） | `"Sample message for keylen=blocklen"`（原文如此，不是笔误） | `2d51b2f7750e410584662e38f133435f4c4fd42a` |
+
+- **原文三处**（2026-10-15 现读）：NIST 示例文档 `SHA1.pdf`／`HMAC_SHA1.pdf`（FIPS 180-4 附录 A.2 指向的
+  csrc.nist.gov 示例页）、RFC 3174 §7.3 测试驱动、RFC 2202 §3。
+- **两级读数先对撞再冻结**：`scripts/gen_sha1_test.py` 内嵌上表 13 条官方值，跑时先与 Python
+  `hashlib.sha1`／`hmac.new(sha1)` 现算逐条 assert（13/13），分岔即拒绝出文件；其余读数（空串 /
+  中文 UTF-8 / 裸字节流 `0x00..0x0f` / 键长 65 档 / verify 四档）只有现算一条来源，读数文件逐条标注
+  provider。首跑当场拒出过一次实错：RFC 3174 Test4 的消息曾被误记成另一条 112 字节串——两级对撞防的
+  正是这类「看着像」的誊写。
+- **`64` 与 `> 64` 的分界两侧都有官方值**：RFC 2202 只覆盖 `<64`（TC1~TC5）与 `>64`（TC6／TC7），
+  恰等于 64 档由 NIST 示例补上（上表倒数第二行）。
+- **不承诺两档**（与 §2.6 同口径）：空密钥档；NIST 文档另有 `keylen=49 / tag=12` 的截断案例，
+  本包不提供截断输出（对位 hutool `HMac` 也无截断档），故不取。

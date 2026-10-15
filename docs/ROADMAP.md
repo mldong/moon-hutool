@@ -17,7 +17,7 @@
 | 包 | hutool 对位 | 状态 | 契约 | 用例 |
 |---|---|---|---|---|
 | `text` | `StrUtil` / `CharSequenceUtil` / `NamingCase` / `StrFormatter` / `EscapeUtil` / `UnicodeUtil` / `CharUtil` / `text.replacer.*` | **已实现** | `docs/spec/01-text.md` | 详记 [`roadmap-log/01-text.md`](https://github.com/mldong/moon-hutool/blob/master/docs/roadmap-log/01-text.md) |
-| `digest` | `DigestUtil`（MD5 / SHA-256 / HMAC） | **已实现** | `docs/spec/02-digest.md` | 详记 [`roadmap-log/02-digest.md`](https://github.com/mldong/moon-hutool/blob/master/docs/roadmap-log/02-digest.md) |
+| `digest` | `DigestUtil`（MD5 / SHA-256 / HMAC） | **已实现**（前两批）；第三批 SHA-1 / HMAC-SHA1 契约已冻结、实现笔紧随 | `docs/spec/02-digest.md` | 详记 [`roadmap-log/02-digest.md`](https://github.com/mldong/moon-hutool/blob/master/docs/roadmap-log/02-digest.md) |
 | `date` | `DateUtil` / `CalendarUtil` / `DatePattern` / `DateUnit` | **已实现**（六批；10-10 第六批 §9 计时三件 + 全局自定义格式表两笔落地：契约笔冻期望、实现笔只把红变绿） | `docs/spec/03-date.md` | 详记 [`roadmap-log/03-date.md`](https://github.com/mldong/moon-hutool/blob/master/docs/roadmap-log/03-date.md) |
 | `id` | `IdUtil`（雪花 / UUID v3·v4 / ObjectId / NanoId） | **已实现** | `docs/spec/04-id.md` | 详记 [`roadmap-log/04-id.md`](https://github.com/mldong/moon-hutool/blob/master/docs/roadmap-log/04-id.md) |
 | `codec` | `Base64`(url-safe·MIME·宽松解码) / `Base32` / `Base58`(含 Check) / `Base62` / `RadixUtil` / `x-www-form-urlencoded` / `UrlBuilder` / `URLUtil`(部分) / `Caesar` / `Rot` | **已实现**（前五批 + 10-10 批③ 片一 `Caesar`/`Rot`（0.1.1 落地笔收口，变异 8/8 抓红）；`Morse` 单独立片未开工） | `docs/spec/05-codec.md` | 详记 [`roadmap-log/05-codec.md`](https://github.com/mldong/moon-hutool/blob/master/docs/roadmap-log/05-codec.md) |
@@ -49,8 +49,9 @@
 <!-- READINGS:BEGIN 由 scripts/sync_status.py 生成，勿手改 -->
 | 读数（`moon test --target wasm`，当场跑） | 值 |
 |---|---|
-| 用例总数 | **1731** —— 绿 1731 / 红 0 |
-| 包状态 | 共 23 个：`已实现` 23 · `实现中` 0 · `契约已冻结` 0 · `未开工` 0 |
+| 用例总数 | **1738** —— 绿 1731 / 红 7 |
+| 包状态 | 共 23 个：`已实现` 22 · `实现中` 1 · `契约已冻结` 0 · `未开工` 0 |
+| 红的是谁 | `digest`（7 红） —— 未实现的包红是设计态 |
 <!-- READINGS:END -->
 
 | 项 | 值 |

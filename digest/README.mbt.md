@@ -6,7 +6,7 @@ hutool `DigestUtil` 的 MoonBit 对位：MD5、SHA-256、HMAC-SHA-256，外加�
 
 输入一律按 **UTF-8 字节**参与运算。core 没有任何摘要能力，故整包自研，纯位运算、无状态、无第三方依赖。
 
-> 状态：**已实现**（10-04）。本页 7 个示例块由 `moon test` 真跑并全绿；期望值就是 RFC 1321 / FIPS 180-4 / RFC 2104+4231 的官方向量（本机 `hashlib` 现算核对）。
+> 状态：**已实现**（首批 10-04 + 第二批 10-05）；第三批（SHA-1 / HMAC-SHA1，§2.8）契约与期望已冻结（10-15）、实现笔紧随——本页第 8 个示例块此刻是设计态红。期望值就是 RFC 1321 / FIPS 180-4 / RFC 2104+4231 / RFC 3174 / RFC 2202 的官方向量（本机 `hashlib` 现算核对）。
 
 ## MD5
 
@@ -134,6 +134,24 @@ test "hmac 家族 MD5 与字节键" {
   )
   assert_false(
     @digest.hmac_md5_verify_hex(k, d, "8141d87875d4fe5bcf3b6dd15343ea83"),
+  )
+}
+```
+
+## SHA-1 与 HMAC-SHA1
+
+与 SHA-256 同族（大端、同一台零分配的虚拟消息机器）；HMAC 侧与 MD5 / SHA-256 共用同一台 pad/xor 机器，块长同样是 64 字节、长键同样先哈希一次。官方向量抽两条（SHA-1 的 `"abc"` 与 HMAC-SHA1 的 RFC 2202 TC2）：
+
+```mbt check
+///|
+test "sha1 与 hmac_sha1 官方向量抽样" {
+  // RFC 3174 §7.3 Test1；NIST 示例文档 One Block Sample 同值
+  assert_eq(@digest.sha1_hex("abc"), "a9993e364706816aba3e25717850c26c9cd0d89d")
+  assert_eq(@digest.sha1_bytes("abc").length(), 20)
+  // RFC 2202 §3 TC2
+  assert_eq(
+    @digest.hmac_sha1_hex("Jefe", "what do ya want for nothing?"),
+    "effcdf6ae5eb2fa2d27416d5f184df9c259a7c79",
   )
 }
 ```
