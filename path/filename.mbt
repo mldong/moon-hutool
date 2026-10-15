@@ -23,14 +23,14 @@ fn is_sep(c : Char) -> Bool {
 // 非 ASCII 的"大小写"不参与——腿的 IT 行里有 `中文.txt` 这一档，靠的就是这条边界）
 
 ///|
-fn ci_eq(a : Int, b : Int) -> Bool {
+fn ci_eq(a : Int32, b : Int32) -> Bool {
   a == b ||
   (a >= 65 && a <= 90 && a + 32 == b) ||
   (b >= 65 && b <= 90 && b + 32 == a)
 }
 
 ///|
-fn join_range(cs : Array[Char], lo : Int, hi : Int) -> String {
+fn join_range(cs : Array[Char], lo : Int32, hi : Int32) -> String {
   let buf = StringBuilder()
   let mut i = lo
   while i < hi {
@@ -60,7 +60,7 @@ fn name_part(s : String) -> String {
 }
 
 ///|
-fn last_dot(cs : Array[Char]) -> Int? {
+fn last_dot(cs : Array[Char]) -> Int32? {
   let mut found = None
   let mut i = 0
   while i < cs.length() {
@@ -84,7 +84,7 @@ let special_suffixes : Array[Array[Char]] = [
 
 ///|
 /// 名字段是否以 `.SPECIAL_SUFFIX` 中某条结尾（大小写不敏感）；给命中的长度（含前面那个点）
-fn special_suffix_len(cs : Array[Char]) -> Int? {
+fn special_suffix_len(cs : Array[Char]) -> Int32? {
   let n = cs.length()
   for suf in special_suffixes {
     let want = suf.length() + 1

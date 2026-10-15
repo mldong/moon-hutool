@@ -15,7 +15,7 @@ fn esc(s : String) -> String {
   let digits = [
     "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d", "e", "f",
   ]
-  fn h4(v : Int) -> String {
+  fn h4(v : Int32) -> String {
     digits[(v >> 12) & 0xf] +
     digits[(v >> 8) & 0xf] +
     digits[(v >> 4) & 0xf] +

@@ -12,7 +12,7 @@ fn md_tag(
   zone : String,
   st : Int64,
   en : Int64,
-  n : Int,
+  n : Int32,
   sec : Bool,
 ) -> String {
   try {
@@ -39,7 +39,7 @@ fn md_len_tag(
   zone : String,
   st : Int64,
   en : Int64,
-  n : Int,
+  n : Int32,
 ) -> String {
   try {
     match @cron.cron_matched_dates(@cron.cron_of(pat), zone, st, en, n, false) {

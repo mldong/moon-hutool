@@ -58,7 +58,7 @@ pub fn is_blank_char(c : Char) -> Bool {
 
 ///|
 /// 按 UTF-16 单元区间 `[lo, hi)` 取子串（`find`/`length()` 的读数可直接当单元数用）
-fn substring_units(s : String, lo : Int, hi : Int) -> String {
+fn substring_units(s : String, lo : Int32, hi : Int32) -> String {
   let buf = StringBuilder()
   let mut acc = 0
   for c in s.iter() {
@@ -105,7 +105,7 @@ pub fn trim_opt(s : String?) -> String? {
 pub fn split(
   s : String,
   sep : Char,
-  trim_result? : Bool = false,
+  trim_result~ : Bool = false,
 ) -> Array[String] {
   if s.is_empty() {
     []
@@ -156,7 +156,7 @@ pub fn sub_between(
   s : String,
   left : String,
   right : String,
-  include_sep? : Bool = false,
+  include_sep~ : Bool = false,
 ) -> String {
   match s.find(left) {
     None => ""
@@ -213,7 +213,7 @@ pub fn format(template : String, args : Array[String]) -> String {
 /// 版本串比较：逐段取前导数字按数值比，缺段补零（hutool `compareVersion`）
 ///
 /// 返回归一到 `-1 / 0 / 1`；数字段相等时再按剩余后缀比（spec 1.9）
-pub fn compare_version(a : String, b : String) -> Int {
+pub fn compare_version(a : String, b : String) -> Int32 {
   let pa = a.split(".").to_array()
   let pb = b.split(".").to_array()
   let n = if pa.length() > pb.length() { pa.length() } else { pb.length() }
@@ -234,7 +234,7 @@ pub fn compare_version(a : String, b : String) -> Int {
 
 ///|
 /// 取一段的前导十进制数与剩余串（`"10-beta"` → `(10, "-beta")`；无数字 → `(0, 原串)`）
-fn leading_number(seg : StringView) -> (Int, String) {
+fn leading_number(seg : StringView) -> (Int32, String) {
   let cs = seg.iter().collect()
   let mut v = 0
   let mut i = 0
@@ -261,7 +261,7 @@ pub fn first_non_blank(candidates : Array[String?]) -> String? {
 /// 区间掩码：`[start, end)` 用 `mask` 替换（hutool `CharSequenceUtil.hide`）
 ///
 /// 下标按**码点**计；越界夹紧不报错；`start >= end` 时原样返回（spec 1.11）
-pub fn hide(s : String, start : Int, end : Int, mask : Char) -> String {
+pub fn hide(s : String, start : Int32, end : Int32, mask : Char) -> String {
   let cs = s.iter().collect()
   let n = cs.length()
   let lo = if start < 0 { 0 } else if start > n { n } else { start }
@@ -401,7 +401,7 @@ fn is_digit(c : Char) -> Bool {
 
 ///|
 /// 从 char 数组的 `[from, to)` 区间重建字符串（trim / leading_number 的共用出口）
-fn rebuild(cs : Array[Char], from : Int, to : Int) -> String {
+fn rebuild(cs : Array[Char], from : Int32, to : Int32) -> String {
   let buf = StringBuilder()
   for i in from..<to {
     buf.write_char(cs[i])

@@ -21,7 +21,7 @@
 ///|
 // 本包唯一的取数口：`n` 必须是正域大小。core 的 `Rand::int` 对 `limit=0` 是"取 [0,2^31) 全域"
 // 而不是报错、对负值直接 `abort`（`try` 抓不到 panic，实测探针在那一行终止），所以域一律在本包判死。
-fn take_under(rng : @random.Rand, n : Int) -> Int raise RandError {
+fn take_under(rng : @random.Rand, n : Int32) -> Int32 raise RandError {
   if n <= 0 {
     raise EmptyDomain("n=" + n.to_string())
   }
@@ -34,9 +34,9 @@ pub suberror RandError {
   /// 定义域为空（`min == max` 的半开/双开区间，或 `min > max`）。载荷 = 四个界值参数的读数
   EmptyDomain(String)
   /// 取元素的集合是空的。载荷 = 集合长度
-  EmptyCollection(Int)
+  EmptyCollection(Int32)
   /// 字符表是空的，没法从中取字符。载荷 = 表长
-  EmptyAlphabet(Int)
+  EmptyAlphabet(Int32)
   /// 要求取出的条数超过可用条数（去重档）。载荷 = `(要的条数, 实际可用条数)`
   BadCount(String)
 }
@@ -76,11 +76,11 @@ pub fn alphabet_all() -> String {
 /// - Raises: `RandError.EmptyDomain("min=..,max=..,incl_min=..,incl_max=..")`——定义域为空
 pub fn random_int(
   rng : @random.Rand,
-  min : Int,
-  max : Int,
+  min : Int32,
+  max : Int32,
   incl_min? : Bool,
   incl_max? : Bool,
-) -> Int raise RandError {
+) -> Int32 raise RandError {
   let im = match incl_min {
     None => true
     Some(b) => b
@@ -111,7 +111,7 @@ pub fn random_int(
 ///|
 /// `[0, n)` 档的整数。对位 `RandomUtil.randomInt(n)`（`n` 必须为正）。
 /// - Raises: `RandError.EmptyDomain("n=0")` / `RandError.EmptyDomain("n=-1")`：非正没有定义域
-pub fn random_int_under(rng : @random.Rand, n : Int) -> Int raise RandError {
+pub fn random_int_under(rng : @random.Rand, n : Int32) -> Int32 raise RandError {
   take_under(rng, n)
 }
 
@@ -143,7 +143,7 @@ pub fn random_char(
 pub fn random_string_from(
   rng : @random.Rand,
   table : String,
-  length : Int,
+  length : Int32,
 ) -> String raise RandError {
   if length <= 0 {
     // 要求 0 个字符就是空串——参照实现实测给长度 1 的串（§5 第 1 行），本包不跟随
@@ -167,7 +167,7 @@ pub fn random_string_from(
 /// 62 表（大写在前）取 `length` 个。对位 `RandomUtil.randomString(length)`
 pub fn random_string(
   rng : @random.Rand,
-  length : Int,
+  length : Int32,
 ) -> String raise RandError {
   random_string_from(rng, alphabet_all(), length)
 }
@@ -176,7 +176,7 @@ pub fn random_string(
 /// 26 位小写字母表取 `length` 个。对位 `RandomUtil.randomStringLower(length)`
 pub fn random_string_lower(
   rng : @random.Rand,
-  length : Int,
+  length : Int32,
 ) -> String raise RandError {
   random_string_from(rng, alphabet_lower(), length)
 }
@@ -185,7 +185,7 @@ pub fn random_string_lower(
 /// 10 位数字表取 `length` 个。对位 `RandomUtil.randomNumbers(length)`
 pub fn random_numbers(
   rng : @random.Rand,
-  length : Int,
+  length : Int32,
 ) -> String raise RandError {
   random_string_from(rng, alphabet_number(), length)
 }
@@ -195,7 +195,7 @@ pub fn random_numbers(
 /// 实测结果集只有 36 个字符（数字 + 大写），因为表里本来就带数字
 pub fn random_string_upper(
   rng : @random.Rand,
-  length : Int,
+  length : Int32,
 ) -> String raise RandError {
   // ASCII 档转大写：62 表里的小写段抬上去，数字段原样留在结果里（实测结果集 36 字符）
   let cs = random_string(rng, length).to_array()
@@ -218,7 +218,7 @@ pub fn random_string_upper(
 ///   实测的行为（spec §3），本包同档；但"过滤后表为空还要求非空长度"给 `EmptyAlphabet`
 pub fn random_string_without(
   rng : @random.Rand,
-  length : Int,
+  length : Int32,
   filter : String,
 ) -> String raise RandError {
   let keep : Array[Char] = []
@@ -247,7 +247,7 @@ pub fn random_string_without(
 pub fn[A] random_ele(
   rng : @random.Rand,
   items : Array[A],
-  limit? : Int,
+  limit? : Int32,
 ) -> A raise RandError {
   let n = match limit {
     None => items.length()
@@ -267,7 +267,7 @@ pub fn[A] random_ele(
 pub fn[A] random_eles(
   rng : @random.Rand,
   items : Array[A],
-  count : Int,
+  count : Int32,
 ) -> Array[A] raise RandError {
   if items.length() == 0 {
     raise EmptyCollection(0)
@@ -291,7 +291,7 @@ pub fn[A] random_eles(
 pub fn[A : Eq] random_ele_set(
   rng : @random.Rand,
   items : Array[A],
-  count : Int,
+  count : Int32,
 ) -> Array[A] raise RandError {
   let uniq : Array[A] = []
   for x in items {
@@ -308,7 +308,7 @@ pub fn[A : Eq] random_ele_set(
     )
   }
   // 索引域洗牌再取前 count 个：互不相同由构造保证，顺序不保证
-  let idx : Array[Int] = []
+  let idx : Array[Int32] = []
   let mut k = 0
   while k < uniq.length() {
     idx.push(k)

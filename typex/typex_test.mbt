@@ -19,7 +19,7 @@ fn joinx(a : Array[String], sep : String) -> String {
 }
 
 ///|
-fn sign_of(v : Int) -> String {
+fn sign_of(v : Int32) -> String {
   if v < 0 {
     "-"
   } else if v > 0 {
@@ -30,7 +30,7 @@ fn sign_of(v : Int) -> String {
 }
 
 ///|
-fn arr_str(a : Array[Int]) -> String {
+fn arr_str(a : Array[Int32]) -> String {
   let r : Array[String] = []
   for x in a {
     r.push(x.to_string())

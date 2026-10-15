@@ -36,14 +36,14 @@ pub fn is_general(text : String) -> Bool {
 /// 通用名并限长度。对位 `Validator.isGeneral(value, min, max)`
 /// 长度上界是 core 的硬限制（实测 `a{256}` 合法、`a{300}` 报错）⇒ `max` 超界属于调用方的问题，本件不收界值
 /// - Returns: 整串被本件码表匹配 ⇒ `true`
-pub fn is_general_between(text : String, min : Int, max : Int) -> Bool {
+pub fn is_general_between(text : String, min : Int32, max : Int32) -> Bool {
   whole("^[[:word:]]{" + min.to_string() + "," + max.to_string() + "}$", text)
 }
 
 ///|
 /// 通用名并限**最小**长度（不封顶）。对位 `Validator.isGeneral(value, min)`
 /// - Returns: 整串被本件码表匹配 ⇒ `true`
-pub fn is_general_at_least(text : String, min : Int) -> Bool {
+pub fn is_general_at_least(text : String, min : Int32) -> Bool {
   whole("^[[:word:]]{" + min.to_string() + ",}$", text)
 }
 

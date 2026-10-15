@@ -33,7 +33,7 @@
 pub struct GroupedMap {
   priv order : Array[String]
   priv buckets : Array[Array[(String, String?)]]
-  priv mut cached_size : Int
+  priv mut cached_size : Int32
 }
 
 ///|
@@ -106,7 +106,7 @@ fn gnorm(group : String?) -> String {
 }
 
 ///|
-fn find_group(gm : GroupedMap, g : String) -> Int {
+fn find_group(gm : GroupedMap, g : String) -> Int32 {
   let n = gm.order.length()
   let mut i = 0
   let mut hit = -1
@@ -122,7 +122,7 @@ fn find_group(gm : GroupedMap, g : String) -> Int {
 }
 
 ///|
-fn find_str(arr : Array[String], s : String) -> Int {
+fn find_str(arr : Array[String], s : String) -> Int32 {
   let n = arr.length()
   let mut i = 0
   let mut hit = -1
@@ -160,7 +160,7 @@ fn bucket_norm(gm : GroupedMap, group : String?) -> Array[(String, String?)] {
 }
 
 ///|
-fn find_key(b : Array[(String, String?)], key : String) -> Int {
+fn find_key(b : Array[(String, String?)], key : String) -> Int32 {
   let n = b.length()
   let mut i = 0
   let mut hit = -1
@@ -314,7 +314,7 @@ fn replace_var(gm : GroupedMap, group : String, value : String) -> String {
 }
 
 ///|
-fn find_dot(ic : Array[Char]) -> Int {
+fn find_dot(ic : Array[Char]) -> Int32 {
   let n = ic.length()
   let mut i = 0
   let mut hit = -1
@@ -467,7 +467,7 @@ pub fn grouped_map_clear_group(gm : GroupedMap, group : String?) -> Unit {
 /// - Returns: 各组条目数之和；若上次缓存填好之后发生过 #22.7/#22.8，读数停在旧值（照参照）
 /// - Raises: 无
 /// - Note: hutool 对位 `int size()`
-pub fn grouped_map_size(gm : GroupedMap) -> Int {
+pub fn grouped_map_size(gm : GroupedMap) -> Int32 {
   if gm.cached_size < 0 {
     let mut sum = 0
     let mut i = 0
@@ -760,13 +760,13 @@ pub struct Props {
 
 ///|
 // `LineReader` 认的三个空白（不是 `Character.isWhitespace`，也不是第一批的 35 位表（在 `@text.is_blank_char`））
-fn is_ws3(cp : Int) -> Bool {
+fn is_ws3(cp : Int32) -> Bool {
   cp == 0x20 || cp == 0x09 || cp == 0x0c
 }
 
 ///|
 // `\r\n` 算一个终止符
-fn eol_len(cs : Array[Char], i : Int, n : Int) -> Int {
+fn eol_len(cs : Array[Char], i : Int32, n : Int32) -> Int32 {
   if cs[i].to_int() == 0x0d && i + 1 < n && cs[i + 1].to_int() == 0x0a {
     2
   } else {
@@ -852,14 +852,14 @@ fn logical_lines(text : String) -> Array[String] {
 }
 
 ///|
-fn is_hex(cp : Int) -> Bool {
+fn is_hex(cp : Int32) -> Bool {
   (cp >= 0x30 && cp <= 0x39) ||
   (cp >= 0x61 && cp <= 0x66) ||
   (cp >= 0x41 && cp <= 0x46)
 }
 
 ///|
-fn hex_val(cp : Int) -> Int {
+fn hex_val(cp : Int32) -> Int32 {
   if cp >= 0x30 && cp <= 0x39 {
     cp - 0x30
   } else if cp >= 0x61 && cp <= 0x66 {
@@ -871,7 +871,7 @@ fn hex_val(cp : Int) -> Int {
 
 ///|
 fn ff_char() -> Char {
-  let v : Int = 12
+  let v : Int32 = 12
   v.unsafe_to_char()
 }
 
@@ -986,7 +986,7 @@ pub fn props_new() -> Props {
 }
 
 ///|
-fn find_pair(p : Props, key : String) -> Int {
+fn find_pair(p : Props, key : String) -> Int32 {
   let n = p.order.length()
   let mut i = 0
   let mut hit = -1
@@ -1107,7 +1107,7 @@ pub fn props_has_key(p : Props, key : String) -> Bool {
 /// #22.35 条数
 /// - Raises: 无
 /// - Note: hutool 对位 `int size()`（参照无缓存，本库也无）
-pub fn props_size(p : Props) -> Int {
+pub fn props_size(p : Props) -> Int32 {
   p.order.length()
 }
 
@@ -1155,7 +1155,7 @@ pub fn props_entries(p : Props) -> Array[(String, String)] {
 // 其余一律原样（`escapeUnicode = false` ⇒ 中文与 BMP 外字符不写 `\uXXXX`——
 // 腿的 `p.value_unicode_esc.store` 与 `p.value_astral.store` 就是这一条的判据）
 fn bs_char() -> Char {
-  let v : Int = 92
+  let v : Int32 = 92
   v.unsafe_to_char()
 }
 

@@ -41,11 +41,11 @@ pub fn num_calculate(expression : String) -> Double raise NumError {
 // 内部形状（spec §11.1）：值 = `m × 10^(-s)`，`s` **非负**。全程十进制精确，只在出口落 `Double`
 priv struct Dec {
   m : @bigint.BigInt
-  s : Int
+  s : Int32
 }
 
 ///|
-fn dec_int(v : Int) -> Dec {
+fn dec_int(v : Int32) -> Dec {
   Dec::{ m: @bigint.BigInt::from_int(v), s: 0, }
 }
 
@@ -59,7 +59,7 @@ fn big_neg(x : @bigint.BigInt) -> @bigint.BigInt {
 }
 
 ///|
-fn big10(n : Int) -> @bigint.BigInt {
+fn big10(n : Int32) -> @bigint.BigInt {
   if n <= 0 {
     @bigint.BigInt::from_int(1)
   } else {
@@ -202,7 +202,7 @@ fn is_arith(c : Char) -> Bool {
 ///|
 // Java 那句 `operatPriority = {0,3,2,1,-1,1,0,2}` 按 `ASCII-40` 下标摊开（spec §11.2 第 2 段）：
 // `+`/`-` = 1、`*`/`/`/`%` = 2、`(` = 0、`)` = 3、栈底哨兵 `,` = -1
-fn calc_prio(c : Char) -> Int {
+fn calc_prio(c : Char) -> Int32 {
   if c == '(' {
     0
   } else if c == ')' {
@@ -292,7 +292,7 @@ fn calc_prepare(orig : String, expr : String) -> Array[String] raise NumError {
 }
 
 ///|
-fn chars_to_string(arr : Array[Char], from : Int, len : Int) -> String {
+fn chars_to_string(arr : Array[Char], from : Int32, len : Int32) -> String {
   let out : Array[Char] = []
   let mut i = 0
   while i < len {

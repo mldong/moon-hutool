@@ -10,12 +10,12 @@
 
 ///|
 fn dt(
-  y : Int,
-  mo : Int,
-  d : Int,
-  h : Int,
-  mi : Int,
-  se : Int,
+  y : Int32,
+  mo : Int32,
+  d : Int32,
+  h : Int32,
+  mi : Int32,
+  se : Int32,
 ) -> @date.DateTime {
   @date.DateTime::of(@date.Date::of(y, mo, d), h, mi, se, 0) catch {
     _ => abort("cron 用例的时刻夹具非法")

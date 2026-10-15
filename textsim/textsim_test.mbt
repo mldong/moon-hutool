@@ -14,7 +14,7 @@
 
 ///|
 // 夹具表：33 组输入串，逐条由腿 A 的 `fx.N.A`/`fx.N.B` 码元读数换算，不许手打
-fn fx_a(i : Int) -> String {
+fn fx_a(i : Int32) -> String {
   match i {
     1 => ""
     2 => ""
@@ -57,7 +57,7 @@ fn fx_a(i : Int) -> String {
 }
 
 ///|
-fn fx_b(i : Int) -> String {
+fn fx_b(i : Int32) -> String {
   match i {
     1 => ""
     2 => "a"
@@ -577,7 +577,7 @@ test "textsim 百分比：33 组 × {0,1,2,10}（腿 A 码元读数 132 条）" 
 
 ///|
 // raise 面就是 `num.NumError`（#8.11 的既有错误类型），本包不重定义、也不重复钉它的读数
-fn pct_ok(scale : Int) -> Bool {
+fn pct_ok(scale : Int32) -> Bool {
   try {
     let _ = @textsim.similar_percent("a", "b", scale)
     true

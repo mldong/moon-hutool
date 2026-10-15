@@ -95,7 +95,7 @@ pub fn cron_matched_dates(
   zone : String,
   start : Int64,
   end : Int64,
-  count : Int,
+  count : Int32,
   match_second : Bool,
 ) -> Array[Int64]? raise CronError {
   if start >= end {
@@ -199,7 +199,7 @@ fn subs_view(c : Cron, match_second : Bool) -> Array[Sub] {
 ///|
 // 候选墙上时刻的七字段。秒不参与匹配时字段里的秒给 0——`fields_of(_, false)` 给的是 -1 哨兵，
 // 那是"放行判定"用的，进位引擎要的是一个真的起点
-fn zone_fields(w : @date.DateTime, match_second : Bool) -> Array[Int] {
+fn zone_fields(w : @date.DateTime, match_second : Bool) -> Array[Int32] {
   let f = fields_of(w, match_second)
   if !match_second {
     f[0] = 0
@@ -209,7 +209,7 @@ fn zone_fields(w : @date.DateTime, match_second : Bool) -> Array[Int] {
 
 ///|
 // 参照 `PatternMatcher.nextMatchAfter(int[], zone)`：各子表达式各给一个候选，取最早那个
-fn earliest_of(subs : Array[Sub], values : Array[Int]) -> @date.DateTime {
+fn earliest_of(subs : Array[Sub], values : Array[Int32]) -> @date.DateTime {
   let mut best = from_values(sub_next_values(subs[0].ms, values))
   let mut k = 1
   while k < subs.length() {

@@ -16,7 +16,7 @@
 // - NanoId：hutool 的 mask/step 公式与**它自己的 64 字符表**，Python 镜像同一算法逐条现算。
 
 ///|
-fn sf(dc : Int, worker : Int, tolerance : Int64) -> @id.Snowflake {
+fn sf(dc : Int32, worker : Int32, tolerance : Int64) -> @id.Snowflake {
   @id.Snowflake::new(dc, worker, tolerance_millis=tolerance) catch {
     _ => abort("夹具节点编号必须合法")
   }
@@ -308,7 +308,7 @@ test "@id #3.6 有熵则出 v4 形状，无熵则明确报 NoEntropy（不许静
 
 ///|
 test "@id #3.7 uuid_version 只读 version 段" {
-  let v : (String) -> Int = s => {
+  let v : (String) -> Int32 = s => {
     @id.uuid_version(s) catch {
       _ => abort("夹具串必须合法")
     }
@@ -418,7 +418,7 @@ fn oid_gen_at(machine : Int64, start : Int64) -> @id.ObjectIdGen {
 
 ///|
 test "@id #5 nano_id_bytes_needed（hutool 的 mask/step 公式）" {
-  let n : (Int, Int) -> Int = (len, size) => {
+  let n : (Int32, Int32) -> Int32 = (len, size) => {
     @id.nano_id_bytes_needed(len, size) catch {
       _ => abort("夹具表长必须合法")
     }
@@ -445,7 +445,7 @@ test "@id #5 nano_id_bytes_needed（hutool 的 mask/step 公式）" {
 
 ///|
 test "@id #5 nano_id 注入版（默认表序、拒绝采样逐字节同序）" {
-  let g : (String, Int, Array[Byte]) -> String = (alphabet, size, xs) => {
+  let g : (String, Int32, Array[Byte]) -> String = (alphabet, size, xs) => {
     @id.nano_id(alphabet, size, bytes_of(xs)) catch {
       _ => abort("夹具注入字节必须够")
     }

@@ -13,7 +13,7 @@
 ```mbt check
 ///|
 test "cache 五档一览与 FIFO 踢队首" {
-  let f : @cache.Cache[String, Int] = @cache.Cache::new_cache(
+  let f : @cache.Cache[String, Int32] = @cache.Cache::new_cache(
     @cache.Fifo,
     3,
     0L,
@@ -41,7 +41,11 @@ test "cache 五档一览与 FIFO 踢队首" {
 ```mbt check
 ///|
 test "cache LRU 的访问序由读决定，peek 也不例外" {
-  let r : @cache.Cache[String, Int] = @cache.Cache::new_cache(@cache.Lru, 3, 0L)
+  let r : @cache.Cache[String, Int32] = @cache.Cache::new_cache(
+    @cache.Lru,
+    3,
+    0L,
+  )
   r.put("a", 1, 1000L)
   r.put("b", 2, 1001L)
   r.put("c", 3, 1002L)
@@ -62,7 +66,7 @@ test "cache LRU 的访问序由读决定，peek 也不例外" {
 ```mbt check
 ///|
 test "cache 过期算术：相等不算过期，ttl<=0 永不过期，命中会挪窗口" {
-  let c : @cache.Cache[String, Int] = @cache.Cache::new_cache(
+  let c : @cache.Cache[String, Int32] = @cache.Cache::new_cache(
     @cache.Timed,
     0,
     100L,
@@ -72,7 +76,7 @@ test "cache 过期算术：相等不算过期，ttl<=0 永不过期，命中会�
   assert_eq(c.peek("a", 1101L), None) // 101 > ttl：过期，并顺手删掉这一条
   assert_eq(c.size(), 0)
   // 负数不是"立即过期"，参照侧判的是 `ttl > 0`，所以它表示"不过期"
-  let n : @cache.Cache[String, Int] = @cache.Cache::new_cache(
+  let n : @cache.Cache[String, Int32] = @cache.Cache::new_cache(
     @cache.Timed,
     0,
     -5L,
@@ -80,7 +84,7 @@ test "cache 过期算术：相等不算过期，ttl<=0 永不过期，命中会�
   n.put("a", 1, 1000L)
   assert_eq(n.get("a", 4102444800000L), Some(1))
   // get 命中会把 last_access 挪到 now ⇒ 滑动过期
-  let s : @cache.Cache[String, Int] = @cache.Cache::new_cache(
+  let s : @cache.Cache[String, Int32] = @cache.Cache::new_cache(
     @cache.Timed,
     0,
     100L,
@@ -100,7 +104,11 @@ test "cache 过期算术：相等不算过期，ttl<=0 永不过期，命中会�
 ///|
 test "cache LFU 三条形状与 No 档空转" {
   // 三条计数全为 0 ⇒ 减完仍 <=0，一起删，只剩新来的那条
-  let l : @cache.Cache[String, Int] = @cache.Cache::new_cache(@cache.Lfu, 3, 0L)
+  let l : @cache.Cache[String, Int32] = @cache.Cache::new_cache(
+    @cache.Lfu,
+    3,
+    0L,
+  )
   l.put("a", 1, 1000L)
   l.put("b", 2, 1001L)
   l.put("c", 3, 1002L)
@@ -108,7 +116,7 @@ test "cache LFU 三条形状与 No 档空转" {
   assert_eq(l.size(), 1)
   assert_eq(l.keys(), ["d"])
   // 有唯一最小值 ⇒ 只删它，其余计数原样
-  let l2 : @cache.Cache[String, Int] = @cache.Cache::new_cache(
+  let l2 : @cache.Cache[String, Int32] = @cache.Cache::new_cache(
     @cache.Lfu,
     3,
     0L,
@@ -121,7 +129,7 @@ test "cache LFU 三条形状与 No 档空转" {
   assert_eq(l2.get("b", 1005L), Some(2))
   l2.put("d", 4, 1006L)
   assert_eq(l2.keys(), ["a", "b", "d"])
-  let n : @cache.Cache[String, Int] = @cache.Cache::new_cache(
+  let n : @cache.Cache[String, Int32] = @cache.Cache::new_cache(
     @cache.No,
     3,
     100L,

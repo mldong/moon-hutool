@@ -178,7 +178,7 @@ fn bloom_of(f : () -> @bloom.Bloom raise @bloom.BloomError) -> String {
 }
 
 ///|
-fn ww_of(n : Int) -> String {
+fn ww_of(n : Int32) -> String {
   try "OK:" + wtag(@bloom.word_width(n)) catch {
     e => tag(e)
   }

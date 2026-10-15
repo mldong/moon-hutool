@@ -27,25 +27,25 @@
 /// 本包唯一错误面。每个变体对应**一个** `raise` 点，载荷只放调用方拿不到的读数
 pub suberror NumError {
   /// 给进来的 `scale`（`> 308` 或 `< -323` 的那个值——`Double` 的十进制指数范围之外，舍入没有意义）
-  ScaleOutOfRange(Int)
+  ScaleOutOfRange(Int32)
   /// 收到 `NaN` / `±Infinity`（没有十进制舍入这回事，也不替它编一个 0）
   NotFinite
   /// 被开方数 `< 0`（实数域无解；本库不返回 `NaN`，因为 `NaN` 是"值"而这是"没定义"）
-  NegativeRadicand(Int)
+  NegativeRadicand(Int32)
   /// 模数 `< 2` 的那一个给进来的值（模 1 只剩剩余类 0，负模与 0 模都不是环）
-  InvalidModulus(Int)
+  InvalidModulus(Int32)
   /// `(a, m)` 原样两个读数：互质判据没过，`gcd(a, m) != 1` ⇒ 逆元不存在
-  NonCoprime(Int, Int)
+  NonCoprime(Int32, Int32)
   /// 给进来的 `n`（`< 0` 的那个值——负数没有阶乘）
-  NegativeFactorial(Int)
+  NegativeFactorial(Int32)
   /// `(n, m)` 原样两个读数：组合数/排列数的阶乘定义域是自然数
-  NegativeCount(Int, Int)
+  NegativeCount(Int32, Int32)
   /// 给进来的原串：它不是一个十进制数（第二批的 `trim_trailing_zeros` / `Money::from_yuan_str` 用）
   NotDecimal(String)
   /// 给进来的份数（`<= 0` 的那个值——分成 0 份不是"空分配"，是没有答案）
-  NonPositiveTargets(Int)
+  NonPositiveTargets(Int32)
   /// 给进来的那个负比例（比例分配里每一项都必须 `>= 0`）
-  NegativeRatio(Int)
+  NegativeRatio(Int32)
   /// 比例的**和**（`<= 0` 时没有分母可用；带和是因为逐项符号可能互相抵消，调用方不易一眼看出）
   RatioSumNotPositive(Int64)
   /// 分的加减或 `cent * ratio` 超出 `Int64` 可表范围。
@@ -58,10 +58,10 @@ pub suberror NumError {
   OutOfRange(String)
   ///
   /// 反向解析撞到不认的单位字，带那个字与它的位置（0 基码点下标）。
-  UnknownChineseUnit(Char, Int)
+  UnknownChineseUnit(Char, Int32)
   ///
   /// 反向解析撞到"单位字后面又跟了个数字字"这类坏形状，带 hutool 同款的两字窗口与位置。
-  BadChineseNumber(String, Int)
+  BadChineseNumber(String, Int32)
   // ---- 第四批（Calculator 表达式求值）新增两条 ----
   ///
   /// 整个原式：式子形状坏了——括号失衡、以算子结尾、空串、纯 `=`、`(` 被当成操作数。
@@ -113,7 +113,7 @@ pub(all) enum RoundingMode {
 /// - Note: 结果可表性：`|gcd| <= min(|a|, |b|)`，所以除 `Int::MIN` 自反那一档（wasm 上 2^31 不可表）
 ///   外恒在 `Int` 内；那一档按 core 同类件的立场交给 `abort`，本包不为其发明错误码（spec §0.1）
 /// - 复杂度：欧几里得辗转，O(log min(|a|,|b|))
-pub fn gcd(a : Int, b : Int) -> Int {
+pub fn gcd(a : Int32, b : Int32) -> Int32 {
   i64_to_int(gcd64(a.to_int64(), b.to_int64()))
 }
 
@@ -130,7 +130,7 @@ pub fn gcd(a : Int, b : Int) -> Int {
 ///   不变量成立；不要把它读成"逆元"
 /// - Note: hutool 无对位件（`NumberUtil` 只有 `divisor`）；这一件是为 RSA/模逆而补的，
 ///   与 `mod_inverse` 同族但**独立公开**，因为调用方要的是系数本身
-pub fn ext_gcd(a : Int, b : Int) -> (Int, Int, Int) {
+pub fn ext_gcd(a : Int32, b : Int32) -> (Int32, Int32, Int32) {
   let (s, t, g) = ext_gcd64(a.to_int64(), b.to_int64())
   (i64_to_int(s), i64_to_int(t), i64_to_int(g))
 }
@@ -148,7 +148,7 @@ pub fn ext_gcd(a : Int, b : Int) -> (Int, Int, Int) {
 /// - Note: hutool 无对位件；`java.math.BigInteger.modInverse` 是同语义参照（它给 `[0, m)` 档，
 ///   与本库一致）。本库在 `Int` 域给出同一档，中间量走 `Int64`（64 位定宽，不随目标变）
 /// - 复杂度：扩展欧几里得，O(log m)
-pub fn mod_inverse(a : Int, m : Int) -> Int raise NumError {
+pub fn mod_inverse(a : Int32, m : Int32) -> Int32 raise NumError {
   if m < 2 {
     raise InvalidModulus(m)
   }
@@ -174,7 +174,7 @@ pub fn mod_inverse(a : Int, m : Int) -> Int raise NumError {
 ///   `Assert.isTrue(n > 1, …)`——`isPrimes(1)` 抛异常而不是给 `false`。判定函数报异常会让
 ///   "1 是不是素数"这种问题无法回答（逐条差异声明见 spec §5）
 /// - 复杂度：试除到 `sqrt(n)` 的 6k±1 档，O(√n)；`Int` 域最坏 2^31 档约 46340 次迭代，够用
-pub fn is_prime(n : Int) -> Bool {
+pub fn is_prime(n : Int32) -> Bool {
   let v = n.to_int64()
   if v < 2 {
     false
@@ -207,7 +207,7 @@ pub fn is_prime(n : Int) -> Bool {
 /// - Note: hutool 对位 `NumberUtil.sqrt(long)`（逐位开方法）。它**没有负数防线**：
 ///   `sqrt(-1)` 静默给一个正数读数。本库把这一档改成 `raise`
 /// - Note: 读数来源 = Python `math.isqrt`（同为精确整数开方，独立实现）
-pub fn isqrt(n : Int) -> Int raise NumError {
+pub fn isqrt(n : Int32) -> Int32 raise NumError {
   if n < 0 {
     raise NegativeRadicand(n)
   }
@@ -262,7 +262,7 @@ pub fn lcm(a : @bigint.BigInt, b : @bigint.BigInt) -> @bigint.BigInt {
 /// - Note: hutool 对位 `NumberUtil.factorial(long)`，它查表到 `20!`（`long` 装得下的最大档），
 ///   `n > 20` 直接抛 `IllegalArgumentException`。**本库不设上界**：`25!` 与 `100!` 都是可回答的
 ///   问题，只是回答的形状是 `BigInt`（`BigInteger` 版 hutool 也有，本库把它当唯一一档）
-pub fn factorial(n : Int) -> @bigint.BigInt raise NumError {
+pub fn factorial(n : Int32) -> @bigint.BigInt raise NumError {
   if n < 0 {
     raise NegativeFactorial(n)
   }
@@ -288,7 +288,7 @@ pub fn factorial(n : Int) -> @bigint.BigInt raise NumError {
 /// - Note: hutool 另有一档 `Combination.count`（返回 `long`）**已标 `@Deprecated`**，
 ///   原因是 `big.longValue()` 会静默截断高位；`countSafe` 用 `longValueExact()` 抛异常。
 ///   本库只出精确那一档，截断与判界都不做
-pub fn combination_count(n : Int, m : Int) -> @bigint.BigInt raise NumError {
+pub fn combination_count(n : Int32, m : Int32) -> @bigint.BigInt raise NumError {
   if n < 0 || m < 0 {
     raise NegativeCount(n, m)
   }
@@ -321,7 +321,7 @@ pub fn combination_count(n : Int, m : Int) -> @bigint.BigInt raise NumError {
 ///   函数两种口径。本库统一按数学值给 `0`，并把这条差异写明，不让调用方去猜
 /// - Note: 溢出档：hutool 的 `long` 版在 `A(21, 21)` 这一档靠 `next < result` 检出并抛
 ///   `ArithmeticException`；本库 `BigInt` 直接给 `21!` 的真值（用例钉的就是这一档）
-pub fn arrangement_count(n : Int, m : Int) -> @bigint.BigInt raise NumError {
+pub fn arrangement_count(n : Int32, m : Int32) -> @bigint.BigInt raise NumError {
   if n < 0 || m < 0 {
     raise NegativeCount(n, m)
   }
@@ -360,8 +360,8 @@ pub fn arrangement_count(n : Int, m : Int) -> @bigint.BigInt raise NumError {
 /// - Note: `round_to_str` 是本件的**主形态**，`round_to` 只是它的串再解析回 `Double`
 pub fn round_to_str(
   x : Double,
-  scale : Int,
-  mode? : RoundingMode = RoundingMode::HalfUp,
+  scale : Int32,
+  mode~ : RoundingMode = RoundingMode::HalfUp,
 ) -> String raise NumError {
   if x.is_nan() || x.is_inf() {
     raise NotFinite
@@ -389,8 +389,8 @@ pub fn round_to_str(
 ///   本件 `HalfUp` 档按绝对值走，`round_to(-0.5, 0)` 给 `-1`。所以本件不叫 `round`
 pub fn round_to(
   x : Double,
-  scale : Int,
-  mode? : RoundingMode = RoundingMode::HalfUp,
+  scale : Int32,
+  mode~ : RoundingMode = RoundingMode::HalfUp,
 ) -> Double raise NumError {
   let s = round_to_str(x, scale, mode~)
   // 自家产出的平格式十进制串必然可解析；解析不动就是这条实现被改坏了，不静默兜住
@@ -437,7 +437,7 @@ fn i64_neg(v : Int64) -> Int64 {
 ///|
 /// `Int64` → `Int` 的**带界**转换。core 的 `Int64::to_int` 越界是静默回绕（本机实测 2^40 给 `0`），
 /// 所以先比界再转；越界只可能是 `Int::MIN` 自反那一档，属契约外读数（spec §0.1）
-fn i64_to_int(v : Int64) -> Int {
+fn i64_to_int(v : Int64) -> Int32 {
   if v > @int.MAX_VALUE.to_int64() || v < @int.MIN_VALUE.to_int64() {
     abort(
       "moon-hutool: num 的 Int 域结果/输入落在本目标不可表的一档（spec 08-num §0.1）",
@@ -521,7 +521,7 @@ fn big_gcd(x : @bigint.BigInt, y : @bigint.BigInt) -> @bigint.BigInt {
 /// 这一位**——所以数字流允许前导零（`"0.5"` ⇒ `[0,5]` + point `1`），位置语义不必再折一遍。
 /// 数字流取自 core 的 `Double::to_string`：本机实测三档逐值一致（spec #8.11 的依据），
 /// 且形如 ECMAScript `Number::toString`（绝对值大到 1e21 走 `1e+21`，极小走 `1e-7`）
-fn split_decimal(x : Double) -> (Bool, Array[Int], Int) {
+fn split_decimal(x : Double) -> (Bool, Array[Int32], Int32) {
   let text = x.to_string()
   let tc = text.to_array()
   let has_sign = tc.length() > 0 && (tc[0] == '-' || tc[0] == '+')
@@ -543,7 +543,7 @@ fn split_decimal(x : Double) -> (Bool, Array[Int], Int) {
   } else {
     read_signed_int(tc, eidx + 1, tc.length())
   }
-  let digits : Array[Int] = []
+  let digits : Array[Int32] = []
   let mut int_len = -1
   let mut j = start
   while j < mant_end {
@@ -561,7 +561,7 @@ fn split_decimal(x : Double) -> (Bool, Array[Int], Int) {
 
 ///|
 /// 读 `tc[from:to]` 这段带符号十进制整数（只服务指数位）
-fn read_signed_int(tc : Array[Char], from : Int, to : Int) -> Int {
+fn read_signed_int(tc : Array[Char], from : Int32, to : Int32) -> Int32 {
   let head = if from < to && (tc[from] == '-' || tc[from] == '+') {
     from + 1
   } else {
@@ -586,9 +586,9 @@ fn read_signed_int(tc : Array[Char], from : Int, to : Int) -> Int {
 /// `keep` 是保留几位有效数字；`keep <= 0` 时先补前导零（补零同时抬 `point`，值不变）
 fn round_digits(
   neg : Bool,
-  digits : Array[Int],
-  point : Int,
-  scale : Int,
+  digits : Array[Int32],
+  point : Int32,
+  scale : Int32,
   mode : RoundingMode,
 ) -> String {
   let mut pt = point
@@ -660,7 +660,7 @@ fn round_digits(
 }
 
 ///|
-fn all_zero(digits : Array[Int], from : Int, to : Int) -> Bool {
+fn all_zero(digits : Array[Int32], from : Int32, to : Int32) -> Bool {
   let mut i = from
   while i < to {
     if digits[i] != 0 {
@@ -673,7 +673,7 @@ fn all_zero(digits : Array[Int], from : Int, to : Int) -> Bool {
 
 ///|
 /// 十进制 +1（可能多出一位）
-fn add_one(digits : Array[Int]) -> Array[Int] {
+fn add_one(digits : Array[Int32]) -> Array[Int32] {
   let out = digits.copy()
   let mut i = out.length() - 1
   let mut carry = 1
@@ -694,9 +694,9 @@ fn add_one(digits : Array[Int]) -> Array[Int] {
 /// 零的形状照 Java 实测：`scale <= 0` 就是 `"0"`，`scale > 0` 才保留小数位（spec #8.11）
 fn emit_plain(
   neg : Bool,
-  kept : Array[Int],
-  point : Int,
-  scale : Int,
+  kept : Array[Int32],
+  point : Int32,
+  scale : Int32,
   zero : Bool,
 ) -> String {
   if zero {
@@ -727,12 +727,12 @@ fn emit_plain(
 }
 
 ///|
-fn digit_char(d : Int) -> String {
+fn digit_char(d : Int32) -> String {
   (d + 48).to_char().unwrap().to_string()
 }
 
 ///|
-fn zero_run(n : Int) -> String {
+fn zero_run(n : Int32) -> String {
   let mut s = ""
   let mut i = 0
   while i < n {
@@ -763,10 +763,10 @@ fn zero_run(n : Int) -> String {
 ///   所以这里只承诺"三位一隔"这一档封闭形状，pattern 全套（`#`/`0`/前缀后缀/百分号/千分位混写）在「不做」清单里
 pub fn format_thousands(
   x : Double,
-  scale : Int,
-  mode? : RoundingMode = RoundingMode::HalfUp,
-  sep? : Char = ',',
-  decimal_sep? : Char = '.',
+  scale : Int32,
+  mode~ : RoundingMode = RoundingMode::HalfUp,
+  sep~ : Char = ',',
+  decimal_sep~ : Char = '.',
 ) -> String raise NumError {
   // 这一件不是第二套舍入：先把 #8.11 那条腿的结果拿过来，再只对整数部分插分隔符
   group_decimal(round_to_str(x, scale, mode~), sep, decimal_sep)
@@ -789,9 +789,9 @@ pub fn format_thousands(
 ///   14.5 就是 14.5），`DecimalFormat` 给 `"14%"`（它看到的是 14.499999999999998）
 pub fn format_percent(
   x : Double,
-  scale : Int,
-  mode? : RoundingMode = RoundingMode::HalfUp,
-  suffix? : String = "%",
+  scale : Int32,
+  mode~ : RoundingMode = RoundingMode::HalfUp,
+  suffix~ : String = "%",
 ) -> String raise NumError {
   if x.is_nan() || x.is_inf() {
     raise NotFinite
@@ -865,7 +865,7 @@ pub fn Money::new(cent : Int64) -> Money {
 ///   用 HALF_UP、`Money` 用 HALF_EVEN），两处都跟随比"顺手统一"更负责。要 HalfUp 就显式传
 pub fn Money::from_yuan_str(
   s : String,
-  mode? : RoundingMode = RoundingMode::HalfEven,
+  mode~ : RoundingMode = RoundingMode::HalfEven,
 ) -> Money raise NumError {
   let (neg, digits, point) = match parse_decimal_str(s) {
     None => raise NotDecimal(s)
@@ -892,7 +892,7 @@ pub fn Money::from_yuan_str(
 ///   `0.005` ⇒ `0` / `1`；`12.345` ⇒ `1234` / `1235`。本库只留一条口径：最短十进制 + 显式模式
 pub fn Money::from_yuan(
   yuan : Double,
-  mode? : RoundingMode = RoundingMode::HalfEven,
+  mode~ : RoundingMode = RoundingMode::HalfEven,
 ) -> Money raise NumError {
   if yuan.is_nan() || yuan.is_inf() {
     raise NotFinite
@@ -983,7 +983,7 @@ pub fn Money::sub(self : Money, other : Money) -> Money raise NumError {
 ///   本库把负档规则化（对称分配），并由用例断言"和 == 原值"这条不变量
 pub fn Money::allocate_even(
   self : Money,
-  targets : Int,
+  targets : Int32,
 ) -> Array[Money] raise NumError {
   if targets < 1 {
     raise NonPositiveTargets(targets)
@@ -1017,7 +1017,7 @@ pub fn Money::allocate_even(
 ///   所以两个变体不合并
 pub fn Money::allocate_by_ratio(
   self : Money,
-  ratios : Array[Int],
+  ratios : Array[Int32],
 ) -> Array[Money] raise NumError {
   let mut sum : Int64 = 0
   for r in ratios {
@@ -1120,14 +1120,14 @@ fn money_from_plain(plain : String) -> Money raise NumError {
 /// 把十进制**串**拆成 `(是否负, 数字流, 小数点位置)`，约定同 `split_decimal`。
 /// `"+1.10"`、`".5"`、`"12."` 都认（这三条 JDK 的 `BigDecimal` 也认，23 条实测见 spec #8.16）；
 /// 认不出的形状一律 `None`，由调用方报 `NotDecimal`
-fn parse_decimal_str(text : String) -> (Bool, Array[Int], Int)? {
+fn parse_decimal_str(text : String) -> (Bool, Array[Int32], Int32)? {
   let cs = text.to_array()
   let mut i = 0
   let neg = cs.length() > 0 && cs[0] == '-'
   if cs.length() > 0 && (cs[0] == '-' || cs[0] == '+') {
     i = 1
   }
-  let digits : Array[Int] = []
+  let digits : Array[Int32] = []
   let mut point = -1
   let mut any_digit = false
   let mut ok = true
@@ -1158,7 +1158,7 @@ fn parse_decimal_str(text : String) -> (Bool, Array[Int], Int)? {
 ///|
 /// 最短平格式：去小数部分尾随零（清空就连点一起去掉）、去整数部分前导零、零不保留负号。
 /// 23 条夹具逐条与 JDK 的 `stripTrailingZeros().toPlainString()` 对撞
-fn emit_shortest(neg : Bool, digits : Array[Int], point : Int) -> String {
+fn emit_shortest(neg : Bool, digits : Array[Int32], point : Int32) -> String {
   let d = digits.copy()
   let pt = point
   while d.length() > pt && d[d.length() - 1] == 0 {
@@ -1241,16 +1241,16 @@ fn group_decimal(plain : String, sep : Char, dec : Char) -> String {
 /// `split_decimal` 的位置约定下，挪点只是 `point + k`；但 `0.125` 挪两位会得到整数区读数 `012`，
 /// 所以这一步必须跳零——否则百分比与元→分会输出 `"012.50%"` 这种带前导零的形状
 fn shift_point_left(
-  parts : (Bool, Array[Int], Int),
-  k : Int,
-) -> (Bool, Array[Int], Int) {
+  parts : (Bool, Array[Int32], Int32),
+  k : Int32,
+) -> (Bool, Array[Int32], Int32) {
   let (neg, digits, point) = parts
   let pt = point + k
   let mut lead = 0
   while pt - lead > 1 && lead < digits.length() && digits[lead] == 0 {
     lead += 1
   }
-  let out : Array[Int] = []
+  let out : Array[Int32] = []
   let mut i = lead
   while i < digits.length() {
     out.push(digits[i])
@@ -1319,13 +1319,13 @@ pub fn chinese_money_simple_of(text : String) -> String raise NumError {
 ///
 /// 这是与 #8.26 不同的一条档：`chinese_of("10") ⇒ "一十"`，而本件给 `"十"`；越界 ⇒ `OutOfRange`
 /// （hutool 那句 `Number support only: (-999 ~ 999)！` 只当读数证据，不进错误载荷）。
-pub fn chinese_of_thousand(n : Int) -> String raise NumError {
+pub fn chinese_of_thousand(n : Int32) -> String raise NumError {
   cn_thousand(n, false)
 }
 
 ///|
 /// 千分位档的繁体版，对位 `formatThousand(int, true)`：`11 ⇒ "拾壹"`、`110 ⇒ "壹佰壹拾"`。
-pub fn chinese_upper_of_thousand(n : Int) -> String raise NumError {
+pub fn chinese_upper_of_thousand(n : Int32) -> String raise NumError {
   cn_thousand(n, true)
 }
 
@@ -1569,7 +1569,7 @@ let cn_unit_sec : Array[Bool] = [
 let cn_plain_bound : Int64 = 99_9999_9999_9999
 
 ///|
-fn cn_num_char(n : Int, upper : Bool) -> Char {
+fn cn_num_char(n : Int32, upper : Bool) -> Char {
   if n == 0 {
     cn_digits[0]
   } else {
@@ -1578,7 +1578,7 @@ fn cn_num_char(n : Int, upper : Bool) -> Char {
 }
 
 ///|
-fn cn_unit_name(index : Int, upper : Bool) -> String {
+fn cn_unit_name(index : Int32, upper : Bool) -> String {
   if index == 0 {
     ""
   } else {
@@ -1589,7 +1589,7 @@ fn cn_unit_name(index : Int, upper : Bool) -> String {
 ///|
 /// 单个汉字 → 数字值，`-1` 表示"不是数字"（hutool 拿 -1 当"该走单位分支"的哨兵，这里同义）。
 /// 「两」先折成「二」是它的口语纠正，跟。
-fn cn_char_num(c : Char) -> Int {
+fn cn_char_num(c : Char) -> Int32 {
   let c2 = if c == '两' { '二' } else { c }
   let mut i = 0
   while i < cn_digits.length() {
@@ -1603,7 +1603,7 @@ fn cn_char_num(c : Char) -> Int {
 }
 
 ///|
-fn cn_char_unit(c : Char) -> Int {
+fn cn_char_unit(c : Char) -> Int32 {
   let mut i = 0
   while i < cn_unit_names.length() {
     if cn_unit_names[i] == c {
@@ -1617,7 +1617,7 @@ fn cn_char_unit(c : Char) -> Int {
 ///|
 /// 段内（0~9999）逐位拼字：0 位补一个「零」，连续 0 不叠。返回空串只发生在负数输入上
 /// （`formatThousand` 就是这么产出 `-1 => ""` 的，跟随）。
-fn cn_thousand_to_chinese(part : Int, upper : Bool) -> String {
+fn cn_thousand_to_chinese(part : Int32, upper : Bool) -> String {
   if part == 0 {
     return "零"
   }
@@ -1658,7 +1658,7 @@ fn cn_long_to_chinese(amount : Int64, upper : Bool) -> String {
   if amount == 0 {
     return "零"
   }
-  let parts : Array[Int] = [0, 0, 0, 0]
+  let parts : Array[Int32] = [0, 0, 0, 0]
   let mut a = amount
   let mut k = 0
   while a != 0 && k < 4 {
@@ -1712,7 +1712,7 @@ fn cn_long_to_chinese(amount : Int64, upper : Bool) -> String {
 ///|
 /// 本批文法（spec §10.4 第 13 行）：`-? D+ ('.' D*)?` 或 `-? '.' D+`。
 /// 不吃 `+` 前缀、指数、空白、分组符——hutool 那两条腿都吃得更宽（`+1 => 一`、`1e5 => 一十万`）。
-fn cn_decimal(text : String) -> (Bool, Array[Int], Array[Int])? {
+fn cn_decimal(text : String) -> (Bool, Array[Int32], Array[Int32])? {
   let cs = text.to_array()
   let n = cs.length()
   if n == 0 {
@@ -1720,12 +1720,12 @@ fn cn_decimal(text : String) -> (Bool, Array[Int], Array[Int])? {
   }
   let neg = cs[0] == '-'
   let mut i = if neg { 1 } else { 0 }
-  let ip : Array[Int] = []
+  let ip : Array[Int32] = []
   while i < n && cs[i] >= '0' && cs[i] <= '9' {
     ip.push(cs[i].to_int() - 48)
     i += 1
   }
-  let fp : Array[Int] = []
+  let fp : Array[Int32] = []
   if i < n && cs[i] == '.' {
     i += 1
     while i < n && cs[i] >= '0' && cs[i] <= '9' {
@@ -1847,7 +1847,7 @@ fn cn_money_of(text : String, upper : Bool) -> String raise NumError {
 ///|
 /// `formatThousand`：界 ±999，且 10~19 切掉首个「一/壹」。负数那三支在 hutool 里是空串
 /// （`thousandToChinese` 的循环对负数一次都不跑），跟随。
-fn cn_thousand(n : Int, upper : Bool) -> String raise NumError {
+fn cn_thousand(n : Int32, upper : Bool) -> String raise NumError {
   if n < -999 || n > 999 {
     raise OutOfRange(n.to_string())
   }
@@ -1868,7 +1868,7 @@ fn cn_all_blank(cs : Array[Char]) -> Bool {
 }
 
 ///|
-fn cn_slice_blank(cs : Array[Char], from : Int, to : Int) -> Bool {
+fn cn_slice_blank(cs : Array[Char], from : Int32, to : Int32) -> Bool {
   let mut i = from
   while i < to {
     if cs[i] > ' ' {
@@ -1880,7 +1880,7 @@ fn cn_slice_blank(cs : Array[Char], from : Int, to : Int) -> Bool {
 }
 
 ///|
-fn cn_index_key(cs : Array[Char], k : Char) -> Int {
+fn cn_index_key(cs : Array[Char], k : Char) -> Int32 {
   let mut i = 0
   while i < cs.length() {
     if cs[i] == k {
@@ -1915,8 +1915,8 @@ fn cn_mul64(a : Int64, b : Int64, text : String) -> Int64 raise NumError {
 /// 报错载荷 = 档位名 + 字符/两字窗口 + 码点位置，英文文案不进载荷。
 fn cn_back_parse(
   cs : Array[Char],
-  from : Int,
-  to : Int,
+  from : Int32,
+  to : Int32,
   text : String,
 ) -> Int64 raise NumError {
   let mut result : Int64 = 0
@@ -2069,8 +2069,8 @@ let word_more : Array[String] = [
 ///|
 /// 低位在前、每三位一组、高位侧补零到 3 的倍数——这是 hutool「reverse 后补零再切」的等价写法，
 /// 补零位置决定 `1001` 分成 `[001, 010]` 而不是别的形状，所以按它写而不是按直觉写。
-fn cn_word_groups(ip : Array[Int]) -> Array[Array[Int]] {
-  let rev : Array[Int] = []
+fn cn_word_groups(ip : Array[Int32]) -> Array[Array[Int32]] {
+  let rev : Array[Int32] = []
   let mut i = ip.length() - 1
   while i >= 0 {
     rev.push(ip[i])
@@ -2080,7 +2080,7 @@ fn cn_word_groups(ip : Array[Int]) -> Array[Array[Int]] {
   while body.length() % 3 != 0 {
     body.push(0)
   }
-  let out : Array[Array[Int]] = []
+  let out : Array[Array[Int32]] = []
   let mut k = 0
   while k < body.length() {
     out.push([body[k + 2], body[k + 1], body[k]])
@@ -2093,7 +2093,7 @@ fn cn_word_groups(ip : Array[Int]) -> Array[Array[Int]] {
 /// 两位档：`0x → 单字`、`1x → TEEN`、`x0 → TEN`、其余 `TEN + 单字`。
 /// 输入是小数原文的前两位（不足两位右补 0，超两位截断），所以 `"0"`、`"00"` 都会读成空串——
 /// 那正是 `ONE AND CENTS  ONLY` 双空格的来源，本包在调用侧把这种零分档整段去掉。
-fn cn_word_two(src : Array[Int]) -> String {
+fn cn_word_two(src : Array[Int32]) -> String {
   let a = if src.length() > 0 { src[0] } else { 0 }
   let b = if src.length() > 1 { src[1] } else { 0 }
   if a == 0 {
@@ -2109,7 +2109,7 @@ fn cn_word_two(src : Array[Int]) -> String {
 
 ///|
 /// 三位档。「AND」只在这里插（百位与后段之间），节与节之间不插 ⇒ `1001 => ONE THOUSAND ONE`。
-fn cn_word_three(g : Array[Int]) -> String {
+fn cn_word_three(g : Array[Int32]) -> String {
   if g[0] == 0 {
     cn_word_two([g[1], g[2]])
   } else if g[1] == 0 && g[2] == 0 {
@@ -2120,7 +2120,7 @@ fn cn_word_three(g : Array[Int]) -> String {
 }
 
 ///|
-fn cn_cents_zero(fp : Array[Int]) -> Bool {
+fn cn_cents_zero(fp : Array[Int32]) -> Bool {
   let a = if fp.length() > 0 { fp[0] } else { 0 }
   let b = if fp.length() > 1 { fp[1] } else { 0 }
   a == 0 && b == 0

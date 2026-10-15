@@ -174,7 +174,7 @@ fn pb_round_tag(name : String) -> String {
 
 ///|
 // #19.10 的读数：`RET:<原值>` 或 `ERR:<本库错误档>`
-fn cv_tag(p : @cron.CronPart, v : Int) -> String {
+fn cv_tag(p : @cron.CronPart, v : Int32) -> String {
   try "RET:" + @cron.cron_part_check_value(p, v).to_string() catch {
     e => "ERR:" + tag(e)
   }

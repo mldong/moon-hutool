@@ -10,7 +10,7 @@
 
 ///|
 /// 字母区间的半开上界表（按起点升序，两两不相邻可并）。
-let letter_ranges : Array[(Int, Int)] = [
+let letter_ranges : Array[(Int32, Int32)] = [
   (65, 91),
   (97, 123),
   (170, 171),
@@ -397,7 +397,7 @@ let letter_ranges : Array[(Int, Int)] = [
 /// 该 UTF-16 码元在参照的 `Character.isLetter` 眼里是不是字母（二分查上面的表）。
 ///
 /// - Note: 私有——这是 `Caesar` 守卫的实现机制，不是对外能力；公开它会多一条要维护的契约。
-fn is_letter_unit(unit : Int) -> Bool {
+fn is_letter_unit(unit : Int32) -> Bool {
   let mut lo = 0
   let mut hi = letter_ranges.length() - 1
   while lo <= hi {

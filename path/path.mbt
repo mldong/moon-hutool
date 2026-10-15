@@ -189,7 +189,7 @@ pub fn combine(prefix : String, suffix : String) -> String raise PathError {
 /// - Returns: **负数**（`a` 更具体、该排前）、0（同等级）、**正数**；直接可作 `sort` 的比较函数。
 ///   用 `Int` 而不用 `Ordering`：本仓没有 `Ordering` 的现成前例，而排序函数正好要 `Int`
 /// - Raises: 无
-pub fn compare_patterns(against : String, a : String, b : String) -> Int {
+pub fn compare_patterns(against : String, a : String, b : String) -> Int32 {
   compare_pat(against, a, b)
 }
 

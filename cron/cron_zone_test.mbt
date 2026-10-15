@@ -27,7 +27,7 @@ fn z4_md(
   zone : String,
   start : Int64,
   end : Int64,
-  count : Int,
+  count : Int32,
 ) -> String {
   try {
     let c = @cron.cron_of(pat)

@@ -367,7 +367,7 @@ test "@codec #6 radix_encode（表序 0-9A-Za-z，负号单列）" {
 
 ///|
 test "@codec #6 radix_decode 与 encode 互逆，越界与非法字符各有读数" {
-  let d : (String, Int) -> Int64 = (t, base) => {
+  let d : (String, Int32) -> Int64 = (t, base) => {
     @codec.radix_decode(t, base) catch {
       _ => abort("夹具必须能解：\{t} base=\{base}")
     }

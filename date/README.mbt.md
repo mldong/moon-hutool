@@ -305,7 +305,7 @@ test "between 取绝对值，difference 带符号" {
 ///|
 test "周岁：2 月 29 日出生者在平年 2 月 28 日还没过完生日" {
   let b = @date.Date::from_epoch_days(11016L) // 2000-02-29
-  let age : (Int64) -> Int = on => {
+  let age : (Int64) -> Int32 = on => {
     @date.age(b, @date.Date::from_epoch_days(on)) catch {
       _ => abort("夹具不该触发 FutureBirth")
     }
@@ -451,7 +451,7 @@ test "启动时设一次，之后到处不带区名" {
 ```mbt check
 ///|
 fn tick_clock(ticks : Array[Int64]) -> () -> Int64 {
-  let i : Array[Int] = [0]
+  let i : Array[Int32] = [0]
   () => {
     let k = i[0]
     i[0] = k + 1

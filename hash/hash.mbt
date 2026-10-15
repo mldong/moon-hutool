@@ -44,17 +44,17 @@ pub(all) enum Crc16Variant {
 /// - Note: 参照实现的表构造是 `remainder = dividend`（没有 `<< 8`），因此**不是**标准 CRC-8；
 ///   本库照抄，理由见包头第 1 条与 spec §5 第 3 行。
 pub struct Crc8 {
-  polynomial : Int
-  init : Int
-  mut value : Int
-  table : Array[Int]
+  polynomial : Int32
+  init : Int32
+  mut value : Int32
+  table : Array[Int32]
 }
 
 ///|
 /// CRC16 累加器。对位 `CRC16` 包装器 + 抽象基类 `CRC16Checksum`。
 pub struct Crc16 {
   variant : Crc16Variant
-  mut value : Int
+  mut value : Int32
 }
 
 ///|
@@ -63,8 +63,8 @@ pub struct Crc16 {
 /// - Parameters:
 ///   - `polynomial` 生成多项式（参照实现按低→高逐位右移构造表）
 ///   - `init` 初始值，同时是 `crc8_reset` 回到的值
-pub fn new_crc8(polynomial : Int, init : Int) -> Crc8 {
-  let table : Array[Int] = []
+pub fn new_crc8(polynomial : Int32, init : Int32) -> Crc8 {
+  let table : Array[Int32] = []
   for d in 0..<256 {
     let mut r = d
     for _ in 0..<8 {
@@ -92,8 +92,8 @@ pub fn Crc8::crc8_update(self : Crc8, data : Bytes) -> Unit {
 pub fn Crc8::crc8_update_range(
   self : Crc8,
   data : Bytes,
-  offset : Int,
-  length : Int,
+  offset : Int32,
+  length : Int32,
 ) -> Unit {
   let mut v = self.value
   let mut i = 0
@@ -108,13 +108,13 @@ pub fn Crc8::crc8_update_range(
 
 ///|
 /// 累加单个字节；参照实现取的是 `int` 的低 8 位（`update(int)` 走的是 `new byte[]{(byte)b}`）。
-pub fn Crc8::crc8_update_byte(self : Crc8, b : Int) -> Unit {
+pub fn Crc8::crc8_update_byte(self : Crc8, b : Int32) -> Unit {
   self.crc8_update_range(Bytes::from_array([b.to_byte()]), 0, 1)
 }
 
 ///|
 /// 当前校验值，出口是 `value & 0xff`（8 位，恒在 0..255）。
-pub fn Crc8::crc8_value(self : Crc8) -> Int {
+pub fn Crc8::crc8_value(self : Crc8) -> Int32 {
   self.value & 0xff
 }
 
@@ -135,8 +135,8 @@ pub fn Crc16::crc16_update(self : Crc16, data : Bytes) -> Unit {
 pub fn Crc16::crc16_update_range(
   self : Crc16,
   data : Bytes,
-  offset : Int,
-  length : Int,
+  offset : Int32,
+  length : Int32,
 ) -> Unit {
   let mut v = self.value
   let mut i = 0
@@ -149,13 +149,13 @@ pub fn Crc16::crc16_update_range(
 
 ///|
 /// 累加单个字节（低 8 位有效）。
-pub fn Crc16::crc16_update_byte(self : Crc16, b : Int) -> Unit {
+pub fn Crc16::crc16_update_byte(self : Crc16, b : Int32) -> Unit {
   self.value = crc16_step(self.variant, self.value, b)
 }
 
 ///|
 /// 当前校验值 = `wCRCin` 全值（可达 65535，与 CRC8 的 8 位出口不同）。
-pub fn Crc16::crc16_value(self : Crc16) -> Int {
+pub fn Crc16::crc16_value(self : Crc16) -> Int32 {
   self.value
 }
 
@@ -179,7 +179,7 @@ pub fn Crc16::crc16_hex_value(self : Crc16, padding : Bool) -> String {
 ///
 /// - Parameters: `prime` 是模数。`prime == 0` 时 `raise HashError::ZeroPrime`
 ///   （参照侧是 `ArithmeticException: / by zero`）；负数照常算，Java 的 `%` 保留符号。
-pub fn additive_hash(text : String, prime : Int) -> Int raise HashError {
+pub fn additive_hash(text : String, prime : Int32) -> Int32 raise HashError {
   if prime == 0 {
     raise HashError::ZeroPrime
   }
@@ -194,7 +194,7 @@ pub fn additive_hash(text : String, prime : Int) -> Int raise HashError {
 /// 旋转哈希：初值是**串长**，逐字符 `h = (h << 4) ^ (h >> 28) ^ c`，末尾同样 `% prime`。
 ///
 /// - Parameters: `prime` 是模数，`0` 那档 `raise HashError::ZeroPrime`。
-pub fn rotating_hash(text : String, prime : Int) -> Int raise HashError {
+pub fn rotating_hash(text : String, prime : Int32) -> Int32 raise HashError {
   if prime == 0 {
     raise HashError::ZeroPrime
   }
@@ -207,7 +207,7 @@ pub fn rotating_hash(text : String, prime : Int) -> Int raise HashError {
 
 ///|
 /// 逐字符三拍：`h += c; h += h << 10; h ^= h >> 6`，收尾再来 `h += h << 3; h ^= h >> 11; h += h << 15`。
-pub fn one_by_one_hash(text : String) -> Int {
+pub fn one_by_one_hash(text : String) -> Int32 {
   let mut h = 0
   for c in utf16_codes(text) {
     h = add3(h, c)
@@ -221,7 +221,7 @@ pub fn one_by_one_hash(text : String) -> Int {
 
 ///|
 /// Bernstein（`h = 33 * h + c`，初值 **0**——5381 那档是 `djb_hash`，两件别混）。
-pub fn bernstein(text : String) -> Int {
+pub fn bernstein(text : String) -> Int32 {
   let mut h = 0
   for c in utf16_codes(text) {
     h = add3(mul3(33, h), c)
@@ -235,7 +235,7 @@ pub fn bernstein(text : String) -> Int {
 /// - Note: 末尾有一段 `<<13 / >>7 / <<3 / >>17 / <<5` 的搅拌，再取 `Math.abs`；
 ///   而 `abs(Integer.MIN_VALUE)` 仍是负数 ⇒ **返回值可以为负**（spec §3 第 4 条）。
 ///   与 `fnv_hash_bytes` 只在纯 ASCII 上同值，非 ASCII 必分岔。
-pub fn fnv_hash(text : String) -> Int {
+pub fn fnv_hash(text : String) -> Int32 {
   let mut h = -2128831035
   for c in utf16_codes(text) {
     h = mul3(h ^ c, 16777619)
@@ -246,7 +246,7 @@ pub fn fnv_hash(text : String) -> Int {
 ///|
 /// 同上，但**按字节**遍历，且对每个字节做符号扩展 XOR（参照侧 `hash ^ b`，`b` 是 Java 有符号 `byte`）；
 /// 两档的末尾搅拌完全一致：`h += h<<13; h ^= h>>7; h += h<<3; h ^= h>>17; h += h<<5` 再取 `Math.abs`。
-pub fn fnv_hash_bytes(data : Bytes) -> Int {
+pub fn fnv_hash_bytes(data : Bytes) -> Int32 {
   let mut h = -2128831035
   let n = data.length()
   let mut i = 0
@@ -259,7 +259,7 @@ pub fn fnv_hash_bytes(data : Bytes) -> Int {
 
 ///|
 /// Thomas Wang 的整数哈希（用 `>>>` 逻辑右移，与 FNV 那档的算术右移不同）。
-pub fn int_hash(key : Int) -> Int {
+pub fn int_hash(key : Int32) -> Int32 {
   let mut k = key
   k = add3(k, not32(shl32(k, 15)))
   k = k ^ lshr32(k, 10)
@@ -271,7 +271,7 @@ pub fn int_hash(key : Int) -> Int {
 
 ///|
 /// RS 算法：`h = h * a + c`，同时 `a = a * 378551`（`a` 初值 63689），出口 `& 0x7FFFFFFF`。
-pub fn rs_hash(text : String) -> Int {
+pub fn rs_hash(text : String) -> Int32 {
   let mut h = 0
   let mut a = 63689
   for c in utf16_codes(text) {
@@ -283,7 +283,7 @@ pub fn rs_hash(text : String) -> Int {
 
 ///|
 /// JS 算法：`h ^= (h << 5) + c + (h >> 2)`（`>>` 是算术右移，逐字照搬），出口 `Math.abs(h) & 0x7FFFFFFF`。
-pub fn js_hash(text : String) -> Int {
+pub fn js_hash(text : String) -> Int32 {
   let mut h = 1315423911
   for c in utf16_codes(text) {
     h = h ^ add3(add3(h << 5, c), h >> 2)
@@ -293,7 +293,7 @@ pub fn js_hash(text : String) -> Int {
 
 ///|
 /// PJW 算法：`h = (h << 4) + c`，命中高 4 位（`0xF0000000`）时折回 `test >> 24` 并清掉高位，出口 `& 0x7FFFFFFF`。
-pub fn pjw_hash(text : String) -> Int {
+pub fn pjw_hash(text : String) -> Int32 {
   let mut h = 0
   for c in utf16_codes(text) {
     h = add3(h << 4, c)
@@ -307,7 +307,7 @@ pub fn pjw_hash(text : String) -> Int {
 
 ///|
 /// ELF 算法：`h = (h << 4) + c`，`x = h & 0xF0000000` 非零时 `h ^= x >> 24; h &= ~x`，出口 `& 0x7FFFFFFF`。
-pub fn elf_hash(text : String) -> Int {
+pub fn elf_hash(text : String) -> Int32 {
   let mut h = 0
   for c in utf16_codes(text) {
     h = add3(h << 4, c)
@@ -322,7 +322,7 @@ pub fn elf_hash(text : String) -> Int {
 
 ///|
 /// BKDR 算法：`h = h * 131 + c`，出口 `& 0x7FFFFFFF`。
-pub fn bkdr_hash(text : String) -> Int {
+pub fn bkdr_hash(text : String) -> Int32 {
   let mut h = 0
   for c in utf16_codes(text) {
     h = add3(mul3(h, 131), c)
@@ -332,7 +332,7 @@ pub fn bkdr_hash(text : String) -> Int {
 
 ///|
 /// SDBM 算法：`h = c + (h << 6) + (h << 16) - h`，出口 `& 0x7FFFFFFF`（参照侧这条**有**掩码）。
-pub fn sdbm_hash(text : String) -> Int {
+pub fn sdbm_hash(text : String) -> Int32 {
   let mut h = 0
   for c in utf16_codes(text) {
     h = sub3(add3(c, add3(h << 6, h << 16)), h)
@@ -342,7 +342,7 @@ pub fn sdbm_hash(text : String) -> Int {
 
 ///|
 /// DJB 算法：初值 5381，`h = (h << 5) + h + c`，出口 `& 0x7FFFFFFF`。
-pub fn djb_hash(text : String) -> Int {
+pub fn djb_hash(text : String) -> Int32 {
   let mut h = 5381
   for c in utf16_codes(text) {
     h = add3(add3(h << 5, h), c)
@@ -352,7 +352,7 @@ pub fn djb_hash(text : String) -> Int {
 
 ///|
 /// DEK 算法：初值是**串长**，`h = (h << 5) ^ (h >> 27) ^ c`，出口 `& 0x7FFFFFFF`。
-pub fn dek_hash(text : String) -> Int {
+pub fn dek_hash(text : String) -> Int32 {
   let mut h = text.length()
   for c in utf16_codes(text) {
     h = (h << 5) ^ (h >> 27) ^ c
@@ -362,7 +362,7 @@ pub fn dek_hash(text : String) -> Int {
 
 ///|
 /// AP 算法：偶数下标 `h ^= (h << 7) ^ c ^ (h >> 3)`，奇数下标 `h ^= ~((h << 11) ^ c ^ (h >> 5))`，出口**不掩码**。
-pub fn ap_hash(text : String) -> Int {
+pub fn ap_hash(text : String) -> Int32 {
   let mut h = 0
   let mut i = 0
   for c in utf16_codes(text) {
@@ -417,7 +417,7 @@ pub fn tianl_hash(text : String) -> Int64 {
 
 ///|
 /// `String.hashCode` 的 31 进制展开（与参照实现逐字符同式）。
-pub fn java_default_hash(text : String) -> Int {
+pub fn java_default_hash(text : String) -> Int32 {
   let mut h = 0
   for c in utf16_codes(text) {
     h = add3(mul3(31, h), c)
@@ -463,13 +463,13 @@ pub fn hf_ip_hash(text : String) -> Int64 {
 
 ///|
 /// Murmur3 32 位，输入是文本——参照实现先按 **UTF-8** 编码再走字节档（类内 `DEFAULT_CHARSET`）。
-pub fn murmur32(text : String) -> Int {
+pub fn murmur32(text : String) -> Int32 {
   murmur32_bytes(@utf8.encode(text))
 }
 
 ///|
 /// Murmur3 32 位，整段字节，默认 `seed = 0`、小端取字（`DEFAULT_ORDER`）。
-pub fn murmur32_bytes(data : Bytes) -> Int {
+pub fn murmur32_bytes(data : Bytes) -> Int32 {
   murmur32_range(data, 0, data.length(), 0)
 }
 
@@ -478,7 +478,7 @@ pub fn murmur32_bytes(data : Bytes) -> Int {
 ///
 /// - Parameters: `length` 是**参与哈希的字节数**（从下标 0 起算），`seed` 是种子。
 /// - Note: 参照侧这个重载与 `murmur32_range` 只差一个参数位置、名字相同，本库分名把陷阱摆出来。
-pub fn murmur32_len_seed(data : Bytes, length : Int, seed : Int) -> Int {
+pub fn murmur32_len_seed(data : Bytes, length : Int32, seed : Int32) -> Int32 {
   murmur32_range(data, 0, length, seed)
 }
 
@@ -488,11 +488,11 @@ pub fn murmur32_len_seed(data : Bytes, length : Int, seed : Int) -> Int {
 /// - Note: 必须与"先把 `[offset, offset+length)` 切出来再哈希"同值（实测成立，读数 `mmr.hash32.slice_eq`）。
 pub fn murmur32_range(
   data : Bytes,
-  offset : Int,
-  length : Int,
-  seed : Int,
-) -> Int {
-  let mut h : UInt = seed.reinterpret_as_uint()
+  offset : Int32,
+  length : Int32,
+  seed : Int32,
+) -> Int32 {
+  let mut h : UInt32 = seed.reinterpret_as_uint()
   let nblocks = length >> 2
   for i in 0..<nblocks {
     h = mix32(read_u32le(data, offset + i * 4), h)
@@ -500,7 +500,7 @@ pub fn murmur32_range(
   let idx = offset + nblocks * 4
   let rem = length - nblocks * 4
   if rem > 0 {
-    let mut k1 : UInt = 0
+    let mut k1 : UInt32 = 0
     if rem >= 3 {
       k1 = k1 | ((data[idx + 2].to_int() & 0xff).reinterpret_as_uint() << 16)
     }
@@ -533,7 +533,7 @@ pub fn murmur64_bytes(data : Bytes) -> Int64 {
 /// Murmur3 64 位的 `(length, seed)` 档。
 ///
 /// - Note: **64 位没有 offset 档**——参照侧只有三个重载（`javap` 现读），本库不替它补。
-pub fn murmur64_len_seed(data : Bytes, length : Int, seed : Int) -> Int64 {
+pub fn murmur64_len_seed(data : Bytes, length : Int32, seed : Int32) -> Int64 {
   let mut h : UInt64 = seed.to_int64().reinterpret_as_uint64()
   let nblocks = length >> 3
   for i in 0..<nblocks {
@@ -568,43 +568,43 @@ pub fn murmur64_len_seed(data : Bytes, length : Int, seed : Int) -> Int64 {
 /// 这样每条断言的右侧都能与参照腿的十进制读数逐字同形。
 /// `^`/`&`/`<<`/`>>` 保持参照侧原样——Java 那些位置全是有符号 int，`>>` 是算术右移，
 /// 只有 `int_hash` 与 murmur 的 `>>>` 才是逻辑右移（`lshr32`）。
-fn add3(a : Int, b : Int) -> Int {
+fn add3(a : Int32, b : Int32) -> Int32 {
   (a.reinterpret_as_uint() + b.reinterpret_as_uint()).reinterpret_as_int()
 }
 
 ///|
-fn sub3(a : Int, b : Int) -> Int {
+fn sub3(a : Int32, b : Int32) -> Int32 {
   (a.reinterpret_as_uint() - b.reinterpret_as_uint()).reinterpret_as_int()
 }
 
 ///|
-fn mul3(a : Int, b : Int) -> Int {
+fn mul3(a : Int32, b : Int32) -> Int32 {
   (a.reinterpret_as_uint() * b.reinterpret_as_uint()).reinterpret_as_int()
 }
 
 ///|
-fn not32(a : Int) -> Int {
+fn not32(a : Int32) -> Int32 {
   (a.reinterpret_as_uint() ^ ff_mask).reinterpret_as_int()
 }
 
 ///|
-fn shl32(a : Int, n : Int) -> Int {
+fn shl32(a : Int32, n : Int32) -> Int32 {
   (a.reinterpret_as_uint() << n).reinterpret_as_int()
 }
 
 ///|
-fn lshr32(a : Int, n : Int) -> Int {
+fn lshr32(a : Int32, n : Int32) -> Int32 {
   (a.reinterpret_as_uint() >> n).reinterpret_as_int()
 }
 
 ///|
 /// Java 的 `%`：余数符号跟被除数（`/` 向零截断），所以负数档不能套 MoonBit 的 `mod`。
-fn java_mod(a : Int, b : Int) -> Int {
+fn java_mod(a : Int32, b : Int32) -> Int32 {
   a - a / b * b
 }
 
 ///|
-fn abs32(a : Int) -> Int {
+fn abs32(a : Int32) -> Int32 {
   if a >= 0 || a == -2147483648 {
     a
   } else {
@@ -613,7 +613,7 @@ fn abs32(a : Int) -> Int {
 }
 
 ///|
-fn fnv_mixer(h0 : Int) -> Int {
+fn fnv_mixer(h0 : Int32) -> Int32 {
   let mut h = h0
   h = add3(h, h << 13)
   h = h ^ (h >> 7)
@@ -623,12 +623,12 @@ fn fnv_mixer(h0 : Int) -> Int {
 }
 
 ///|
-fn rotl32(v : UInt, c : Int) -> UInt {
+fn rotl32(v : UInt32, c : Int32) -> UInt32 {
   (v << c) | (v >> (32 - c))
 }
 
 ///|
-fn mix32(k0 : UInt, h0 : UInt) -> UInt {
+fn mix32(k0 : UInt32, h0 : UInt32) -> UInt32 {
   let mut k = k0 * c1_32
   k = rotl32(k, 15)
   k = k * c2_32
@@ -637,7 +637,7 @@ fn mix32(k0 : UInt, h0 : UInt) -> UInt {
 }
 
 ///|
-fn fmix32(h0 : UInt) -> UInt {
+fn fmix32(h0 : UInt32) -> UInt32 {
   let mut h = h0 ^ (h0 >> 16)
   h = h * f1_32
   h = h ^ (h >> 13)
@@ -646,7 +646,7 @@ fn fmix32(h0 : UInt) -> UInt {
 }
 
 ///|
-fn rotl64(v : UInt64, c : Int) -> UInt64 {
+fn rotl64(v : UInt64, c : Int32) -> UInt64 {
   (v << c) | (v >> (64 - c))
 }
 
@@ -662,8 +662,8 @@ fn fmix64(h0 : UInt64) -> UInt64 {
 ///|
 /// Java 的 `charAt` 走 UTF-16 码元，而 MoonBit 的 `Char` 是码位 —— 代理对必须展开成两个码元，
 /// 否则 `one_by_one_hash("emoji+abc")` 这类会比参照侧少算一步。
-fn utf16_codes(text : String) -> Array[Int] {
-  let out : Array[Int] = []
+fn utf16_codes(text : String) -> Array[Int32] {
+  let out : Array[Int32] = []
   for c in text.to_array() {
     let v = c.to_int()
     if v < 0x10000 {
@@ -679,7 +679,7 @@ fn utf16_codes(text : String) -> Array[Int] {
 
 ///|
 /// 参照侧 `byte` 是有符号的（0xff 进来是 -1），异或前必须符号扩展。
-fn sbyte(v : Int) -> Int {
+fn sbyte(v : Int32) -> Int32 {
   if v > 127 {
     v - 256
   } else {
@@ -688,7 +688,7 @@ fn sbyte(v : Int) -> Int {
 }
 
 ///|
-fn read_u32le(data : Bytes, off : Int) -> UInt {
+fn read_u32le(data : Bytes, off : Int32) -> UInt32 {
   let b0 = (data[off].to_int() & 0xff).reinterpret_as_uint()
   let b1 = (data[off + 1].to_int() & 0xff).reinterpret_as_uint()
   let b2 = (data[off + 2].to_int() & 0xff).reinterpret_as_uint()
@@ -697,7 +697,7 @@ fn read_u32le(data : Bytes, off : Int) -> UInt {
 }
 
 ///|
-fn read_u64le(data : Bytes, off : Int) -> UInt64 {
+fn read_u64le(data : Bytes, off : Int32) -> UInt64 {
   let mut v : UInt64 = 0
   let mut i = 7
   while i >= 0 {
@@ -709,7 +709,7 @@ fn read_u64le(data : Bytes, off : Int) -> UInt64 {
 }
 
 ///|
-fn crc16_init(v : Crc16Variant) -> Int {
+fn crc16_init(v : Crc16Variant) -> Int32 {
   match v {
     Ansi => 0xffff
     Ccitt => 0
@@ -725,7 +725,7 @@ fn crc16_init(v : Crc16Variant) -> Int {
 }
 
 ///|
-fn crc16_poly(v : Crc16Variant) -> Int {
+fn crc16_poly(v : Crc16Variant) -> Int32 {
   match v {
     Ansi | Ibm | Maxim | Modbus | Usb => 0xa001
     Ccitt | X25 => 0x8408
@@ -735,7 +735,7 @@ fn crc16_poly(v : Crc16Variant) -> Int {
 }
 
 ///|
-fn crc16_step(v : Crc16Variant, crc_in : Int, b : Int) -> Int {
+fn crc16_step(v : Crc16Variant, crc_in : Int32, b : Int32) -> Int32 {
   let poly = crc16_poly(v)
   match v {
     Ansi => {
@@ -774,7 +774,7 @@ fn crc16_step(v : Crc16Variant, crc_in : Int, b : Int) -> Int {
 ///|
 /// 参照侧把"最终异或/掩码"挂在 `update(byte[], off, len)` 上而不是 `update(int)` 上，
 /// 于是逐字节喂与整段喂不同值——这份差异原样留在两个入口里（读数 `crc16.single_int.*` 对 `crc16.digits.*`）。
-fn crc16_array_tail(v : Crc16Variant, crc_in : Int) -> Int {
+fn crc16_array_tail(v : Crc16Variant, crc_in : Int32) -> Int32 {
   match v {
     Dnp | Maxim | Usb | X25 => crc_in ^ 0xffff
     CcittFalse | XModem => crc_in & 0xffff
@@ -784,7 +784,7 @@ fn crc16_array_tail(v : Crc16Variant, crc_in : Int) -> Int {
 
 ///|
 /// 对位 `HexUtil.toHex(...)`（小写、无前缀）+ `StrUtil.padPre(hex, 4, '0')`。
-fn hex_of_u16(n : Int, padding : Bool) -> String {
+fn hex_of_u16(n : Int32, padding : Bool) -> String {
   let digits = "0123456789abcdef".to_array()
   let out : Array[Char] = []
   let mut v = if n < 0 { 0 - n } else { n }
@@ -808,25 +808,25 @@ fn hex_of_u16(n : Int, padding : Bool) -> String {
 }
 
 ///|
-let c1_32 : UInt = 0xcc9e2d51
+let c1_32 : UInt32 = 0xcc9e2d51
 
 ///|
-let c2_32 : UInt = 0x1b873593
+let c2_32 : UInt32 = 0x1b873593
 
 ///|
-let m_32 : UInt = 5
+let m_32 : UInt32 = 5
 
 ///|
-let n_32 : UInt = 0xe6546b64
+let n_32 : UInt32 = 0xe6546b64
 
 ///|
-let f1_32 : UInt = 0x85ebca6b
+let f1_32 : UInt32 = 0x85ebca6b
 
 ///|
-let f2_32 : UInt = 0xc2b2ae35
+let f2_32 : UInt32 = 0xc2b2ae35
 
 ///|
-let ff_mask : UInt = 0xffffffff
+let ff_mask : UInt32 = 0xffffffff
 
 ///|
 let c1_64 : UInt64 = 0x87c37b91114253d5

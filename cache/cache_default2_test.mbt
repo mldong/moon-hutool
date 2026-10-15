@@ -7,7 +7,7 @@
 ///|
 test "cache 默认档 hit-get" {
   // put 之后 get 命中 ｜ 参照=1 ｜ 缺键参照=null
-  let c : @cache.Cache[String, Int] = @cache.Cache::new_cache(
+  let c : @cache.Cache[String, Int32] = @cache.Cache::new_cache(
     @cache.CachePolicy::Lru,
     4,
     0L,
@@ -21,7 +21,7 @@ test "cache 默认档 hit-get" {
 ///|
 test "cache 默认档 hit-get_or_put" {
   // get_or_put：缺键走 supplier、命中不回表 ｜ 参照 get(k, Func0) 缺键=42 命中=1
-  let c : @cache.Cache[String, Int] = @cache.Cache::new_cache(
+  let c : @cache.Cache[String, Int32] = @cache.Cache::new_cache(
     @cache.CachePolicy::Lru,
     4,
     0L,
@@ -34,7 +34,7 @@ test "cache 默认档 hit-get_or_put" {
 ///|
 test "cache 默认档 empty-lru" {
   // 新建未写入 ｜ 参照 isEmpty=true size=0
-  let c : @cache.Cache[String, Int] = @cache.Cache::new_cache(
+  let c : @cache.Cache[String, Int32] = @cache.Cache::new_cache(
     @cache.CachePolicy::Lru,
     4,
     10L,
@@ -46,7 +46,7 @@ test "cache 默认档 empty-lru" {
 ///|
 test "cache 默认档 empty-timed" {
   // 新建未写入 ｜ 参照 isEmpty=true size=0
-  let c : @cache.Cache[String, Int] = @cache.Cache::new_cache(
+  let c : @cache.Cache[String, Int32] = @cache.Cache::new_cache(
     @cache.CachePolicy::Timed,
     4,
     10L,
@@ -58,7 +58,7 @@ test "cache 默认档 empty-timed" {
 ///|
 test "cache 默认档 remove-missing" {
   // remove 不存在的键 ｜ 参照 remove 后 size=1 a=1 containsKey=false
-  let c : @cache.Cache[String, Int] = @cache.Cache::new_cache(
+  let c : @cache.Cache[String, Int32] = @cache.Cache::new_cache(
     @cache.CachePolicy::Lru,
     4,
     0L,
@@ -73,7 +73,7 @@ test "cache 默认档 remove-missing" {
 ///|
 test "cache 默认档 prune-timed" {
   // Timed ttl=10，t=0 写两条，t=30 prune ｜ 参照 prune=2 size=0 get=null isEmpty=true
-  let c : @cache.Cache[String, Int] = @cache.Cache::new_cache(
+  let c : @cache.Cache[String, Int32] = @cache.Cache::new_cache(
     @cache.CachePolicy::Timed,
     8,
     10L,
@@ -89,7 +89,7 @@ test "cache 默认档 prune-timed" {
 ///|
 test "cache 默认档 prune-lru" {
   // Lru 且 timeout=0（腿用的是 newLRUCache(4)，无缺省超时）推进到 t=30 ｜ 参照 prune=0 size=1 a=1 isEmpty=false
-  let c : @cache.Cache[String, Int] = @cache.Cache::new_cache(
+  let c : @cache.Cache[String, Int32] = @cache.Cache::new_cache(
     @cache.CachePolicy::Lru,
     4,
     0L,

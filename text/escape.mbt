@@ -25,7 +25,7 @@ pub suberror TextError {
   /// `%` 落在串尾、取不够位数 —— 参照 `StringIndexOutOfBoundsException`
   ShortInput
   /// 解出来是孤立代理码元 —— 参照能产出，本库的 `String` 表示不了
-  LoneSurrogate(Int)
+  LoneSurrogate(Int32)
   /// `lookup_replacer` 的表里出现空键 —— 参照在构造器里就 `charAt(0)` 越界
   EmptyKey
 }
@@ -108,7 +108,7 @@ pub fn escape_by(s : String, to_escape : (Char) -> Bool) -> String {
 pub fn unescape(s : String) -> String raise TextError {
   let cs = s.iter().collect()
   let n = cs.length()
-  let units : Array[Int] = []
+  let units : Array[Int32] = []
   let mut i = 0
   while i < n {
     if cs[i] != '%' {
@@ -174,7 +174,7 @@ pub fn to_unicode_all(s : String) -> String {
 /// 腿 N 行成对打这两个出口，BMP 内每一条两侧同字符串 ⇒ 没有第二条语义可承诺）。
 /// 形状照参照的 `Integer.toHexString`：取低 32 位、小写十六进制、最少四位（`-1` →
 /// `\uffffffff`、`0x10000` → `\u10000`，腿 N 行两位都在）。
-pub fn unicode_of(cp : Int) -> String {
+pub fn unicode_of(cp : Int32) -> String {
   "\\u" + to_hex(cp, 4)
 }
 
@@ -185,7 +185,7 @@ pub fn unicode_of(cp : Int) -> String {
 pub fn unicode_to_string(s : String) -> String raise TextError {
   let cs = s.iter().collect()
   let n = cs.length()
-  let units : Array[Int] = []
+  let units : Array[Int32] = []
   let mut i = 0
   while i < n {
     // 参照只认 "反斜杠 + u + 恰好四位十六进制"；位数不足、含非十六进制位都原样留，
@@ -240,9 +240,9 @@ let hex_digits : Array[Char] = [
 ///|
 /// 小写十六进制、最少 `width` 位。形状照参照 `Integer.toHexString(int)`：
 /// 负数是 32 位补码（`-1` → `ffffffff`），正数不补到 8 位（`0x10000` → `10000`）。
-fn to_hex(v : Int, width : Int) -> String {
+fn to_hex(v : Int32, width : Int32) -> String {
   let mut x = v
-  let nib : Array[Int] = []
+  let nib : Array[Int32] = []
   if x == 0 {
     nib.push(0)
   }
@@ -267,7 +267,7 @@ fn to_hex(v : Int, width : Int) -> String {
 
 ///|
 /// 码位 → UTF-16 码元（BMP 一个、星平面两个）。参照全程按码元走，这一件是把两边对起来的支点。
-fn to_units(cp : Int) -> Array[Int] {
+fn to_units(cp : Int32) -> Array[Int32] {
   if cp <= 0xffff {
     [cp]
   } else {
@@ -277,19 +277,19 @@ fn to_units(cp : Int) -> Array[Int] {
 }
 
 ///|
-fn is_high_surrogate(u : Int) -> Bool {
+fn is_high_surrogate(u : Int32) -> Bool {
   u >= 0xd800 && u <= 0xdbff
 }
 
 ///|
-fn is_low_surrogate(u : Int) -> Bool {
+fn is_low_surrogate(u : Int32) -> Bool {
   u >= 0xdc00 && u <= 0xdfff
 }
 
 ///|
 /// 码元序列 → String。**成对**代理合成码位（与参照表示同一个字符，零偏差）；
 /// 落单代理本库表示不了 ⇒ 给 None，由调用方 raise（不静默丢、不替换 U+FFFD）。
-fn units_to_string(units : Array[Int]) -> String? {
+fn units_to_string(units : Array[Int32]) -> String? {
   let buf = StringBuilder()
   let mut i = 0
   let n = units.length()
@@ -311,7 +311,7 @@ fn units_to_string(units : Array[Int]) -> String? {
 }
 
 ///|
-fn first_lone(units : Array[Int]) -> Int {
+fn first_lone(units : Array[Int32]) -> Int32 {
   let mut i = 0
   let n = units.length()
   while i < n {
@@ -334,7 +334,7 @@ fn is_hex_digit(c : Char) -> Bool {
 }
 
 ///|
-fn hex_value(c : Char) -> Int {
+fn hex_value(c : Char) -> Int32 {
   let x = c.to_int()
   if x >= 48 && x <= 57 {
     x - 48
@@ -346,7 +346,7 @@ fn hex_value(c : Char) -> Int {
 }
 
 ///|
-fn sub_chars(cs : Array[Char], lo : Int, hi : Int) -> Array[Char] {
+fn sub_chars(cs : Array[Char], lo : Int32, hi : Int32) -> Array[Char] {
   let out : Array[Char] = []
   let mut i = lo
   while i < hi {
@@ -366,7 +366,7 @@ fn join_chars(cs : Array[Char]) -> String {
 }
 
 ///|
-fn push_chars_units(cs : Array[Char], units : Array[Int]) -> Unit {
+fn push_chars_units(cs : Array[Char], units : Array[Int32]) -> Unit {
   for c in cs {
     for u in to_units(c.to_int()) {
       units.push(u)
@@ -393,7 +393,7 @@ fn trim_zeros(body : Array[Char]) -> Array[Char] {
 }
 
 ///|
-fn parse_hex(body : Array[Char]) -> Int? {
+fn parse_hex(body : Array[Char]) -> Int32? {
   let b = trim_zeros(body)
   if b.length() > 7 {
     return None // 腿 N 行：`&#xFFFFFFFF;` 原样留
@@ -409,7 +409,7 @@ fn parse_hex(body : Array[Char]) -> Int? {
 }
 
 ///|
-fn parse_dec(body : Array[Char]) -> Int? {
+fn parse_dec(body : Array[Char]) -> Int32? {
   let b = trim_zeros(body)
   if b.length() > 9 {
     return None // 腿 `&#99999999999;`（11 位）原样留
@@ -427,7 +427,7 @@ fn parse_dec(body : Array[Char]) -> Int? {
 
 ///|
 /// 码位是否落在 `escape` 的不转义区间表里（表由 `EscapeLeg3` 对整个 BMP 逐位对撞产出）
-fn keep_at(cp : Int) -> Bool {
+fn keep_at(cp : Int32) -> Bool {
   if cp > 0xffff {
     return false // 非 BMP 一律转：参照按码元走，两半都不属数字/大小写
   }
@@ -451,8 +451,8 @@ fn entity_escape(s : String, table : Array[(String, String)]) -> String {
 fn longest_entity(
   table : Array[(String, String)],
   cs : Array[Char],
-  at : Int,
-) -> (Int, String)? {
+  at : Int32,
+) -> (Int32, String)? {
   let mut best_len = 0
   let mut best_val = ""
   for (key, value) in table {
@@ -489,7 +489,7 @@ fn unescape_entities(
 ) -> String raise TextError {
   let cs = s.iter().collect()
   let n = cs.length()
-  let units : Array[Int] = []
+  let units : Array[Int32] = []
   let mut i = 0
   while i < n {
     let mut advanced = false

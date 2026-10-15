@@ -46,7 +46,7 @@ test "#24.13 空表在任何时刻都不该有该触发的下标（`due_indices`
 //   ② 而 **impl trait 方法时不写 async**（照 mldong-moon 的 DevQueryApi 实现形状），与 ① 不同形；
 //   ③ 顶层 `let mut` 非法 ⇒ 计数器用单元素 `Array[Int]`（数组是引用语义）。
 
-async fn noop_sleep(_ms : Int) -> Unit {
+async fn noop_sleep(_ms : Int32) -> Unit {
   // 本版两头堵：普通 fn 塞不进 `async (Int) -> Unit`，而空转的 async 吃 unused_async（零警告门禁）
   // ⇒ 真 await 一手的本包 default_sleeper(0)：0 毫秒，不落计时依赖
   @sched.default_sleeper(0)
@@ -54,7 +54,7 @@ async fn noop_sleep(_ms : Int) -> Unit {
 
 ///|
 priv struct Tally {
-  hits : Array[Int]
+  hits : Array[Int32]
 }
 
 ///|
@@ -91,13 +91,13 @@ fn cfg_utc() -> @sched.CronConfig {
 
 ///|
 // 只被"start 唤醒对齐"那一条用例用的两格（其余用例不碰，避免并发用例互盖全局槽）
-let leg_seen : Array[Int] = []
+let leg_seen : Array[Int32] = []
 
 ///|
 let leg_held : Array[@sched.Scheduler] = []
 
 ///|
-async fn sleep_and_stop(ms : Int) -> Unit {
+async fn sleep_and_stop(ms : Int32) -> Unit {
   noop_sleep(ms) // 真 await，免得 async 注解空转吃 unused_async
   leg_seen.push(ms)
   if leg_seen.length() >= 2 && leg_held.length() > 0 {
@@ -107,7 +107,7 @@ async fn sleep_and_stop(ms : Int) -> Unit {
 
 ///|
 async test "到点触发一次：tick 返回执行条数 1，任务体进了一次" {
-  let hits : Array[Int] = [0]
+  let hits : Array[Int32] = [0]
   let t = @sched.table_new()
   @sched.table_add(t, "noon", "0 0 12 * * ?", Tally::{ hits, })
   let s = @sched.scheduler_new(t, cfg_utc(), () => noon_utc_millis, noop_sleep)
@@ -117,7 +117,7 @@ async test "到点触发一次：tick 返回执行条数 1，任务体进了一�
 
 ///|
 async test "不到点不触发：tick 给 0，任务体一次都没进" {
-  let hits : Array[Int] = [0]
+  let hits : Array[Int32] = [0]
   let t = @sched.table_new()
   @sched.table_add(t, "half", "0 30 12 * * ?", Tally::{ hits, })
   let s = @sched.scheduler_new(t, cfg_utc(), () => noon_utc_millis, noop_sleep)
@@ -127,7 +127,7 @@ async test "不到点不触发：tick 给 0，任务体一次都没进" {
 
 ///|
 async test "同一瞬间连喂两次就执行两次（与参照同形，本库不去重）" {
-  let hits : Array[Int] = [0]
+  let hits : Array[Int32] = [0]
   let t = @sched.table_new()
   @sched.table_add(t, "noon", "0 0 12 * * ?", Tally::{ hits, })
   let s = @sched.scheduler_new(t, cfg_utc(), () => noon_utc_millis, noop_sleep)
@@ -138,7 +138,7 @@ async test "同一瞬间连喂两次就执行两次（与参照同形，本库�
 
 ///|
 async test "start 的唤醒对齐 =(now/unit+1)*unit-now，unit 随 match_second 取 1000/60000；第二次进 sleeper 时 stop 生效" {
-  let hits : Array[Int] = [0]
+  let hits : Array[Int32] = [0]
   leg_seen.clear()
   leg_held.clear()
   let t = @sched.table_new()
@@ -161,7 +161,7 @@ async test "start 的唤醒对齐 =(now/unit+1)*unit-now，unit 随 match_second
 
 ///|
 async test "缺省不注册回调则任务体的错误被忽略（参照同形）；注册后失败那条的 id 递得出来（P9）" {
-  let hits : Array[Int] = [0]
+  let hits : Array[Int32] = [0]
   let failed : Array[String] = []
   let t = @sched.table_new()
   @sched.table_add(t, "boom", "0 0 12 * * ?", Bomber::{ })
@@ -180,7 +180,7 @@ async test "缺省不注册回调则任务体的错误被忽略（参照同形�
 
 ///|
 test "摘除一条：三条并行数组同步收缩，剩下的那条仍按原下标取得到（跟参照的 List 形状同构）" {
-  let hits : Array[Int] = [0]
+  let hits : Array[Int32] = [0]
   let t = @sched.table_new()
   @sched.table_add(t, "a", "0 0 12 * * ?", Tally::{ hits, })
   @sched.table_add(t, "b", "0 30 12 * * ?", Tally::{ hits, })
@@ -194,7 +194,7 @@ test "摘除一条：三条并行数组同步收缩，剩下的那条仍按原�
 
 ///|
 test "改表达式不换任务体：在册文本跟着换，摘不存在的键给 false" {
-  let hits : Array[Int] = [0]
+  let hits : Array[Int32] = [0]
   let t = @sched.table_new()
   @sched.table_add(t, "a", "0 0 12 * * ?", Tally::{ hits, })
   assert_eq(@sched.table_update_pattern(t, "a", "0 30 12 * * ?"), true)
@@ -211,7 +211,7 @@ test "改表达式不换任务体：在册文本跟着换，摘不存在的键�
 
 ///|
 test "重复 id 第二次登记必须抛，且三条并行数组一格都不动（腿 N1 现读：参照抛 CronException 且表不变）" {
-  let hits : Array[Int] = [0]
+  let hits : Array[Int32] = [0]
   let t = @sched.table_new()
   @sched.table_add(t, "dup", "0 0 12 * * ?", Tally::{ hits, })
   let shape = try {

@@ -27,8 +27,8 @@ pub suberror Ipv4Error {
 }
 
 ///|
-fn ipv4_octets(text : String) -> Array[Int] {
-  let out : Array[Int] = []
+fn ipv4_octets(text : String) -> Array[Int32] {
+  let out : Array[Int32] = []
   let mut cur = 0
   for c in text.to_array() {
     if c == '.' {
@@ -121,7 +121,7 @@ pub fn ipv4_to_long_or(text : String, default : Int64) -> Int64 {
 }
 
 ///|
-fn mask_long(mask_bit : Int) -> Int64? {
+fn mask_long(mask_bit : Int32) -> Int64? {
   // 参照的 `MaskBit` 表就是 1..32 条连续掩码，用算式复现同一张表：高 mask_bit 位为 1。
   // 表里没有 0 这一档，所以 0 与负数、>32 一律 None（腿 `MBMB|0`→null、`IMBV|0`→false）。
   if mask_bit < 1 || mask_bit > 32 {
@@ -132,7 +132,7 @@ fn mask_long(mask_bit : Int) -> Int64? {
 }
 
 ///|
-fn mask_long_strict(mask_bit : Int) -> Int64 raise Ipv4Error {
+fn mask_long_strict(mask_bit : Int32) -> Int64 raise Ipv4Error {
   match mask_long(mask_bit) {
     Some(v) => v
     None => raise BadMaskBit
@@ -143,7 +143,10 @@ fn mask_long_strict(mask_bit : Int) -> Int64 raise Ipv4Error {
 /// #23.19 网段起始 IP（串）
 /// - Raises: `BadIp` | `BadMaskBit`
 /// - Note: hutool 对位 `static String getBeginIpStr(String, int)`
-pub fn ipv4_begin_ip_str(ip : String, mask_bit : Int) -> String raise Ipv4Error {
+pub fn ipv4_begin_ip_str(
+  ip : String,
+  mask_bit : Int32,
+) -> String raise Ipv4Error {
   long_to_ipv4(ipv4_begin_ip_long(ip, mask_bit))
 }
 
@@ -152,7 +155,10 @@ pub fn ipv4_begin_ip_str(ip : String, mask_bit : Int) -> String raise Ipv4Error 
 /// - Raises: `BadIp`（先）| `BadMaskBit`——参照算式 `ipv4ToLong(ip) & ipv4ToLong(mask)`
 ///   的左操作数先算，两处同时非法时以 `BadIp` 为准（腿 `BSTR|256.1.1.1|0` 就是钉这一条）
 /// - Note: hutool 对位 `static Long getBeginIpLong(String, int)`
-pub fn ipv4_begin_ip_long(ip : String, mask_bit : Int) -> Int64 raise Ipv4Error {
+pub fn ipv4_begin_ip_long(
+  ip : String,
+  mask_bit : Int32,
+) -> Int64 raise Ipv4Error {
   let a = ipv4_to_long(ip)
   let m = mask_long_strict(mask_bit)
   a & m
@@ -162,7 +168,7 @@ pub fn ipv4_begin_ip_long(ip : String, mask_bit : Int) -> Int64 raise Ipv4Error 
 /// #23.21 网段终止 IP（串）
 /// - Raises: `BadIp` | `BadMaskBit`
 /// - Note: hutool 对位 `static String getEndIpStr(String, int)`
-pub fn ipv4_end_ip_str(ip : String, mask_bit : Int) -> String raise Ipv4Error {
+pub fn ipv4_end_ip_str(ip : String, mask_bit : Int32) -> String raise Ipv4Error {
   long_to_ipv4(ipv4_end_ip_long(ip, mask_bit))
 }
 
@@ -172,7 +178,7 @@ pub fn ipv4_end_ip_str(ip : String, mask_bit : Int) -> String raise Ipv4Error {
 /// - Note: hutool 对位 `static Long getEndIpLong(String, int)`。参照注释写"此接口返回负数"，
 ///   实测档里都是正数（`ELNG|218.240.38.69|1` = `4294967295`）⇒ 跟随算式不跟随注释。
 ///   本版没有 `~` 运算符，掩码补集用 `0xffffffffL ^ m`（`m` 已在低 32 位内，二者同值）。
-pub fn ipv4_end_ip_long(ip : String, mask_bit : Int) -> Int64 raise Ipv4Error {
+pub fn ipv4_end_ip_long(ip : String, mask_bit : Int32) -> Int64 raise Ipv4Error {
   let begin = ipv4_begin_ip_long(ip, mask_bit)
   let m = mask_long_strict(mask_bit)
   begin + (0xffffffffL ^ m)
@@ -183,7 +189,7 @@ pub fn ipv4_end_ip_long(ip : String, mask_bit : Int) -> Int64 raise Ipv4Error {
 /// - Raises: `BadMask`（参照 `IllegalArgumentException: Invalid netmask <输入>`）
 /// - Note: hutool 对位 `static int getMaskBitByMask(String)`；掩码必须是连续的 1 前缀，
 ///   `0.0.0.0` 与 `255.0.255.0` 这类非连续形状都在表外
-pub fn mask_bit_by_mask(mask : String) -> Int raise Ipv4Error {
+pub fn mask_bit_by_mask(mask : String) -> Int32 raise Ipv4Error {
   match mask_bit_of(mask) {
     Some(k) => k
     None => raise BadMask
@@ -191,7 +197,7 @@ pub fn mask_bit_by_mask(mask : String) -> Int raise Ipv4Error {
 }
 
 ///|
-fn mask_bit_of(mask : String) -> Int? {
+fn mask_bit_of(mask : String) -> Int32? {
   let mut k = 1
   while k <= 32 {
     if mask_by_mask_bit(k) == Some(mask) {
@@ -207,7 +213,7 @@ fn mask_bit_of(mask : String) -> Int? {
 /// - Returns: 定义域 1..32 之外给 `None`（参照给 `null`）
 /// - Raises: 无
 /// - Note: hutool 对位 `static String getMaskByMaskBit(int)`
-pub fn mask_by_mask_bit(mask_bit : Int) -> String? {
+pub fn mask_by_mask_bit(mask_bit : Int32) -> String? {
   match mask_long(mask_bit) {
     Some(v) => Some(long_to_ipv4(v))
     None => None
@@ -221,7 +227,7 @@ pub fn mask_by_mask_bit(mask_bit : Int) -> String? {
 /// - Note: hutool 对位 `static int countByMaskBit(int, boolean)`。参照在 `all=false` 一侧先短路
 ///   `maskBit <= 0 || maskBit >= 32` 给 0；`all=true` 一侧 `maskBit <= 1` 全部饱和在 `2147483647`、
 ///   `maskBit >= 33` 给 0（`2^-1` 截断）。`1|false` 走的是"先饱和成 MAX 再减 2" ⇒ `2147483645`。
-pub fn count_by_mask_bit(mask_bit : Int, all : Bool) -> Int {
+pub fn count_by_mask_bit(mask_bit : Int32, all : Bool) -> Int32 {
   if !all && (mask_bit <= 0 || mask_bit >= 32) {
     return 0
   }
@@ -269,7 +275,7 @@ pub fn mask_by_ip_range(
 pub fn count_by_ip_range(
   from_ip : String,
   to_ip : String,
-) -> Int raise Ipv4Error {
+) -> Int32 raise Ipv4Error {
   let t = ipv4_to_long(to_ip)
   let f = ipv4_to_long(from_ip)
   if f > t {
@@ -312,7 +318,7 @@ pub fn mask_is_valid(mask : String) -> Bool {
 /// #23.29 掩码位是否合法
 /// - Raises: 无
 /// - Note: hutool 对位 `static boolean isMaskBitValid(int)`；定义域 1..32，`0` 不合法（参照表没有这一档）
-pub fn mask_bit_is_valid(mask_bit : Int) -> Bool {
+pub fn mask_bit_is_valid(mask_bit : Int32) -> Bool {
   mask_long(mask_bit) is Some(_)
 }
 

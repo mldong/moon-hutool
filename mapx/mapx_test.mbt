@@ -28,12 +28,12 @@
 
 ///|
 /// 夹具：三条互不冲突的键值对，多处复用
-fn new_bimap() -> @mapx.BiMap[String, Int] {
+fn new_bimap() -> @mapx.BiMap[String, Int32] {
   unwrap(() => @mapx.BiMap::of([("a", 1), ("b", 2), ("c", 3)]))
 }
 
 ///|
-fn new_bimap1() -> @mapx.BiMap[String, Int] {
+fn new_bimap1() -> @mapx.BiMap[String, Int32] {
   unwrap(() => @mapx.BiMap::of([("a", 1)]))
 }
 
@@ -110,7 +110,7 @@ test "@mapx #7.3 force_put 不报错，而是把占着该值的旧键整条摘�
   assert_eq(m.get("b"), None)
   assert_eq(m.get("a"), Some(2))
   assert_eq(m.get_key(2), Some("a"))
-  let m2 : @mapx.BiMap[String, Int] = @mapx.BiMap::new()
+  let m2 : @mapx.BiMap[String, Int32] = @mapx.BiMap::new()
   let e2 = unwrap(() => m2.force_put("x", 1))
   assert_eq(e2, None)
   assert_eq(m2.to_pairs(), [("x", 1)])
@@ -142,7 +142,7 @@ test "@mapx #7.5 BiMap::of 逐条走 put 的判据：值撞了就整条构造失
   let m = unwrap(() => @mapx.BiMap::of([("a", 1), ("a", 2)]))
   assert_eq(m.to_pairs(), [("a", 2)])
   assert_eq(m.get_key(1), None)
-  let e : @mapx.BiMap[String, Int] = unwrap(() => @mapx.BiMap::of([]))
+  let e : @mapx.BiMap[String, Int32] = unwrap(() => @mapx.BiMap::of([]))
   assert_eq(e.to_pairs(), [])
   assert_eq(e.length(), 0)
 }
@@ -162,7 +162,7 @@ test "@mapx #7.6 CiMap：折叠查得到，原样键保留**首次写入**的那
 
 ///|
 test "@mapx #7.7 contains / remove / to_map 都按折叠槽走；折叠只管 ASCII" {
-  let m : @mapx.CiMap[Int] = @mapx.CiMap::new()
+  let m : @mapx.CiMap[Int32] = @mapx.CiMap::new()
   let _ = m.put("AbC", 1)
   let _ = m.put("def", 2)
   assert_eq(m.contains("abc"), true)
@@ -180,12 +180,12 @@ test "@mapx #7.7 contains / remove / to_map 都按折叠槽走；折叠只管 AS
   assert_eq(m.contains("中文-A"), true)
   assert_eq(m.contains("中文-a"), true)
   // 真正"不折叠"的是非 ASCII 字母本身：`Ä` 与 `ä` 是两个槽位
-  let non_ascii : @mapx.CiMap[Int] = @mapx.CiMap::new()
+  let non_ascii : @mapx.CiMap[Int32] = @mapx.CiMap::new()
   let _ = non_ascii.put("Ä", 1)
   assert_eq(non_ascii.contains("Ä"), true)
   assert_eq(non_ascii.contains("ä"), false)
   assert_eq(non_ascii.length(), 1)
-  let e : @mapx.CiMap[Int] = @mapx.CiMap::new()
+  let e : @mapx.CiMap[Int32] = @mapx.CiMap::new()
   assert_eq(e.length(), 0)
   assert_eq(e.get("anything"), None)
 }
@@ -242,7 +242,7 @@ test "@mapx #7.10 rename_key：目标键已存在报错；原键不存在就原�
 
 ///|
 test "@mapx #7.11 空表与极端输入上判据不变形" {
-  let b : @mapx.BiMap[String, Int] = @mapx.BiMap::new()
+  let b : @mapx.BiMap[String, Int32] = @mapx.BiMap::new()
   assert_eq(b.length(), 0)
   assert_eq(b.to_pairs(), [])
   assert_eq(b.get("nope"), None)

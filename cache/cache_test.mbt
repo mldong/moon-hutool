@@ -25,7 +25,7 @@ fn policy_tag(p : @cache.CachePolicy) -> String {
 
 ///|
 // 把条目归化成 `键=访问数:ttl`，顺序按本库承诺的内部序（插入序 / LRU 的访问序）。
-fn dump(objs : Array[@cache.CacheObj[String, Int]]) -> Array[String] {
+fn dump(objs : Array[@cache.CacheObj[String, Int32]]) -> Array[String] {
   let out : Array[String] = []
   for co in objs {
     out.push("\{co.key}=\{co.access_count}:\{co.ttl}")
@@ -39,7 +39,7 @@ test "cache fifo 满员淘汰与插入序（读不重排）" {
   //          fifo.keys|a,b,c, fifo.values|1,2,3, fifo.iter_after_4th|b,c,d,
   //          fifo.get_evicted|null + fifo.hit_miss|0/1, fifo.hit_miss_after_get|1/1,
   //          fifo.iter_order_after_get|b,c,d, fifo.get_false_flag_value|2
-  let c : @cache.Cache[String, Int] = @cache.Cache::new_cache(
+  let c : @cache.Cache[String, Int32] = @cache.Cache::new_cache(
     @cache.Fifo,
     3,
     0L,
@@ -72,7 +72,7 @@ test "cache fifo 覆盖已有键不淘汰、remove 回调、clear 不回调" {
   //          fifo.replace_existing_listener|（空）, fifo.listener_on_evict|a=1,
   //          fifo.remove_listener|a=1, fifo.remove_size|1, fifo.clear_listener|（空）
   let log : Array[String] = []
-  let c : @cache.Cache[String, Int] = @cache.Cache::new_cache(
+  let c : @cache.Cache[String, Int32] = @cache.Cache::new_cache(
     @cache.Fifo,
     3,
     0L,
@@ -103,7 +103,7 @@ test "cache prune 的三档差异：fifo 踢队首、lru 只扫过期、lfu 公�
   //          lru.prune_ttl0|0 + lru.size_after_prune|3,
   //          lfu.prune_while_full_before|3, lfu.prune_while_full_count|2,
   //          lfu.prune_while_full_after|1, lfu.prune_while_full_keys|a
-  let f : @cache.Cache[String, Int] = @cache.Cache::new_cache(
+  let f : @cache.Cache[String, Int32] = @cache.Cache::new_cache(
     @cache.Fifo,
     2,
     0L,
@@ -114,14 +114,22 @@ test "cache prune 的三档差异：fifo 踢队首、lru 只扫过期、lfu 公�
   assert_eq(f.keys(), ["b"])
   assert_eq(f.prune(1003L), 0) // 已经不满，不再踢
 
-  let r : @cache.Cache[String, Int] = @cache.Cache::new_cache(@cache.Lru, 3, 0L)
+  let r : @cache.Cache[String, Int32] = @cache.Cache::new_cache(
+    @cache.Lru,
+    3,
+    0L,
+  )
   r.put("a", 1, 1000L)
   r.put("b", 2, 1001L)
   r.put("c", 3, 1002L)
   assert_eq(r.prune(1003L), 0)
   assert_eq(r.size(), 3)
 
-  let l : @cache.Cache[String, Int] = @cache.Cache::new_cache(@cache.Lfu, 3, 0L)
+  let l : @cache.Cache[String, Int32] = @cache.Cache::new_cache(
+    @cache.Lfu,
+    3,
+    0L,
+  )
   l.put("a", 1, 1000L)
   l.put("b", 2, 1001L)
   l.put("c", 3, 1002L)
@@ -136,7 +144,7 @@ test "cache lfu 的公平减计三条形状" {
   // 参照读数：lfu.allzero_size|1 + lfu.allzero_keys|d + lfu.allzero_counts|d=0:0,
   //          lfu.sorted_size|3 + lfu.sorted_keys|a,b,d + lfu.sorted_counts|a=2:0,b=1:0,d=0:0,
   //          lfu.equal_counts_size|1 + lfu.equal_counts_keys|d
-  let c1 : @cache.Cache[String, Int] = @cache.Cache::new_cache(
+  let c1 : @cache.Cache[String, Int32] = @cache.Cache::new_cache(
     @cache.Lfu,
     3,
     0L,
@@ -149,7 +157,7 @@ test "cache lfu 的公平减计三条形状" {
   assert_eq(c1.keys(), ["d"])
   assert_eq(dump(c1.cache_objs()), ["d=0:0"])
 
-  let c2 : @cache.Cache[String, Int] = @cache.Cache::new_cache(
+  let c2 : @cache.Cache[String, Int32] = @cache.Cache::new_cache(
     @cache.Lfu,
     3,
     0L,
@@ -165,7 +173,7 @@ test "cache lfu 的公平减计三条形状" {
   assert_eq(c2.keys(), ["a", "b", "d"])
   assert_eq(dump(c2.cache_objs()), ["a=2:0", "b=1:0", "d=0:0"])
 
-  let c3 : @cache.Cache[String, Int] = @cache.Cache::new_cache(
+  let c3 : @cache.Cache[String, Int32] = @cache.Cache::new_cache(
     @cache.Lfu,
     3,
     0L,
@@ -186,7 +194,11 @@ test "cache lru 访问序：get/peek/覆盖都会移动，踢最久未读的那�
   // 参照读数：lru.iter_after_get_a|b,c,a, lru.keys_after_4th|a,c,d, lru.iter_after_4th|c,a,d,
   //          lru.order_after_get_b|a,c,b, lru.order_after_replace_a|c,b,a, lru.order_after_4th|b,a,d,
   //          lru.get_false_still_reorders_iter|c,a,d, lru.evict_is|b
-  let c : @cache.Cache[String, Int] = @cache.Cache::new_cache(@cache.Lru, 3, 0L)
+  let c : @cache.Cache[String, Int32] = @cache.Cache::new_cache(
+    @cache.Lru,
+    3,
+    0L,
+  )
   c.put("a", 1, 1000L)
   c.put("b", 2, 1001L)
   c.put("c", 3, 1002L)
@@ -199,7 +211,11 @@ test "cache lru 访问序：get/peek/覆盖都会移动，踢最久未读的那�
   assert_eq(c.get("c", 1006L), None)
   assert_eq(c.get("a", 1007L), Some(9))
 
-  let p : @cache.Cache[String, Int] = @cache.Cache::new_cache(@cache.Lru, 3, 0L)
+  let p : @cache.Cache[String, Int32] = @cache.Cache::new_cache(
+    @cache.Lru,
+    3,
+    0L,
+  )
   p.put("a", 1, 1000L)
   p.put("b", 2, 1001L)
   p.put("c", 3, 1002L)
@@ -216,7 +232,7 @@ test "cache 过期算术：严格大于才过期、ttl<=0 永不过期、命中�
   //          fifo.zero_ttl_alive|1, fifo.neg_ttl_alive|1 + fifo.neg_ttl_prune|0,
   //          timed.sliding_mid|1 + timed.alive_after_refresh|1 + timed.dead_after_window|null
   // 判据（源码 CacheObj.isExpired）：ttl > 0 && now - last_access > ttl —— 相等不算过期。
-  let c : @cache.Cache[String, Int] = @cache.Cache::new_cache(
+  let c : @cache.Cache[String, Int32] = @cache.Cache::new_cache(
     @cache.Timed,
     0,
     100L,
@@ -226,7 +242,7 @@ test "cache 过期算术：严格大于才过期、ttl<=0 永不过期、命中�
   assert_eq(c.peek("a", 1101L), None) // 101 > 100：过期，并顺手删掉
   assert_eq(c.size(), 0)
 
-  let z : @cache.Cache[String, Int] = @cache.Cache::new_cache(
+  let z : @cache.Cache[String, Int32] = @cache.Cache::new_cache(
     @cache.Timed,
     0,
     0L,
@@ -235,7 +251,7 @@ test "cache 过期算术：严格大于才过期、ttl<=0 永不过期、命中�
   assert_eq(z.get("a", 4102444800000L), Some(1)) // ttl=0 永久
   assert_eq(z.prune(4102444800000L), 0)
 
-  let n : @cache.Cache[String, Int] = @cache.Cache::new_cache(
+  let n : @cache.Cache[String, Int32] = @cache.Cache::new_cache(
     @cache.Timed,
     0,
     -5L,
@@ -244,7 +260,7 @@ test "cache 过期算术：严格大于才过期、ttl<=0 永不过期、命中�
   assert_eq(n.get("a", 4102444800000L), Some(1)) // **负数不是"立即过期"，是"不过期"**
   assert_eq(n.prune(4102444800000L), 0)
 
-  let s : @cache.Cache[String, Int] = @cache.Cache::new_cache(
+  let s : @cache.Cache[String, Int32] = @cache.Cache::new_cache(
     @cache.Timed,
     0,
     100L,
@@ -261,7 +277,7 @@ test "cache contains_key 只清被查的那条、不计命中也不加访问数"
   // 参照读数：fifo.hit_miss_after_containsKey|0/1, fifo.expired_containsKey|false +
   //          fifo.expired_size_after_containsKey|0, lfu.count_after_containsKey|a=0:0,
   //          fifo.containsKey_missing_size|false/1
-  let c : @cache.Cache[String, Int] = @cache.Cache::new_cache(
+  let c : @cache.Cache[String, Int32] = @cache.Cache::new_cache(
     @cache.Lru,
     3,
     100L,
@@ -286,8 +302,12 @@ test "cache get_or_put 的两次 miss 与 supplier 造出来的那条" {
   //          lru.supplier_hitmiss|0/2（外层取一次 + 装回后再取一次，两笔都记 miss）,
   //          lru.supplier_hitmiss_second|1/2 calls=1,
   //          lru.supplier_custom_ttl_counts|a=0:0,x=1:0,y=0:100, lru.supplier_ttl_inherited|0
-  let calls : Array[Int] = []
-  let c : @cache.Cache[String, Int] = @cache.Cache::new_cache(@cache.Lru, 3, 0L)
+  let calls : Array[Int32] = []
+  let c : @cache.Cache[String, Int32] = @cache.Cache::new_cache(
+    @cache.Lru,
+    3,
+    0L,
+  )
   c.put("a", 1, 1000L)
   assert_eq(
     c.get_or_put("x", 1001L, () => {
@@ -321,7 +341,7 @@ test "cache timed 不限容量 / no 档全空转" {
   // 参照读数：timed.capacity|0, timed.is_full|false, timed.size4|4, timed.prune_ttl0|0,
   //          no.capacity|0/timeout|0/size|0/is_full|false/containsKey|false/get|null/prune|0,
   //          no.supplier|S + no.supplier_size|0
-  let t : @cache.Cache[String, Int] = @cache.Cache::new_cache(
+  let t : @cache.Cache[String, Int32] = @cache.Cache::new_cache(
     @cache.Timed,
     2,
     0L,
@@ -337,7 +357,7 @@ test "cache timed 不限容量 / no 档全空转" {
   ]
   let tags : Array[String] = []
   for p in ps {
-    let one : @cache.Cache[String, Int] = @cache.Cache::new_cache(p, 0, 0L)
+    let one : @cache.Cache[String, Int32] = @cache.Cache::new_cache(p, 0, 0L)
     tags.push(policy_tag(one.policy()))
   }
   assert_eq(tags, ["Fifo", "Lru", "Lfu", "Timed", "No"])
@@ -350,7 +370,7 @@ test "cache timed 不限容量 / no 档全空转" {
   assert_eq(t.prune(1004L), 0)
   assert_eq(t.keys(), ["a", "b", "c", "d"])
 
-  let n : @cache.Cache[String, Int] = @cache.Cache::new_cache(
+  let n : @cache.Cache[String, Int32] = @cache.Cache::new_cache(
     @cache.No,
     3,
     100L,
@@ -377,7 +397,7 @@ test "cache capacity==0 一律是不限容量（本库把 lru/lfu 那一档统�
   // AbstractCache.isFull 判 `capacity > 0 && …`（0 = 不限），而 LRU/LFU 的 map
   // 用 `size > capacity` 逐条踢——同一份代码里两套说法。本库取 `0 = 不限容量`，
   // 于是"放进去立刻被淘汰"那次回调也不存在（spec §5 分岔表第 2 行）。
-  let f : @cache.Cache[String, Int] = @cache.Cache::new_cache(
+  let f : @cache.Cache[String, Int32] = @cache.Cache::new_cache(
     @cache.Fifo,
     0,
     0L,
@@ -388,7 +408,11 @@ test "cache capacity==0 一律是不限容量（本库把 lru/lfu 那一档统�
   assert_eq(f.size(), 5)
   assert_false(f.is_full())
 
-  let r : @cache.Cache[String, Int] = @cache.Cache::new_cache(@cache.Lru, 0, 0L)
+  let r : @cache.Cache[String, Int32] = @cache.Cache::new_cache(
+    @cache.Lru,
+    0,
+    0L,
+  )
   let log : Array[String] = []
   r.set_listener((k, v) => log.push("\{k}=\{v}"))
   r.put("a", 1, 1000L)
@@ -397,7 +421,11 @@ test "cache capacity==0 一律是不限容量（本库把 lru/lfu 那一档统�
   assert_eq(r.get("a", 1001L), Some(1))
   assert_eq(log.length(), 0) // 没有"装进去就被淘汰"那次回调
 
-  let l : @cache.Cache[String, Int] = @cache.Cache::new_cache(@cache.Lfu, 0, 0L)
+  let l : @cache.Cache[String, Int32] = @cache.Cache::new_cache(
+    @cache.Lfu,
+    0,
+    0L,
+  )
   l.put("a", 1, 1000L)
   l.put("b", 2, 1001L)
   assert_eq(l.prune(1002L), 0) // 不满 ⇒ 不做公平减计

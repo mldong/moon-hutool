@@ -18,12 +18,12 @@
 
 ///|
 /// 基础夹具：`r1` 两格、`r2` 一格——非矩形，列数不一致
-fn new_table() -> @mapx.Table[String, String, Int] {
+fn new_table() -> @mapx.Table[String, String, Int32] {
   @mapx.Table::of([("r1", "c1", 1), ("r1", "c2", 2), ("r2", "c1", 3)])
 }
 
 ///|
-fn new_single() -> @mapx.Table[String, String, Int] {
+fn new_single() -> @mapx.Table[String, String, Int32] {
   @mapx.Table::of([("a", "x", 1)])
 }
 
@@ -39,7 +39,7 @@ test "@mapx #7.12 Table 的格坐标：不是行×列的矩形，size 数的是�
   assert_eq(m.rows(), ["r1", "r2"])
   assert_eq(m.columns(), ["c1", "c2"])
   assert_eq(m.to_cells(), [("r1", "c1", 1), ("r1", "c2", 2), ("r2", "c1", 3)])
-  let e : @mapx.Table[String, String, Int] = @mapx.Table::new()
+  let e : @mapx.Table[String, String, Int32] = @mapx.Table::new()
   assert_eq(e.size(), 0)
   assert_eq(e.rows(), [])
   assert_eq(e.columns(), [])
@@ -54,13 +54,13 @@ test "@mapx #7.13 put 覆盖已有格：返回旧值，行列键序都不挪位"
   assert_eq(m.columns(), ["c1", "c2"])
   assert_eq(m.size(), 3)
   assert_eq(m.get("r1", "c2"), Some(9))
-  let n : @mapx.Table[String, String, Int] = @mapx.Table::new()
+  let n : @mapx.Table[String, String, Int32] = @mapx.Table::new()
   assert_eq(n.put("r1", "c1", 7), None)
 }
 
 ///|
 test "@mapx #7.14 行序按首次写入该行、列序按首次写入该列，两者互不影响" {
-  let m : @mapx.Table[String, String, Int] = @mapx.Table::new()
+  let m : @mapx.Table[String, String, Int32] = @mapx.Table::new()
   let _ = m.put("r1", "later_col", 1)
   let _ = m.put("r2", "earlier_name", 2)
   assert_eq(m.rows(), ["r1", "r2"])
@@ -133,7 +133,7 @@ test "@mapx #7.18 Table::of 逐条 put（同格后者胜）；clear 一次清空
   assert_eq(m.rows(), [])
   assert_eq(m.columns(), [])
   assert_eq(m.to_cells(), [])
-  let e : @mapx.Table[String, String, Int] = @mapx.Table::of([])
+  let e : @mapx.Table[String, String, Int32] = @mapx.Table::of([])
   assert_eq(e.size(), 0)
 }
 

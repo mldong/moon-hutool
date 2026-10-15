@@ -61,7 +61,7 @@ fn ds_clean_blank(text : String) -> String {
 }
 
 ///|
-fn ds_lower(c : Char) -> Int {
+fn ds_lower(c : Char) -> Int32 {
   let x = c.to_int()
   if x >= 65 && x <= 90 {
     x + 32
@@ -378,7 +378,7 @@ pub fn data_size_to_string(n : Int64) -> String {
 /// - Returns: `-1` / `0` / `1`
 /// - Raises: 无
 /// - Note: hutool 对位 `int DataSize.compareTo(DataSize)`（`Long.compare`）——写差值会在极值档炸（§15.6 N12）
-pub fn data_size_compare(a : Int64, b : Int64) -> Int {
+pub fn data_size_compare(a : Int64, b : Int64) -> Int32 {
   if a < b {
     -1
   } else if a > b {

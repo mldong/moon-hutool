@@ -11,7 +11,7 @@
 test "codec 字母表与参照 isLetter 逐码元同判（BMP 全域三条读数）" {
   let mut total = 0
   let mut sum : Int64 = 0L
-  let block_counts : Array[Int] = []
+  let block_counts : Array[Int32] = []
   for b in 0..<=15 {
     let mut n = 0
     for i in 0..<=0xfff {

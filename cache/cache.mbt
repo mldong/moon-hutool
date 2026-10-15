@@ -43,7 +43,7 @@ pub(all) struct CacheObj[K, V] {
   value : V
   ttl : Int64
   mut last_access : Int64
-  mut access_count : Int
+  mut access_count : Int32
 }
 
 ///|
@@ -53,12 +53,12 @@ pub(all) struct CacheObj[K, V] {
 /// 那只是为了让"可变异对象"当 HashMap 的键，本包直接约束 `K : Hash + Eq`，语义等价。
 pub struct Cache[K, V] {
   policy : CachePolicy
-  capacity : Int
+  capacity : Int32
   timeout : Int64
   mut order : Array[K]
   mut entries : Map[K, CacheObj[K, V]]
-  mut hit : Int
-  mut miss : Int
+  mut hit : Int32
+  mut miss : Int32
   mut listener : ((K, V) -> Unit)?
 }
 
@@ -77,7 +77,7 @@ pub struct Cache[K, V] {
 ///   两档都不可能出现这个溢出，故**不跟**——这是容器实现细节，不是语义。
 pub fn[K : Hash + Eq, V] Cache::new_cache(
   policy : CachePolicy,
-  capacity : Int,
+  capacity : Int32,
   timeout : Int64,
 ) -> Cache[K, V] {
   let cap = match policy {
@@ -304,7 +304,7 @@ pub fn[K : Hash + Eq, V] Cache::clear(self : Cache[K, V]) -> Unit {
 /// - `Timed`：只扫过期（读数 `timed.prune_count|2`）
 /// - `No`：恒 0
 /// - Note: 参照实现另有 `schedulePrune(delay)`（守护线程定时清），本库不建，理由见 spec §5。
-pub fn[K : Hash + Eq, V] Cache::prune(self : Cache[K, V], now : Int64) -> Int {
+pub fn[K : Hash + Eq, V] Cache::prune(self : Cache[K, V], now : Int64) -> Int32 {
   match self.policy {
     No => 0
     Lru => self.sweep(now)
@@ -352,7 +352,7 @@ pub fn[K : Hash + Eq, V] Cache::prune(self : Cache[K, V], now : Int64) -> Int {
 
 ///|
 /// 当前条数。对位 `size()`。
-pub fn[K, V] Cache::size(self : Cache[K, V]) -> Int {
+pub fn[K, V] Cache::size(self : Cache[K, V]) -> Int32 {
   self.entries.length()
 }
 
@@ -374,7 +374,7 @@ pub fn[K, V] Cache::is_full(self : Cache[K, V]) -> Bool {
 
 ///|
 /// 容量（`0` = 不限）。对位 `capacity()`。
-pub fn[K, V] Cache::capacity(self : Cache[K, V]) -> Int {
+pub fn[K, V] Cache::capacity(self : Cache[K, V]) -> Int32 {
   self.capacity
 }
 
@@ -393,13 +393,13 @@ pub fn[K, V] Cache::policy(self : Cache[K, V]) -> CachePolicy {
 
 ///|
 /// 命中次数（`get`/`peek` 计，`contains_key` 不计）。对位 `AbstractCache.getHitCount()`。
-pub fn[K, V] Cache::hit_count(self : Cache[K, V]) -> Int {
+pub fn[K, V] Cache::hit_count(self : Cache[K, V]) -> Int32 {
   self.hit
 }
 
 ///|
 /// 未命中次数。对位 `AbstractCache.getMissCount()`。
-pub fn[K, V] Cache::miss_count(self : Cache[K, V]) -> Int {
+pub fn[K, V] Cache::miss_count(self : Cache[K, V]) -> Int32 {
   self.miss
 }
 
@@ -531,7 +531,7 @@ fn[K : Hash + Eq, V] Cache::drop(
 
 ///|
 /// 扫全部过期条目并回调，返回删掉的条数。先把键抄一份再删——边遍历边删会跳条目。
-fn[K : Hash + Eq, V] Cache::sweep(self : Cache[K, V], now : Int64) -> Int {
+fn[K : Hash + Eq, V] Cache::sweep(self : Cache[K, V], now : Int64) -> Int32 {
   let ks = self.keys()
   let mut count = 0
   for k in ks {
@@ -551,8 +551,8 @@ fn[K : Hash + Eq, V] Cache::sweep(self : Cache[K, V], now : Int64) -> Int {
 
 ///|
 /// 当前条目里的最小访问数；空表给 `None`。
-fn[K : Hash + Eq, V] Cache::min_access_count(self : Cache[K, V]) -> Int? {
-  let mut best : Int? = None
+fn[K : Hash + Eq, V] Cache::min_access_count(self : Cache[K, V]) -> Int32? {
+  let mut best : Int32? = None
   for k in self.order {
     match self.entries.get(k) {
       None => ()

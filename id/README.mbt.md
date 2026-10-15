@@ -200,7 +200,7 @@ test "组一个并解回时间戳" {
 ```mbt check
 ///|
 test "注入版逐字节确定" {
-  let g : (String, Int, Array[Byte]) -> String = (alphabet, size, xs) => {
+  let g : (String, Int32, Array[Byte]) -> String = (alphabet, size, xs) => {
     @id.nano_id(alphabet, size, Bytes::from_array(xs.exact_view())) catch {
       _ => abort("夹具注入字节必须够")
     }
@@ -222,7 +222,7 @@ test "注入版逐字节确定" {
 ```mbt check
 ///|
 test "凑多少随机字节" {
-  let n : (Int, Int) -> Int = (len, size) => {
+  let n : (Int32, Int32) -> Int32 = (len, size) => {
     @id.nano_id_bytes_needed(len, size) catch {
       _ => abort("夹具表长必须合法")
     }

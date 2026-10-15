@@ -28,13 +28,13 @@ let credit_base : Array[Char] = "0123456789ABCDEFGHJKLMNPQRTUWXY".to_array()
 
 ///|
 // 反射读自 `CreditCodeUtil.WEIGHT`（17 枚，3 的幂 mod 31）。
-let credit_weight : Array[Int] = [
+let credit_weight : Array[Int32] = [
   1, 3, 9, 27, 19, 26, 16, 17, 20, 29, 25, 13, 8, 24, 10, 30, 28,
 ]
 
 ///|
 /// 字符在码表里的下标；参照查 `Map<Character, Integer>` 查不到给 `null`、上层落成 `-1` ⇒ 本库直接给 `-1`。
-fn credit_index(c : Char) -> Int {
+fn credit_index(c : Char) -> Int32 {
   let mut i = 0
   while i < credit_base.length() {
     if credit_base[i] == c {
@@ -49,7 +49,7 @@ fn credit_index(c : Char) -> Int {
 /// 校验位下标（参照的 private `getParityBit`：前 17 位加权和，`31 - sum % 31`，等于 31 时归 0）。
 /// - 只在过了形状闸之后被调用 ⇒ 入参一定是 18 码位、且前 17 位全在码表内，`-1` 分支本批走不到
 ///   （spec §12.3 第 1 条），保留它是照参照的形状而不是造一条永不成立的档。
-fn credit_parity(cs : Array[Char]) -> Int {
+fn credit_parity(cs : Array[Char]) -> Int32 {
   let mut sum = 0
   let mut i = 0
   while i < 17 {

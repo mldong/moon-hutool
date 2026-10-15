@@ -183,7 +183,7 @@ pub fn[K : Hash + Eq, V : Hash + Eq] BiMap::inverse(
 
 ///|
 /// 条目数。两个方向恒等，所以不需要单独的"反向长度"
-pub fn[K, V] BiMap::length(self : BiMap[K, V]) -> Int {
+pub fn[K, V] BiMap::length(self : BiMap[K, V]) -> Int32 {
   self.forward.length()
 }
 
@@ -273,7 +273,7 @@ pub fn[V] CiMap::remove(self : CiMap[V], key : String) -> V? {
 
 ///|
 /// 槽位数（不是写入次数：撞过同一槽位的 `put` 不增加）
-pub fn[V] CiMap::length(self : CiMap[V]) -> Int {
+pub fn[V] CiMap::length(self : CiMap[V]) -> Int32 {
   self.slots.length()
 }
 
@@ -409,7 +409,7 @@ fn fold_ascii(text : String) -> String {
 ///|
 /// `Int::to_char()` 返回 `Char?`；这里只喂 `[97, 122]`（折叠后的 ASCII 字母），
 /// 那个区间全合法，None 分支不可达
-fn ascii_char(v : Int) -> Char {
+fn ascii_char(v : Int32) -> Char {
   v.to_char().unwrap()
 }
 
@@ -624,7 +624,7 @@ pub fn[R, C, V] Table::columns(self : Table[R, C, V]) -> Array[C] {
 
 ///|
 /// 格数，**不是行×列**：稀疏表里有几格就是几
-pub fn[R, C, V] Table::size(self : Table[R, C, V]) -> Int {
+pub fn[R, C, V] Table::size(self : Table[R, C, V]) -> Int32 {
   let mut n = 0
   self.rows.each((_, row_map) => n = n + row_map.length())
   n

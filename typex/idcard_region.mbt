@@ -27,14 +27,14 @@
 
 ///|
 /// 反射读自 `IdcardUtil.TW_FIRST_CODE` 的 26 枚（下标 `A`..`Z`）。值不等差，别按等差生成。
-let idcard_tw_first_code : Array[Int] = [
+let idcard_tw_first_code : Array[Int32] = [
   10, 11, 12, 13, 14, 15, 16, 17, 34, 18, 19, 20, 21, 22, 35, 23, 24, 25, 26, 27,
   28, 29, 32, 30, 31, 33,
 ]
 
 ///|
 /// 首字母 → 参照表里的两位数字；不在 `A`..`Z` 内给 `None`（参照查 `Map` 查不到给 `null`）。
-fn idc_tw_start(c : Char) -> Int? {
+fn idc_tw_start(c : Char) -> Int32? {
   let i = c.to_int() - 'A'.to_int()
   if i < 0 || i >= idcard_tw_first_code.length() {
     None
@@ -45,7 +45,7 @@ fn idc_tw_start(c : Char) -> Int? {
 
 ///|
 /// ASCII 数字字符 → 数值
-fn idc_digit(c : Char) -> Int? {
+fn idc_digit(c : Char) -> Int32? {
   if c >= '0' && c <= '9' {
     Some(c.to_int() - '0'.to_int())
   } else {
@@ -60,7 +60,7 @@ fn idc_is_letter(c : Char) -> Bool {
 
 ///|
 /// 从 `from` 起恰好 `n` 位都是 ASCII 数字
-fn idc_digits_at(cs : Array[Char], from : Int, n : Int) -> Bool {
+fn idc_digits_at(cs : Array[Char], from : Int32, n : Int32) -> Bool {
   if from < 0 || from + n > cs.length() {
     return false
   }
@@ -78,7 +78,7 @@ fn idc_digits_at(cs : Array[Char], from : Int, n : Int) -> Bool {
 /// 文法闸的收尾一档：`\(?X\)?$`——`X`、`(X)`、`(X`、`X)` 四种都算合法（参照两条 `\)?` 各自可选）。
 /// `which` 选校验字符集：0 = 香港的 `[0-9A]`，1 = 澳门的 `[0-9A-Z]`（本版把闭包当实参传在 `&&` 链里解析不稳，
 /// 用档位整数代替，两档都各有腿读数）。
-fn idc_opt_check(cs : Array[Char], at : Int, which : Int) -> Bool {
+fn idc_opt_check(cs : Array[Char], at : Int32, which : Int32) -> Bool {
   let rest = cs.length() - at
   if rest < 1 || rest > 3 {
     return false
@@ -178,7 +178,7 @@ fn idc_strip_parens(cs : Array[Char]) -> Array[Char] {
 
 ///|
 /// 手写子串（本版 `Array` 无 `slice`，与 `idcard.mbt` 同一姿势）
-fn idc_sub(cs : Array[Char], from : Int, to : Int) -> Array[Char] {
+fn idc_sub(cs : Array[Char], from : Int32, to : Int32) -> Array[Char] {
   let out : Array[Char] = []
   let mut k = from
   while k < to {
@@ -190,7 +190,7 @@ fn idc_sub(cs : Array[Char], from : Int, to : Int) -> Array[Char] {
 
 ///|
 /// 参照 `Character.toUpperCase(c) - 55`：`A` → 10
-fn idc_hk_letter(c : Char) -> Int {
+fn idc_hk_letter(c : Char) -> Int32 {
   let mut v = c.to_int()
   if v >= 'a'.to_int() && v <= 'z'.to_int() {
     v = v - 32
@@ -280,7 +280,7 @@ pub fn idcard_is_valid_hk_card(id : String) -> Bool {
 /// - Returns: 十位那一支只认港澳台三种文法之一且校验通过的串（澳门那支参照不做校验、匹配即真）
 /// - Raises: 无
 /// - Note: hutool 对位 `static boolean isValidCard(String)`（忽略 `X` 的大小写那一档）
-pub fn idcard_is_valid_card(id : String, this_year : Int) -> Bool {
+pub fn idcard_is_valid_card(id : String, this_year : Int32) -> Bool {
   let cs = id.to_array()
   let mut blank = true
   for c in cs.iter() {

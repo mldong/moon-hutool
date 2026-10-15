@@ -38,7 +38,7 @@ pub let caesar_table : String = "AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwX
 ///     于是 `shift <= 0` 全档负、`shift >= 1` 才出字符（腿 `CC|enc|é|0` 抛、`CC|enc|é|1` 给 `A`）。
 /// - Note: 参照的 `null` 入参档（`IllegalArgumentException: message must be not null!`）在本库
 ///   **结构上到不了**——`String` 非空，不需要也不能造那一条。
-pub fn caesar_encode(text : String, shift : Int) -> String raise CodecError {
+pub fn caesar_encode(text : String, shift : Int32) -> String raise CodecError {
   let t = caesar_table.to_array()
   let buf = StringBuilder()
   for c in text {
@@ -70,7 +70,7 @@ pub fn caesar_encode(text : String, shift : Int) -> String raise CodecError {
 /// - Note: 于是 `decode(encode(x, k), k) == x` **不恒成立**：`encode` 在负档先抛了，
 ///   而 `decode` 对表外字母照样出字符（`é` 解码给 `z`/`Z` 那一族，腿 `CC|dec|é|*`）。
 ///   往返判据只在"两边都不抛"的档上钉（腿 `CC|rt` 组）。
-pub fn caesar_decode(text : String, shift : Int) -> String {
+pub fn caesar_decode(text : String, shift : Int32) -> String {
   let t = caesar_table.to_array()
   let buf = StringBuilder()
   for c in text {
@@ -92,7 +92,7 @@ pub fn caesar_decode(text : String, shift : Int) -> String {
 ///|
 /// 码元在 52 字符交替表里的下标；表外（`indexOf == -1` 档）给 -1。
 /// 表固定 52 字符，逐格扫描即可，不为这一件引入额外数据件。
-fn table_index_of(t : Array[Char], c : Char) -> Int {
+fn table_index_of(t : Array[Char], c : Char) -> Int32 {
   for k in 0..<52 {
     if t[k] == c {
       return k

@@ -26,7 +26,7 @@ let idcard_pro_keys : Array[String] = [
 
 ///|
 // 参照 private `getPowerSum` 的权重（17 枚）。
-let idcard_weight : Array[Int] = [
+let idcard_weight : Array[Int32] = [
   7, 9, 10, 5, 8, 4, 2, 1, 6, 3, 7, 9, 10, 5, 8, 4, 2,
 ]
 
@@ -36,7 +36,7 @@ let idcard_check_chars : Array[Char] = "10X98765432".to_array()
 
 ///|
 /// 本版 `Array` 没有 `slice`（`re` 轮记过），手写字区间。
-fn idcard_sub(cs : Array[Char], from : Int, to : Int) -> Array[Char] {
+fn idcard_sub(cs : Array[Char], from : Int32, to : Int32) -> Array[Char] {
   let out : Array[Char] = []
   let mut i = from
   while i < to {
@@ -55,7 +55,7 @@ fn idcard_is_digit(c : Char) -> Bool {
 ///|
 /// 参照用 `ReUtil.isMatch(PatternPool.NUMBERS, ·)`（即 `\d+` 整串匹配）；这里等价改写成"全档数字且非空"。
 /// `\d` 在参照侧（无 `UNICODE_CHARACTER_CLASS`）就是 `[0-9]` ⇒ 改写可逐字符核对（spec §13.3 第 5 条）。
-fn idcard_all_digits(cs : Array[Char], from : Int, to : Int) -> Bool {
+fn idcard_all_digits(cs : Array[Char], from : Int32, to : Int32) -> Bool {
   if from >= to {
     return false
   }
@@ -70,7 +70,7 @@ fn idcard_all_digits(cs : Array[Char], from : Int, to : Int) -> Bool {
 }
 
 ///|
-fn idcard_num(cs : Array[Char], from : Int, len : Int) -> Int {
+fn idcard_num(cs : Array[Char], from : Int32, len : Int32) -> Int32 {
   let mut v = 0
   let mut i = from
   while i < from + len {
@@ -81,7 +81,7 @@ fn idcard_num(cs : Array[Char], from : Int, len : Int) -> Int {
 }
 
 ///|
-fn idcard_is_leap(y : Int) -> Bool {
+fn idcard_is_leap(y : Int32) -> Bool {
   (y % 4 == 0 && y % 100 != 0) || y % 400 == 0
 }
 
@@ -90,7 +90,7 @@ fn idcard_is_leap(y : Int) -> Bool {
 /// 其中 4/6/9/11 月不吃 31 日，2 月只吃 ≤28（闰年可到 29）。
 /// 8 位必须全数字——参照侧是 `BIRTHDAY` 正则 `find()` 后取组，本库的入参恒是被切出来的 8 个字符，
 /// 全数字这一判与"正则找到 4+2+2"在这些样本上同答案（980 条读数为凭）。
-fn idcard_birthday_ok(cs : Array[Char], this_year : Int) -> Bool {
+fn idcard_birthday_ok(cs : Array[Char], this_year : Int32) -> Bool {
   if !idcard_all_digits(cs, 0, 8) {
     return false
   }
@@ -155,7 +155,7 @@ fn idcard_char_eq(a : Char, b : Char, ignore_case : Bool) -> Bool {
 /// - Parameters: `this_year` 参照读的是宿主当年（`DateUtil.thisYear()`），本库做成显式参数
 /// - Raises: 无（参照的 `null` 入参档在本库是类型不允许；非数字/越界档一律 `false`）
 /// - Note: hutool 对位 `static boolean isValidCard18(String)`
-pub fn idcard_is_valid_18(id : String, this_year : Int) -> Bool {
+pub fn idcard_is_valid_18(id : String, this_year : Int32) -> Bool {
   idcard_is_valid_18_case(id, this_year, true)
 }
 
@@ -164,7 +164,7 @@ pub fn idcard_is_valid_18(id : String, this_year : Int) -> Bool {
 /// - Note: hutool 对位 `static boolean isValidCard18(String, boolean)`（5.5.7 起）
 pub fn idcard_is_valid_18_case(
   id : String,
-  this_year : Int,
+  this_year : Int32,
   ignore_case : Bool,
 ) -> Bool {
   let cs = id.to_array()
@@ -236,7 +236,7 @@ pub fn idcard_convert_15_to_18(id : String) -> String? {
 ///   空白串的 `isValidCard18` 必为 false ⇒ 本库不再单独判空白，两处判定等价
 /// - Raises: 无
 /// - Note: hutool 对位 `static String convert18To15(String)`
-pub fn idcard_convert_18_to_15(id : String, this_year : Int) -> String {
+pub fn idcard_convert_18_to_15(id : String, this_year : Int32) -> String {
   if !idcard_is_valid_18(id, this_year) {
     return id
   }

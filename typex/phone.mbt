@@ -13,8 +13,8 @@
 // - `phone_is_mobile` 委托 `@valid.is_mobile`（`MOBILE` 源文与该包已冻结的模式逐字符相同），不留第二张手机号表。
 
 ///|
-fn phone_units(s : String) -> Array[Int] {
-  let out : Array[Int] = []
+fn phone_units(s : String) -> Array[Int32] {
+  let out : Array[Int32] = []
   for c in s.to_array() {
     let cp = c.to_int()
     if cp > 0xffff {
@@ -32,7 +32,7 @@ fn phone_units(s : String) -> Array[Int] {
 /// 码元序列合回合法串：代理对成对时合成一个码位。取串族只在 `sub` 的起止处切开，
 /// 参照按码元切片可能把代理对劈开——那时参照给出的就是**半个代理对**，
 /// 而 MoonBit 的 `String` 装不下孤立代理项，故本库把落单的低位代理并入相邻码位边界之外（见 spec §11.5 末行）。
-fn phone_from_units(us : Array[Int], b : Int, e : Int) -> String {
+fn phone_from_units(us : Array[Int32], b : Int32, e : Int32) -> String {
   let cs : Array[Char] = []
   let mut i = b
   while i < e {
@@ -68,7 +68,7 @@ fn phone_from_units(us : Array[Int], b : Int, e : Int) -> String {
 }
 
 ///|
-fn phone_sub_units(s : String, b : Int, e : Int) -> String {
+fn phone_sub_units(s : String, b : Int32, e : Int32) -> String {
   let us = phone_units(s)
   let n = us.length()
   let lo = if b < 0 { 0 } else if b > n { n } else { b }
@@ -114,7 +114,7 @@ fn whole(pat : String, value : String) -> Bool {
 
 ///|
 /// 参照 `ReUtil.getGroup1` / `get(TEL, v, 2)`：**查找式**（不锚定），无匹配给 `null` ⇒ 本库给 `None`。
-fn tel_group(value : String, group : Int) -> String? {
+fn tel_group(value : String, group : Int32) -> String? {
   try {
     let r = @string.Regex(pat_tel.to_string_view())
     match r.execute(value.to_string_view()) {

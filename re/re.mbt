@@ -125,7 +125,7 @@ pub fn contains(pattern : String, text : String) -> Bool raise ReError {
 ///   - `text`：被查找的内容
 /// - Returns: 非重叠匹配的条数；零宽模式会数到"每个位置"那一档（实测 `x*` 于 `"abab"` ⇒ 5，两腿一致）
 /// - Raises: `ReError.BadPattern(pattern)`
-pub fn count(pattern : String, text : String) -> Int raise ReError {
+pub fn count(pattern : String, text : String) -> Int32 raise ReError {
   let re = must_compile(pattern)
   let mut n = 0
   for _ in re.find(text.to_string_view()) {
@@ -164,7 +164,7 @@ pub fn find_first(pattern : String, text : String) -> String? raise ReError {
 pub fn find_first_group(
   pattern : String,
   text : String,
-  group : Int,
+  group : Int32,
 ) -> String? raise ReError {
   match must_compile(pattern).execute(text.to_string_view()) {
     Some(m) => group_text(m, group)
@@ -226,7 +226,7 @@ pub fn find_all(pattern : String, text : String) -> Array[String] raise ReError 
 pub fn find_all_group(
   pattern : String,
   text : String,
-  group : Int,
+  group : Int32,
 ) -> Array[String?] raise ReError {
   let re = must_compile(pattern)
   let out : Array[String?] = []
@@ -337,7 +337,7 @@ pub fn named_groups(
 pub fn first_position(
   pattern : String,
   text : String,
-) -> (Int, Int)? raise ReError {
+) -> (Int32, Int32)? raise ReError {
   let re = must_compile(pattern)
   let v = text.to_string_view()
   match re.execute(v) {
@@ -357,10 +357,10 @@ pub fn first_position(
 pub fn last_position(
   pattern : String,
   text : String,
-) -> (Int, Int)? raise ReError {
+) -> (Int32, Int32)? raise ReError {
   let re = must_compile(pattern)
   let v = text.to_string_view()
-  let mut last : (Int, Int)? = None
+  let mut last : (Int32, Int32)? = None
   for m in re.find(v) {
     last = Some(match_range(m, v))
   }
@@ -415,7 +415,7 @@ pub fn del_first(pattern : String, text : String) -> String raise ReError {
 pub fn del_last(pattern : String, text : String) -> String raise ReError {
   let re = must_compile(pattern)
   let v = text.to_string_view()
-  let mut hole : (Int, Int)? = None
+  let mut hole : (Int32, Int32)? = None
   for m in re.find(v) {
     hole = Some(match_range(m, v))
   }
@@ -592,7 +592,7 @@ fn is_re_key(c : Char) -> Bool {
 ///|
 // 扫模式串取 (捕获组数, 命名组声明序)。只在**已编译通过**的模式上调用，所以不必处理非法写法。
 // 需要它是因为 core 的 `MatchResult` 不公开组数，也不给"越界"和"没参与"的区分
-fn scan_groups(pattern : String) -> (Int, Array[String]) raise ReError {
+fn scan_groups(pattern : String) -> (Int32, Array[String]) raise ReError {
   let cs = pattern.to_array()
   let n = cs.length()
   let mut count = 0
@@ -652,14 +652,14 @@ fn scan_groups(pattern : String) -> (Int, Array[String]) raise ReError {
 
 ///|
 // core 没给位置出口：起点取 `before()` 的长度，终点用"全长减 `after()` 长度"反推（同 §0.4 的 UTF-16 码元口径）
-fn match_range(m : @string.MatchResult, v : StringView) -> (Int, Int) {
+fn match_range(m : @string.MatchResult, v : StringView) -> (Int32, Int32) {
   let start = m.before().length()
   (start, v.length() - m.after().length())
 }
 
 ///|
 // 组值取文本：0 组是整段，1 起是括号组；没参与与越界同档给 `None`（§5 第 4 行）
-fn group_text(m : @string.MatchResult, g : Int) -> String? {
+fn group_text(m : @string.MatchResult, g : Int32) -> String? {
   if g == 0 {
     Some(m.content().to_owned())
   } else {
@@ -671,7 +671,7 @@ fn group_text(m : @string.MatchResult, g : Int) -> String? {
 }
 
 ///|
-fn splice(v : StringView, start : Int, end : Int) -> String {
+fn splice(v : StringView, start : Int32, end : Int32) -> String {
   v[0:start].to_owned() + v[end:v.length()].to_owned()
 }
 
@@ -680,7 +680,7 @@ fn splice(v : StringView, start : Int, end : Int) -> String {
 // 同长度的引用互不为前缀，谁先谁后不影响结果；跨长度才分先后——`$1-$11` 于 12 组模式 ⇒ `a-k`
 fn subst_template(
   template : String,
-  cnt : Int,
+  cnt : Int32,
   m : @string.MatchResult,
 ) -> String raise ReError {
   let vars = template_refs(template)
@@ -752,7 +752,7 @@ fn template_refs(template : String) -> Array[String] {
 }
 
 ///|
-fn digits_to_int(digits : String) -> Int {
+fn digits_to_int(digits : String) -> Int32 {
   let mut n = 0
   for c in digits.to_array() {
     n = n * 10 + (c.to_int() - '0'.to_int())
@@ -788,7 +788,7 @@ fn str_replace_all(text : String, from : String, into : String) -> String {
 }
 
 ///|
-fn starts_at(src : Array[Char], at : Int, pat : Array[Char]) -> Bool {
+fn starts_at(src : Array[Char], at : Int32, pat : Array[Char]) -> Bool {
   let mut ok = true
   let mut i = 0
   while i < pat.length() && ok {

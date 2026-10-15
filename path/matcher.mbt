@@ -15,7 +15,7 @@ priv struct SegPlan {
   re : String
   names : Array[String]
   // 用户子表达式自带的捕获组数：参照实现拿它跟变量数比，不等就抛（实测档 `{n:(a)(b)}`）
-  extra_groups : Int
+  extra_groups : Int32
 }
 
 ///|
@@ -58,7 +58,7 @@ fn quote_literal(s : String) -> String {
 
 ///|
 // 括号配对：参照实现的 GLOB 允许一层嵌套（`{path:[a-z]{2}}`），这里跟同一层深度。
-fn find_close_brace(cs : Array[Char], from : Int) -> Int {
+fn find_close_brace(cs : Array[Char], from : Int32) -> Int32 {
   let mut depth = 0
   let mut i = from
   let mut hit = -1
@@ -77,7 +77,7 @@ fn find_close_brace(cs : Array[Char], from : Int) -> Int {
 }
 
 ///|
-fn count_capture_groups(re : String) -> Int {
+fn count_capture_groups(re : String) -> Int32 {
   let cs = re.to_array()
   let mut n = 0
   let mut i = 0
@@ -99,7 +99,7 @@ fn count_capture_groups(re : String) -> Int {
 }
 
 ///|
-fn chars_of(cs : Array[Char], lo : Int, hi : Int) -> Array[Char] {
+fn chars_of(cs : Array[Char], lo : Int32, hi : Int32) -> Array[Char] {
   // 半开区间 [lo, hi)。这里不写 `for k in lo..hi`——那层端点语义（Range 含尾 vs IntRange 不含）
   // 本轮实测吃掉过一个变量名（`{name}` 抽出来的键带了尾括号），不赌，手写 while。
   let out : Array[Char] = []
@@ -123,7 +123,7 @@ fn chars_to_string(cs : Array[Char]) -> String {
 }
 
 ///|
-fn index_of_char(cs : Array[Char], c : Char) -> Int {
+fn index_of_char(cs : Array[Char], c : Char) -> Int32 {
   let mut i = 0
   let mut hit = -1
   while i < cs.length() && hit < 0 {
@@ -150,7 +150,7 @@ fn has_glob(cs : Array[Char]) -> Bool {
 
 ///|
 // 按 **UTF-16 码元** 区间 `[lo, hi)` 取子串（承诺口径与 `re`/`text` 同一条：位置一律码元，不用切片语法）。
-fn slice_units(s : String, lo : Int, hi : Int) -> String {
+fn slice_units(s : String, lo : Int32, hi : Int32) -> String {
   let buf = StringBuilder()
   let mut acc = 0
   for c in s.iter() {
@@ -638,7 +638,7 @@ fn contains_char(s : String, c : Char) -> Bool {
 }
 
 ///|
-fn index_of_pair(s : String, pair : String) -> Int {
+fn index_of_pair(s : String, pair : String) -> Int32 {
   let n = pair.length()
   let mut i = 0
   let mut hit = -1
@@ -654,7 +654,7 @@ fn index_of_pair(s : String, pair : String) -> Int {
 ///|
 /// 把 `{...}` 折叠成 1 个字符之后的长度（参照 `PatternInfo.getLength()` 里
 /// `VARIABLE_PATTERN.matcher(pattern).replaceAll("#").length()` 那一档）。
-fn collapsed_len(p : String) -> Int {
+fn collapsed_len(p : String) -> Int32 {
   let cs = p.to_array()
   let n = cs.length()
   let mut i = 0
@@ -679,12 +679,12 @@ fn collapsed_len(p : String) -> Int {
 // PatternInfo：`{` 计变量、`**` 计跨段、单个 `*` 计段内通配（`.*` 这种"点+星"不算，参照实现那条
 // 判据原样搬）。`length` 只在没有变量时参与比较，有变量时给 -1 让后面几级裁决。
 priv struct PatInfo {
-  uri_vars : Int
-  single : Int
-  doubles : Int
+  uri_vars : Int32
+  single : Int32
+  doubles : Int32
   catch_all : Bool
   prefix_pat : Bool
-  length : Int
+  length : Int32
 }
 
 ///|
@@ -732,7 +732,7 @@ fn pat_info(p : String) -> PatInfo {
 ///|
 // 七级判定，照源码 780~828 行的顺序：leastSpecific → 与 against 相等 → 前缀模式 → 计数和
 // → 长度 → 单星数 → 变量数。顺序不能重排，实测四条排序读数就是钉这个顺序的。
-fn compare_pat(against : String, p1 : String, p2 : String) -> Int {
+fn compare_pat(against : String, p1 : String, p2 : String) -> Int32 {
   let i1 = pat_info(p1)
   let i2 = pat_info(p2)
   if i1.catch_all && i2.catch_all {

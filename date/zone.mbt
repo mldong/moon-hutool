@@ -7,7 +7,7 @@
 /// 为什么自带：本工具链 core 的 `impl Compare for String` 是**先比长度、再比内容**
 /// （`moonbitlang/core/builtin/string.mbt:221`，实测 `"aa" < "b"` 为 `false`），
 /// 与 `tbl_names` 的存储序不是同一个序——顺手写 `tbl_names[mid] < zone` 会把所有"长度不同的邻居"查飞。
-fn zone_name_cmp(a : String, b : String) -> Int {
+fn zone_name_cmp(a : String, b : String) -> Int32 {
   let ua = a.to_array()
   let ub = b.to_array()
   let n = if ua.length() < ub.length() { ua.length() } else { ub.length() }
@@ -34,7 +34,7 @@ fn zone_name_cmp(a : String, b : String) -> Int {
 
 ///|
 /// 区名 → 表内区号。`tbl_names` 升序 + 上面那条比较器 ⇒ 二分成立。
-fn zone_find(zone : String) -> Int? {
+fn zone_find(zone : String) -> Int32? {
   let mut lo = 0
   let mut hi = tbl_names.length() - 1
   let mut found = -1
@@ -58,7 +58,7 @@ fn zone_find(zone : String) -> Int? {
 
 ///|
 /// 在区号 `zi` 的段序列里找"起点 `<= sec` 的最后一段"，返回**段内下标**；`-1` 表示早于该区首段。
-fn seg_last_le(zi : Int, sec : Int64) -> Int {
+fn seg_last_le(zi : Int32, sec : Int64) -> Int32 {
   let base = tbl_start[zi]
   let mut lo = 0
   let mut hi = tbl_len[zi] - 1
@@ -85,7 +85,7 @@ fn in_window(millis : Int64) -> Bool {
 ///|
 /// 内置表里有多少个区名（参照代次的全部 IANA id，含 legacy link 与 `Etc/*`）。
 /// - Returns: 条数，与腿的 `B ZONES` 读数同值
-pub fn zone_count() -> Int {
+pub fn zone_count() -> Int32 {
   tbl_names.length()
 }
 
@@ -114,7 +114,7 @@ pub fn zone_exists(zone : String) -> Bool {
 ///   - 非整点偏移真实存在（`Asia/Kathmandu` = 345、`Pacific/Chatham` = 765/825）
 ///   - `Etc/GMT+5` 的读数腿给 **-300**：Etc 那一族的符号与直觉相反，照搬不修
 /// - Returns: 未知区名或窗外 ⇒ `None`
-pub fn zone_offset_minutes(zone : String, millis : Int64) -> Int? {
+pub fn zone_offset_minutes(zone : String, millis : Int64) -> Int32? {
   if !in_window(millis) {
     return None
   }
@@ -135,8 +135,12 @@ pub fn zone_offset_minutes(zone : String, millis : Int64) -> Int? {
 /// `by_window=false` 只多给 `parse_in` 用一次：把首段向窗口以前延伸，好把
 /// "这个墙上时刻在该区不存在"（真空洞）与"这个时刻超出表的覆盖窗口"两种空表分开——
 /// 两者都返回空数组，但不该给同一个出口（§7.3 第 3 行）。
-fn wall_offsets(zone : String, wall : DateTime, by_window : Bool) -> Array[Int] {
-  let out : Array[Int] = []
+fn wall_offsets(
+  zone : String,
+  wall : DateTime,
+  by_window : Bool,
+) -> Array[Int32] {
+  let out : Array[Int32] = []
   let zi = match zone_find(zone) {
     None => return out
     Some(i) => i
@@ -171,7 +175,7 @@ fn wall_offsets(zone : String, wall : DateTime, by_window : Bool) -> Array[Int] 
 ///   - 1 档 = 平常
 ///   - 这一件的存在就是"墙上 ↔ 瞬间"在有 DST 的区里**不是一一映射**的正面承认；
 ///     要唯一瞬间请走显式偏移那条路（`DateTime::to_epoch_millis(offset)`）
-pub fn zone_offsets_at_wall(zone : String, wall : DateTime) -> Array[Int] {
+pub fn zone_offsets_at_wall(zone : String, wall : DateTime) -> Array[Int32] {
   wall_offsets(zone, wall, true)
 }
 

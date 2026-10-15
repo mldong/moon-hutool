@@ -37,7 +37,7 @@ fn seeded() -> @random.Rand {
 
 ///|
 // 数出 `s` 里有多少个字符**不在** `table` 中——用来把"字符取自表"写成一条与流无关的不变量
-fn outside(table : String, s : String) -> Int {
+fn outside(table : String, s : String) -> Int32 {
   let set : Set[String] = Set([])
   for ch in table.to_array() {
     set.add(ch.to_string())

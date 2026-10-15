@@ -23,9 +23,9 @@
 /// 只有 `of`/`from_epoch_days`/`parse` 三个入口，**非法日期无法构造**（2 月 30 日直接 `raise`）。
 /// 字段可读、不可改；跨包构造请用这三个入口。
 pub struct Date {
-  year : Int
-  month : Int
-  day : Int
+  year : Int32
+  month : Int32
+  day : Int32
 } derive(Eq, Compare)
 
 ///|
@@ -34,10 +34,10 @@ pub struct Date {
 /// 它是"某偏移下的读表结果"，不是瞬间；要拿到瞬间用 `to_epoch_millis(offset_minutes)`。
 pub struct DateTime {
   date : Date
-  hour : Int
-  minute : Int
-  second : Int
-  milli : Int
+  hour : Int32
+  minute : Int32
+  second : Int32
+  milli : Int32
 } derive(Eq, Compare)
 
 ///|
@@ -61,15 +61,15 @@ pub(all) enum TimeUnit {
 /// 否则改一个措辞就要撞"期望值冻结"红线）。用例只断言变体形状与携带值。
 pub suberror DateError {
   /// 月不在 1..12：携带读到的月值
-  MonthOutOfRange(Int)
+  MonthOutOfRange(Int32)
   /// 该月没有这一天：携带 (year, month, day)
-  DayOutOfRange(Int, Int, Int)
+  DayOutOfRange(Int32, Int32, Int32)
   /// 时间字段越界：携带读到的 (hour, minute, second, milli)
-  TimeFieldOutOfRange(Int, Int, Int, Int)
+  TimeFieldOutOfRange(Int32, Int32, Int32, Int32)
   /// pattern 里出现不支持的占位串；`hh`/`h` 在解析侧也算这条（12 小时制无 AM/PM 不可逆）
   UnknownPatternToken(String)
   /// 输入与 pattern 不匹配：携带 (输入, 失败处的码元下标)
-  ParseFailed(String, Int)
+  ParseFailed(String, Int32)
   /// `age(birth, on)` 里 `on` 早于 `birth`：年龄不存在，不做负数猜测
   FutureBirth
   /// 墙上时刻在该区**不存在**（前跳空洞）：携带那个不存在的墙上时刻的 ISO 串
@@ -119,7 +119,7 @@ pub let time_pattern : String = "HH:mm:ss"
 ///
 /// - `1900 → false`、`2000 → true`、`2100 → false`、`2400 → true`
 /// - 天文纪年下 0 与 -4 都是闰年、-100 不是（负年份按数学整除判，不用"公元前无闰年"的历史口径）
-pub fn is_leap_year(year : Int) -> Bool {
+pub fn is_leap_year(year : Int32) -> Bool {
   let y = year.to_int64()
   y % 4L == 0L && (y % 100L != 0L || y % 400L == 0L)
 }
@@ -130,7 +130,7 @@ pub fn is_leap_year(year : Int) -> Bool {
 /// - Parameters: `year` 任意 `Int`（proleptic）；`month` 1..12
 /// - Returns: 28/29/30/31
 /// - Raises: `DateError.MonthOutOfRange` —— `month` 不在 1..12 时**不夹紧也不取绝对值**
-pub fn days_in_month(year : Int, month : Int) -> Int raise DateError {
+pub fn days_in_month(year : Int32, month : Int32) -> Int32 raise DateError {
   if month < 1 || month > 12 {
     raise MonthOutOfRange(month)
   }
@@ -144,7 +144,11 @@ pub fn days_in_month(year : Int, month : Int) -> Int raise DateError {
 /// - Raises: `MonthOutOfRange` / `DayOutOfRange`
 /// - Note: 这是唯一的日期构造入口，非法值不会静默变成"下个月的某天"（JDK `Calendar` 的
 ///   lenient 模式会滚，本库不滚，见 spec 2.1 差异声明）
-pub fn Date::of(year : Int, month : Int, day : Int) -> Date raise DateError {
+pub fn Date::of(
+  year : Int32,
+  month : Int32,
+  day : Int32,
+) -> Date raise DateError {
   if month < 1 || month > 12 {
     raise MonthOutOfRange(month)
   }
@@ -174,7 +178,7 @@ pub fn Date::from_epoch_days(days : Int64) -> Date {
 
 ///|
 /// 加减天数（跨月/跨年/跨世纪自动进位，`0` 原样返回）
-pub fn Date::offset_day(self : Self, days : Int) -> Date {
+pub fn Date::offset_day(self : Self, days : Int32) -> Date {
   Date::from_epoch_days(self.epoch_days() + days.to_int64())
 }
 
@@ -184,7 +188,7 @@ pub fn Date::offset_day(self : Self, days : Int) -> Date {
 /// - `2024-01-31 +1 → 2024-02-29`、`2023-01-31 +1 → 2023-02-28`、`2024-05-31 +1 → 2024-06-30`
 /// - Note: 夹紧而不是滚到 3 月 2/3 日，这是 hutool `DateUtil.offsetMonth`（= JDK
 ///   `Calendar.add(MONTH)`）的行为，也是业务最不容易出错的一档
-pub fn Date::offset_month(self : Self, months : Int) -> Date {
+pub fn Date::offset_month(self : Self, months : Int32) -> Date {
   let total = self.month - 1 + months
   let y = self.year + floor_div_i(total, 12)
   let m = floor_mod_i(total, 12) + 1
@@ -194,7 +198,7 @@ pub fn Date::offset_month(self : Self, months : Int) -> Date {
 
 ///|
 /// 加减年数，2 月 29 日在平年夹紧到 2 月 28 日
-pub fn Date::offset_year(self : Self, years : Int) -> Date {
+pub fn Date::offset_year(self : Self, years : Int32) -> Date {
   self.offset_month(years * 12)
 }
 
@@ -202,7 +206,7 @@ pub fn Date::offset_year(self : Self, years : Int) -> Date {
 /// ISO 8601 星期：周一 = 1 … 周日 = 7
 ///
 /// - Note: **不是** JDK `Calendar.DAY_OF_WEEK`（那套周日 = 1）。选 ISO 的理由与差异见 spec 2.2
-pub fn Date::day_of_week(self : Self) -> Int {
+pub fn Date::day_of_week(self : Self) -> Int32 {
   floor_mod(self.epoch_days() + 3L, 7L).to_int() + 1
 }
 
@@ -217,14 +221,14 @@ pub fn Date::is_weekend(self : Self) -> Bool {
 
 ///|
 /// 该年内的第几天（1 起算：平年 1..365，闰年 1..366）
-pub fn Date::day_of_year(self : Self) -> Int {
+pub fn Date::day_of_year(self : Self) -> Int32 {
   (self.epoch_days() - days_from_civil(self.year.to_int64(), 1L, 1L)).to_int() +
   1
 }
 
 ///|
 /// 季度 1..4
-pub fn Date::quarter(self : Self) -> Int {
+pub fn Date::quarter(self : Self) -> Int32 {
   (self.month - 1) / 3 + 1
 }
 
@@ -234,7 +238,7 @@ pub fn Date::quarter(self : Self) -> Int {
 /// - Note: 判"第几周"必须先定"以哪一天为周首、哪一周算第一年第一周"。本库固定 ISO 8601：
 ///   周一为周首，含该年第一个周四的那一周是第 1 周。hutool `DateUtil.weekOfYear` 走
 ///   `Calendar.WEEK_OF_YEAR`，随 `Locale`/`firstDayOfWeek` 变——那是不可复现的读数，不跟
-pub fn Date::week_of_year(self : Self) -> Int {
+pub fn Date::week_of_year(self : Self) -> Int32 {
   let (_wby, week) = iso_week_parts(self)
   week
 }
@@ -243,7 +247,7 @@ pub fn Date::week_of_year(self : Self) -> Int {
 /// ISO 周基准年：可能与日历年不同（`2021-01-01` 属 `2020` 年的第 53 周）
 ///
 /// - Note: 与 `week_of_year` 配对使用；只看 `week_of_year` 而忽略这一位，跨年那一周会归错年
-pub fn Date::week_based_year(self : Self) -> Int {
+pub fn Date::week_based_year(self : Self) -> Int32 {
   let (year, _week) = iso_week_parts(self)
   year
 }
@@ -328,7 +332,7 @@ pub fn Date::to_datetime(self : Self) -> DateTime {
 
 ///|
 /// `other - self` 的天数（有符号；`self == other` 为 0）
-pub fn Date::between_day(self : Self, other : Date) -> Int {
+pub fn Date::between_day(self : Self, other : Date) -> Int32 {
   (other.epoch_days() - self.epoch_days()).to_int()
 }
 
@@ -339,10 +343,10 @@ pub fn Date::between_day(self : Self, other : Date) -> Int {
 /// - Raises: `TimeFieldOutOfRange`（携带读到的四个值）
 pub fn DateTime::of(
   date : Date,
-  hour : Int,
-  minute : Int,
-  second : Int,
-  milli : Int,
+  hour : Int32,
+  minute : Int32,
+  second : Int32,
+  milli : Int32,
 ) -> DateTime raise DateError {
   let out_of_range = hour < 0 ||
     hour > 23 ||
@@ -366,7 +370,7 @@ pub fn DateTime::of(
 /// - Note: 这是"环境显式化"的核心一格——JDK 用进程默认时区，这里必须显式给
 pub fn DateTime::from_epoch_millis(
   millis : Int64,
-  offset_minutes : Int,
+  offset_minutes : Int32,
 ) -> DateTime {
   let shifted = millis + offset_minutes.to_int64() * 60000L
   let tod = floor_mod(shifted, 86400000L)
@@ -383,7 +387,7 @@ pub fn DateTime::from_epoch_millis(
 /// 墙上时刻 → 瞬间：与 `from_epoch_millis` 互逆
 ///
 /// - Note: 不做 DST，故不存在"同一个墙上时刻对应两个瞬间"的歧义（这也是本库砍掉命名时区换来的简单）
-pub fn DateTime::to_epoch_millis(self : Self, offset_minutes : Int) -> Int64 {
+pub fn DateTime::to_epoch_millis(self : Self, offset_minutes : Int32) -> Int64 {
   let h = self.hour.to_int64()
   let mi = self.minute.to_int64()
   let se = self.second.to_int64()
@@ -405,7 +409,7 @@ pub fn DateTime::offset(self : Self, unit : TimeUnit, n : Int64) -> DateTime {
 
 ///|
 /// 加减月数（日夹紧到月末，时刻部分原样保留）
-pub fn DateTime::offset_month(self : Self, months : Int) -> DateTime {
+pub fn DateTime::offset_month(self : Self, months : Int32) -> DateTime {
   {
     date: self.date.offset_month(months),
     hour: self.hour,
@@ -576,7 +580,7 @@ pub fn is_same_day(a : DateTime, b : DateTime) -> Bool {
 /// 周岁（已过生日则取年差，未过减 1；2 月 29 日出生者在平年按 2 月 28 日过完）
 ///
 /// - Raises: `FutureBirth` —— `on` 早于 `birth` 时不返回负数
-pub fn age(birth : Date, on : Date) -> Int raise DateError {
+pub fn age(birth : Date, on : Date) -> Int32 raise DateError {
   if on < birth {
     raise FutureBirth
   }
@@ -604,7 +608,7 @@ pub fn now_millis() -> Int64 {
 /// 当前墙上时刻 = `DateTime::from_epoch_millis(now_millis(), offset_minutes)`
 ///
 /// - Parameters: `offset_minutes` 调用方所在地的 UTC 偏移（框架层通常来自配置项，不是猜的）
-pub fn now(offset_minutes : Int) -> DateTime {
+pub fn now(offset_minutes : Int32) -> DateTime {
   DateTime::from_epoch_millis(now_millis(), offset_minutes)
 }
 
@@ -614,7 +618,7 @@ pub fn now(offset_minutes : Int) -> DateTime {
 /// - Parameters: `millis` epoch 毫秒；`offset_minutes` 输出用的 UTC 偏移
 /// - Note: 偏移 0 出 `Z`，其余出 `+HH:MM`/`-HH:MM`；毫秒为 0 时**省略**小数秒，非 0 时出 3 位
 ///   （定长输出要恒定宽度请改用 `DateTime::format` + `datetime_millis_pattern`）
-pub fn to_rfc3339(millis : Int64, offset_minutes : Int) -> String {
+pub fn to_rfc3339(millis : Int64, offset_minutes : Int32) -> String {
   let x = DateTime::from_epoch_millis(millis, offset_minutes)
   let buf = StringBuilder()
   buf.write_string(iso_date_string(x.date))
@@ -675,12 +679,12 @@ fn floor_mod(a : Int64, b : Int64) -> Int64 {
 }
 
 ///|
-fn floor_div_i(a : Int, b : Int) -> Int {
+fn floor_div_i(a : Int32, b : Int32) -> Int32 {
   floor_div(a.to_int64(), b.to_int64()).to_int()
 }
 
 ///|
-fn floor_mod_i(a : Int, b : Int) -> Int {
+fn floor_mod_i(a : Int32, b : Int32) -> Int32 {
   floor_mod(a.to_int64(), b.to_int64()).to_int()
 }
 
@@ -716,7 +720,7 @@ fn civil_from_days(z0 : Int64) -> (Int64, Int64, Int64) {
 
 ///|
 /// 该年月的天数（`month` 已由公开入口校验过 1..12，这里不再判）
-fn month_len(year : Int, month : Int) -> Int {
+fn month_len(year : Int32, month : Int32) -> Int32 {
   let table = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
   let base = table[month - 1]
   if month == 2 && is_leap_year(year) {
@@ -731,7 +735,7 @@ fn month_len(year : Int, month : Int) -> Int {
 ///
 /// 先取本周的**周四**定"归属年"，再从"含该年 1 月 4 日那一周的周一"数周——
 /// 这样 2021-01-01 归 2020 年第 53 周是靠定义算出来的，不是靠分支猜出来的
-fn iso_week_parts(date : Date) -> (Int, Int) {
+fn iso_week_parts(date : Date) -> (Int32, Int32) {
   let thu = date.epoch_days() + (4L - date.day_of_week().to_int64())
   let wby = Date::from_epoch_days(thu).year
   let jan4 = Date::{ year: wby, month: 1, day: 4, }
@@ -742,7 +746,7 @@ fn iso_week_parts(date : Date) -> (Int, Int) {
 
 ///|
 /// 十进制补零（本包只拿它装非负读数）
-fn pad(n : Int, width : Int) -> String {
+fn pad(n : Int32, width : Int32) -> String {
   let s = n.to_string()
   let missing = width - s.char_length()
   if missing <= 0 {
@@ -759,7 +763,7 @@ fn pad(n : Int, width : Int) -> String {
 
 ///|
 /// 年份位：绝对值补零到 4 位，负数前缀 `-`（天文纪年下公元 0 年写作 `0000`）
-fn write_signed_year(buf : StringBuilder, year : Int) -> Unit {
+fn write_signed_year(buf : StringBuilder, year : Int32) -> Unit {
   if year < 0 {
     buf.write_char('-')
   }
@@ -779,7 +783,7 @@ fn iso_date_string(date : Date) -> String {
 
 ///|
 /// 12 小时制读数：0 点报 12、13 点报 1
-fn hour12_of(hour : Int) -> Int {
+fn hour12_of(hour : Int32) -> Int32 {
   let x = hour % 12
   if x == 0 {
     12
@@ -802,7 +806,7 @@ fn is_ascii_letter(c : Char) -> Bool {
 }
 
 ///|
-fn digit_value(c : Char) -> Int? {
+fn digit_value(c : Char) -> Int32? {
   let v = c.to_int()
   if v >= 48 && v <= 57 {
     Some(v - 48)
@@ -812,7 +816,7 @@ fn digit_value(c : Char) -> Int? {
 }
 
 ///|
-fn digit_value_at(chars : Array[Char], idx : Int) -> Int? {
+fn digit_value_at(chars : Array[Char], idx : Int32) -> Int32? {
   if idx < chars.length() {
     digit_value(chars[idx])
   } else {
@@ -828,7 +832,7 @@ fn single_char(c : Char) -> String {
 }
 
 ///|
-fn slice_chars(chars : Array[Char], lo : Int, hi : Int) -> String {
+fn slice_chars(chars : Array[Char], lo : Int32, hi : Int32) -> String {
   let buf = StringBuilder()
   for k in lo..<hi {
     buf.write_char(chars[k])
@@ -838,7 +842,7 @@ fn slice_chars(chars : Array[Char], lo : Int, hi : Int) -> String {
 
 ///|
 /// 占位串 → 字段类别号，`0` 表示不支持（封闭子集：表外字母显式报错，不当字面量吞掉）
-fn field_kind(run : String) -> Int {
+fn field_kind(run : String) -> Int32 {
   if run == "yyyy" {
     1
   } else if run == "yy" {
@@ -917,7 +921,7 @@ fn check_pattern(
   for_parse : Bool,
 ) -> Array[Seg] raise DateError {
   let segs = tokenize(pattern)
-  let seen : Array[Int] = []
+  let seen : Array[Int32] = []
   for s in segs {
     if !s.is_field {
       continue
@@ -989,7 +993,7 @@ fn write_field(
 fn write_time_field(
   buf : StringBuilder,
   run : String,
-  w : Int,
+  w : Int32,
   t : DateTime,
 ) -> Unit {
   if run == "HH" || run == "H" {
@@ -1009,10 +1013,10 @@ fn write_time_field(
 /// 恰好 `len` 位数字；失败位就是**字段的起始位**（用例里 `ParseFailed(_, at)` 的口径）
 fn read_exact(
   chars : Array[Char],
-  at : Int,
-  len : Int,
+  at : Int32,
+  len : Int32,
   input : String,
-) -> Int raise DateError {
+) -> Int32 raise DateError {
   let mut v = 0
   let mut k = 0
   while k < len {
@@ -1029,9 +1033,9 @@ fn read_exact(
 /// 1~2 位贪婪数字（`M`/`d`/`H`/`m`/`s` 那一档），返回 (值, 新下标)
 fn read_greedy(
   chars : Array[Char],
-  at : Int,
+  at : Int32,
   input : String,
-) -> (Int, Int) raise DateError {
+) -> (Int32, Int32) raise DateError {
   match digit_value_at(chars, at) {
     None => raise ParseFailed(input, at)
     Some(v0) =>
@@ -1044,7 +1048,7 @@ fn read_greedy(
 
 ///|
 /// 两位年窗口：`00..69 → 2000..2069`、`70..99 → 1970..1999`
-fn year2_window(v : Int) -> Int {
+fn year2_window(v : Int32) -> Int32 {
   if v <= 69 {
     2000 + v
   } else {
@@ -1200,7 +1204,7 @@ fn from_rfc3339_inner(text : String) -> Int64 raise DateError {
 ///|
 fn expect_char(
   chars : Array[Char],
-  at : Int,
+  at : Int32,
   want : Char,
   text : String,
 ) -> Unit raise DateError {
@@ -1211,7 +1215,7 @@ fn expect_char(
 
 ///|
 /// 小数秒 → 毫秒：**多于 3 位截断**（不四舍五入）、少于 3 位右侧补零（`.52` = 520）
-fn frac_millis(chars : Array[Char], start : Int, end : Int) -> Int {
+fn frac_millis(chars : Array[Char], start : Int32, end : Int32) -> Int32 {
   let mut v = 0
   let mut k = 0
   while k < 3 && start + k < end {

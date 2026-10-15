@@ -14,11 +14,11 @@
 /// 本包唯一错误面：只携带**读数**，不携带文案（同 `date`/`id` 的立场）
 pub suberror CodecError {
   /// (输入原文, 第一个不在表内的字符下标)
-  IllegalChar(String, Int)
+  IllegalChar(String, Int32)
   /// (输入原文, 出错的填充字符下标)
-  BadPadding(String, Int)
+  BadPadding(String, Int32)
   /// (给的值, 被违反的上界)
-  RadixOutOfRange(Int, Int)
+  RadixOutOfRange(Int32, Int32)
   /// 位权展开超出 `Int64`：携带输入原文
   ValueOverflow(String)
   /// Base58Check 的 4 字节校验位不符（不带读数——摘要对人没有信息量，也不指向被改过的那一位）
@@ -28,7 +28,7 @@ pub suberror CodecError {
   /// 凯撒移位算出**负下标**（携带那个负数）：参照在这一档抛
   /// `StringIndexOutOfBoundsException: String index out of range: <负数>`，消息里带的就是这个下标
   /// ——本库把读数原样交出，不改成正数、也不"顺手"归一（`caesar_encode` 才有这一档，`caesar_decode` 归一后从不抛）
-  ShiftUnderflow(Int)
+  ShiftUnderflow(Int32)
 }
 
 ///|
@@ -43,7 +43,7 @@ pub let radix_alphabet : String = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghi
 /// - Parameters: `padding` 默认 `true`（保留 `=` 填充）。hutool 的默认档**不去**填充，
 ///   这里给 2.1 的 `false` 才是那一档——差异写在参数名旁，不让调用方猜
 /// - Note: core 的 `encoding/base64` 只有标准表，这一档是真缺口（不是转发）
-pub fn b64_encode_url(data : Bytes, padding? : Bool = true) -> String {
+pub fn b64_encode_url(data : Bytes, padding~ : Bool = true) -> String {
   b64_encode_with(b64_url_alphabet, data, padding)
 }
 
@@ -99,8 +99,8 @@ pub fn b64_decode_lenient(text : String) -> Bytes raise CodecError {
 /// - Parameters: `hex` 选表（`0-9A-V` 那张），`padding` 默认 `true`
 pub fn b32_encode(
   data : Bytes,
-  hex? : Bool = false,
-  padding? : Bool = true,
+  hex~ : Bool = false,
+  padding~ : Bool = true,
 ) -> String {
   b32_encode_with(
     if hex {
@@ -117,7 +117,7 @@ pub fn b32_encode(
 /// Base32 解码（大小写都收——这张表天然不分大小写，而现实里常见小写）
 ///
 /// - Raises: `CodecError.IllegalChar`、`CodecError.BadPadding`
-pub fn b32_decode(text : String, hex? : Bool = false) -> Bytes raise CodecError {
+pub fn b32_decode(text : String, hex~ : Bool = false) -> Bytes raise CodecError {
   b32_decode_with(text, hex)
 }
 
@@ -143,7 +143,7 @@ pub fn b58_decode(text : String) -> Bytes raise CodecError {
 /// - Raises: `CodecError.RadixOutOfRange`（version 越界）
 pub fn b58_check_encode(
   data : Bytes,
-  version? : Int = 0,
+  version~ : Int32 = 0,
 ) -> String raise CodecError {
   if version < 0 || version > 255 {
     raise RadixOutOfRange(version, 255)
@@ -164,7 +164,7 @@ pub fn b58_check_encode(
 ///   `CodecError.IllegalChar`（表外字符；或给了 `version` 而首字节不符，报 `@0`）
 pub fn b58_check_decode(
   text : String,
-  version? : Int,
+  version? : Int32,
 ) -> Bytes raise CodecError {
   let raw = bN_decode(text, b58_alphabet)
   let n = raw.length()
@@ -197,7 +197,7 @@ pub fn b58_check_decode(
 
 ///|
 /// Base62（GMP 表 `0-9A-Za-z`；`inverted` 走大小写互换表）
-pub fn b62_encode(data : Bytes, inverted? : Bool = false) -> String {
+pub fn b62_encode(data : Bytes, inverted~ : Bool = false) -> String {
   bN_encode(data, if inverted { b62_inverted_alphabet } else { radix_alphabet })
 }
 
@@ -207,7 +207,7 @@ pub fn b62_encode(data : Bytes, inverted? : Bool = false) -> String {
 /// - Raises: `CodecError.IllegalChar`（携带下标）
 pub fn b62_decode(
   text : String,
-  inverted? : Bool = false,
+  inverted~ : Bool = false,
 ) -> Bytes raise CodecError {
   bN_decode(text, if inverted { b62_inverted_alphabet } else { radix_alphabet })
 }
@@ -218,7 +218,7 @@ pub fn b62_decode(
 /// - Note: 收 `Int64` 且明确支持负数——hutool 那侧收 `int` 且对 `MIN_VALUE` 会翻成正的算。
 ///   `Int64::min()` 取绝对值这一步本身仍溢出 ⇒ 按无符号位权展开，读数见 spec #6
 /// - Raises: `CodecError.RadixOutOfRange(radix, 62)`
-pub fn radix_encode(value : Int64, radix : Int) -> String raise CodecError {
+pub fn radix_encode(value : Int64, radix : Int32) -> String raise CodecError {
   if radix < 2 || radix > 62 {
     raise RadixOutOfRange(radix, 62)
   }
@@ -259,7 +259,7 @@ pub fn radix_encode(value : Int64, radix : Int) -> String raise CodecError {
 /// - Raises: `CodecError.RadixOutOfRange`、`CodecError.IllegalChar`（字符不属于该 radix 的前
 ///   `radix` 个表字符；空串与只有 `-` 也走这条）、`CodecError.ValueOverflow`
 /// - Note: **不做** hutool `parseRadix` 的"溢出自动补位"档——静默改变值比报错坏
-pub fn radix_decode(text : String, radix : Int) -> Int64 raise CodecError {
+pub fn radix_decode(text : String, radix : Int32) -> Int64 raise CodecError {
   if radix < 2 || radix > 62 {
     raise RadixOutOfRange(radix, 62)
   }
@@ -420,7 +420,7 @@ pub(all) struct Url {
   scheme : String
   userinfo : String
   host : String
-  port : Int
+  port : Int32
   path : String
   query : String?
   fragment : String?
@@ -631,8 +631,8 @@ let b62_inverted_alphabet : String = "0123456789abcdefghijklmnopqrstuvwxyzABCDEF
 
 ///|
 /// ASCII 反查表：字符码 → 表内下标，`-1` 表示表外
-fn ascii_map(table : String) -> Array[Int] {
-  let m : Array[Int] = []
+fn ascii_map(table : String) -> Array[Int32] {
+  let m : Array[Int32] = []
   for _ in 0..<128 {
     m.push(-1)
   }
@@ -645,7 +645,7 @@ fn ascii_map(table : String) -> Array[Int] {
 
 ///|
 /// 宽松 Base64 的反查表：两张表的字符都收（`+`/`/` 与 `-`/`_` 都映到 62/63）
-fn b64_merged_map() -> Array[Int] {
+fn b64_merged_map() -> Array[Int32] {
   let m = ascii_map(b64_std_alphabet)
   m[45] = 62
   m[95] = 63
@@ -654,7 +654,7 @@ fn b64_merged_map() -> Array[Int] {
 
 ///|
 /// Base32 大小写都收：这张表天然不分大小写，而现实里小写常见
-fn b32_map(hex : Bool) -> Array[Int] {
+fn b32_map(hex : Bool) -> Array[Int32] {
   let table = if hex { b32_hex_alphabet } else { b32_std_alphabet }
   let m = ascii_map(table)
   let chars = table.to_array()
@@ -704,13 +704,13 @@ fn b64_encode_with(table : String, data : Bytes, padding : Bool) -> String {
 /// 报 `BadPadding` 并带那个 `=` 的下标；整串没有 `=` 而余数不可能时，报**余数段起始下标**
 fn b64_decode_with(
   text : String,
-  sextets : Array[Int],
+  sextets : Array[Int32],
   ignore_ws : Bool,
   auto_complete : Bool,
 ) -> Bytes raise CodecError {
   let chars = text.to_array()
   let n = chars.length()
-  let vals : Array[Int] = []
+  let vals : Array[Int32] = []
   let mut pad_at = -1
   let mut i = 0
   while i < n {
@@ -753,7 +753,7 @@ fn b64_decode_with(
 
 ///|
 /// 位权折叠：每 `from` 位一组攒起来，满 `to` 位就吐一个字节（Base64 用 6/8，Base32 用 5/8）
-fn fold_bits(groups : Array[Int], from : Int, to : Int) -> Bytes {
+fn fold_bits(groups : Array[Int32], from : Int32, to : Int32) -> Bytes {
   let out : Array[Byte] = []
   let mut acc = 0
   let mut bits = 0
@@ -805,7 +805,7 @@ fn b32_decode_with(text : String, hex : Bool) -> Bytes raise CodecError {
   let m = b32_map(hex)
   let chars = text.to_array()
   let n = chars.length()
-  let vals : Array[Int] = []
+  let vals : Array[Int32] = []
   let mut pad_at = -1
   let mut i = 0
   while i < n {
@@ -850,14 +850,14 @@ fn b32_decode_with(text : String, hex : Bool) -> Bytes raise CodecError {
 fn bN_encode(data : Bytes, table : String) -> String {
   let t = table.to_array()
   let base = t.length()
-  let mut num : Array[Int] = []
+  let mut num : Array[Int32] = []
   for i in 0..<data.length() {
     num.push(data[i].to_int())
   }
-  let digits : Array[Int] = []
+  let digits : Array[Int32] = []
   while has_nonzero(num) {
     let mut rem = 0
-    let out : Array[Int] = []
+    let out : Array[Int32] = []
     for x in num {
       let v = rem * 256 + x
       let q = v / base
@@ -891,7 +891,7 @@ fn bN_encode(data : Bytes, table : String) -> String {
 }
 
 ///|
-fn has_nonzero(num : Array[Int]) -> Bool {
+fn has_nonzero(num : Array[Int32]) -> Bool {
   let mut found = false
   for x in num {
     if x != 0 {
@@ -915,7 +915,7 @@ fn bN_decode(text : String, table : String) -> Bytes raise CodecError {
     zeros = zeros + 1
     i = i + 1
   }
-  let acc : Array[Int] = []
+  let acc : Array[Int32] = []
   while i < n {
     let c = chars[i].to_int()
     if c >= 128 || m[c] < 0 {
@@ -961,7 +961,7 @@ fn take4(data : Bytes) -> Bytes {
 }
 
 ///|
-fn byte_prefix(data : Bytes, len : Int) -> Bytes {
+fn byte_prefix(data : Bytes, len : Int32) -> Bytes {
   let out : Array[Byte] = []
   for i in 0..<len {
     out.push(data[i])
@@ -971,7 +971,7 @@ fn byte_prefix(data : Bytes, len : Int) -> Bytes {
 
 ///|
 /// 取 `radix` 个表字符的索引（表序写死在 `radix_alphabet`，base36 就是 `0-9A-Z`）
-fn radix_index(c : Char, radix : Int) -> Int? {
+fn radix_index(c : Char, radix : Int32) -> Int32? {
   let chars = radix_alphabet.to_array()
   let mut found = -1
   let mut i = 0
@@ -999,13 +999,13 @@ let hex_digits : Array[Char] = [
 /// 码位 → `Char`。`Int::to_char()` 返回 `Char?`（非法码位给 None），
 /// 而这里只喂 `[0, 255]` 与 ASCII 归一位，那些码位全合法、None 分支不可达。
 /// 写 `unwrap` 而不是编一个替换字符：真被喂进坏值，炸出来比静默换字符好
-fn code_char(v : Int) -> Char {
+fn code_char(v : Int32) -> Char {
   v.to_char().unwrap()
 }
 
 ///|
 /// 一个字节 → `%XX`（**大写**十六进制）
-fn pct_pair(v : Int) -> String {
+fn pct_pair(v : Int32) -> String {
   let buf = StringBuilder()
   buf.write_string("%")
   buf.write_char(hex_digits[v >> 4])
@@ -1015,7 +1015,7 @@ fn pct_pair(v : Int) -> String {
 
 ///|
 /// 十六进制位的值，大小写都收。`radix_index` 那批表只认大写，这里不能用它
-fn hex_value(c : Char) -> Int? {
+fn hex_value(c : Char) -> Int32? {
   let v = c.to_int()
   if v >= 48 && v <= 57 {
     Some(v - 48)
@@ -1031,7 +1031,7 @@ fn hex_value(c : Char) -> Int? {
 ///|
 /// 表单档放行的字节：`A-Za-z0-9` 外加 `*` `-` `.` `_`。
 /// **`~` 不在这里**——RFC 3986 的 unreserved 有它、HTML 序列化器没有，这一位就是两档的分歧点
-fn is_form_safe(v : Int) -> Bool {
+fn is_form_safe(v : Int32) -> Bool {
   (v >= 48 && v <= 57) ||
   (v >= 65 && v <= 90) ||
   (v >= 97 && v <= 122) ||
@@ -1043,7 +1043,7 @@ fn is_form_safe(v : Int) -> Bool {
 
 ///|
 /// RFC 3986 §2.3 的 unreserved：`A-Za-z0-9` 加 `-` `.` `_` `~`（`~` 在、`*` 不在）
-fn is_unreserved_byte(v : Int) -> Bool {
+fn is_unreserved_byte(v : Int32) -> Bool {
   (v >= 48 && v <= 57) ||
   (v >= 65 && v <= 90) ||
   (v >= 97 && v <= 122) ||
@@ -1056,7 +1056,7 @@ fn is_unreserved_byte(v : Int) -> Bool {
 ///|
 /// host（RFC 3986 §3.2.2 的 reg-name）允许的字符：unreserved + sub-delims + `%`。
 /// 表外字符（空格是典型）由 `Url::parse` 报错并给**那个字符**的下标
-fn is_host_char(v : Int) -> Bool {
+fn is_host_char(v : Int32) -> Bool {
   if is_unreserved_byte(v) || v == 37 {
     true
   } else {
@@ -1080,7 +1080,7 @@ fn is_scheme_char(c : Char) -> Bool {
     true
   } else {
     match c.to_int() {
-      43 | 45 | 46 | 48..=57 => true
+      43 | 45 | 46 | 48..<=57 => true
       _ => false
     }
   }
@@ -1088,7 +1088,7 @@ fn is_scheme_char(c : Char) -> Bool {
 
 ///|
 /// 字符数组切片——**下标一律按码元（Char）算**，错误读数与夹具都是这一口径
-fn chars_slice(chars : Array[Char], start : Int, end : Int) -> String {
+fn chars_slice(chars : Array[Char], start : Int32, end : Int32) -> String {
   let buf = StringBuilder()
   for i in start..<end {
     buf.write_char(chars[i])
@@ -1098,7 +1098,12 @@ fn chars_slice(chars : Array[Char], start : Int, end : Int) -> String {
 
 ///|
 /// 区间 `[from, to)` 内第一个目标字符的下标；没有给 `-1`
-fn find_char_from(chars : Array[Char], c : Char, from : Int, to : Int) -> Int {
+fn find_char_from(
+  chars : Array[Char],
+  c : Char,
+  from : Int32,
+  to : Int32,
+) -> Int32 {
   let mut i = from
   while i < to {
     if chars[i] == c {
@@ -1112,7 +1117,7 @@ fn find_char_from(chars : Array[Char], c : Char, from : Int, to : Int) -> Int {
 ///|
 /// 区间内**最后一个**目标字符的下标：userinfo 按最后一个 `@`、端口按最后一个 `:` 切
 ///（RFC 3986 §3.2 就是这么定的，按第一个切会在 `user@name@host` 上给出另一个答案）
-fn find_last(chars : Array[Char], c : Char, from : Int, to : Int) -> Int {
+fn find_last(chars : Array[Char], c : Char, from : Int32, to : Int32) -> Int32 {
   let mut last = -1
   let mut i = from
   while i < to {

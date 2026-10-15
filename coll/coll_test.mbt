@@ -54,7 +54,7 @@ test "@coll #6.1 group_by：键序＝键的首现序，桶内保原序" {
   assert_eq(g.get('a'), Some(["apple", "ant", "a"]))
   assert_eq(g.get('b'), Some(["bee", "bear"]))
   assert_eq(g.get('c'), Some(["cat"]))
-  let empty_nums : Array[Int] = []
+  let empty_nums : Array[Int32] = []
   assert_eq(@coll.group_by(empty_nums, x => x % 3).keys().to_array(), [])
   assert_eq(@coll.group_by(empty_nums, x => x % 3).length(), 0)
 }
@@ -89,7 +89,7 @@ test "@coll #6.3 distinct / distinct_by：首现胜出（不是尾现，也不�
   assert_eq(@coll.distinct(["apple", "bee", "ant", "cat", "bear", "a"]), [
     "apple", "bee", "ant", "cat", "bear", "a",
   ])
-  let empty_i : Array[Int] = []
+  let empty_i : Array[Int32] = []
   assert_eq(@coll.distinct(empty_i), [])
   assert_eq(@coll.distinct([7, 7, 7]), [7])
   assert_eq(
@@ -193,8 +193,8 @@ test "@coll #6.8 union / intersection / subtract：去重的两个、保留左�
   assert_eq(@coll.intersection(b, a), [2, 3])
   assert_eq(@coll.subtract(a, b), [1])
   assert_eq(@coll.subtract(b, a), [4])
-  let e1 : Array[Int] = []
-  let e2 : Array[Int] = []
+  let e1 : Array[Int32] = []
+  let e2 : Array[Int32] = []
   assert_eq(@coll.union(e1, e2), [])
   assert_eq(@coll.union(e1, [1, 1, 2]), [1, 2])
   assert_eq(@coll.subtract(e1, [1]), [])
@@ -209,7 +209,7 @@ test "@coll #6.9 maximum / minimum：空给 None，并列取第一个" {
   assert_eq(@coll.maximum([2, 5, 5, 1]), Some(5))
   assert_eq(@coll.minimum([5, 1, 1, 2]), Some(1))
   assert_eq(@coll.maximum([7]), Some(7))
-  let es : Array[Int] = []
+  let es : Array[Int32] = []
   assert_eq(@coll.maximum(es), None)
   assert_eq(@coll.minimum(es), None)
   let xs = [3, 1, 4, 1, 5, 9, 2, 6, 5, 3, 5]
@@ -230,7 +230,7 @@ test "@coll #6.10 maximum_by_key / minimum_by_key：按选出来的键比，返�
     @coll.minimum_by_key(["a", "bbb", "cc"], s => s.char_length()),
     Some("a"),
   )
-  let er : Array[(String, Int)] = []
+  let er : Array[(String, Int32)] = []
   assert_eq(@coll.maximum_by_key(er, _ => 0), None)
   assert_eq(@coll.minimum_by_key(er, _ => 0), None)
 }

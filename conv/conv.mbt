@@ -79,7 +79,7 @@ pub fn to_char(j : Json) -> Char? {
 /// `Number` 优先用 `repr` 走 #9.9 的宽松文法（大整数不丢精度），否则向零截断；
 /// 非有限值、越出当前 `Int` 位宽 ⇒ `None`（**不跟随** Java 的低位回绕/saturate，读数证据见 spec §5）。
 /// `True`/`False` ⇒ 1/0；`String` ⇒ #9.9；`Array`/`Object` ⇒ `None`。
-pub fn to_int(j : Json) -> Int? {
+pub fn to_int(j : Json) -> Int32? {
   match j {
     Null | Array(_) | Object(_) => None
     True => Some(1)
@@ -195,7 +195,7 @@ pub fn parse_bool(s : String) -> Bool? {
 /// 顺序：`@text.trim` ⇒ 末字符 `D/d/L/l/F/f` 去尾（会吃掉 hex 尾字母，实测读数）⇒
 /// `0x/0X` 十六进制 ⇒ **含 `e/E` 直接判失败**（hutool 明确拒绝科学计数法）⇒
 /// 严格十进制 ⇒ 小数形态向零截断 ⇒ 界校验。任何一步不成立 ⇒ `None`。
-pub fn parse_int_loose(s : String) -> Int? {
+pub fn parse_int_loose(s : String) -> Int32? {
   loose_int_text(s)
 }
 
@@ -390,7 +390,7 @@ fn hex_unsign(t : String) -> (String, Bool) {
 }
 
 ///|
-fn parse_int_safe(s : String) -> Int? {
+fn parse_int_safe(s : String) -> Int32? {
   let v = @string.parse_int(s) catch { _ => return None }
   Some(v)
 }
@@ -404,7 +404,7 @@ fn parse_int64_safe(s : String) -> Int64? {
 ///|
 /// 宽松整数腿的共用体：**前段归一（trim + 去 D/L/F 尾 + 全角归一）在内部做**，
 /// 所以 Json 的字符串档、路径下标段都可以直接喂原文（spec #9.9 的顺序就是这条）。
-fn loose_int_text(s : String) -> Int? {
+fn loose_int_text(s : String) -> Int32? {
   let t = match loose_prepare(s) {
     Some(t) => t
     None => return None
@@ -665,7 +665,7 @@ fn num_form(t : String, allow_exp : Bool) -> NumForm? {
 ///|
 /// 小数/指数档 ⇒ `Double` 求值后**向零截断**（hutool 走 `BigDecimal/Number.intValue()`，同判），
 /// 再做本档界校验：非有限值、越出 `Int` 位宽 ⇒ `None`（不跟随 Java 的低位回绕与 saturate）。
-fn trunc_to_int(d : Double) -> Int? {
+fn trunc_to_int(d : Double) -> Int32? {
   if d != d {
     None
   } else {

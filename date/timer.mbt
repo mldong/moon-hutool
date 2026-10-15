@@ -118,7 +118,7 @@ fn pad9(v : Int64) -> String {
 
 ///|
 /// n 个 `0`
-fn zero_pad(n : Int) -> String {
+fn zero_pad(n : Int32) -> String {
   let b : Array[Char] = []
   for _ in 0..<n {
     b.push('0')
@@ -286,7 +286,7 @@ pub struct StopWatch {
   priv mut running : String?
   priv mut start_at : Int64
   priv mut total : Int64
-  priv mut count : Int
+  priv mut count : Int32
 }
 
 ///|
@@ -301,8 +301,8 @@ pub struct StopWatch {
 /// - 示例见 `date/README.mbt.md` 的「计时：读钟的活儿交给调用方」一节。
 pub fn stop_watch(
   clock : () -> Int64,
-  id? : String = "",
-  keep_task_list? : Bool = true,
+  id~ : String = "",
+  keep_task_list~ : Bool = true,
 ) -> StopWatch {
   StopWatch::{
     watch_id: id,
@@ -355,7 +355,7 @@ pub fn StopWatch::set_keep_task_list(self : StopWatch, keep : Bool) -> Unit {
 ///   （腿 `SN` 行四档全冻）。本库入参做成 `String?` 就是为了让这条暗档仍然可达，不"顺手"把它当成没传。
 pub fn StopWatch::start(
   self : StopWatch,
-  name? : String? = Some(""),
+  name~ : String? = Some(""),
 ) -> Unit raise DateError {
   if self.running is Some(_) {
     raise TimerAlreadyRunning
@@ -461,7 +461,7 @@ pub fn StopWatch::total_seconds(self : StopWatch) -> Double {
 ///
 /// - Note: **与留存表长解耦**：`keep_task_list=false` 时参照计数照加、表却拿不到
 ///   （腿 `keep=false|taskCount|2` 对 `taskInfoLen|ERR`）。
-pub fn StopWatch::task_count(self : StopWatch) -> Int {
+pub fn StopWatch::task_count(self : StopWatch) -> Int32 {
   self.count
 }
 
@@ -490,7 +490,7 @@ pub fn StopWatch::task_infos(
 ///   参照无参那档传的是 `null` 单位，字节码现读它落到 `NANOSECONDS` ⇒ 本库的默认值不是猜的。
 pub fn StopWatch::short_summary(
   self : StopWatch,
-  unit? : ChronoUnit = Nanoseconds,
+  unit~ : ChronoUnit = Nanoseconds,
 ) -> String {
   summary_line(self.watch_id, self.total_in(unit), unit.shot_name())
 }
@@ -502,7 +502,7 @@ pub fn StopWatch::short_summary(
 ///   整体写在 **spec §9.7**，每条都有与时钟无关的腿读数兜着（`NF`/`PC`/`PP`/`LS` 行）。
 pub fn StopWatch::pretty_print(
   self : StopWatch,
-  unit? : ChronoUnit = Nanoseconds,
+  unit~ : ChronoUnit = Nanoseconds,
 ) -> String {
   let shot = unit.shot_name()
   let head = summary_line(self.watch_id, self.total_in(unit), shot)
@@ -604,7 +604,7 @@ pub fn time_interval_nanos(clock : () -> Int64) -> GroupTimeInterval {
 /// - Note: 毫秒档下返回值就是 epoch 毫秒（腿 `T|start`）；重复 start 就是覆盖，参照没有"重复 start 报错"这一档。
 pub fn GroupTimeInterval::start(
   self : GroupTimeInterval,
-  id? : String = "",
+  id~ : String = "",
 ) -> Int64 {
   let t = (self.clock)()
   self.group[id] = t
@@ -615,7 +615,7 @@ pub fn GroupTimeInterval::start(
 /// 重新起表（参照 `TimeInterval::restart()`）。参照返回 `this` 供链式，本库返回 `Unit` ⇒ **不承诺链式**。
 pub fn GroupTimeInterval::restart(
   self : GroupTimeInterval,
-  id? : String = "",
+  id~ : String = "",
 ) -> Unit {
   let _ = self.start(id~)
 }
@@ -627,7 +627,7 @@ pub fn GroupTimeInterval::restart(
 /// - Note: 于是"没记过"与"记了但正好 0"两档在公开读数上**不可区分**——这是参照行为，不是本库偷懒。
 pub fn GroupTimeInterval::interval(
   self : GroupTimeInterval,
-  id? : String = "",
+  id~ : String = "",
 ) -> Int64 {
   match self.group.get(id) {
     None => 0L
@@ -642,7 +642,7 @@ pub fn GroupTimeInterval::interval(
 ///   毫秒档下就是一个巨大的 epoch 值）。这一档容易想当然写成"给 0"，spec §9.4 那行把算式抄在明面。
 pub fn GroupTimeInterval::interval_restart(
   self : GroupTimeInterval,
-  id? : String = "",
+  id~ : String = "",
 ) -> Int64 {
   let t = (self.clock)()
   // 参照：t - defaultIfNull(map.put(key, t), 0) ⇒ 未记过的键拿到的是那次读数本身
@@ -662,7 +662,7 @@ pub fn GroupTimeInterval::interval_restart(
 pub fn GroupTimeInterval::interval_in(
   self : GroupTimeInterval,
   unit : TimeUnit,
-  id? : String = "",
+  id~ : String = "",
 ) -> Int64 {
   let raw = self.interval(id~)
   // 两步：纳秒档先换成毫秒，再按单位分；参照这两处除法都是向零截断（腿 CU 行负档为凭）
@@ -678,7 +678,7 @@ pub fn GroupTimeInterval::interval_in(
 /// 差值毫秒数（参照 `intervalMs(String)` = `interval(key, DateUnit.MS)`）
 pub fn GroupTimeInterval::interval_ms(
   self : GroupTimeInterval,
-  id? : String = "",
+  id~ : String = "",
 ) -> Int64 {
   self.interval_in(Millisecond, id~)
 }
@@ -687,7 +687,7 @@ pub fn GroupTimeInterval::interval_ms(
 /// 差值秒数（参照 `intervalSecond(String)`；六件全部委托 `interval_in`，不留第二套算法）
 pub fn GroupTimeInterval::interval_second(
   self : GroupTimeInterval,
-  id? : String = "",
+  id~ : String = "",
 ) -> Int64 {
   self.interval_in(Second, id~)
 }
@@ -696,7 +696,7 @@ pub fn GroupTimeInterval::interval_second(
 /// 差值分钟数（参照 `intervalMinute(String)`）
 pub fn GroupTimeInterval::interval_minute(
   self : GroupTimeInterval,
-  id? : String = "",
+  id~ : String = "",
 ) -> Int64 {
   self.interval_in(Minute, id~)
 }
@@ -705,7 +705,7 @@ pub fn GroupTimeInterval::interval_minute(
 /// 差值小时数（参照 `intervalHour(String)`）
 pub fn GroupTimeInterval::interval_hour(
   self : GroupTimeInterval,
-  id? : String = "",
+  id~ : String = "",
 ) -> Int64 {
   self.interval_in(Hour, id~)
 }
@@ -714,7 +714,7 @@ pub fn GroupTimeInterval::interval_hour(
 /// 差值天数（参照 `intervalDay(String)`）
 pub fn GroupTimeInterval::interval_day(
   self : GroupTimeInterval,
-  id? : String = "",
+  id~ : String = "",
 ) -> Int64 {
   self.interval_in(Day, id~)
 }
@@ -723,7 +723,7 @@ pub fn GroupTimeInterval::interval_day(
 /// 差值周数（参照 `intervalWeek(String)`）
 pub fn GroupTimeInterval::interval_week(
   self : GroupTimeInterval,
-  id? : String = "",
+  id~ : String = "",
 ) -> Int64 {
   self.interval_in(Week, id~)
 }
@@ -734,7 +734,7 @@ pub fn GroupTimeInterval::interval_week(
 /// - Note: 中间量已经是毫秒 ⇒ 纳秒档在这里已经除过一次 1e6；本库委托 `format_between`（§9.5），不复制那套档位算法。
 pub fn GroupTimeInterval::interval_pretty(
   self : GroupTimeInterval,
-  id? : String = "",
+  id~ : String = "",
 ) -> String {
   format_between(self.interval_ms(id~))
 }

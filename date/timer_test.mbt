@@ -13,7 +13,7 @@ fn tm_fixed(v : Int64) -> () -> Int64 {
 ///|
 /// 脚本钟：按数组依次给读数，用尽之后重复最后一个（夹具因此只需写"变化点"）
 fn tm_steps(xs : Array[Int64]) -> () -> Int64 {
-  let i : Array[Int] = [0]
+  let i : Array[Int32] = [0]
   () => {
     let k = i[0]
     i[0] = k + 1
@@ -57,7 +57,7 @@ fn tm_one(n : Int64, id : String) -> @date.StopWatch {
 
 ///|
 /// 取 `pretty_print` 的第 n 行（数据行从下标 4 起）
-fn tm_line(s : String, n : Int) -> String {
+fn tm_line(s : String, n : Int32) -> String {
   s.split("\n").to_array()[n].to_owned()
 }
 

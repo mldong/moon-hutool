@@ -22,7 +22,7 @@ pub(all) enum WordWidth {
 pub suberror BloomError {
   /// 宽不是 32/64：参照 `AbstractFilter.init` 构造期抛 `RuntimeException("Error Machine number!")`
   /// （读数 `machine.16`、`machine.0`）
-  BadWidth(Int)
+  BadWidth(Int32)
   /// `size == 0`：参照侧构造成功、第一次 `h % size` 才抛 `ArithmeticException: / by zero`
   /// （`bf.m1.contains`/`bf.m1.add`/`bf.m0.contains`），本库**同点**报，不提前
   ZeroSize
@@ -31,7 +31,7 @@ pub suberror BloomError {
   BadBitCount(Int64)
   /// 词下标越界：参照抛未检的 `ArrayIndexOutOfBoundsException`
   /// （`oob.add.320`、`trunc.oob.999`、`oob.add.2^32`），本库换成可捕获的 typed 错误（两侧读数都在案）
-  IndexOutOfRange(Int64, Int)
+  IndexOutOfRange(Int64, Int32)
 }
 
 ///|
@@ -89,7 +89,7 @@ fn wrap32(x : Int64) -> Int64 {
 
 ///|
 // 本版 Int64 的移位要绕 `reinterpret_as_uint64`（同 `hash` 包 shl32/lshr32 那一对的形状）
-fn shl64(a : Int64, n : Int) -> Int64 {
+fn shl64(a : Int64, n : Int32) -> Int64 {
   (a.reinterpret_as_uint64() << n).reinterpret_as_int64()
 }
 
@@ -103,7 +103,10 @@ fn row_of(i : Int64, w : WordWidth) -> Int64 {
 ///|
 // 词下标 + 词内位。越界判定用的是**回绕之后**的行号，与参照侧 AIOOBE 里的 index 同值
 // （`oob.add.2^32` 报 134217728、`trunc.oob.999` 报 31）
-fn BitField::locate(self : BitField, i : Int64) -> (Int, Int) raise BloomError {
+fn BitField::locate(
+  self : BitField,
+  i : Int64,
+) -> (Int32, Int32) raise BloomError {
   let r = row_of(i, self.width)
   let c = (i & (width_bits(self.width) - 1L)).to_int()
   let len = self.words.length()
@@ -122,7 +125,7 @@ fn BitField::locate(self : BitField, i : Int64) -> (Int, Int) raise BloomError {
 /// 那两条读数才有落点（永真死格比红灯更危险）
 ///
 /// - Raises: `BloomError.BadWidth(n)`：`n` 不是 32 也不是 64
-pub fn word_width(n : Int) -> WordWidth raise BloomError {
+pub fn word_width(n : Int32) -> WordWidth raise BloomError {
   match n {
     32 => W32
     64 => W64
@@ -137,7 +140,7 @@ pub fn word_width(n : Int) -> WordWidth raise BloomError {
 /// - Raises: `BloomError.BadBitCount(nbits)`：`nbits < 0`（参照同点在 `new int[负数]`）
 pub fn new_bit_field(
   nbits : Int64,
-  width? : WordWidth = WordWidth::W32,
+  width~ : WordWidth = WordWidth::W32,
 ) -> BitField raise BloomError {
   let w = width_bits(width)
   if nbits < 0L {
@@ -197,7 +200,7 @@ pub fn BitField::words(self : BitField) -> Array[Int64] {
 
 ///|
 /// #18.13 词数 = `nbits / 宽` 的截断值（不是向上取整，理由同 #18.8；两侧读数 `w32.*`/`w64.*`）
-pub fn BitField::word_count(self : BitField) -> Int {
+pub fn BitField::word_count(self : BitField) -> Int32 {
   self.words.length()
 }
 
@@ -209,7 +212,7 @@ pub fn BitField::word_count(self : BitField) -> Int {
 pub fn new_filter(
   size : Int64,
   hash : HashFn,
-  width? : WordWidth = WordWidth::W32,
+  width~ : WordWidth = WordWidth::W32,
 ) -> Filter raise BloomError {
   // 参照 init() 先按 machineNum 选档再建图；本库那一步由 #18.7 把关（枚举里已是合法值），
   // 这里的 raise 只可能来自位图长度：size < 0（对应参照侧 new int[负数]）
@@ -302,7 +305,7 @@ fn h_sdbm(s : String) -> Int64 {
 /// #18.19 m 定档：`mNum = NumberUtil.div(m, 5).longValue()`（**BigDecimal 商截断**，不是整数除），
 /// `bits = mNum * 1024 * 1024 * 8`。总函数，负 m 照样算出负位数（`bits.-5|-8388608`），
 /// 报错留给 #18.8 与 #18.20 各自的时机
-pub fn bloom_bits_for(m : Int) -> Int64 {
+pub fn bloom_bits_for(m : Int32) -> Int64 {
   // NumberUtil.div(m, 5).longValue()：两个整数相除的 BigDecimal 商截断到 long，
   // 与"向零取整的整数除"同值（小数部分直接丢），负档 m=-5 也给 -1（读数 mnum.-5|-1）
   m.to_int64() / 5L * 1024L * 1024L * 8L
@@ -313,7 +316,7 @@ pub fn bloom_bits_for(m : Int) -> Int64 {
 /// （`bf.m6.*` 那 60 条序列读数的来源就是这个定档 + 这个顺序，顺序调换在落地轮会被抓到）
 ///
 /// - Raises: `BloomError.BadBitCount(bits)`：`bits < 0`（`bf.negm`）；`ZeroSize` 在第一次查询时（`bf.m1.*`）
-pub fn new_bloom(m : Int) -> Bloom raise BloomError {
+pub fn new_bloom(m : Int32) -> Bloom raise BloomError {
   let bits = bloom_bits_for(m)
   // 顺序照参照源码：DefaultFilter(javaDefaultHash) → ELF → JS → PJW → SDBM
   let hs : Array[(String) -> Int64] = [

@@ -22,7 +22,7 @@ pub(all) enum CronPart {
 }
 
 ///|
-fn part_index(p : CronPart) -> Int {
+fn part_index(p : CronPart) -> Int32 {
   match p {
     Second => 0
     Minute => 1
@@ -47,7 +47,7 @@ pub fn cron_part_name(p : CronPart) -> String {
 /// #19.8 该段的最小值（含）。
 /// - Note: 腿 C 的 P 行第三列七条：`SECOND 0`、`MINUTE 0`、`HOUR 0`、`DAY_OF_MONTH 1`、
 ///   `MONTH 1`、`DAY_OF_WEEK 0`、`YEAR 1970`
-pub fn cron_part_min(p : CronPart) -> Int {
+pub fn cron_part_min(p : CronPart) -> Int32 {
   match p {
     Second => 0
     Minute => 0
@@ -65,7 +65,7 @@ pub fn cron_part_min(p : CronPart) -> Int {
 ///   都当周日（spec §3 第 8 条），不是这里的界放宽了
 /// - Note: `YEAR` 是 2099，且这是**参照的界**，与本库内置时区表的窗口
 ///   `[1970-01-01, 2050-01-01)` 是两件事（spec §11 第 4 行）
-pub fn cron_part_max(p : CronPart) -> Int {
+pub fn cron_part_max(p : CronPart) -> Int32 {
   match p {
     Second => 59
     Minute => 59
@@ -83,7 +83,10 @@ pub fn cron_part_max(p : CronPart) -> Int {
 ///   任何归一（不把 24 小时折成 0~23、不把周日 7 折成 0）。本库同形
 /// - Note: 参照的文案是 `"{} value {} out of range: [{} , {}]"`（腿 C 的 ERR 行原文，
 ///   区间里那个空格照留在标签里），本库不复制模板，只带档名与值（spec §5 第 4 行）
-pub fn cron_part_check_value(p : CronPart, value : Int) -> Int raise CronError {
+pub fn cron_part_check_value(
+  p : CronPart,
+  value : Int32,
+) -> Int32 raise CronError {
   if value < cron_part_min(p) || value > cron_part_max(p) {
     raise OutOfRange(part_name(part_index(p)), value)
   }
@@ -116,7 +119,7 @@ fn slot_texts(b : CronBuilder) -> Array[String?] {
 
 ///|
 // 按段号写一格，其余照抄（值语义 ⇒ 每次造一个新格；记录更新语法在本库不通，逐字段摆）
-fn with_slot(b : CronBuilder, i : Int, v : String?) -> CronBuilder {
+fn with_slot(b : CronBuilder, i : Int32, v : String?) -> CronBuilder {
   let s = slot_texts(b)
   s[i] = v
   {
@@ -174,7 +177,7 @@ pub fn cron_builder_set(
 pub fn cron_builder_set_values(
   b : CronBuilder,
   part : CronPart,
-  values : Array[Int],
+  values : Array[Int32],
 ) -> CronBuilder raise CronError {
   for v in values {
     let _ = cron_part_check_value(part, v)
@@ -192,8 +195,8 @@ pub fn cron_builder_set_values(
 pub fn cron_builder_set_range(
   b : CronBuilder,
   part : CronPart,
-  begin : Int,
-  end : Int,
+  begin : Int32,
+  end : Int32,
 ) -> CronBuilder raise CronError {
   let _ = cron_part_check_value(part, begin)
   let _ = cron_part_check_value(part, end)

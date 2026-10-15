@@ -26,7 +26,11 @@
 /// - Parameters: `text` 明文；`shift` 位移量（可为负）；`number_support` 数字是否参与。
 /// - Returns: 恒出字符串、**从不抛错**——负数取模的落点即使掉出字母表也照样是合法字符（见上第 3 条）。
 /// - Note: 参照的 `null` 档（`IllegalArgumentException: message must not be null`）结构上到不了。
-pub fn rot_encode(text : String, shift : Int, number_support : Bool) -> String {
+pub fn rot_encode(
+  text : String,
+  shift : Int32,
+  number_support : Bool,
+) -> String {
   let buf = StringBuilder()
   for c in text {
     buf.write_char(rot_shift(c, shift, number_support))
@@ -38,7 +42,7 @@ pub fn rot_encode(text : String, shift : Int, number_support : Bool) -> String {
 /// 三段独立取模的共式（encode 用 `+shift`、decode 用 `-shift`，其余一字不差）。
 /// 各段结果恒在 ASCII 区间（负 shift 落点最低 `39`/`40`/`84`，都不越合法码位），
 /// `unsafe_to_char` 在这里不会产孤立代理。数字段只在 `number_support` 开着才参与。
-fn rot_shift(c : Char, shift : Int, number_support : Bool) -> Char {
+fn rot_shift(c : Char, shift : Int32, number_support : Bool) -> Char {
   let u = c.to_int()
   if number_support && u >= 48 && u <= 57 {
     ((u - 48 + shift) % 10 + 48).unsafe_to_char()
@@ -57,7 +61,11 @@ fn rot_shift(c : Char, shift : Int, number_support : Bool) -> Char {
 /// - Note: 参照 `decode` 不是 `encode` 取负的对称件（归一策略见 `rot_decode_char`），
 ///   因此 `rot13_decode(rot13_encode(x))` 只在部分档自逆（腿 `RT|d13` 组分布逐条钉）。
 ///   把解码"修成"真逆元是一处语义发明，禁止。
-pub fn rot_decode(text : String, shift : Int, number_support : Bool) -> String {
+pub fn rot_decode(
+  text : String,
+  shift : Int32,
+  number_support : Bool,
+) -> String {
   let buf = StringBuilder()
   for c in text {
     buf.write_char(rot_decode_char(c, shift, number_support))
@@ -78,7 +86,7 @@ pub fn rot_decode(text : String, shift : Int, number_support : Bool) -> String {
 /// 数字段处理完**不截断流程**——改写后的码元还要过两段字母判断（结果 48..57 不会落字母段，
 /// 但结构照抄不合并）。最终 `(char) temp` 的 16 位截断用 `& 0xFFFF` 对齐；参照腿覆盖
 /// `±104`，面内结果恒在 `[19, 226]`，不会走到代理区。
-fn rot_decode_char(c : Char, offset : Int, number_support : Bool) -> Char {
+fn rot_decode_char(c : Char, offset : Int32, number_support : Bool) -> Char {
   let mut t = c.to_int()
   if number_support && t >= 48 && t <= 57 {
     t = t - 48 - offset
@@ -109,7 +117,7 @@ fn rot_decode_char(c : Char, offset : Int, number_support : Bool) -> Char {
 /// - Parameters: `number_support` 默认 `true`——这一档不是选出来的，是参照单参 `encode13(String)`
 ///   字节码里那个 `iconst_1` 加上腿对撞出来的（数字夹具 `0189` 只有 `true` 侧相等）。
 /// - Returns: 等价于 `rot_encode(text, 13, number_support)`。
-pub fn rot13_encode(text : String, number_support? : Bool = true) -> String {
+pub fn rot13_encode(text : String, number_support~ : Bool = true) -> String {
   rot_encode(text, 13, number_support)
 }
 
@@ -118,6 +126,6 @@ pub fn rot13_encode(text : String, number_support? : Bool = true) -> String {
 ///
 /// - Returns: 等价于 `rot_decode(text, 13, number_support)`；默认档同样是 `true`。
 /// - Note: 与 `rot13_encode` **不是互逆**（上一条已给读数），名字照参照留，不改成 `rot13` 单件。
-pub fn rot13_decode(text : String, number_support? : Bool = true) -> String {
+pub fn rot13_decode(text : String, number_support~ : Bool = true) -> String {
   rot_decode(text, 13, number_support)
 }

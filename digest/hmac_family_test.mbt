@@ -13,7 +13,7 @@ fn k_of(s : String) -> Bytes {
 }
 
 ///|
-fn rep(n : Int, v : Int) -> Bytes {
+fn rep(n : Int32, v : Int32) -> Bytes {
   let buf = @buffer.Buffer()
   let mut i = 0
   while i < n {
@@ -24,12 +24,12 @@ fn rep(n : Int, v : Int) -> Bytes {
 }
 
 ///|
-fn bs_of(xs : Array[Int]) -> Bytes {
+fn bs_of(xs : Array[Int32]) -> Bytes {
   rep_of(xs)
 }
 
 ///|
-fn rep_of(xs : Array[Int]) -> Bytes {
+fn rep_of(xs : Array[Int32]) -> Bytes {
   let buf = @buffer.Buffer()
   for v in xs {
     buf.write_byte(v.to_byte())

@@ -26,13 +26,13 @@ pub suberror IdError {
   /// 时钟回拨超过容忍档：携带回拨的毫秒数
   ClockMovedBackwards(Int64)
   /// 注入的随机字节不够：(需要, 实得)
-  EntropyTooShort(Int, Int)
+  EntropyTooShort(Int32, Int32)
   /// `env.rand` 给不出熵（本机实测 wasm-gc 档就是这种）——绝不静默回落固定种子
   NoEntropy
   /// (输入, 实际长度, 期望长度)
-  BadLength(String, Int, Int)
+  BadLength(String, Int32, Int32)
   /// (输入, 第一个非法字符的下标)
-  BadHex(String, Int)
+  BadHex(String, Int32)
 }
 
 ///|
@@ -43,7 +43,7 @@ pub let snowflake_epoch : Int64 = 1288834974657L
 
 ///|
 /// 数据中心号与 worker 号的上界（各 5 位 ⇒ 0..31）
-pub let snowflake_max_node : Int = 31
+pub let snowflake_max_node : Int32 = 31
 
 ///|
 /// 序列号上界（12 位 ⇒ 0..4095，即每毫秒每节点最多 4096 个号）
@@ -53,8 +53,8 @@ pub let snowflake_max_sequence : Int64 = 4095L
 /// 雪花 ID 的四段解析结果（41 位时间戳 ‖ 5 位数据中心 ‖ 5 位 worker ‖ 12 位序列）
 pub struct SnowflakeParts {
   timestamp_millis : Int64
-  datacenter_id : Int
-  worker_id : Int
+  datacenter_id : Int32
+  worker_id : Int32
   sequence : Int64
 } derive(Eq, Compare)
 
@@ -71,8 +71,8 @@ pub struct IdRange {
 /// 状态（`last_timestamp`/`sequence`）挂在**实例**上而不是类级静态——hutool 是静态的，
 /// 多实例共享一个计数器且不可注入。
 pub struct Snowflake {
-  datacenter_id : Int
-  worker_id : Int
+  datacenter_id : Int32
+  worker_id : Int32
   tolerance_millis : Int64
   mut last_timestamp : Int64
   mut sequence : Int64
@@ -91,13 +91,13 @@ let ts_delta_max : Int64 = 2199023255551L
 
 ///|
 /// 位移常数（hutool `Snowflake` 与 MyBatis-Plus `IdWorker` 都是 22/17/12）
-let ts_shift : Int = 22
+let ts_shift : Int32 = 22
 
 ///|
-let dc_shift : Int = 17
+let dc_shift : Int32 = 17
 
 ///|
-let worker_shift : Int = 12
+let worker_shift : Int32 = 12
 
 ///|
 /// 一个 Int32 的无符号满值：ObjectId 的 machine/counter 上界，也是时间戳取低 32 位的掩码
@@ -105,7 +105,7 @@ let u32_max : Int64 = 4294967295L
 
 ///|
 /// 规范 UUID 串的长度（32 个十六进制字符 + 4 个连字符）
-let uuid_str_len : Int = 36
+let uuid_str_len : Int32 = 36
 
 ///|
 /// 越界就报 `FieldOutOfRange`，携带**被违反的那一侧**边界（破下界给下界、破上界给上界）
@@ -126,9 +126,9 @@ fn check_range(
 ///|
 fn check_int(
   name : String,
-  value : Int,
-  low : Int,
-  high : Int,
+  value : Int32,
+  low : Int32,
+  high : Int32,
 ) -> Unit raise IdError {
   check_range(name, value.to_int64(), low.to_int64(), high.to_int64())
 }
@@ -143,8 +143,8 @@ fn check_int(
 ///   （41 位装不下——hutool 不校验，符号位翻负后发出的是**负数 ID**）
 pub fn snowflake_id(
   timestamp_millis : Int64,
-  datacenter_id : Int,
-  worker_id : Int,
+  datacenter_id : Int32,
+  worker_id : Int32,
   sequence : Int64,
 ) -> Int64 raise IdError {
   check_int("datacenter_id", datacenter_id, 0, snowflake_max_node)
@@ -203,9 +203,9 @@ pub fn id_range_for_timestamps(
 ///   给 0 表示任何回拨都直接失败
 /// - Raises: `IdError.FieldOutOfRange`
 pub fn Snowflake::new(
-  datacenter_id : Int,
-  worker_id : Int,
-  tolerance_millis? : Int64 = 2000L,
+  datacenter_id : Int32,
+  worker_id : Int32,
+  tolerance_millis~ : Int64 = 2000L,
 ) -> Snowflake raise IdError {
   check_int("datacenter_id", datacenter_id, 0, snowflake_max_node)
   check_int("worker_id", worker_id, 0, snowflake_max_node)
@@ -285,7 +285,7 @@ pub let uuid_ns_x500 : String = "6ba7b814-9dad-11d1-80b4-00c04fd430c8"
 
 ///|
 /// 十六进制字符 → 数值，非十六进制给 `None`（大小写都收）
-fn hex_value(c : Char) -> Int? {
+fn hex_value(c : Char) -> Int32? {
   let v = c.to_int()
   if v >= 48 && v <= 57 {
     Some(v - 48)
@@ -300,7 +300,11 @@ fn hex_value(c : Char) -> Int? {
 
 ///|
 /// 取一个十六进制字符的值，非法即 `BadHex`（携带下标，脏串才定位得了）
-fn nibble_at(chars : Array[Char], src : String, at : Int) -> Int raise IdError {
+fn nibble_at(
+  chars : Array[Char],
+  src : String,
+  at : Int32,
+) -> Int32 raise IdError {
   match hex_value(chars[at]) {
     Some(v) => v
     None => raise BadHex(src, at)
@@ -309,7 +313,7 @@ fn nibble_at(chars : Array[Char], src : String, at : Int) -> Int raise IdError {
 
 ///|
 /// 规范串里连字符固定落在这四个下标
-fn dash_slot(i : Int) -> Bool {
+fn dash_slot(i : Int32) -> Bool {
   i == 8 || i == 13 || i == 18 || i == 23
 }
 
@@ -347,7 +351,7 @@ fn to_hex_lower(data : Bytes) -> String {
 
 ///|
 /// 置 version 与 variant（RFC 4122 §4.1.1）：`byte[6]` 高四位 = version，`byte[8]` 高两位 = 10
-fn with_version(data : Bytes, version : Int) -> Bytes {
+fn with_version(data : Bytes, version : Int32) -> Bytes {
   let arr = data.to_array()
   arr[6] = ((arr[6].to_int() & 0x0f) | (version << 4)).to_byte()
   arr[8] = ((arr[8].to_int() & 0x3f) | 0x80).to_byte()
@@ -422,7 +426,7 @@ pub fn name_uuid(name : String) -> String {
 ///
 /// - Raises: `IdError.BadLength`、`IdError.BadHex`
 /// - Note: 只读 version，不判 variant——"这串是不是合法 UUID"是 `valid` 包的活
-pub fn uuid_version(canonical : String) -> Int raise IdError {
+pub fn uuid_version(canonical : String) -> Int32 raise IdError {
   let b = uuid_bytes(canonical)
   b[6].to_int() >> 4
 }
@@ -518,7 +522,7 @@ pub fn is_object_id(s : String) -> Bool {
 /// - Raises: `IdError.FieldOutOfRange`
 pub fn ObjectIdGen::new(
   machine : Int64,
-  start_counter? : Int64 = 0L,
+  start_counter~ : Int64 = 0L,
 ) -> ObjectIdGen raise IdError {
   check_range("machine", machine, 0L, u32_max)
   check_range("counter", start_counter, 0L, u32_max)
@@ -544,13 +548,13 @@ pub let nano_id_alphabet : String = "_-0123456789abcdefghijklmnopqrstuvwxyzABCDE
 
 ///|
 /// 默认长度（21 字符，配合 64 字符表 ≈ 126 位熵）
-pub let nano_id_size : Int = 21
+pub let nano_id_size : Int32 = 21
 
 ///|
 /// hutool 的 mask 式 `(2 << (int) floor(log(len-1) / log(2))) - 1`，用整数位长代替 `log`。
 ///
 /// `len == 1` 时 Java 那侧 `(int)` 强转把 `-Infinity` 折成 0 ⇒ mask=1；本库照此定死（spec 04 #5）
-fn nano_mask(alphabet_len : Int) -> Int {
+fn nano_mask(alphabet_len : Int32) -> Int32 {
   if alphabet_len <= 1 {
     1
   } else {
@@ -565,7 +569,7 @@ fn nano_mask(alphabet_len : Int) -> Int {
 }
 
 ///|
-fn ceil_div(a : Int, b : Int) -> Int {
+fn ceil_div(a : Int32, b : Int32) -> Int32 {
   (a + b - 1) / b
 }
 
@@ -577,9 +581,9 @@ fn ceil_div(a : Int, b : Int) -> Int {
 ///
 /// - Raises: `IdError.FieldOutOfRange`（`len` 不在 1..255）、`IdError.BadLength`（`size <= 0`）
 pub fn nano_id_bytes_needed(
-  alphabet_len : Int,
-  size : Int,
-) -> Int raise IdError {
+  alphabet_len : Int32,
+  size : Int32,
+) -> Int32 raise IdError {
   check_int("alphabet_len", alphabet_len, 1, 255)
   if size < 1 {
     raise BadLength("nano_id size", size, 1)
@@ -593,9 +597,9 @@ pub fn nano_id_bytes_needed(
 fn nano_fill(
   buf : StringBuilder,
   chars : Array[Char],
-  want : Int,
+  want : Int32,
   rand : Bytes,
-) -> Int {
+) -> Int32 {
   let len = chars.length()
   let mask = nano_mask(len)
   let total = rand.length()
@@ -620,7 +624,7 @@ fn nano_fill(
 ///   `IdError.FieldOutOfRange`（空表、表长 ≥ 256、`size < 1`——都携带被违反的那一侧边界）
 pub fn nano_id(
   alphabet : String,
-  size : Int,
+  size : Int32,
   rand : Bytes,
 ) -> String raise IdError {
   let chars = alphabet.to_array()
@@ -643,7 +647,7 @@ pub fn nano_id(
 /// NanoId 便捷版：自定义表与长度，熵走 `env.rand`（每轮取 `nano_id_bytes_needed` 个字节）
 ///
 /// - Raises: `IdError.NoEntropy` 及 `nano_id` 的全部错误
-pub fn nano_id_random(alphabet : String, size : Int) -> String raise IdError {
+pub fn nano_id_random(alphabet : String, size : Int32) -> String raise IdError {
   let chars = alphabet.to_array()
   let need = nano_id_bytes_needed(chars.length(), size)
   let buf = StringBuilder()

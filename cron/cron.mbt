@@ -27,7 +27,7 @@ pub suberror CronError {
   BadAlias(String)
   /// 值落在该段区间之外：参照 `MINUTE value 60 out of range: [0 , 59]`；
   /// `-1` 这类"长度 ≤2 的负数"参照会绕过区间校验，本库按同一把尺子报错（spec §5 第 5 行）
-  OutOfRange(String, Int)
+  OutOfRange(String, Int32)
   /// 步进 ≤ 0：参照 `Non positive divisor for field: [*/0]`
   NonPositiveStep(String)
   /// 语法形状错（多于一个 `/` 等）：参照 `Invalid syntax of field: [{}]`
@@ -88,7 +88,7 @@ pub fn cron_of(pattern : String) -> Cron raise CronError {
 pub fn cron_match(
   c : Cron,
   dt : @date.DateTime,
-  match_second? : Bool = false,
+  match_second~ : Bool = false,
 ) -> Bool {
   let f = fields_of(dt, match_second)
   let mut r = false
@@ -166,7 +166,7 @@ pub fn cron_pattern_text(c : Cron) -> String {
 
 ///|
 // 段名只用于 OutOfRange 的携带值，取参照 Part.name() 的字面（spec §5 第 4 行：钉"哪一档"，不复制模板）
-fn part_name(i : Int) -> String {
+fn part_name(i : Int32) -> String {
   match i {
     0 => "SECOND"
     1 => "MINUTE"
@@ -179,7 +179,7 @@ fn part_name(i : Int) -> String {
 }
 
 ///|
-fn part_lo(i : Int) -> Int {
+fn part_lo(i : Int32) -> Int32 {
   match i {
     3 | 4 => 1
     6 => 1970
@@ -188,7 +188,7 @@ fn part_lo(i : Int) -> Int {
 }
 
 ///|
-fn part_hi(i : Int) -> Int {
+fn part_hi(i : Int32) -> Int32 {
   match i {
     0 | 1 => 59
     2 => 23
@@ -211,8 +211,8 @@ priv enum PmKind {
 priv struct Pm {
   kind : PmKind
   bits : Array[Bool] // PmBool：下标即值，长度 = 集合最大值 + 1（与参照的 boolean[] 同形）
-  min : Int // PmBool：集合最小值；PmYear：年集合最小值
-  years : Array[Int] // PmYear：升序去重
+  min : Int32 // PmBool：集合最小值；PmYear：年集合最小值
+  years : Array[Int32] // PmYear：升序去重
   last : Bool // 日档专用：集合含 31 ⇒ 参照 DayOfMonthMatcher.isLast()
 }
 
@@ -222,7 +222,7 @@ fn pm_always() -> Pm {
 }
 
 ///|
-fn has_int(arr : Array[Int], x : Int) -> Bool {
+fn has_int(arr : Array[Int32], x : Int32) -> Bool {
   let mut found = false
   for v in arr {
     if v == x {
@@ -234,7 +234,7 @@ fn has_int(arr : Array[Int], x : Int) -> Bool {
 }
 
 ///|
-fn pm_match(m : Pm, v : Int) -> Bool {
+fn pm_match(m : Pm, v : Int32) -> Bool {
   match m.kind {
     PmAlways => true
     // 参照：value == null || value >= bValues.length() ⇒ false
@@ -244,7 +244,7 @@ fn pm_match(m : Pm, v : Int) -> Bool {
 }
 
 ///|
-fn pm_next_after(m : Pm, v : Int) -> Int {
+fn pm_next_after(m : Pm, v : Int32) -> Int32 {
   match m.kind {
     PmAlways => v
     PmYear => {
@@ -282,7 +282,7 @@ fn pm_next_after(m : Pm, v : Int) -> Int {
 // 参照 PatternMatcher.getMin：AlwaysTrue ⇒ 段下界，BoolArray ⇒ 集合最小值。
 // 参照对 YearValueMatcher 在这一条上抛 IllegalArgumentException:Invalid matcher（腿读数 nx.34.*/nm.34.*），
 // 本库按参照自己"以下所有值置为最小值"的规矩给年集合的最小值（spec §5 第 9 行）
-fn pm_min(m : Pm, part : Int) -> Int {
+fn pm_min(m : Pm, part : Int32) -> Int32 {
   match m.kind {
     PmAlways => part_lo(part)
     PmBool => m.min
@@ -303,7 +303,7 @@ fn is_match_all(v : String) -> Bool {
 }
 
 ///|
-fn parse_int_opt(v : String) -> Int? {
+fn parse_int_opt(v : String) -> Int32? {
   let cs = v.to_array()
   let n = cs.length()
   if n == 0 {
@@ -330,7 +330,7 @@ fn parse_int_opt(v : String) -> Int? {
 }
 
 ///|
-fn month_alias(s : String) -> Int? {
+fn month_alias(s : String) -> Int32? {
   match s.to_lower() {
     "jan" | "january" => Some(1)
     "feb" | "february" => Some(2)
@@ -349,7 +349,7 @@ fn month_alias(s : String) -> Int? {
 }
 
 ///|
-fn week_alias(s : String) -> Int? {
+fn week_alias(s : String) -> Int32? {
   match s.to_lower() {
     "sun" | "sunday" => Some(0)
     "mon" | "monday" => Some(1)
@@ -364,7 +364,7 @@ fn week_alias(s : String) -> Int? {
 
 ///|
 // 参照 PartParser.parseAlias：`L` 优先（取该段最大值），再按月/周别名；都不中就无别名
-fn parse_alias(part : Int, v : String) -> Int? {
+fn parse_alias(part : Int32, v : String) -> Int32? {
   if v.to_lower() == "l" {
     Some(part_hi(part))
   } else if part == 4 {
@@ -377,7 +377,11 @@ fn parse_alias(part : Int, v : String) -> Int? {
 }
 
 ///|
-fn parse_number(part : Int, v : String, check : Bool) -> Int raise CronError {
+fn parse_number(
+  part : Int32,
+  v : String,
+  check : Bool,
+) -> Int32 raise CronError {
   let raw = match parse_int_opt(v) {
     Some(n) => n
     None =>
@@ -405,7 +409,12 @@ fn parse_number(part : Int, v : String, check : Bool) -> Int raise CronError {
 }
 
 ///|
-fn append_range(from : Int, to : Int, step : Int, out : Array[Int]) -> Unit {
+fn append_range(
+  from : Int32,
+  to : Int32,
+  step : Int32,
+  out : Array[Int32],
+) -> Unit {
   let mut i = from
   while i <= to {
     out.push(i)
@@ -415,11 +424,11 @@ fn append_range(from : Int, to : Int, step : Int, out : Array[Int]) -> Unit {
 
 ///|
 fn parse_range(
-  part : Int,
+  part : Int32,
   value : String,
-  step0 : Int,
-) -> Array[Int] raise CronError {
-  let out : Array[Int] = []
+  step0 : Int32,
+) -> Array[Int32] raise CronError {
+  let out : Array[Int32] = []
   let mut step = step0
   if value.to_array().length() <= 2 {
     // 参照：长度 ≤2 时不认区间，"单值/全配 + 可选步进"
@@ -473,7 +482,7 @@ fn parse_range(
 }
 
 ///|
-fn parse_step(part : Int, value : String) -> Array[Int] raise CronError {
+fn parse_step(part : Int32, value : String) -> Array[Int32] raise CronError {
   let parts = split_drop(value, '/')
   match parts.length() {
     1 => parse_range(part, value, -1)
@@ -490,8 +499,8 @@ fn parse_step(part : Int, value : String) -> Array[Int] raise CronError {
 }
 
 ///|
-fn parse_array(part : Int, value : String) -> Array[Int] raise CronError {
-  let out : Array[Int] = []
+fn parse_array(part : Int32, value : String) -> Array[Int32] raise CronError {
+  let out : Array[Int32] = []
   for tok in split_drop(value, ',') {
     for v in parse_step(part, tok) {
       if !has_int(out, v) {
@@ -503,7 +512,7 @@ fn parse_array(part : Int, value : String) -> Array[Int] raise CronError {
 }
 
 ///|
-fn parse_part(part : Int, value : String) -> Pm raise CronError {
+fn parse_part(part : Int32, value : String) -> Pm raise CronError {
   if is_match_all(value) {
     pm_always()
   } else {
@@ -512,7 +521,7 @@ fn parse_part(part : Int, value : String) -> Pm raise CronError {
       raise BadValue(value)
     }
     if part == 6 {
-      let ys : Array[Int] = []
+      let ys : Array[Int32] = []
       for v in vs {
         if !has_int(ys, v) {
           ys.push(v)
@@ -588,7 +597,7 @@ fn parse_single(text : String) -> Sub raise CronError {
 }
 
 ///|
-fn fields_of(dt : @date.DateTime, match_second : Bool) -> Array[Int] {
+fn fields_of(dt : @date.DateTime, match_second : Bool) -> Array[Int32] {
   // 参照 PatternUtil.getFields：不匹配秒时秒位给 -1（match 里 `second < 0` 直接放行）
   let w = dt.date.day_of_week() // date 包是 ISO：周一 1 … 周日 7
   [
@@ -611,7 +620,7 @@ fn fields_of(dt : @date.DateTime, match_second : Bool) -> Array[Int] {
 }
 
 ///|
-fn sub_match(sm : Array[Pm], f : Array[Int]) -> Bool {
+fn sub_match(sm : Array[Pm], f : Array[Int32]) -> Bool {
   (f[0] < 0 || pm_match(sm[0], f[0])) &&
   pm_match(sm[1], f[1]) &&
   pm_match(sm[2], f[2]) &&
@@ -623,7 +632,7 @@ fn sub_match(sm : Array[Pm], f : Array[Int]) -> Bool {
 }
 
 ///|
-fn last_day(year : Int, month : Int) -> Int {
+fn last_day(year : Int32, month : Int32) -> Int32 {
   // 回退查找能把月值送成 13（`0 12 L * *` 在 2024-12-31 23:59:01 实测给 2025-01-31 12:00:00），
   // 参照侧 Month.of 按月数取模，这里同口径折回 1..12 再取月末
   let m = ((month - 1) % 12 + 12) % 12 + 1
@@ -633,13 +642,13 @@ fn last_day(year : Int, month : Int) -> Int {
 }
 
 ///|
-fn match_day(m : Pm, v : Int, month : Int, year : Int) -> Bool {
+fn match_day(m : Pm, v : Int32, month : Int32, year : Int32) -> Bool {
   // 参照 DayOfMonthMatcher.match：集合命中，或"28~31 且集合含 31 且正好是月末"
   pm_match(m, v) || (m.last && v > 27 && v == last_day(year, month))
 }
 
 ///|
-fn set_to_min(sm : Array[Pm], nv : Array[Int], to_part : Int) -> Unit {
+fn set_to_min(sm : Array[Pm], nv : Array[Int32], to_part : Int32) -> Unit {
   let mut j = 0
   while j <= to_part && j <= 6 {
     if j == 3 && sm[3].last {
@@ -652,8 +661,8 @@ fn set_to_min(sm : Array[Pm], nv : Array[Int], to_part : Int) -> Unit {
 }
 
 ///|
-fn sub_next_values(sm : Array[Pm], values : Array[Int]) -> Array[Int] {
-  let nv : Array[Int] = []
+fn sub_next_values(sm : Array[Pm], values : Array[Int32]) -> Array[Int32] {
+  let nv : Array[Int32] = []
   for v in values {
     nv.push(v)
   }
@@ -706,7 +715,7 @@ fn sub_next_values(sm : Array[Pm], values : Array[Int]) -> Array[Int] {
 }
 
 ///|
-fn date_safe(y : Int, m : Int, d : Int) -> @date.Date {
+fn date_safe(y : Int32, m : Int32, d : Int32) -> @date.Date {
   @date.Date::of(y, m, d) catch {
     _ => @date.Date::from_epoch_days(0L)
   }
@@ -720,7 +729,7 @@ fn day_start(d : @date.Date) -> @date.DateTime {
 }
 
 ///|
-fn from_values(v : Array[Int]) -> @date.DateTime {
+fn from_values(v : Array[Int32]) -> @date.DateTime {
   // 参照把七个字段逐个 set 回 **lenient Calendar**：不仅日超出该月天数会滚进下月，
   // 回退查找还能把分/时给出 60/24 这类越界值（`* * * * *` 在 2024-12-31 23:59:01
   // 实测滚成 2025-01-01 00:00:00），所以这里按 epoch 秒整体折算，逐字段校验反而错
@@ -744,7 +753,7 @@ fn from_values(v : Array[Int]) -> @date.DateTime {
 }
 
 ///|
-fn earliest(c : Cron, values : Array[Int]) -> @date.DateTime {
+fn earliest(c : Cron, values : Array[Int32]) -> @date.DateTime {
   // 参照 nextMatchAfter(int[], zone)：各匹配器各给一个候选，取最早的那个
   // （第二批的带区名入口共用同一台引擎，实现挪在 zone_util.mbt 的 `earliest_of`，
   // 这里只留一层转调——一条判据不留两处实现）

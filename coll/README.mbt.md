@@ -149,7 +149,7 @@ test "极值的三档：正常、并列、空" {
   // 并列取第一个，不是最后一个
   assert_eq(@coll.maximum([2, 5, 5, 1]), Some(5))
   assert_eq(@coll.minimum([5, 1, 1, 2]), Some(1))
-  let es : Array[Int] = []
+  let es : Array[Int32] = []
   assert_eq(@coll.maximum(es), None)
   // 按键取极值：比的是键，返回的是元素本身
   let recs = [("x", 5), ("y", 9), ("z", 9), ("w", 1)]

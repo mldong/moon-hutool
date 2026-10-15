@@ -10,7 +10,7 @@
 ///|
 // 四档区间的码位版（#20.1 的唯一判据源，参照侧 `isValidChar(char)` 逐码元走、本库逐码位走，
 // 区间全在 BMP 内，astral 码位两个码元都落在四档之外 ⇒ 两侧同值，读数 `valid.cp.1f34e|false,false`）
-fn is_valid_cp(cp : Int) -> Bool {
+fn is_valid_cp(cp : Int32) -> Bool {
   (cp >= 0x4e00 && cp <= 0x9fff) ||
   (cp >= 97 && cp <= 122) ||
   (cp >= 65 && cp <= 90) ||
@@ -49,7 +49,7 @@ pub fn remove_sign(s : String) -> String {
 ///|
 // 最长公共子序列的长度：滚动一行 DP（参照侧 `generateMatrix` 是同一张表的完整版，长度只取右下角）。
 // 参照侧在**码元**上比、本库在**码位**上比；两侧同值由腿 C（Python 独立实现）逐格对撞过。
-fn lcs_length(a : Array[Char], b : Array[Char]) -> Int {
+fn lcs_length(a : Array[Char], b : Array[Char]) -> Int32 {
   let n = b.length()
   let mut prev = Array::make(n + 1, 0)
   for x in a {
@@ -130,7 +130,7 @@ fn lcs_string(a : Array[Char], b : Array[Char]) -> String {
 // （`sim.33|4.882813E-4` 对裸商 `div.tie.raw|4.8828125E-4` 就是这条的凭据）。
 // 溢出档：`rem < den ≤` 串长，`rem * 10` 要越过 `Int64` 需要一条 9×10^17 长的串——wasm32 档
 // 串长封顶 2^31，native 档也要先耗尽内存才够到，故本包不留这一档。
-fn div_half_up_10(num : Int, den : Int) -> Double {
+fn div_half_up_10(num : Int32, den : Int32) -> Double {
   let d = den.to_int64()
   let whole = num.to_int64() / d
   let mut rem = num.to_int64() % d
@@ -220,7 +220,7 @@ pub fn similar(str_a : String, str_b : String) -> Double {
 pub fn similar_percent(
   str_a : String,
   str_b : String,
-  scale : Int,
+  scale : Int32,
 ) -> String raise @num.NumError {
   let sc = if scale < 0 { 0 } else { scale }
   // 默认档是 HalfUp（#8.11），参照侧的 PercentInstance 默认档是 HALF_EVEN，所以 mode 必须显式传

@@ -6,7 +6,7 @@
 // 人不手打一个字符。异常档只钉"抛不抛"，变体名不由这条腿授权。
 
 ///|
-fn t4_rain(cur : Int, total : Int, cnt : Int) -> String {
+fn t4_rain(cur : Int32, total : Int32, cnt : Int32) -> String {
   let mut s = ""
   for v in @typex.page_rainbow_count(cur, total, cnt) {
     if s != "" {

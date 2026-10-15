@@ -27,8 +27,8 @@
 pub struct FoundWord {
   word : String
   found : String
-  start : Int
-  end : Int
+  start : Int32
+  end : Int32
 }
 
 ///|
@@ -41,13 +41,13 @@ pub struct WordTree {
   // 节点表：`children[i][c] = j` 表示节点 i 吃字符 c 转到节点 j，`ends[j]` 表示"走到 j 就是完整词"。
   // 参照实现把结束标记挂在**父节点的字符集**上（`parent.setEnd(currentChar)`），这里等价地挂在目标节点上——
   // 只是形状不同；`红、领巾` 命中 `红领巾` 靠的是"停顿字符不进转移、但占住 found 区间"。
-  children : Array[Map[Char, Int]]
+  children : Array[Map[Char, Int32]]
   ends : Array[Bool]
 }
 
 ///|
 // 新节点：空转移表 + 非终止。返回新节点下标（根是 0，所以首个新节点恒为 1）。
-fn new_node(children : Array[Map[Char, Int]], ends : Array[Bool]) -> Int {
+fn new_node(children : Array[Map[Char, Int32]], ends : Array[Bool]) -> Int32 {
   children.push(Map([]))
   ends.push(false)
   children.length() - 1
@@ -57,7 +57,7 @@ fn new_node(children : Array[Map[Char, Int]], ends : Array[Bool]) -> Int {
 // 把一个词并进树里：只有"参与匹配"的字符进转移（停顿字符直接跳过，参照实现同一条），
 // 路径最后一个节点标终止。**一个字符都没进过树就不标终止**——这正是"空串/全停顿词永不命中"的来处。
 fn add_word(
-  children : Array[Map[Char, Int]],
+  children : Array[Map[Char, Int32]],
   ends : Array[Bool],
   word : String,
 ) -> Unit {
@@ -83,8 +83,8 @@ fn add_word(
 
 ///|
 // 码点 → 该码点起点的 **UTF-16 码元**下标（承诺口径见契约 §0 规则 2：非 BMP 字符占两位）。
-fn unit_offsets(cs : Array[Char]) -> Array[Int] {
-  let out : Array[Int] = []
+fn unit_offsets(cs : Array[Char]) -> Array[Int32] {
+  let out : Array[Int32] = []
   let mut acc = 0
   for c in cs {
     out.push(acc)
@@ -97,7 +97,7 @@ fn unit_offsets(cs : Array[Char]) -> Array[Int] {
 
 ///|
 // 取码点闭区间 `lo..=hi` 的原文（`found` 用，停顿字符原样在内）。
-fn span(cs : Array[Char], lo : Int, hi : Int) -> String {
+fn span(cs : Array[Char], lo : Int32, hi : Int32) -> String {
   let buf = StringBuilder()
   let mut k = lo
   while k <= hi {
@@ -131,7 +131,7 @@ fn key_text(ks : Array[Char]) -> String {
 /// let t = @dfa.new_word_tree(["ab", "b"])
 /// ```
 pub fn new_word_tree(words : Array[String]) -> WordTree {
-  let children : Array[Map[Char, Int]] = []
+  let children : Array[Map[Char, Int32]] = []
   let ends : Array[Bool] = []
   let _ = new_node(children, ends)
   for w in words {
@@ -207,7 +207,7 @@ pub fn WordTree::match_all_words(
 pub fn WordTree::match_all_mode(
   self : WordTree,
   text : String,
-  limit : Int,
+  limit : Int32,
   density : Bool,
   greed : Bool,
 ) -> Array[String] {
@@ -225,7 +225,7 @@ pub fn WordTree::match_all_mode(
 pub fn WordTree::match_all_words_mode(
   self : WordTree,
   text : String,
-  limit : Int,
+  limit : Int32,
   density : Bool,
   greed : Bool,
 ) -> Array[FoundWord] {
@@ -326,4 +326,4 @@ pub fn is_not_stop_char(c : Char) -> Bool {
 ///|
 // 停顿字符表的**只读缓存**（顶层绑定，不是全局可变注册表——没有一个写入口）。
 // 每个字符重新 alloc 一张 327 项的表，BMP 扫描那种调用量下会白烧分配。
-let stop_cache : Array[Int] = stop_table()
+let stop_cache : Array[Int32] = stop_table()

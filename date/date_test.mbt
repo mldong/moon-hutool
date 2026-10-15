@@ -20,7 +20,7 @@
 // `Date::format` 遇到时间占位串必须报错而不是补 `00:00:00`（#2.6）。
 
 ///|
-fn d(year : Int, month : Int, day : Int) -> @date.Date {
+fn d(year : Int32, month : Int32, day : Int32) -> @date.Date {
   @date.Date::of(year, month, day) catch {
     _ => abort("夹具日期本身必须合法：\{year}-\{month}-\{day}")
   }
@@ -28,13 +28,13 @@ fn d(year : Int, month : Int, day : Int) -> @date.Date {
 
 ///|
 fn dt(
-  year : Int,
-  month : Int,
-  day : Int,
-  hour : Int,
-  minute : Int,
-  second : Int,
-  milli : Int,
+  year : Int32,
+  month : Int32,
+  day : Int32,
+  hour : Int32,
+  minute : Int32,
+  second : Int32,
+  milli : Int32,
 ) -> @date.DateTime {
   @date.DateTime::of(d(year, month, day), hour, minute, second, milli) catch {
     _ => abort("夹具时刻本身必须合法")

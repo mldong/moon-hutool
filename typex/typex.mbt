@@ -34,25 +34,25 @@ pub struct Version {
 ///|
 /// 段：参照的 `List<Object>` 只有 `Integer` / `String` 两种实际类型，这里收成两变体。
 enum Token {
-  Num(Int)
+  Num(Int32)
   Str(String)
 }
 
 ///|
 // 下面四个是 UTF-16 码元值：'.' '-' '+' '0'。参照全程拿 `char` 比，本库把输入摊成码元数组后比同一些数。
-let u_dot : Int = 0x2e
+let u_dot : Int32 = 0x2e
 
 ///|
-let u_dash : Int = 0x2d
+let u_dash : Int32 = 0x2d
 
 ///|
-let u_plus : Int = 0x2b
+let u_plus : Int32 = 0x2b
 
 ///|
-let u_zero : Int = 0x30
+let u_zero : Int32 = 0x30
 
 ///|
-fn is_digit_unit(u : Int) -> Bool {
+fn is_digit_unit(u : Int32) -> Bool {
   // 参照 `CharUtil.isNumber`：`ch >= '0' && ch <= '9'`（现读 CharUtil.java:151-153），ASCII 档
   u >= u_zero && u <= 0x39
 }
@@ -61,7 +61,7 @@ fn is_digit_unit(u : Int) -> Bool {
 /// 参照 `Math.toIntExact` 之前的 Java `int` 口径：取低 32 位、按补码读。
 /// `Int` 位宽随目标变（wasm/js/wasm-gc 是 32 位，native 是 64 位），不回绕就会四档三样，
 /// 而这里要的不是"更大范围"，是**与参照同值**。
-fn wrap32(v : Int64) -> Int {
+fn wrap32(v : Int64) -> Int32 {
   let lo = v & 0xffffffffL
   if lo >= 0x80000000L {
     (lo - 0x100000000L).to_int()
@@ -74,7 +74,7 @@ fn wrap32(v : Int64) -> Int {
 /// 码元序列 → 串。代理对（高位 0xd800-0xdbff 紧跟低位 0xdc00-0xdfff）合回一个码位；
 /// 解析时代理对永不被切断（`take_*` 只在 `.` `-` `+` 与数字处停，代理对两个码元都不在其中），
 /// 所以这里不需要处理"半个代理对"。
-fn units_to_string(us : Array[Int], b : Int, e : Int) -> String {
+fn units_to_string(us : Array[Int32], b : Int32, e : Int32) -> String {
   let cs : Array[Char] = []
   let mut i = b
   while i < e {
@@ -83,7 +83,7 @@ fn units_to_string(us : Array[Int], b : Int, e : Int) -> String {
     if hi_surrogate && i + 1 < e {
       let lo = us[i + 1]
       if lo >= 0xdc00 && lo <= 0xdfff {
-        let cp : Int = (u - 0xd800) * 0x400 + (lo - 0xdc00) + 0x10000
+        let cp : Int32 = (u - 0xd800) * 0x400 + (lo - 0xdc00) + 0x10000
         cs.push(cp.unsafe_to_char())
         i = i + 2
         continue
@@ -98,8 +98,8 @@ fn units_to_string(us : Array[Int], b : Int, e : Int) -> String {
 ///|
 /// 串 → UTF-16 码元序列（代理对拆开）。参照的 `charAt`/`substring`/`String.compareTo` 全是码元口径，
 /// 本库解析与比较两侧都走同一条单位。
-fn units_of(s : String) -> Array[Int] {
-  let out : Array[Int] = []
+fn units_of(s : String) -> Array[Int32] {
+  let out : Array[Int32] = []
   for c in s.to_array() {
     let cp = c.to_int()
     if cp > 0xffff {
@@ -117,7 +117,7 @@ fn units_of(s : String) -> Array[Int] {
 /// 参照 `Version.takeNumber(String, int, List<Object>)`：从 `start` 起把连续数字并进一个 `int`。
 /// 两处参照怪癖都跟随：① `start` 处那个字符**无条件**按 `c - '0'` 当首位（于是 `v1.2.3` 首段 701）；
 /// ② 累加是 Java `int`，越界回绕 ⇒ 这里先 `Int64` 累加再 `wrap32`（模 2^32 域里 `+`/`*` 同余，一次回绕与逐步回绕同值）。
-fn take_number(us : Array[Int], start : Int, acc : Array[Token]) -> Int {
+fn take_number(us : Array[Int32], start : Int32, acc : Array[Token]) -> Int32 {
   let n = us.length()
   let mut d : Int64 = (us[start] - u_zero).to_int64()
   let mut i = start + 1
@@ -136,7 +136,7 @@ fn take_number(us : Array[Int], start : Int, acc : Array[Token]) -> Int {
 
 ///|
 /// 参照 `Version.takeString(String, int, List<Object>)`：从 `start` 起吃到 `.` `-` `+` 或数字为止（不含）。
-fn take_string(us : Array[Int], start : Int, acc : Array[Token]) -> Int {
+fn take_string(us : Array[Int32], start : Int32, acc : Array[Token]) -> Int32 {
   let n = us.length()
   let mut i = start + 1
   while i < n {
@@ -242,7 +242,7 @@ fn token_text(t : Token) -> String {
 ///|
 /// 参照的 `String.compareTo` / `o1.toString().compareTo(o2.toString())` 都是 **UTF-16 码元** 序，
 /// 逐码元比而不是逐码位比——`V`/`v`、`_`/`4` 两档的符号就是这么来的。
-fn cmp_units(a : String, b : String) -> Int {
+fn cmp_units(a : String, b : String) -> Int32 {
   let ua = units_of(a)
   let ub = units_of(b)
   let n = if ua.length() < ub.length() { ua.length() } else { ub.length() }
@@ -269,7 +269,7 @@ fn cmp_units(a : String, b : String) -> Int {
 /// 参照 `Version.compareTokens(List<Object>, List<Object>)`：同类型按类型比，
 /// 类型不同则把两侧都当字符串比（`Integer.toString` 就是十进制）。
 /// 参照返回的是原始差值（如 `ts1.size() - ts2.size()`、码元差），本库只承诺符号档（spec §5 第 4 行）。
-fn compare_tokens(ts1 : Array[Token], ts2 : Array[Token]) -> Int {
+fn compare_tokens(ts1 : Array[Token], ts2 : Array[Token]) -> Int32 {
   let n = if ts1.length() < ts2.length() { ts1.length() } else { ts2.length() }
   let mut i = 0
   while i < n {
@@ -297,7 +297,7 @@ fn compare_tokens(ts1 : Array[Token], ts2 : Array[Token]) -> Int {
 }
 
 ///|
-fn cmp_token(a : Token, b : Token) -> Int {
+fn cmp_token(a : Token, b : Token) -> Int32 {
   match a {
     Str(s) => cmp_units(s, token_text(b))
     Num(x) =>
@@ -313,7 +313,7 @@ fn cmp_token(a : Token, b : Token) -> Int {
 /// - Returns: `-1` / `0` / `1`（参照给的是原始差值，如段数差 `-2`、码元差 `-27`；腿只钉符号档，契约也只钉符号）
 /// - Raises: 无
 /// - Note: hutool 对位 `int compareTo(Version)`
-pub fn version_compare(a : Version, b : Version) -> Int {
+pub fn version_compare(a : Version, b : Version) -> Int32 {
   let c = compare_tokens(a.sequence, b.sequence)
   if c != 0 {
     return c
@@ -346,14 +346,14 @@ pub fn version_equals(a : Version, b : Version) -> Bool {
 ///|
 /// 参照 `PageUtil.firstPageNo`：`private static int`，默认 0。本库同样全局可变，
 /// 形式是单元素数组当格子（本版顶层 `let mut` 直接判词法错，数组元素本身可变）。
-let first_page_cell : Array[Int] = [0]
+let first_page_cell : Array[Int32] = [0]
 
 ///|
 /// #23.6 首尾页号（参照全局静态 `firstPageNo`，默认 0）
 /// - Returns: 当前档位
 /// - Raises: 无
 /// - Note: hutool 对位 `static int getFirstPageNo()`
-pub fn typex_first_page_no() -> Int {
+pub fn typex_first_page_no() -> Int32 {
   first_page_cell[0]
 }
 
@@ -363,7 +363,7 @@ pub fn typex_first_page_no() -> Int {
 /// - Raises: 无
 /// - Note: 这是**全局可变状态**，并发或跨用例互盖 ⇒ 测试里每条用例先显式设档。
 ///   参照不校验取值（注释说"可以为 0 或者 1"，实际任何 `int` 都收，负数档照算），本库同样不校验。
-pub fn typex_set_first_page_no(n : Int) -> Unit {
+pub fn typex_set_first_page_no(n : Int32) -> Unit {
   first_page_cell[0] = n
 }
 
@@ -372,7 +372,7 @@ pub fn typex_set_first_page_no(n : Int) -> Unit {
 /// - Raises: 无
 /// - Note: hutool 对位 `static int getStart(int, int)`：页号低于 `firstPageNo` 就夹到 `firstPageNo`
 ///   （所以负页号给 0，`V P5` 读数），每页条数 `< 1` 一律当 0（不是夹成 1）。
-pub fn page_get_start(page : Int, size : Int) -> Int {
+pub fn page_get_start(page : Int32, size : Int32) -> Int32 {
   let p = if page < first_page_cell[0] { first_page_cell[0] } else { page }
   let s = if size < 1 { 0 } else { size }
   wrap32((p.to_int64() - first_page_cell[0].to_int64()) * s.to_int64())
@@ -383,13 +383,13 @@ pub fn page_get_start(page : Int, size : Int) -> Int {
 /// - Raises: 无
 /// - Note: hutool 对位 `static int getEnd(int, int)` = `getStart + (size < 1 ? 0 : size)`；
 ///   **不减 1**（`P0.end|10` 而非 9，javadoc 里那句"页码：0，每页10 =》 9"与实现不符，以腿为准）。
-pub fn page_get_end(page : Int, size : Int) -> Int {
+pub fn page_get_end(page : Int32, size : Int32) -> Int32 {
   let start = page_get_start(page, size)
   end_by_start(start, size)
 }
 
 ///|
-fn end_by_start(start : Int, size : Int) -> Int {
+fn end_by_start(start : Int32, size : Int32) -> Int32 {
   let s = if size < 1 { 0 } else { size }
   wrap32(start.to_int64() + s.to_int64())
 }
@@ -398,7 +398,7 @@ fn end_by_start(start : Int, size : Int) -> Int {
 /// #23.10 起始与结束行号成对给出
 /// - Raises: 无
 /// - Note: hutool 对位 `static int[] transToStartEnd(int, int)`（参照出口是长度为 2 的数组，本库给元组）
-pub fn page_trans_to_start_end(page : Int, size : Int) -> (Int, Int) {
+pub fn page_trans_to_start_end(page : Int32, size : Int32) -> (Int32, Int32) {
   let start = page_get_start(page, size)
   (start, end_by_start(start, size))
 }
@@ -410,7 +410,7 @@ pub fn page_trans_to_start_end(page : Int, size : Int) -> (Int, Int) {
 /// - Note: hutool 对位 `static int totalPage(int, int)`（转手 `totalPage((long) count, size)`）。
 ///   `size == 0` 直接给 0（不是除零报错，`P2004`）；`count` 为负时 Java 的 `%` 与 `/` 都向零截断，
 ///   于是 `-5 / 10 + 1 = 1`（`P2005` 读数），MoonBit 的 `Int64` 除余同口径。
-pub fn page_total_page(count : Int, size : Int) -> Int {
+pub fn page_total_page(count : Int32, size : Int32) -> Int32 {
   page_total_page_long(count.to_int64(), size)
 }
 
@@ -420,7 +420,7 @@ pub fn page_total_page(count : Int, size : Int) -> Int {
 /// - Note: hutool 对位 `static int totalPage(long, int)`——腿的 `4294967296|10` 等读数钉这一档。
 ///   参照出口前有 `Math.toIntExact`（超 int 直接抛 `ArithmeticException`，边腿现读），
 ///   本库签名没有 raise 面 ⇒ 取低 32 位补码读法，两侧分岔记在 spec §5 第 5 行。
-pub fn page_total_page_long(count : Int64, size : Int) -> Int {
+pub fn page_total_page_long(count : Int64, size : Int32) -> Int32 {
   if size == 0 {
     0
   } else {
@@ -435,7 +435,7 @@ pub fn page_total_page_long(count : Int64, size : Int) -> Int {
 /// - Returns: 页号数组（参照从不给 `null`：退化档给长度 0 的数组，`P3`/`P4` 读数即空数组）
 /// - Raises: 无
 /// - Note: hutool 对位 `static int rainbow(int, int)`，现读源码就是 `rainbow(cur, total, 10)`
-pub fn page_rainbow(current : Int, total : Int) -> Array[Int] {
+pub fn page_rainbow(current : Int32, total : Int32) -> Array[Int32] {
   page_rainbow_count(current, total, 10)
 }
 
@@ -448,10 +448,10 @@ pub fn page_rainbow(current : Int, total : Int) -> Array[Int] {
 ///   长度算出负数时（`total` 为负）参照 `new int[负]` 抛 `NegativeArraySizeException`（边腿现读），
 ///   本库给空数组——分岔记在 spec §5 第 6 行。
 pub fn page_rainbow_count(
-  current : Int,
-  total : Int,
-  show_count : Int,
-) -> Array[Int] {
+  current : Int32,
+  total : Int32,
+  show_count : Int32,
+) -> Array[Int32] {
   let is_even = (show_count.to_int64() & 1L) == 0L
   let left = show_count >> 1
   let right = if is_even {
@@ -463,7 +463,7 @@ pub fn page_rainbow_count(
   if total < show_count {
     length = total
   }
-  let out : Array[Int] = []
+  let out : Array[Int32] = []
   if length < 0 {
     return out
   }

@@ -20,7 +20,7 @@
 /// 与首行不等 ⇒ `IORuntimeException:Line 1 has 1 fields, but first line has 2 fields`。
 /// 本库带**行号 / 本行列数 / 首行列数**三个读数，不复制 Java 文案（spec §5 第 3 行）
 pub suberror CsvError {
-  UnevenFields(Int, Int, Int)
+  UnevenFields(Int32, Int32, Int32)
 }
 
 ///|
@@ -35,9 +35,9 @@ pub(all) struct CsvReadOpts {
   delimiter : Char
   quote : Char
   comment : Char?
-  header_line_no : Int
-  begin_line_no : Int
-  end_line_no : Int
+  header_line_no : Int32
+  begin_line_no : Int32
+  end_line_no : Int32
   skip_empty_rows : Bool
   trim_field : Bool
   error_on_different_field_count : Bool
@@ -66,9 +66,9 @@ pub type CsvLine = Array[String?]
 /// `hdr` 是表头名到列下标的映射，对本包外不可见——参照把 headerMap 塞进每个 CsvRow，本库同形
 /// （否则 `get_by_name` 无从查起）
 pub(all) struct CsvRow {
-  line_no : Int
+  line_no : Int32
   fields : Array[String]
-  priv hdr : Array[(String, Int)]
+  priv hdr : Array[(String, Int32)]
 }
 
 ///|
@@ -80,10 +80,10 @@ pub(all) struct CsvData {
 }
 
 ///|
-let cr : Int = 13
+let cr : Int32 = 13
 
 ///|
-let lf : Int = 10
+let lf : Int32 = 10
 
 ///|
 /// 默认读配置（与参照 `defaultConfig()` 同值）
@@ -221,7 +221,7 @@ pub fn csv_write_with_opts(
 ///|
 /// 按列下标取值，越界给 `None`（参照是 `List<String>.get`，越界抛 `IndexOutOfBoundsException`，
 /// spec §5 第 4 行）
-pub fn CsvRow::get(self : CsvRow, index : Int) -> String? {
+pub fn CsvRow::get(self : CsvRow, index : Int32) -> String? {
   if index >= 0 && index < self.fields.length() {
     Some(self.fields[index])
   } else {
@@ -231,7 +231,7 @@ pub fn CsvRow::get(self : CsvRow, index : Int) -> String? {
 
 ///|
 /// 列数（参照 `CsvRow.getFieldCount()` / `size()`）
-pub fn CsvRow::field_count(self : CsvRow) -> Int {
+pub fn CsvRow::field_count(self : CsvRow) -> Int32 {
   self.fields.length()
 }
 
@@ -255,13 +255,13 @@ pub fn CsvRow::get_by_name(self : CsvRow, name : String) -> String? {
 
 ///|
 /// 行数（不含表头行；参照 `CsvData.getRowCount()`）
-pub fn CsvData::row_count(self : CsvData) -> Int {
+pub fn CsvData::row_count(self : CsvData) -> Int32 {
   self.rows.length()
 }
 
 ///|
 /// 取第 n 行，越界给 `None`（参照 `CsvData.getRow(index)` 越界抛 `IndexOutOfBoundsException`）
-pub fn CsvData::get_row(self : CsvData, index : Int) -> CsvRow? {
+pub fn CsvData::get_row(self : CsvData, index : Int32) -> CsvRow? {
   if index >= 0 && index < self.rows.length() {
     Some(self.rows[index])
   } else {
@@ -281,22 +281,22 @@ pub fn CsvData::header_names(self : CsvData) -> Array[String] {
 priv struct PS {
   src : Array[Char]
   o : CsvReadOpts
-  mut pos : Int
+  mut pos : Int32
   mut eof : Bool
-  mut pre : Int
+  mut pre : Int32
   mut inq : Bool
-  mut line_no : Int
-  mut q_lines : Int
-  mut max_fc : Int
-  mut first_fc : Int
+  mut line_no : Int32
+  mut q_lines : Int32
+  mut max_fc : Int32
+  mut first_fc : Int32
   mut done : Bool
   mut header : Array[String]
   mut hdr : Bool
-  mut map : Array[(String, Int)]
+  mut map : Array[(String, Int32)]
 }
 
 ///|
-fn tok_next(st : PS) -> Int {
+fn tok_next(st : PS) -> Int32 {
   // 参照 CsvTokener：一旦读到 EOF 就**停在 EOF**——peek 落空之后 back() 不能让最后一个字符复活，
   // 否则 `"a","b"` 的收尾引号会被读两次，多出一个引号（腿 r.5.* 给的是 a/b）
   if st.eof || st.pos >= st.src.length() {
@@ -318,13 +318,13 @@ fn tok_back(st : PS) -> Unit {
 }
 
 ///|
-fn is_line_end(c : Int, pre : Int) -> Bool {
+fn is_line_end(c : Int32, pre : Int32) -> Bool {
   // 参照原文：`(c == CR || c == LF) && preChar != CR`
   (c == cr || c == lf) && pre != cr
 }
 
 ///|
-fn is_field_begin(pre : Int, sep : Int) -> Bool {
+fn is_field_begin(pre : Int32, sep : Int32) -> Bool {
   // 参照：行首、分隔符之后、LF 之后、CR 之后才算"字段起点"
   pre < 0 || pre == sep || pre == lf || pre == cr
 }
@@ -467,7 +467,7 @@ fn read_line(st : PS) -> Array[String] {
 ///|
 // 参照 initHeader：先过别名表；空名与重名列都不进映射
 fn init_header(st : PS, fields : Array[String]) -> Unit {
-  let map : Array[(String, Int)] = []
+  let map : Array[(String, Int32)] = []
   let names : Array[String] = []
   for i = 0; i < fields.length(); i = i + 1 {
     let mut field = fields[i]

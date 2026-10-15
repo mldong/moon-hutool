@@ -12,7 +12,7 @@
 
 ///|
 /// UTF-16 码元数（＝参照 `String.length()`）：码位大于 `0xFFFF` 的算 2。
-fn dsk_utf16_len(s : String) -> Int {
+fn dsk_utf16_len(s : String) -> Int32 {
   let mut n = 0
   for c in s.to_array() {
     n = n + (if c.to_int() > 0xffff { 2 } else { 1 })
@@ -22,7 +22,7 @@ fn dsk_utf16_len(s : String) -> Int {
 
 ///|
 /// 参照 `StrUtil.indexOf(str, ch)`：给**码元**索引，找不到给 -1。
-fn dsk_index_of(s : String, target : Char) -> Int {
+fn dsk_index_of(s : String, target : Char) -> Int32 {
   let cs = s.to_array()
   let mut i = 0
   for c in cs {
@@ -36,7 +36,7 @@ fn dsk_index_of(s : String, target : Char) -> Int {
 
 ///|
 /// 参照 `CharUtil.SPACE` 那一支：`StrUtil.repeat('*', n)`，`n` 由调用方按码元数给出。
-fn dsk_repeat_mask(n : Int) -> String {
+fn dsk_repeat_mask(n : Int32) -> String {
   let out : Array[Char] = []
   for _ in 0..<n {
     out.push('*')
@@ -86,7 +86,11 @@ pub fn desensitize_chinese_name(full_name : String) -> String {
 ///   其余给 `[front, 码元长度 - end)` 段全掩（边界按码元、遮蔽按码位，照参照不抹平）
 /// - Raises: 无
 /// - Note: hutool 对位 `static String idCardNum(String, int, int)`
-pub fn desensitize_id_card(id_card : String, front : Int, end : Int) -> String {
+pub fn desensitize_id_card(
+  id_card : String,
+  front : Int32,
+  end : Int32,
+) -> String {
   if @text.is_blank(id_card) {
     return ""
   }
@@ -129,7 +133,7 @@ pub fn desensitize_mobile_phone(num : String) -> String {
 /// - Returns: 空白给空串；`sensitive_size > 码元长度` 时起始位为负，参照不报错、由 `hide` 把整串掩掉
 /// - Raises: 无
 /// - Note: hutool 对位 `static String address(String, int)`（`hide(a, len - n, len)`）
-pub fn desensitize_address(address : String, sensitive_size : Int) -> String {
+pub fn desensitize_address(address : String, sensitive_size : Int32) -> String {
   if @text.is_blank(address) {
     return ""
   }

@@ -22,7 +22,7 @@
 // （同 dfa 的 `WordTree` 口径）。
 
 pub struct Replacer {
-  priv kind : Int
+  priv kind : Int32
   priv pairs : Array[(String, String)]
   priv chain : Array[Replacer]
 }
@@ -58,11 +58,11 @@ pub fn replacer_chain(rs : Array[Replacer]) -> Replacer {
 ///|
 /// 从 `cs[at]` 起问一次：命中给 `(吃了几个码位, 要写出的串)`，否则 None。
 /// 长键优先；等长时**后出现的生效**（腿 set2 读数如此，不是"先到先得"）。
-fn step_at(r : Replacer, cs : Array[Char], at : Int) -> (Int, String)? {
+fn step_at(r : Replacer, cs : Array[Char], at : Int32) -> (Int32, String)? {
   if r.kind == 0 {
     longest_of(r.pairs, cs, at)
   } else {
-    let mut found : (Int, String)? = None
+    let mut found : (Int32, String)? = None
     for child in r.chain {
       if found is None {
         found = step_at(child, cs, at)
@@ -76,8 +76,8 @@ fn step_at(r : Replacer, cs : Array[Char], at : Int) -> (Int, String)? {
 fn longest_of(
   pairs : Array[(String, String)],
   cs : Array[Char],
-  at : Int,
-) -> (Int, String)? {
+  at : Int32,
+) -> (Int32, String)? {
   let mut best_len = 0
   let mut best_val = ""
   for (key, value) in pairs {

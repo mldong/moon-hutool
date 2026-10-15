@@ -548,7 +548,7 @@ let html4_unescape_pairs : Array[(String, String)] = [
 // `escape` 默认过滤器的**不转义**码位区间表（146 段；表内原样出，表外全转）。
 // 非 BMP 不在表里是刻意的：参照按 UTF-16 码元走，星平面拆成两个代理码元，
 // 两个都不属数字/大小写 ⇒ 永远转（腿的 ASTRAL 行五对现读全 false）。
-let escape_keep_ranges : Array[(Int, Int)] = [
+let escape_keep_ranges : Array[(Int32, Int32)] = [
   (0x002a, 0x002b),
   (0x002d, 0x0039),
   (0x0040, 0x005a),

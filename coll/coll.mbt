@@ -21,11 +21,11 @@
 /// 本包唯一错误面：只携带**读数**，不携带文案（同 `codec`/`date`/`id` 的立场）
 pub suberror CollError {
   /// 给进来的页号（`< 1` 的那个值；下界恒为 1，不必再带一个常数）
-  NonPositivePageNumber(Int)
+  NonPositivePageNumber(Int32)
   /// 给进来的分页大小（`< 1` 的那个值）
-  NonPositivePageSize(Int)
+  NonPositivePageSize(Int32)
   /// 给进来的条目总数（`< 0` 的那个值——它只可能来自上层算错，不是"没有数据"）
-  NegativeTotal(Int)
+  NegativeTotal(Int32)
 }
 
 ///|
@@ -108,8 +108,8 @@ pub fn[A, K : Hash + Eq] distinct_by(xs : Array[A], key : (A) -> K) -> Array[A] 
 /// - Returns: `Map[A, Int]`，**键序 = 元素首现序**，值恒 `> 0`（没出现过的键不出现在表里）
 /// - Note: core 的 `Array::count(value)` 只数**一个**值，全量统计要自己折——本件就是那一次折。
 ///   hutool 对位 `CollUtil.countMap`
-pub fn[A : Hash + Eq] freq(xs : Array[A]) -> Map[A, Int] {
-  let m : Map[A, Int] = Map([])
+pub fn[A : Hash + Eq] freq(xs : Array[A]) -> Map[A, Int32] {
+  let m : Map[A, Int32] = Map([])
   for x in xs {
     // core 的 `update_or_default` 在键缺席时**直接存默认值、不套 `f`**（Java `Map.merge` 相反），
     // 所以计数默认值给 1 而不是 0——给 0 会让每个计数少 1
@@ -135,8 +135,8 @@ pub fn[A : Hash + Eq] freq(xs : Array[A]) -> Map[A, Int] {
 /// - Note: 范围内的页与 core `Array::chunks` 的对应一片同结果（对拍腿，门禁 G8）
 pub fn[A] page(
   xs : Array[A],
-  page_number : Int,
-  page_size : Int,
+  page_number : Int32,
+  page_size : Int32,
 ) -> Array[A] raise CollError {
   if page_size < 1 {
     raise NonPositivePageSize(page_size)
@@ -159,7 +159,7 @@ pub fn[A] page(
 /// - Raises: `CollError.NonPositivePageSize(给的大小)`、`CollError.NegativeTotal(给的总数)`
 /// - Note: 与 `page` 的配对读法：`page_count(xs.length(), size)` 是页号的上界，
 ///   越界页号在 `page` 那一档给空数组，两者不矛盾
-pub fn page_count(total : Int, page_size : Int) -> Int raise CollError {
+pub fn page_count(total : Int32, page_size : Int32) -> Int32 raise CollError {
   if page_size < 1 {
     raise NonPositivePageSize(page_size)
   }

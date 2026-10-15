@@ -125,7 +125,7 @@ pub fn table_ids(t : TaskTable) -> Array[String] {
 ///|
 /// #24.9 按下标取任务体。对位 `TaskTable.getTask(int)`（下标越界：参照是 `List.get` 的
 /// `IndexOutOfBoundsException`，本库出 `UnknownTask` 档，spec §4 第 4 行）
-pub fn table_task_at(t : TaskTable, index : Int) -> &Task raise SchedError {
+pub fn table_task_at(t : TaskTable, index : Int32) -> &Task raise SchedError {
   if index < 0 || index >= t.tasks.length() {
     raise SchedError::UnknownTask(index.to_string())
   }
@@ -147,7 +147,7 @@ pub fn table_pattern_text(
 
 ///|
 /// #24.11 条数。对位 `TaskTable.size()`；与 `table_is_empty` 同出一源（参照两件都在）
-pub fn table_size(t : TaskTable) -> Int {
+pub fn table_size(t : TaskTable) -> Int32 {
   let _ = t
   t.ids.length()
 }
@@ -169,8 +169,8 @@ pub fn due_indices(
   t : TaskTable,
   cfg : CronConfig,
   now : @date.DateTime,
-) -> Array[Int] {
-  let out : Array[Int] = []
+) -> Array[Int32] {
+  let out : Array[Int32] = []
   for i in 0..<t.patterns.length() {
     if @cron.cron_match(t.patterns[i], now, match_second=cfg.match_second) {
       out.push(i)
@@ -188,7 +188,7 @@ pub type Clock = () -> Int64
 /// #24.15 时延源注入口。触发壳里"等 N 毫秒"这件事的唯一出口：生产走 `moonbitlang/async` 的事件循环
 /// 定时器（实测 wasm `slept_ms=135`、js `slept_ms=125` 到点），用例走假 sleeper。
 /// 计时依赖的用例既冻不住期望值也做不了变异对照，所以这一档必须可注入
-pub type Sleeper = async (Int) -> Unit
+pub type Sleeper = async (Int32) -> Unit
 
 ///|
 /// #24.16 调度器。对位 `cn.hutool.cron.Scheduler`（现读字段面：`config`/`started`/`daemon`/`timer`/
@@ -227,7 +227,7 @@ pub fn scheduler_new(
 /// 用例只调这一件就能覆盖"到点/不到点/同一瞬间连喂两次就重复执行两次"三条判据（第三条与参照同形，
 /// 腿 N2 现读 `hits=2`），完全不必起事件循环
 /// （spec §3 的验收线就钉在这条上；`scheduler_start` 只是它外面套的一层循环）
-pub async fn scheduler_tick(s : Scheduler) -> Int {
+pub async fn scheduler_tick(s : Scheduler) -> Int32 {
   let _ = s
   let now = @date.datetime_in(s.config.zone, (s.clock)())
   match now {
@@ -302,7 +302,7 @@ pub fn scheduler_on_failed(
 }
 
 ///|
-fn table_index(t : TaskTable, id : String) -> Int? {
+fn table_index(t : TaskTable, id : String) -> Int32? {
   for i in 0..<t.ids.length() {
     if t.ids[i] == id {
       return Some(i)
@@ -313,7 +313,7 @@ fn table_index(t : TaskTable, id : String) -> Int? {
 
 ///|
 // 本版没有 `Array::remove_at`（AGENTS 语法坑那条）⇒ 前移一位再 pop，pop 的返回值必须显式忽略
-fn[T] drop_at(index : Int, xs : Array[T]) -> Unit {
+fn[T] drop_at(index : Int32, xs : Array[T]) -> Unit {
   for i in index..<(xs.length() - 1) {
     xs[i] = xs[i + 1]
   }
@@ -329,7 +329,7 @@ fn cron_or_raise(text : String) -> @cron.Cron raise SchedError {
 
 ///|
 // 一条任务体的执行：错误按参照语义吞掉；注册了回调就把 (id, error) 递出去
-async fn run_one(s : Scheduler, index : Int) -> Unit {
+async fn run_one(s : Scheduler, index : Int32) -> Unit {
   let id = s.table.ids[index]
   let task = s.table.tasks[index]
   task.execute() catch {
@@ -345,7 +345,7 @@ async fn run_one(s : Scheduler, index : Int) -> Unit {
 /// #24.16b 生产侧默认时延源（全仓唯一直接踩 `moonbitlang/async` 定时器的一行）。
 /// 注入点 #24.16 解决"可测"，这一件解决"可用"：调用方不写包装也能跑起来。
 /// 落地笔暴露的缺口——注入形状定完，async 依赖其实悬空（`unused_package` 警告 + G1 的悬空 pin 判据双双抓到）
-pub async fn default_sleeper(ms : Int) -> Unit {
+pub async fn default_sleeper(ms : Int32) -> Unit {
   @async.sleep(ms)
 }
 

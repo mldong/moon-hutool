@@ -46,14 +46,14 @@ fn n5_sum(ms : Array[@num.Money]) -> Int64 {
 }
 
 ///|
-fn n5_even_sum(s : String, n : Int) -> Int64 {
+fn n5_even_sum(s : String, n : Int32) -> Int64 {
   n5_sum(@num.Money::from_yuan_str(s).allocate_even(n)) catch {
     _ => -999999999L
   }
 }
 
 ///|
-fn n5_ratio_sum(s : String, rs : Array[Int]) -> Int64 {
+fn n5_ratio_sum(s : String, rs : Array[Int32]) -> Int64 {
   n5_sum(@num.Money::from_yuan_str(s).allocate_by_ratio(rs)) catch {
     _ => -999999999L
   }
@@ -72,7 +72,7 @@ fn n5_join(ms : Array[@num.Money]) -> String {
 }
 
 ///|
-fn n5_even(s : String, n : Int) -> String {
+fn n5_even(s : String, n : Int32) -> String {
   try {
     let m = @num.Money::from_yuan_str(s)
     n5_join(@num.Money::allocate_even(m, n))
@@ -82,7 +82,7 @@ fn n5_even(s : String, n : Int) -> String {
 }
 
 ///|
-fn n5_ratio(s : String, rs : Array[Int]) -> String {
+fn n5_ratio(s : String, rs : Array[Int32]) -> String {
   try {
     let m = @num.Money::from_yuan_str(s)
     n5_join(@num.Money::allocate_by_ratio(m, rs))

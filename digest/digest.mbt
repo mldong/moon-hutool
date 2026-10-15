@@ -20,7 +20,7 @@
 
 ///|
 /// MD5 移位表（RFC 1321 §3.4，四轮各 16 条）
-fn md5_shifts() -> Array[Int] {
+fn md5_shifts() -> Array[Int32] {
   [
     7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22, 5, 9, 14, 20, 5,
     9, 14, 20, 5, 9, 14, 20, 5, 9, 14, 20, 4, 11, 16, 23, 4, 11, 16, 23, 4, 11, 16,
@@ -30,7 +30,7 @@ fn md5_shifts() -> Array[Int] {
 
 ///|
 /// MD5 常数表 `K[i] = floor(2^32 × |sin(i+1)|)`（RFC 1321 §3.4，按公式现算）
-fn md5_consts() -> Array[UInt] {
+fn md5_consts() -> Array[UInt32] {
   [
     0xd76aa478, 0xe8c7b756, 0x242070db, 0xc1bdceee, 0xf57c0faf, 0x4787c62a, 0xa8304613,
     0xfd469501, 0x698098d8, 0x8b44f7af, 0xffff5bb1, 0x895cd7be, 0x6b901122, 0xfd987193,
@@ -47,7 +47,7 @@ fn md5_consts() -> Array[UInt] {
 
 ///|
 /// SHA-256 常数表：前 64 个素数立方根的小数部分 × 2^32（FIPS 180-4 §4.2.2，现算）
-fn sha256_consts() -> Array[UInt] {
+fn sha256_consts() -> Array[UInt32] {
   [
     0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4,
     0xab1c5ed5, 0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe,
@@ -64,7 +64,7 @@ fn sha256_consts() -> Array[UInt] {
 
 ///|
 /// SHA-256 初值 H：前 8 个素数平方根的小数部分 × 2^32（FIPS 180-4 §5.3.3，现算）
-fn sha256_iv() -> Array[UInt] {
+fn sha256_iv() -> Array[UInt32] {
   [
     0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab,
     0x5be0cd19,
@@ -75,10 +75,10 @@ fn sha256_iv() -> Array[UInt] {
 /// 虚拟 padded 消息：原文 + 总长 + 比特长度的 32 位两半（都不物化副本）
 priv struct Msg {
   data : Bytes
-  n : Int
-  total : Int
-  bits_lo : UInt
-  bits_hi : UInt
+  n : Int32
+  total : Int32
+  bits_lo : UInt32
+  bits_hi : UInt32
 }
 
 ///|
@@ -92,13 +92,13 @@ fn make_msg(data : Bytes) -> Msg {
 
 ///|
 /// 32 位取反（本版没有 `~` 运算符）
-fn not32(x : UInt) -> UInt {
+fn not32(x : UInt32) -> UInt32 {
   x ^ 0xffffffff
 }
 
 ///|
 /// 32 位循环左移（`c == 0` 单列：移位量取 32 是未定义形状，不能靠运气）
-fn rotl(v : UInt, c : Int) -> UInt {
+fn rotl(v : UInt32, c : Int32) -> UInt32 {
   if c == 0 {
     v
   } else {
@@ -108,7 +108,7 @@ fn rotl(v : UInt, c : Int) -> UInt {
 
 ///|
 /// 32 位循环右移
-fn rotr(v : UInt, c : Int) -> UInt {
+fn rotr(v : UInt32, c : Int32) -> UInt32 {
   if c == 0 {
     v
   } else {
@@ -118,14 +118,14 @@ fn rotr(v : UInt, c : Int) -> UInt {
 
 ///|
 /// 分块总长：原文 ‖ 0x80 ‖ 补零 ‖ 8 字节比特长度，向上取整到 64 的倍数
-fn padded_len(n : Int) -> Int {
+fn padded_len(n : Int32) -> Int32 {
   ((n + 8) / 64 + 1) * 64
 }
 
 ///|
 /// 取"虚拟 padded 消息"的第 `i` 个字节（不物化副本）；长度域按大端摊在末尾 8 字节，
 /// 各算法再按自己的字节序取字
-fn pad_byte(msg : Msg, i : Int, le : Bool) -> UInt {
+fn pad_byte(msg : Msg, i : Int32, le : Bool) -> UInt32 {
   let n = msg.n
   if i < n {
     msg.data[i].to_uint()
@@ -149,7 +149,7 @@ fn pad_byte(msg : Msg, i : Int, le : Bool) -> UInt {
 
 ///|
 /// 从虚拟消息取一个 32 位字，`le` 决定字节序（MD5 小端 / SHA-256 大端）
-fn pad_word(msg : Msg, off : Int, le : Bool) -> UInt {
+fn pad_word(msg : Msg, off : Int32, le : Bool) -> UInt32 {
   let b0 = pad_byte(msg, off, le)
   let b1 = pad_byte(msg, off + 1, le)
   let b2 = pad_byte(msg, off + 2, le)
@@ -163,7 +163,7 @@ fn pad_word(msg : Msg, off : Int, le : Bool) -> UInt {
 
 ///|
 /// 链字数组 → 原始字节（`le` 跟各算法出口约定：MD5 小端、SHA-256 大端）
-fn words_to_bytes(ws : Array[UInt], le : Bool) -> Bytes {
+fn words_to_bytes(ws : Array[UInt32], le : Bool) -> Bytes {
   let buf = @buffer.Buffer()
   let shifts = if le { [0, 8, 16, 24] } else { [24, 16, 8, 0] }
   for w in ws {
@@ -176,7 +176,7 @@ fn words_to_bytes(ws : Array[UInt], le : Bool) -> Bytes {
 
 ///|
 /// 取字节的 `[lo, hi)` 窗口（`md5_hex16` 用；不用切片语法，避开下标口径歧义）
-fn byte_window(data : Bytes, lo : Int, hi : Int) -> Bytes {
+fn byte_window(data : Bytes, lo : Int32, hi : Int32) -> Bytes {
   let buf = @buffer.Buffer()
   for i in lo..<hi {
     buf.write_byte(data[i])
@@ -192,15 +192,15 @@ fn to_hex_lower(data : Bytes) -> String {
 
 ///|
 /// MD5 主循环（RFC 1321 §3.4）
-fn md5_core(data : Bytes) -> Array[UInt] {
+fn md5_core(data : Bytes) -> Array[UInt32] {
   let msg = make_msg(data)
   let total = msg.total
   let s = md5_shifts()
   let k = md5_consts()
-  let mut a0 : UInt = 0x67452301
-  let mut b0 : UInt = 0xefcdab89
-  let mut c0 : UInt = 0x98badcfe
-  let mut d0 : UInt = 0x10325476
+  let mut a0 : UInt32 = 0x67452301
+  let mut b0 : UInt32 = 0xefcdab89
+  let mut c0 : UInt32 = 0x98badcfe
+  let mut d0 : UInt32 = 0x10325476
   for chunk in 0..<(total / 64) {
     let base = chunk * 64
     let mut a = a0
@@ -208,7 +208,7 @@ fn md5_core(data : Bytes) -> Array[UInt] {
     let mut c = c0
     let mut d = d0
     for r in 0..<64 {
-      let mut f : UInt = 0
+      let mut f : UInt32 = 0
       let mut g = 0
       if r < 16 {
         f = (b & c) | (not32(b) & d)
@@ -239,14 +239,14 @@ fn md5_core(data : Bytes) -> Array[UInt] {
 
 ///|
 /// SHA-256 主循环（FIPS 180-4 §6.2.2）
-fn sha256_core(data : Bytes) -> Array[UInt] {
+fn sha256_core(data : Bytes) -> Array[UInt32] {
   let msg = make_msg(data)
   let total = msg.total
   let kk = sha256_consts()
   let mut h = sha256_iv()
   for chunk in 0..<(total / 64) {
     let base = chunk * 64
-    let w : Array[UInt] = []
+    let w : Array[UInt32] = []
     for j in 0..<16 {
       w.push(pad_word(msg, base + j * 4, false))
     }
@@ -378,7 +378,7 @@ pub fn equal_digest(a : Bytes, b : Bytes) -> Bool {
   if n != b.length() {
     false
   } else {
-    let mut diff : UInt = 0
+    let mut diff : UInt32 = 0
     for i in 0..<n {
       diff = diff ^ (a[i].to_uint() ^ b[i].to_uint())
     }
@@ -501,7 +501,7 @@ fn hex_to_bytes(hex_ : String) -> Bytes {
 }
 
 ///|
-fn hex_digit(c : Char) -> Int {
+fn hex_digit(c : Char) -> Int32 {
   if c >= '0' && c <= '9' {
     c.to_int() - 48
   } else if c >= 'a' && c <= 'f' {

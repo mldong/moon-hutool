@@ -21,7 +21,7 @@ fn idcard_s_birth_slice(s : String) -> String? {
 
 ///|
 /// 参照 `Short.valueOf(substring(a,b))`：切片不是全数字时参照抛 `NumberFormatException` ⇒ 本库 `None`。
-fn idcard_s_int_slice(s : String, from : Int, to : Int) -> Int? {
+fn idcard_s_int_slice(s : String, from : Int32, to : Int32) -> Int32? {
   let u = s.to_array()
   if !idcard_all_digits(u, from, to) {
     return None
@@ -64,7 +64,7 @@ pub fn idcard_birth(id : String) -> String? {
 /// - Raises: 无
 /// - Note: hutool 对位 `static Short getYearByIdCard(String)`。参照**不判空白**（空白走长度 <15 直接给 `null`），
 ///   所以本件也不设空白闸——两件的闸集合不同，是参照自己的不对称，照抄不抹平
-pub fn idcard_year(id : String) -> Int? {
+pub fn idcard_year(id : String) -> Int32? {
   match idcard_s_via18(id) {
     None => None
     Some(s) => idcard_s_int_slice(s, 6, 10)
@@ -75,7 +75,7 @@ pub fn idcard_year(id : String) -> Int? {
 /// #23.57 取生日月
 /// - Raises: 无
 /// - Note: hutool 对位 `static Short getMonthByIdCard(String)`
-pub fn idcard_month(id : String) -> Int? {
+pub fn idcard_month(id : String) -> Int32? {
   match idcard_s_via18(id) {
     None => None
     Some(s) => idcard_s_int_slice(s, 10, 12)
@@ -86,7 +86,7 @@ pub fn idcard_month(id : String) -> Int? {
 /// #23.58 取生日日
 /// - Raises: 无
 /// - Note: hutool 对位 `static Short getDayByIdCard(String)`
-pub fn idcard_day(id : String) -> Int? {
+pub fn idcard_day(id : String) -> Int32? {
   match idcard_s_via18(id) {
     None => None
     Some(s) => idcard_s_int_slice(s, 12, 14)
@@ -99,7 +99,7 @@ pub fn idcard_day(id : String) -> Int? {
 /// - Raises: 无
 /// - Note: hutool 对位 `static int getGenderByIdCard(String)`；判据是 `charAt(16) % 2 != 0 ⇒ 1`，
 ///   即**码位奇偶**而非数字奇偶——第 17 位是字母时参照照样按字符编码给值（有夹具钉）
-pub fn idcard_gender(id : String) -> Int? {
+pub fn idcard_gender(id : String) -> Int32? {
   if @text.is_blank(id) {
     return None
   }
@@ -115,7 +115,7 @@ pub fn idcard_gender(id : String) -> Int? {
 }
 
 ///|
-fn idcard_s_prefix(id : String, k : Int) -> String? {
+fn idcard_s_prefix(id : String, k : Int32) -> String? {
   let u = id.to_array()
   let n = u.length()
   if n != 15 && n != 18 {
@@ -153,6 +153,6 @@ pub fn idcard_district_code(id : String) -> String? {
 /// #23.63 掩掉指定位（掩码字符固定 `*`，**码位**口径）
 /// - Raises: 无（越界夹紧、不校验号型：与 #23.40–#23.42 同一口径）
 /// - Note: hutool 对位 `static String hide(String, int, int)`，参照就是 `StrUtil.hide(·)` 的转委托 ⇒ 复用 `@text.hide`
-pub fn idcard_hide(id : String, start : Int, end : Int) -> String {
+pub fn idcard_hide(id : String, start : Int32, end : Int32) -> String {
   @text.hide(id, start, end, '*')
 }

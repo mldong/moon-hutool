@@ -90,7 +90,7 @@ fn wr_tag(rows : Array[@csv.CsvLine], o : @csv.CsvWriteOpts) -> String {
 // 读配置 12 档：与腿 cfg(i) 逐字段同值（这些是"喂给参照的输入"，不是期望值）。
 // 本版不接受记录更新语法 `{ base with x = 1 }`（实测 Parse error: unexpected token `with`）
 // ⇒ 逐字段照抄默认值，只改这一档要改的那个
-fn rcfg(i : Int) -> @csv.CsvReadOpts {
+fn rcfg(i : Int32) -> @csv.CsvReadOpts {
   let b = @csv.csv_default_read_opts()
   let delimiter = if i == 8 { ';' } else { b.delimiter }
   let quote = if i == 9 { '\u{0027}' } else { b.quote }
@@ -128,7 +128,7 @@ fn rcfg(i : Int) -> @csv.CsvReadOpts {
 
 ///|
 // 写配置 7 档：与腿 wcfg(i) 逐字段同值
-fn wopts(i : Int) -> @csv.CsvWriteOpts {
+fn wopts(i : Int32) -> @csv.CsvWriteOpts {
   let b = @csv.csv_default_write_opts()
   let delimiter = if i == 4 { ';' } else { b.delimiter }
   let quote = if i == 5 { '\u{0027}' } else { b.quote }
@@ -148,7 +148,7 @@ fn wopts(i : Int) -> @csv.CsvWriteOpts {
 // 写侧 12 个行集：与腿 ROWSETS 逐格同值（这是"喂给参照的输入"，不是期望值）。
 // 腿每档都连写两行——夹具行 + 固定的 `z1,z2` 行（行分隔符只有两行才看得见），这里同形。
 // `None` 对位参照的 null 档（腿读数 `w.6.0` 出 `,b`、`w.6.1` 出 `"","b"`）
-fn wrow(i : Int) -> Array[@csv.CsvLine] {
+fn wrow(i : Int32) -> Array[@csv.CsvLine] {
   let one : @csv.CsvLine = match i {
     0 => [Some("a"), Some("b")]
     1 => [Some("a,b"), Some("c")]

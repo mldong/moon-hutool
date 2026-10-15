@@ -29,7 +29,7 @@ fn[A] err_of(r : () -> A raise @hash.HashError) -> String {
 
 ///|
 // Int 列表 → `Bytes`（参照侧的 `new byte[]{...}`；`to_byte` 截断低 8 位，0xff 那档就是这么来的）
-fn bytes_of(xs : Array[Int]) -> Bytes {
+fn bytes_of(xs : Array[Int32]) -> Bytes {
   Bytes::from_array(xs.map(x => x.to_byte()))
 }
 
