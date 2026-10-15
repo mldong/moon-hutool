@@ -4,7 +4,7 @@
 /// 契约：`docs/spec/02-digest.md`；进度：`docs/ROADMAP.md`。
 ///
 /// **权威是规范文本，不是 hutool**：hutool-crypto 自己几乎不实现算法（它是 `javax.crypto`/JCE 门面，
-/// 全模块只有 RC4/XXTEA/Vigenere 是手写位运算），所以本包对着 RFC 1321 / FIPS 180-4 / RFC 2104 实现，
+/// 全模块只有 RC4/XXTEA/Vigenere 是手写位运算），所以本包对着 RFC 1321 / RFC 3174 / FIPS 180-4 / RFC 2104 / RFC 2202 实现，
 /// 验收只认**官方向量**（门禁 G6）。core 无任何摘要能力（本机实测 `md5|sha256|hmac` 全树命中 0）⇒ 整包自研。
 ///
 /// 四条实现取向（都被本机编译器裁决过，别再改回去）：
@@ -15,7 +15,7 @@
 /// · 位运算用中缀 `& | ^ << >>`（`lsl/lsr/land/lor` 那批方法在本版已报废弃），取反没有 `~`，
 ///   写成 `x ^ 0xffffffff`（`not32`）。十六进制字面量**不加后缀**（`0x..u` 与 `0x..u32` 都判词法错），
 ///   靠返回类型推断。
-/// · 常量表**按公式现算生成**（`floor(2^32·|sin(i+1)|)`、素数立方根/平方根小数部分），不抄录；
+/// · 常量表**按公式现算生成**（`floor(2^32·|sin(i+1)|)`、素数立方根/平方根小数部分、`2^30·√k`），不抄录；
 ///   抄错一个常数，官方向量当场翻脸。
 
 ///|
@@ -517,6 +517,67 @@ fn hex_digit(c : Char) -> Int32 {
 // ===== 第三批：SHA-1 与 HMAC-SHA1（八件；需求登记：本仓 Issues #1）。契约与读数见 spec 2.8 =====
 
 ///|
+/// SHA-1 轮常量（FIPS 180-4 §4.2.1）：`floor(2^30 × √k)`，k = 2 / 3 / 5 / 10，每 20 轮一换
+fn sha1_consts() -> Array[UInt32] {
+  [0x5a827999, 0x6ed9eba1, 0x8f1bbcdc, 0xca62c1d6]
+}
+
+///|
+/// SHA-1 主循环（FIPS 180-4 §6.1.2）。padded 消息与 SHA-256 同族（大端取字、共用 `make_msg`）；
+/// 初值 H(0) 五字（§5.3.1）前四个与 MD5 同源，第五个是 `0xc3d2e1f0`。
+///
+/// 与 SHA-256 的三处结构差：① 消息表从 16 字**线性扩到 80 字**（`rotl(⊕(t-3,t-8,t-14,t-16), 1)`）；
+/// ② 每轮只动 5 个链字且 `b` 左转 30 位进 `c`；③ 轮函数与常数按 20 轮一段换（`t / 20` 取段）。
+fn sha1_core(data : Bytes) -> Array[UInt32] {
+  let msg = make_msg(data)
+  let total = msg.total
+  let kk = sha1_consts()
+  let mut h0 : UInt32 = 0x67452301
+  let mut h1 : UInt32 = 0xefcdab89
+  let mut h2 : UInt32 = 0x98badcfe
+  let mut h3 : UInt32 = 0x10325476
+  let mut h4 : UInt32 = 0xc3d2e1f0
+  for chunk in 0..<(total / 64) {
+    let base = chunk * 64
+    let w : Array[UInt32] = []
+    for j in 0..<16 {
+      w.push(pad_word(msg, base + j * 4, false))
+    }
+    for t in 16..<80 {
+      w.push(rotl(w[t - 3] ^ w[t - 8] ^ w[t - 14] ^ w[t - 16], 1))
+    }
+    let mut a = h0
+    let mut b = h1
+    let mut c = h2
+    let mut d = h3
+    let mut e = h4
+    for t in 0..<80 {
+      let f = if t < 20 {
+        (b & c) | (not32(b) & d)
+      } else if t < 40 {
+        b ^ c ^ d
+      } else if t < 60 {
+        (b & c) | (b & d) | (c & d)
+      } else {
+        b ^ c ^ d
+      }
+      let temp = rotl(a, 5) + f + e + kk[t / 20] + w[t]
+      e = d
+      d = c
+      c = rotl(b, 30)
+      b = a
+      a = temp
+    }
+    h0 = h0 + a
+    h1 = h1 + b
+    h2 = h2 + c
+    h3 = h3 + d
+    h4 = h4 + e
+  }
+  [h0, h1, h2, h3, h4]
+}
+
+///|
 /// SHA-1 原始 20 字节。与 `sha256_bytes` 同族：大端取字，共用那台零分配的虚拟消息机器。
 ///
 /// - Parameters: `data` 参与摘要的文本，按 **UTF-8** 成字节（全包口径）
@@ -524,20 +585,14 @@ fn hex_digit(c : Char) -> Int32 {
 /// - Note: 官方向量在两处原文互证——NIST 示例文档（FIPS 180-4 附录 A.2 指向的 `SHA1.pdf`）
 ///   与 RFC 3174 §7.3 的测试驱动；`"abc"` 与 56 字节两分块两条在两处逐字相同，见 spec §2.8
 pub fn sha1_bytes(data : String) -> Bytes {
-  let _ = data
-  abort(
-    "PR-B：契约骨架，docs/spec/02-digest.md §2.8（SHA-1 官方向量）",
-  )
+  words_to_bytes(sha1_core(@utf8.encode(data)), false)
 }
 
 ///|
 /// SHA-1 十六进制小写 40 位
 /// - Raises: 无——纯计算，`data` 是文本不是可失败输入
 pub fn sha1_hex(data : String) -> String {
-  let _ = data
-  abort(
-    "PR-B：契约骨架，docs/spec/02-digest.md §2.8（SHA-1 官方向量）",
-  )
+  to_hex_lower(sha1_bytes(data))
 }
 
 ///|
@@ -549,10 +604,7 @@ pub fn sha1_hex(data : String) -> String {
 ///   有一类输入不是任何字符串。`id` 包的 UUID v5 会对 `namespace 字节 ‖ name 字节` 做 SHA-1，
 ///   走 `String` 入口进不去——本批只补原语，v5 的调用点另案（spec §2.7 相位表）
 pub fn sha1_of_bytes(data : Bytes) -> Bytes {
-  let _ = data
-  abort(
-    "PR-B：契约骨架，docs/spec/02-digest.md §2.8（SHA-1 官方向量）",
-  )
+  words_to_bytes(sha1_core(data), false)
 }
 
 ///|
@@ -563,40 +615,28 @@ pub fn sha1_of_bytes(data : Bytes) -> Bytes {
 /// - Note: 官方向量见 spec §2.8——RFC 2202 §3 全七条，另加 NIST 示例的 `keylen=blocklen`（64 恰在
 ///   "不哈希键"一侧的边界上）与 `keylen=100` 两条
 pub fn hmac_sha1_bytes(key : String, data : String) -> Bytes {
-  let _ = (key, data)
-  abort(
-    "PR-B：契约骨架，docs/spec/02-digest.md §2.8（HMAC-SHA1 官方向量）",
-  )
+  hmac_sha1_of_bytes(@utf8.encode(key), @utf8.encode(data))
 }
 
 ///|
 /// HMAC-SHA-1 十六进制小写 40 位
 /// - Raises: 无——纯计算，`key`/`data` 是文本不是可失败输入
 pub fn hmac_sha1_hex(key : String, data : String) -> String {
-  let _ = (key, data)
-  abort(
-    "PR-B：契约骨架，docs/spec/02-digest.md §2.8（HMAC-SHA1 官方向量）",
-  )
+  to_hex_lower(hmac_sha1_bytes(key, data))
 }
 
 ///|
 /// HMAC-SHA-1 的**字节键**档（密钥是原始二进制时用这一档；RFC 2202 与 NIST 的官方向量都是裸字节键）
 /// - Raises: 无——纯计算，`key`/`data` 是字节不是可失败输入
 pub fn hmac_sha1_of_bytes(key : Bytes, data : Bytes) -> Bytes {
-  let _ = (key, data)
-  abort(
-    "PR-B：契约骨架，docs/spec/02-digest.md §2.8（HMAC-SHA1 官方向量）",
-  )
+  hmac_of(sha1_of_bytes, key, data)
 }
 
 ///|
 /// HMAC-SHA-1 字节键 → 十六进制小写
 /// - Raises: 无——纯计算，`key`/`data` 是字节不是可失败输入
 pub fn hmac_sha1_hex_of_bytes(key : Bytes, data : Bytes) -> String {
-  let _ = (key, data)
-  abort(
-    "PR-B：契约骨架，docs/spec/02-digest.md §2.8（HMAC-SHA1 官方向量）",
-  )
+  to_hex_lower(hmac_sha1_of_bytes(key, data))
 }
 
 ///|
@@ -608,8 +648,5 @@ pub fn hmac_sha1_verify_hex(
   data : Bytes,
   expected : String,
 ) -> Bool {
-  let _ = (key, data, expected)
-  abort(
-    "PR-B：契约骨架，docs/spec/02-digest.md §2.8（HMAC-SHA1 官方向量）",
-  )
+  equal_digest(hmac_sha1_of_bytes(key, data), hex_to_bytes(expected))
 }

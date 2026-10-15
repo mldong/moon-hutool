@@ -7,6 +7,11 @@
 - **公开件签名只前进**：`.mbti` 里既有件的签名不改；要改必须另开主版本。
 - **期望值冻结**：断言右侧（参照读数）不因实现而改；确需更正，单独一条并在对应 spec 里写清外部读数来源。
 
+## 0.1.2（2026-10-15 · digest 第三批 SHA-1 + HMAC-SHA1；全仓随 moonc 0.10.15 迁移）
+
+- **`digest` 新增 SHA-1 与 HMAC-SHA1 八件**：`sha1_bytes` / `sha1_hex` / `sha1_of_bytes` 与 `hmac_sha1_bytes` / `_hex` / `_of_bytes` / `_hex_of_bytes` / `_verify_hex`——与既有 md5/sha256 三件套、hmac_sha256 族逐件同形；HMAC 侧共用同一台 pad/xor 机器。官方向量＝NIST 示例文档（FIPS 180-4 附录 A.2 指向）＋ RFC 3174 §7.3 ＋ RFC 2202 §3 全七条，期望值先与 `hashlib`/`hmac` 现算两级对撞后冻结、实现笔零改写；变异 7/7 抓红（`docs/spec/02-digest.md` §2.8）。
+- **全仓随 moonc 0.10.15 做显式宽度迁移**（源码拼写层）：`Int`→`Int32`、`UInt`→`UInt32`，另含 `? :`→`~ :` 与 `..=`→`..<=` 两处语法换代。**.mbti 零变化、公开签名零漂移**——迁移是纯机械改名（归一化逐字节相等 + 阴性对照见该笔提交信息）。
+
 ## 0.1.1（2026-10-11 · codec 批③ 片一落地）
 
 - **`codec` 的 `caesar_encode` / `caesar_decode` / `rot_encode` / `rot_decode` / `rot13_encode` / `rot13_decode` 从契约骨架落地为真实现**（0.1.0 里这六件调用即 `abort`）。`decodeChar` 的三段归一策略各不相同（数字段/大写段 `while` 补到非负、小写段 `if` 只补一次 26 落 `(char)` 16 位回绕），照 hutool 5.8.37 真源码逐字直译，腿读数一条没动；变异对照 8/8 抓红（`docs/spec/05-codec.md` §13.5 回填）。
@@ -20,7 +25,7 @@
 | 包 | 对位 | 这一版给了什么 |
 |---|---|---|
 | `text` | `StrUtil` / `CharSequenceUtil` / `NamingCase` / `StrFormatter` / `EscapeUtil` / `text.UnicodeUtil` / `util.CharUtil` / `text.replacer.*` | 空白与裁剪档、`{}` 占位格式化、命名法互转、`sub_*` 取段、`hide`（码位档）、逐段数值版序比较；**10-10 批①再加 14 件**：实体转义四件（`escape_xml`/`unescape_xml`/`escape_html4`/`unescape_html4`）、百分号转义五件（`escape`/`escape_all`/`escape_by`/`unescape`/`safe_unescape`）、`\uXXXX` 四件（`to_unicode`/`to_unicode_all`/`unicode_of`/`unicode_to_string`）、`encode_blank`、替换引擎三件（`lookup_replacer`/`replacer_chain`/`Replacer::replace`）+ `is_blank_char` 转公开。两笔落地：契约笔冻 699+18+62 条期望（全由参照腿灌），实现笔只把红变绿、期望串零改写。判据面 `docs/spec/01-text.md` §1.15~§1.20 |
-| `digest` | `DigestUtil`（MD5 / SHA-256 / HMAC） | MD5/SHA-256 全套 + HMAC 家族八件（含裸字节键与常量时间校验）；输入固定 UTF-8；**10-15 第三批新增 SHA-1 三件 + HMAC-SHA1 五件**（官方向量 NIST 示例文档 + RFC 3174 §7.3 + RFC 2202 §3，两级对撞后冻结；契约笔已冻、实现笔紧随） |
+| `digest` | `DigestUtil`（MD5 / SHA-256 / HMAC） | MD5/SHA-256 全套 + HMAC 家族八件（含裸字节键与常量时间校验）；输入固定 UTF-8；**10-15 第三批新增 SHA-1 三件 + HMAC-SHA1 五件**（官方向量 NIST 示例文档 + RFC 3174 §7.3 + RFC 2202 §3，两级对撞后冻结；已随 0.1.2 落地） |
 | `date` | `DateUtil` / `CalendarUtil` / `DatePattern` / `DateUnit` | 整包自研日历与格式化（core 无 time 包）+ 内置 IANA 时区段表（603 区 / 36,701 段）+ 可注入时钟源 + 默认区三级降级（`set_default_zone` → `TZ` → 兜底）；**10-10 第六批再加 54 件**：`StopWatch` 秒表一面（含 `TaskInfo`、`ChronoUnit` 七档）、`GroupTimeInterval` 一个类型承参照 `TimeInterval`+`GroupTimeInterval` 父子两面、`format_between` 时长说中文、`GlobalCustomFormat` 对位的全局格式表八件并挂进 `format_in`/`parse_in`。两笔落地：契约笔冻 351 条期望（全由五条参照腿灌），实现笔只把红变绿、期望串两处就地更正单独一笔。计时件**一处都不读时钟**，读数一律注入 `() -> Int64`；判据面 `docs/spec/03-date.md` §9 |
 | `id` | `IdUtil` | 雪花、UUID v3/v4、ObjectId、NanoId；时钟与熵全显式注入 |
 | `codec` | `Base64` / `Base32` / `Base58` / `Base62` / `RadixUtil` / form / URL / `URLUtil`(部分) | url-safe 与 MIME 档、严格/宽松双档解码、表单 `+` 档、URL 结构化组装与语法归一；**10-10 批①新增 data URI 两件**（`data_uri` / `data_uri_base64`，150 条冻结期望）；**10-10 批③ 片一新增移位七件**（`caesar_table` / `caesar_encode` / `caesar_decode` / `rot_encode` / `rot_decode` / `rot13_encode` / `rot13_decode` + 错误面一个 `ShiftUnderflow(Int)`，3222 条冻结期望由四条腿灌，含一张 BMP 字母判定表 `codec/letter_table.mbt`——契约笔已冻，实现笔紧随）。`URLUtil.completeUrl` **判 deferred**——实测它把"是不是绝对 URL"委托给 `java.net.URL` 的协议白名单，不是纯串面（读数与理由：`05-codec.md` §12.2）|
@@ -56,4 +61,4 @@
 
 ## 未发布的部分
 
-加密套件（AES/SM4/RSA/ECDSA/BCrypt/Argon2/PBKDF2）、SHA-1/SHA-512/SM3/SHA-3、压缩（gzip/zip）、农历与区划码表、非 UTF 字符集表、Excel、流式增量摘要 API 排在 `docs/ROADMAP.md` 的「暂不做」档；运行时反射类与文件/网络类**结构上不属于本库**（见根 `README.md` 的不承诺清单与 `AGENTS.md` 零依赖四条）。
+加密套件（AES/SM4/RSA/ECDSA/BCrypt/Argon2/PBKDF2）、SHA-512/SM3/SHA-3、压缩（gzip/zip）、农历与区划码表、非 UTF 字符集表、Excel、流式增量摘要 API 排在 `docs/ROADMAP.md` 的「暂不做」档；运行时反射类与文件/网络类**结构上不属于本库**（见根 `README.md` 的不承诺清单与 `AGENTS.md` 零依赖四条）。
