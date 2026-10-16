@@ -845,3 +845,120 @@ let n1_64 : UInt64 = 0x52dce729
 
 ///|
 let five_64 : UInt64 = 5
+
+///|
+// ===== 第二批：CRC32（一个累加器 + 八件；需求登记：本仓 Issues #2）。契约与读数见 spec §8 =====
+
+///|
+/// CRC32 累加器：**标准 IEEE 802.3 反射位序**（生成多项式 `0xEDB88320`、寄存器初值 `0xFFFFFFFF`、
+/// 末异或 `0xFFFFFFFF`），与 `java.util.zip.CRC32` / `zlib.crc32` / GZIP 同族同值。
+///
+/// - Note: 与 `Crc8` 那条"照参照实现的非标准表构造"取向**相反**，理由是本件没有 hutool 对位可照
+///   （类面清单现读 `cn.hutool.core.io.checksum` 只有 CRC8 / CRC16 与十个 `crc16` 变体）。
+///   七牛 Kodo 的块级校验、gzip / zip / PNG 都按标准式取值，这里若自创一套就等于把同一个数在两个库里
+///   打成两个数——spec §5 第 16 行把这条反差记成分岔。
+/// - Note: 有状态对象（与 `Crc8`/`Crc16` 同形），所以一次性用法另有 `crc32_of_bytes`/`crc32_hex` 两件。
+pub struct Crc32 {
+  value : UInt32
+}
+
+///|
+/// 建 CRC32 累加器。初值取"未取反的对外读数 0"那一档，与 `new CRC32()` 后 `getValue()` 给 0 同形。
+///
+/// - Returns: 空累加器，`crc32_value` 此刻读 0
+/// - Note: 需求登记（Issues #2）：分块上传的每块校验要"边读边喂"，一次性入口会逼调用方把整块留在内存里
+pub fn new_crc32() -> Crc32 {
+  abort(
+    "PR-B：契约骨架，docs/spec/17-hash.md §8（CRC32 官方向量）",
+  )
+}
+
+///|
+/// 累加整段字节。对位 `java.util.zip.Checksum#update(byte[])`。
+///
+/// - Parameters: `data` 任意字节流（含 `0x00`、非 UTF-8 序列都行——CRC 不关心文本解释）
+/// - Note: 分段喂与整份喂必须逐字节等值；用例把 `1..N` 每种分段长度全档跑一遍，不是挑两档
+pub fn Crc32::crc32_update(self : Crc32, data : Bytes) -> Unit {
+  let _ = (self, data)
+  abort(
+    "PR-B：契约骨架，docs/spec/17-hash.md §8（CRC32 分段全档）",
+  )
+}
+
+///|
+/// 累加 `data` 的 `[offset, offset + length)` 区间。对位 `update(byte[], int, int)`。
+///
+/// - Parameters:
+///   - `data` 源字节
+///   - `offset` 起点
+///   - `length` 取段长度
+/// - Note: 与"整段喂"同值（腿读数 `*.range`），带偏移取段与单独喂那一段同值（`offset56`）
+pub fn Crc32::crc32_update_range(
+  self : Crc32,
+  data : Bytes,
+  offset : Int32,
+  length : Int32,
+) -> Unit {
+  let _ = (self, data, offset, length)
+  abort("PR-B：契约骨架，docs/spec/17-hash.md §8（CRC32 区间档）")
+}
+
+///|
+/// 累加单个字节，只取 `b` 的低 8 位。对位 `update(int)`。
+///
+/// - Parameters: `b` 字节值（高 24 位被忽略，与参照侧 `(byte)` 截断同形）
+pub fn Crc32::crc32_update_byte(self : Crc32, b : Int32) -> Unit {
+  let _ = (self, b)
+  abort(
+    "PR-B：契约骨架，docs/spec/17-hash.md §8（CRC32 逐字节档）",
+  )
+}
+
+///|
+/// 当前校验值。对位 `getValue()`。
+///
+/// - Returns: **无符号 32 位放进 `Int64`**，恒在 `0..4294967295`
+/// - Note: 位扩展规则是契约的一部分：走 `UInt32::to_int64` 的零扩展口，**不许**先降成 `Int32` 再升
+///   （wasm 档 `Int32` 是 32 位，`0xE8B7BE43` 那样的高位一旦进有符号域就符号扩展成负读数）。
+///   `"a"` 那条 3904355907 过 2^31，用例专门拿它挡这一档
+pub fn Crc32::crc32_value(self : Crc32) -> Int64 {
+  let _ = self
+  abort(
+    "PR-B：契约骨架，docs/spec/17-hash.md §8（CRC32 出口位扩展）",
+  )
+}
+
+///|
+/// 回到空累加器状态（`crc32_value` 读 0）。对位 `reset()`。
+///
+/// - Note: 参照侧 `reset()` 之后可以接着喂，本件同形：reset 是可重复的，不消耗对象
+pub fn Crc32::crc32_reset(self : Crc32) -> Unit {
+  let _ = self
+  abort("PR-B：契约骨架，docs/spec/17-hash.md §8（CRC32 reset 档）")
+}
+
+///|
+/// 一次性算整份 CRC32。名字里的 `of_bytes` 说的是**入口吃 `Bytes`**（与 `digest` 的 `*_of_bytes` 同形），
+/// 出口是数值而不是摘要字节——CRC32 本来就是个 32 位数。
+///
+/// - Parameters: `data` 任意字节流
+/// - Returns: 无符号 32 位放进 `Int64`，口径同 `crc32_value`
+/// - Note: 需求登记（Issues #2）：表单上传的可选 `crc32` 参数由这一件直接给
+pub fn crc32_of_bytes(data : Bytes) -> Int64 {
+  let _ = data
+  abort(
+    "PR-B：契约骨架，docs/spec/17-hash.md §8（CRC32 一次性入口）",
+  )
+}
+
+///|
+/// 一次性算整份 CRC32 并出**八位小写十六进制、零填充**。
+///
+/// - Parameters: `data` 任意字节流
+/// - Returns: 长度恒 8 的小写十六进制（`0x00000000` 那档也补满八位，不出现 `"0"`）
+pub fn crc32_hex(data : Bytes) -> String {
+  let _ = data
+  abort(
+    "PR-B：契约骨架，docs/spec/17-hash.md §8（CRC32 十六进制出口）",
+  )
+}

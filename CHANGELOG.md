@@ -39,7 +39,7 @@
 | `dfa` | `WordTree` / `SensitiveUtil` | 词树构建与七档查询、停顿字符表；`(density, greed)` 三档语义 |
 | `path` | `AntPathMatcher` + `io.file.FileNameUtil`(String 档) | 10 件 + `PathOptions` + `PathError` 四档；默认档跟随 hutool（`trimTokens=false`）；**10-10 批①新增文件名六件**（`name_of`/`main_name`/`ext_name`/`clean_invalid`/`contains_invalid`/`is_type`，263 条冻结期望；`File` 重载判 excluded）|
 | `cache` | `Cache` + FIFO/LRU/LFU/Timed/NoCache | 23 件公开面；时钟由调用方显式传 `now`，`prune` 三档语义各按其参照 |
-| `hash` | `HashUtil` + murmur/city/metro + CRC8/CRC16 族 | 45 件（含 2 枚举 2 记录）；返回值一律有符号，与参照读数十进制逐字同形 |
+| `hash` | `HashUtil` + murmur/city/metro + CRC8/CRC16 族 | 45 件（含 2 枚举 2 记录）；返回值一律有符号，与参照读数十进制逐字同形。**10-16 第二批 CRC32 九件契约已冻结**（需求登记：本仓 Issues #2；标准 IEEE 802.3 反射位序，官方向量 + `zlib` + JDK `java.util.zip.CRC32` 三级对撞，判据见 `docs/spec/17-hash.md` §8） |
 | `bloom` | `BitMapBloomFilter` + `filter/` + `bitMap/` | 位图/过滤器/聚合三层 23 件；哈希全部委托 `hash`，词数地板除截断跟随 |
 | `cron` | `CronPattern` | 解析（5~7 段、`/ > - > ,`、别名、`L`）+ 匹配 + 下一瞬间两族 + `Part` 七档 + 建造器；只算不调度；带区名档与内置时区表打通 |
 | `textsim` | `TextSimilarity` | 相似比与百分比（按实现的 LCS 口径，非莱文斯坦）、剥离集与判据件提到公开面 |

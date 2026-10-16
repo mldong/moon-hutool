@@ -1,5 +1,9 @@
 // 落地轮：体子已是真实现，骨架期的 `warnings` 豁免按 G12 撤掉
 
+// 第二批 PR-A（CRC32）重新压上一行：`struct_never_constructed` 是"Crc32 还没有构造点"的机械后果
+// （`new_crc32` 的体是 `PR-B：契约骨架` 的 abort），落地那一笔整行删除——G12 认的是函数体里那句文案。
+warnings = "-struct_never_constructed"
+
 import {
   "moonbitlang/core/encoding/utf8",
 }

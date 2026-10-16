@@ -10,6 +10,10 @@ pub fn bernstein(String) -> Int
 
 pub fn bkdr_hash(String) -> Int
 
+pub fn crc32_hex(Bytes) -> String
+
+pub fn crc32_of_bytes(Bytes) -> Int64
+
 pub fn dek_hash(String) -> Int
 
 pub fn djb_hash(String) -> Int
@@ -47,6 +51,8 @@ pub fn murmur64_bytes(Bytes) -> Int64
 pub fn murmur64_len_seed(Bytes, Int, Int) -> Int64
 
 pub fn new_crc16(Crc16Variant) -> Crc16
+
+pub fn new_crc32() -> Crc32
 
 pub fn new_crc8(Int, Int) -> Crc8
 
@@ -91,6 +97,15 @@ pub(all) enum Crc16Variant {
   X25
   XModem
 }
+
+pub struct Crc32 {
+  value : UInt
+}
+pub fn Crc32::crc32_reset(Self) -> Unit
+pub fn Crc32::crc32_update(Self, Bytes) -> Unit
+pub fn Crc32::crc32_update_byte(Self, Int) -> Unit
+pub fn Crc32::crc32_update_range(Self, Bytes, Int, Int) -> Unit
+pub fn Crc32::crc32_value(Self) -> Int64
 
 pub struct Crc8 {
   polynomial : Int
