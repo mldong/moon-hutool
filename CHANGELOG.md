@@ -7,7 +7,7 @@
 - **公开件签名只前进**：`.mbti` 里既有件的签名不改；要改必须另开主版本。
 - **期望值冻结**：断言右侧（参照读数）不因实现而改；确需更正，单独一条并在对应 spec 里写清外部读数来源。
 
-## 0.1.3（未发布 · 10-16 两批：`hash` 第二批 CRC32 + `digest` 流式/增量入口）
+## 0.1.3（2026-10-16 · `hash` 第二批 CRC32 + `digest` 流式/增量入口）
 
 - **`hash` 新增 CRC32 九件**（需求登记：本仓 Issues #2，七牛 Kodo 客户端的块级校验）：`Crc32` 累加器 +
   `new_crc32` / `crc32_update` / `crc32_update_range` / `crc32_update_byte` / `crc32_value` / `crc32_reset`
