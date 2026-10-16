@@ -32,7 +32,7 @@
 | `dfa` | `WordTree` / `SensitiveUtil` / `StopChar` | **已实现** | `docs/spec/14-dfa.md` | 详记 [`roadmap-log/14-dfa.md`](https://github.com/mldong/moon-hutool/blob/master/docs/roadmap-log/14-dfa.md) |
 | `path` | `AntPathMatcher` + `io.file.FileNameUtil`(String 档) | **已实现** | `docs/spec/15-path.md` | 详记 [`roadmap-log/15-path.md`](https://github.com/mldong/moon-hutool/blob/master/docs/roadmap-log/15-path.md) |
 | `cache` | `Cache` 接口 + `FIFOCache`/`LRUCache`/`LFUCache`/`TimedCache`/`NoCache` + `CacheUtil`（件在 **hutool-cache** 这个 artifact，`unzip -l` 现读 hutool-core 的 jar 里 `cn/hutool/cache` 是 0 条） | **已实现** | `docs/spec/16-cache.md` | 详记 [`roadmap-log/16-cache.md`](https://github.com/mldong/moon-hutool/blob/master/docs/roadmap-log/16-cache.md) |
-| `hash` | `HashUtil`（39 个 `public static`，javap 现读）+ `lang.hash.MurmurHash`/`CityHash`/`MetroHash`/`KetamaHash` + `io.checksum.CRC8`/`CRC16` 与 `crc16/` 十变体——**全在 hutool-core 一个 jar 里**（与 `dfa`/`cache` 两行相反，这行不用另取 artifact） | **已实现**（第一批 45 件）· 第二批 CRC32 **契约已冻结**（需求登记：本仓 Issues #2） | `docs/spec/17-hash.md` | 详记 [`roadmap-log/17-hash.md`](https://github.com/mldong/moon-hutool/blob/master/docs/roadmap-log/17-hash.md)。CRC32 没有 hutool 对位件（类面清单现读 `io.checksum` 只有 CRC8/CRC16 族），归口落本包而不是 `digest`，判据与分岔记在 spec §8 |
+| `hash` | `HashUtil`（39 个 `public static`，javap 现读）+ `lang.hash.MurmurHash`/`CityHash`/`MetroHash`/`KetamaHash` + `io.checksum.CRC8`/`CRC16` 与 `crc16/` 十变体——**全在 hutool-core 一个 jar 里**（与 `dfa`/`cache` 两行相反，这行不用另取 artifact） | **已实现**（第一批 45 件 + 第二批 CRC32 九件，需求登记：本仓 Issues #2） | `docs/spec/17-hash.md` | 详记 [`roadmap-log/17-hash.md`](https://github.com/mldong/moon-hutool/blob/master/docs/roadmap-log/17-hash.md)。CRC32 没有 hutool 对位件（类面清单现读 `io.checksum` 只有 CRC8/CRC16 族），归口落本包而不是 `digest`，判据与分岔记在 spec §8 |
 | `bloom` | `BitMapBloomFilter` + `BitSetBloomFilter` + `filter/` 11 个类 + `bitMap/{BitMap,IntMap,LongMap}` + `BloomFilterUtil`——**件不在 hutool-core**（`unzip -l hutool-core.jar` 现读 `bloom` 是 0 条），全在独立 artifact `hutool-bloomFilter-5.8.35.jar`（19,216 字节、21 个 class，与 `dfa`/`cache` 两行同形；行内旧写"只有 `BitMapBloomFilter`"已按现读更正，`5.8.35` 里也**没有** `AutoBitBloomFilter`） | **已实现** | `docs/spec/18-bloom.md` | 详记 [`roadmap-log/18-bloom.md`](https://github.com/mldong/moon-hutool/blob/master/docs/roadmap-log/18-bloom.md) |
 | `cron` | `cn.hutool.cron.pattern.CronPattern`（+ `parser/{PatternParser,PartParser}`、`matcher/*`、`Part`）——**件不在 hutool-core**：core 的 jar 里 `grep -ic cron` 现读 0 条，全在独立 artifact `hutool-cron-5.8.35.jar`（28 个 class） | **已实现** | `docs/spec/19-cron.md` | 详记 [`roadmap-log/19-cron.md`](https://github.com/mldong/moon-hutool/blob/master/docs/roadmap-log/19-cron.md) |
 | `textsim` | `TextSimilarity`（公开 3 件 + 私有 4 件，反射读数 `priv.names` 逐个点名）/ `Simhash` / `PasswdStrength`——三件都在 hutool-core 的 `cn/hutool/core/text/` 里（`unzip -l` 现读） | **已实现** | `docs/spec/20-textsim.md` | 详记 [`roadmap-log/20-textsim.md`](https://github.com/mldong/moon-hutool/blob/master/docs/roadmap-log/20-textsim.md) |
@@ -49,9 +49,8 @@
 <!-- READINGS:BEGIN 由 scripts/sync_status.py 生成，勿手改 -->
 | 读数（`moon test --target wasm`，当场跑） | 值 |
 |---|---|
-| 用例总数 | **1748** —— 绿 1738 / 红 10 |
-| 包状态 | 共 23 个：`已实现` 22 · `实现中` 1 · `契约已冻结` 0 · `未开工` 0 |
-| 红的是谁 | `hash`（10 红） —— 未实现的包红是设计态 |
+| 用例总数 | **1748** —— 绿 1748 / 红 0 |
+| 包状态 | 共 23 个：`已实现` 23 · `实现中` 0 · `契约已冻结` 0 · `未开工` 0 |
 <!-- READINGS:END -->
 
 | 项 | 值 |

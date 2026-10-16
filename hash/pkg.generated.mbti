@@ -99,7 +99,8 @@ pub(all) enum Crc16Variant {
 }
 
 pub struct Crc32 {
-  value : UInt
+  table : Array[UInt]
+  mut value : UInt
 }
 pub fn Crc32::crc32_reset(Self) -> Unit
 pub fn Crc32::crc32_update(Self, Bytes) -> Unit

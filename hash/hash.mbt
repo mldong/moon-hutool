@@ -859,7 +859,26 @@ let five_64 : UInt64 = 5
 ///   打成两个数——spec §5 第 16 行把这条反差记成分岔。
 /// - Note: 有状态对象（与 `Crc8`/`Crc16` 同形），所以一次性用法另有 `crc32_of_bytes`/`crc32_hex` 两件。
 pub struct Crc32 {
-  value : UInt32
+  table : Array[UInt32]
+  mut value : UInt32
+}
+
+///|
+/// CRC32 的 256 项查表，**按公式现算不抄录**（与 `digest` 那批常数表同一条取向：抄错一个数，
+/// 官方向量当场翻脸）。反射位序 ⇒ 每字节从低位起算八拍，撞到位就用生成多项式 `0xEDB88320` 回抹。
+///
+/// - Note: 与 `Crc8` 的建表差两处：本表按**标准式**（`Crc8` 照参照少了一次移位，见 spec §5 第 3 行与第 7 行），
+///   且环路全程走 `UInt32`（本版 js 档 `Int` 只有 31 位语义，`digest` 包头那条同形适用）
+fn crc32_table() -> Array[UInt32] {
+  let table : Array[UInt32] = []
+  for d in 0..<256 {
+    let mut c = d.reinterpret_as_uint()
+    for _ in 0..<8 {
+      c = if (c & 1) != 0 { (c >> 1) ^ 0xedb88320 } else { c >> 1 }
+    }
+    table.push(c)
+  }
+  table
 }
 
 ///|
@@ -868,9 +887,7 @@ pub struct Crc32 {
 /// - Returns: 空累加器，`crc32_value` 此刻读 0
 /// - Note: 需求登记（Issues #2）：分块上传的每块校验要"边读边喂"，一次性入口会逼调用方把整块留在内存里
 pub fn new_crc32() -> Crc32 {
-  abort(
-    "PR-B：契约骨架，docs/spec/17-hash.md §8（CRC32 官方向量）",
-  )
+  Crc32::{ table: crc32_table(), value: 0, }
 }
 
 ///|
@@ -879,10 +896,7 @@ pub fn new_crc32() -> Crc32 {
 /// - Parameters: `data` 任意字节流（含 `0x00`、非 UTF-8 序列都行——CRC 不关心文本解释）
 /// - Note: 分段喂与整份喂必须逐字节等值；用例把 `1..N` 每种分段长度全档跑一遍，不是挑两档
 pub fn Crc32::crc32_update(self : Crc32, data : Bytes) -> Unit {
-  let _ = (self, data)
-  abort(
-    "PR-B：契约骨架，docs/spec/17-hash.md §8（CRC32 分段全档）",
-  )
+  self.crc32_update_range(data, 0, data.length())
 }
 
 ///|
@@ -899,8 +913,16 @@ pub fn Crc32::crc32_update_range(
   offset : Int32,
   length : Int32,
 ) -> Unit {
-  let _ = (self, data, offset, length)
-  abort("PR-B：契约骨架，docs/spec/17-hash.md §8（CRC32 区间档）")
+  // 对外存的是**已取反**的读数，所以进出各一次异或：这样"分几段喂"与"整份喂"必然同值，
+  // 也让 `new_crc32` 的初值自然地写成 0（寄存器态 `0xFFFFFFFF` 只在循环里出现）。
+  let mut reg = self.value ^ 0xffffffff
+  let mut i = 0
+  while i < length {
+    let b = data[offset + i].to_uint()
+    reg = self.table[((reg ^ b) & 0xff).reinterpret_as_int()] ^ (reg >> 8)
+    i = i + 1
+  }
+  self.value = reg ^ 0xffffffff
 }
 
 ///|
@@ -908,10 +930,7 @@ pub fn Crc32::crc32_update_range(
 ///
 /// - Parameters: `b` 字节值（高 24 位被忽略，与参照侧 `(byte)` 截断同形）
 pub fn Crc32::crc32_update_byte(self : Crc32, b : Int32) -> Unit {
-  let _ = (self, b)
-  abort(
-    "PR-B：契约骨架，docs/spec/17-hash.md §8（CRC32 逐字节档）",
-  )
+  self.crc32_update_range(Bytes::from_array([b.to_byte()]), 0, 1)
 }
 
 ///|
@@ -922,10 +941,7 @@ pub fn Crc32::crc32_update_byte(self : Crc32, b : Int32) -> Unit {
 ///   （wasm 档 `Int32` 是 32 位，`0xE8B7BE43` 那样的高位一旦进有符号域就符号扩展成负读数）。
 ///   `"a"` 那条 3904355907 过 2^31，用例专门拿它挡这一档
 pub fn Crc32::crc32_value(self : Crc32) -> Int64 {
-  let _ = self
-  abort(
-    "PR-B：契约骨架，docs/spec/17-hash.md §8（CRC32 出口位扩展）",
-  )
+  self.value.to_int64()
 }
 
 ///|
@@ -933,8 +949,7 @@ pub fn Crc32::crc32_value(self : Crc32) -> Int64 {
 ///
 /// - Note: 参照侧 `reset()` 之后可以接着喂，本件同形：reset 是可重复的，不消耗对象
 pub fn Crc32::crc32_reset(self : Crc32) -> Unit {
-  let _ = self
-  abort("PR-B：契约骨架，docs/spec/17-hash.md §8（CRC32 reset 档）")
+  self.value = 0
 }
 
 ///|
@@ -945,10 +960,9 @@ pub fn Crc32::crc32_reset(self : Crc32) -> Unit {
 /// - Returns: 无符号 32 位放进 `Int64`，口径同 `crc32_value`
 /// - Note: 需求登记（Issues #2）：表单上传的可选 `crc32` 参数由这一件直接给
 pub fn crc32_of_bytes(data : Bytes) -> Int64 {
-  let _ = data
-  abort(
-    "PR-B：契约骨架，docs/spec/17-hash.md §8（CRC32 一次性入口）",
-  )
+  let ctx = new_crc32()
+  ctx.crc32_update(data)
+  ctx.crc32_value()
 }
 
 ///|
@@ -957,8 +971,20 @@ pub fn crc32_of_bytes(data : Bytes) -> Int64 {
 /// - Parameters: `data` 任意字节流
 /// - Returns: 长度恒 8 的小写十六进制（`0x00000000` 那档也补满八位，不出现 `"0"`）
 pub fn crc32_hex(data : Bytes) -> String {
-  let _ = data
-  abort(
-    "PR-B：契约骨架，docs/spec/17-hash.md §8（CRC32 十六进制出口）",
-  )
+  let ctx = new_crc32()
+  ctx.crc32_update(data)
+  hex_of_u32(ctx.value)
+}
+
+///|
+// 无符号 32 位 → 八位小写十六进制，**恒补满八位**（空串给 `00000000`，不出现 `"0"`）。
+// 从高位起逐 nibble 取，避开 `hex_of_u16` 那条"除 16 再倒序"的路——那条要额外处理零值与补零。
+fn hex_of_u32(v : UInt32) -> String {
+  let digits = "0123456789abcdef".to_array()
+  let out : Array[Char] = []
+  for i in 0..<8 {
+    let sh = 28 - i * 4
+    out.push(digits[((v >> sh) & 0xf).reinterpret_as_int()])
+  }
+  String::from_array(out)
 }

@@ -7,6 +7,18 @@
 - **公开件签名只前进**：`.mbti` 里既有件的签名不改；要改必须另开主版本。
 - **期望值冻结**：断言右侧（参照读数）不因实现而改；确需更正，单独一条并在对应 spec 里写清外部读数来源。
 
+## 0.1.3（未发布 · 10-16 两批：`hash` 第二批 CRC32 + `digest` 流式/增量入口）
+
+- **`hash` 新增 CRC32 九件**（需求登记：本仓 Issues #2，七牛 Kodo 客户端的块级校验）：`Crc32` 累加器 +
+  `new_crc32` / `crc32_update` / `crc32_update_range` / `crc32_update_byte` / `crc32_value` / `crc32_reset`
+  + 一次性 `crc32_of_bytes` / `crc32_hex`。**标准 IEEE 802.3 反射位序**（与 `java.util.zip.CRC32` / `zlib.crc32`
+  / GZIP 同值），归口落 `hash` 而不是 issue 原文写的 `digest`——CRC 族（`Crc8`/`Crc16`）在本包，`digest` 的
+  既定口径是无状态摘要。本件**没有 hutool 对位**（类面清单现读），属基础件补位，所以取向与"照参照的非标准
+  CRC8"相反，反差记在 `docs/spec/17-hash.md` §5 第 7 行。出口是无符号 32 位放进 `Int64`（恒 `0..4294967295`，
+  零扩展），十六进制恒八位小写零填充。期望值由官方公布值 + Python `zlib` + JDK `java.util.zip.CRC32`
+  三级对撞后冻结，分段判据跑到 `1..N` 全档；变异 4/4 抓红（§8）。
+- `digest` 的流式/增量入口见本节末追加的条目（同轮 Issues #3）。
+
 ## 0.1.2（2026-10-15 · digest 第三批 SHA-1 + HMAC-SHA1；全仓随 moonc 0.10.15 迁移）
 
 - **`digest` 新增 SHA-1 与 HMAC-SHA1 八件**：`sha1_bytes` / `sha1_hex` / `sha1_of_bytes` 与 `hmac_sha1_bytes` / `_hex` / `_of_bytes` / `_hex_of_bytes` / `_verify_hex`——与既有 md5/sha256 三件套、hmac_sha256 族逐件同形；HMAC 侧共用同一台 pad/xor 机器。官方向量＝NIST 示例文档（FIPS 180-4 附录 A.2 指向）＋ RFC 3174 §7.3 ＋ RFC 2202 §3 全七条，期望值先与 `hashlib`/`hmac` 现算两级对撞后冻结、实现笔零改写；变异 7/7 抓红（`docs/spec/02-digest.md` §2.8）。
