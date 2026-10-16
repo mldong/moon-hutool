@@ -55,8 +55,34 @@ pub fn sha256_hex(String) -> String
 pub fn sha256_of_bytes(Bytes) -> Bytes
 
 // Errors
+pub suberror DigestError {
+  AlreadyFinished
+}
 
 // Types and methods
+pub struct Md5Ctx {
+  // private fields
+}
+pub fn Md5Ctx::finish(Self) -> Bytes
+pub fn Md5Ctx::finish_hex(Self) -> String
+pub fn Md5Ctx::new() -> Self
+pub fn Md5Ctx::update(Self, Bytes) -> Unit raise DigestError
+
+pub struct Sha1Ctx {
+  // private fields
+}
+pub fn Sha1Ctx::finish(Self) -> Bytes
+pub fn Sha1Ctx::finish_hex(Self) -> String
+pub fn Sha1Ctx::new() -> Self
+pub fn Sha1Ctx::update(Self, Bytes) -> Unit raise DigestError
+
+pub struct Sha256Ctx {
+  // private fields
+}
+pub fn Sha256Ctx::finish(Self) -> Bytes
+pub fn Sha256Ctx::finish_hex(Self) -> String
+pub fn Sha256Ctx::new() -> Self
+pub fn Sha256Ctx::update(Self, Bytes) -> Unit raise DigestError
 
 // Type aliases
 

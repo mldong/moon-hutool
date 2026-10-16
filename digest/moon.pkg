@@ -1,3 +1,8 @@
+// 第四批 PR-A（增量入口 12 件）压上一行豁免：三类警告都是"骨架体全是 abort"的机械后果
+// （状态机与三个 Ctx 没有构造点、字段没人读、错误变体没人构造）。落地那一笔整行删除
+// ——G12 认的是函数体里的 `PR-B：契约骨架` 文案。多个 flag 必须**连写无空格无逗号**。
+warnings = "-struct_never_constructed-unused_constructor-unused_field-unused_error_type"
+
 import {
   "moonbitlang/core/buffer",
   "moonbitlang/core/encoding/hex",

@@ -17,7 +17,7 @@
 | 包 | hutool 对位 | 状态 | 契约 | 用例 |
 |---|---|---|---|---|
 | `text` | `StrUtil` / `CharSequenceUtil` / `NamingCase` / `StrFormatter` / `EscapeUtil` / `UnicodeUtil` / `CharUtil` / `text.replacer.*` | **已实现** | `docs/spec/01-text.md` | 详记 [`roadmap-log/01-text.md`](https://github.com/mldong/moon-hutool/blob/master/docs/roadmap-log/01-text.md) |
-| `digest` | `DigestUtil`（MD5 / SHA-1 / SHA-256 / HMAC） | **已实现**（三批；10-15 第三批 SHA-1 / HMAC-SHA1 落地，官方向量两级对撞后冻结、变异 7/7 抓红） | `docs/spec/02-digest.md` | 详记 [`roadmap-log/02-digest.md`](https://github.com/mldong/moon-hutool/blob/master/docs/roadmap-log/02-digest.md) |
+| `digest` | `DigestUtil`（MD5 / SHA-1 / SHA-256 / HMAC） | **已实现**（三批；10-15 第三批 SHA-1 / HMAC-SHA1 落地，官方向量两级对撞后冻结、变异 7/7 抓红）· 第四批流式/增量入口 **契约已冻结**（10-16，骨架 12 件，需求登记：本仓 Issues #3） | `docs/spec/02-digest.md` | 详记 [`roadmap-log/02-digest.md`](https://github.com/mldong/moon-hutool/blob/master/docs/roadmap-log/02-digest.md)。第四批是对本行旧写「core 无 io ⇒ 不做带状态写接口」的**翻案**：挡住的是读流，不是可续算的状态；判据与分岔记在 spec §2.9 |
 | `date` | `DateUtil` / `CalendarUtil` / `DatePattern` / `DateUnit` | **已实现**（六批；10-10 第六批 §9 计时三件 + 全局自定义格式表两笔落地：契约笔冻期望、实现笔只把红变绿） | `docs/spec/03-date.md` | 详记 [`roadmap-log/03-date.md`](https://github.com/mldong/moon-hutool/blob/master/docs/roadmap-log/03-date.md) |
 | `id` | `IdUtil`（雪花 / UUID v3·v4 / ObjectId / NanoId） | **已实现** | `docs/spec/04-id.md` | 详记 [`roadmap-log/04-id.md`](https://github.com/mldong/moon-hutool/blob/master/docs/roadmap-log/04-id.md) |
 | `codec` | `Base64`(url-safe·MIME·宽松解码) / `Base32` / `Base58`(含 Check) / `Base62` / `RadixUtil` / `x-www-form-urlencoded` / `UrlBuilder` / `URLUtil`(部分) / `Caesar` / `Rot` | **已实现**（前五批 + 10-10 批③ 片一 `Caesar`/`Rot`（0.1.1 落地笔收口，变异 8/8 抓红）；`Morse` 单独立片未开工） | `docs/spec/05-codec.md` | 详记 [`roadmap-log/05-codec.md`](https://github.com/mldong/moon-hutool/blob/master/docs/roadmap-log/05-codec.md) |
@@ -28,7 +28,7 @@
 | `re` | `ReUtil` / `PatternPool` / `RegexPool` | **已实现** | `docs/spec/10-re.md` | 详记 [`roadmap-log/10-re.md`](https://github.com/mldong/moon-hutool/blob/master/docs/roadmap-log/10-re.md) |
 | `valid` | `Validator`（79 个 `public static` 里的正则族） | **已实现** | `docs/spec/11-valid.md` | 详记 [`roadmap-log/11-valid.md`](https://github.com/mldong/moon-hutool/blob/master/docs/roadmap-log/11-valid.md) |
 | `rand` | `RandomUtil` / `WeightRandom` | **已实现** | `docs/spec/12-rand.md` | 详记 [`roadmap-log/12-rand.md`](https://github.com/mldong/moon-hutool/blob/master/docs/roadmap-log/12-rand.md) |
-| `mac` | `HMac`（并入 `digest` 还是独立包，出契约时定） | **不做**（10-05 判定：内容并入 `digest` 第二批，不建独立包，占位目录一并删掉） | —（判据与八件签名都记在 `digest` 的 spec §2.6） | 判据三条，都现读：① `HMac` 在 **hutool-crypto** 不在 core（本机 `javap -cp hutool-core-5.8.35.jar cn.hutool.crypto.digest.HMac` 找不到类，同批 `ReUtil`/`Validator` 都在 core）；② 它是**有状态对象**（7 个构造器 + `update`/`digest`/`digestHex`/`verify`），`update` 那半属"流式/增量摘要"，早已在 `digest` 的暂不做档；③ 剩下的一次性用法薄薄一层，已由 `digest` 八件（HMAC-MD5 全套 + 裸字节键 + `*_verify_hex`）全数覆盖 ⇒ 再开一个包只造出第二张嘴。20 块用例与 22 条 JDK 读数挂在 `digest` 行 |
+| `mac` | `HMac`（并入 `digest` 还是独立包，出契约时定） | **不做**（10-05 判定：内容并入 `digest` 第二批，不建独立包，占位目录一并删掉） | —（判据与八件签名都记在 `digest` 的 spec §2.6） | 判据三条，都现读：① `HMac` 在 **hutool-crypto** 不在 core（本机 `javap -cp hutool-core-5.8.35.jar cn.hutool.crypto.digest.HMac` 找不到类，同批 `ReUtil`/`Validator` 都在 core）；② 它是**有状态对象**（7 个构造器 + `update`/`digest`/`digestHex`/`verify`），`update` 那半属"流式/增量摘要"，10-16 第四批已在 `digest` 落三个 `Ctx`（spec §2.9）——**这条翻案不动 `mac` 判不建的结论**：`HMac` 仍然只在一次性那薄一层有独立价值，而那层已由八件覆盖；③ 剩下的一次性用法薄薄一层，已由 `digest` 八件（HMAC-MD5 全套 + 裸字节键 + `*_verify_hex`）全数覆盖 ⇒ 再开一个包只造出第二张嘴。20 块用例与 22 条 JDK 读数挂在 `digest` 行 |
 | `dfa` | `WordTree` / `SensitiveUtil` / `StopChar` | **已实现** | `docs/spec/14-dfa.md` | 详记 [`roadmap-log/14-dfa.md`](https://github.com/mldong/moon-hutool/blob/master/docs/roadmap-log/14-dfa.md) |
 | `path` | `AntPathMatcher` + `io.file.FileNameUtil`(String 档) | **已实现** | `docs/spec/15-path.md` | 详记 [`roadmap-log/15-path.md`](https://github.com/mldong/moon-hutool/blob/master/docs/roadmap-log/15-path.md) |
 | `cache` | `Cache` 接口 + `FIFOCache`/`LRUCache`/`LFUCache`/`TimedCache`/`NoCache` + `CacheUtil`（件在 **hutool-cache** 这个 artifact，`unzip -l` 现读 hutool-core 的 jar 里 `cn/hutool/cache` 是 0 条） | **已实现** | `docs/spec/16-cache.md` | 详记 [`roadmap-log/16-cache.md`](https://github.com/mldong/moon-hutool/blob/master/docs/roadmap-log/16-cache.md) |
@@ -49,8 +49,9 @@
 <!-- READINGS:BEGIN 由 scripts/sync_status.py 生成，勿手改 -->
 | 读数（`moon test --target wasm`，当场跑） | 值 |
 |---|---|
-| 用例总数 | **1748** —— 绿 1748 / 红 0 |
-| 包状态 | 共 23 个：`已实现` 23 · `实现中` 0 · `契约已冻结` 0 · `未开工` 0 |
+| 用例总数 | **1759** —— 绿 1748 / 红 11 |
+| 包状态 | 共 23 个：`已实现` 22 · `实现中` 1 · `契约已冻结` 0 · `未开工` 0 |
+| 红的是谁 | `digest`（11 红） —— 未实现的包红是设计态 |
 <!-- READINGS:END -->
 
 | 项 | 值 |
@@ -61,7 +62,7 @@ G16 的 done 只认逐条登记（包级规则整片声称一律落 unattested �
 
 ## 暂不做（排后，未定日期）
 
-AES / SM4 / ChaCha20、PBKDF2、RSA（门票已在 core：`BigInt::pow(exp, modulus?)` + `math::probable_prime`，缺 ASN.1 DER）、ECDSA / SM2、Blake2b→Argon2、BCrypt、DEFLATE / gzip / zip、SHA-512（下一批）、SM3、SHA-3、农历·节气·生肖码表、GB/T 2260 区划码表、拼音 / 繁简、GBK 等非 UTF 字符集表、Excel(xlsx)、流式增量摘要 API、`{0,number,…}` 式 `MessageFormat`。
+AES / SM4 / ChaCha20、PBKDF2、RSA（门票已在 core：`BigInt::pow(exp, modulus?)` + `math::probable_prime`，缺 ASN.1 DER）、ECDSA / SM2、Blake2b→Argon2、BCrypt、DEFLATE / gzip / zip、SHA-512（下一批）、SM3、SHA-3、农历·节气·生肖码表、GB/T 2260 区划码表、拼音 / 繁简、GBK 等非 UTF 字符集表、Excel(xlsx)、`{0,number,…}` 式 `MessageFormat`。
 
 **码表类若要作，一律独立成数据件**（本库被它依赖，反向不成立）：零依赖契约不破、不想拖表的用户不背体积、会过期的区划数据也不把一个工具库的发布节奏绑住。
 

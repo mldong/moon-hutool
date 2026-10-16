@@ -25,8 +25,9 @@ GATE_TARGETS="${GATE_TARGETS:-wasm js}"
 # 逐包条数别抄在这里，现读 ROADMAP.md 末的 READINGS 生成块（G11 每次都会重生成）。
 # 10-15 换代：moonc 0.10.15 全仓迁移笔后现读 wasm/js 1731 / wasm-gc 1719；
 # 第三批（SHA-1）契约笔 +7 条（6 个用例块 + 1 个 README 文档块）→ 1738 / 1726。
-# 10-16 换代：hash 第二批（CRC32）契约笔 +10 个用例块 → 1748 / 1736。
-BASELINE_TESTS="${BASELINE_TESTS:-1748}"
+# 10-16 换代：hash 第二批（CRC32）契约笔 +10 个用例块 → 1748 / 1736；
+# digest 第四批（增量入口）契约笔 +11 个用例块 → 1759 / 1747。
+BASELINE_TESTS="${BASELINE_TESTS:-1759}"
 
 echo "== G1 零第三方 + async 按包归属（10-09 口径翻案：白名单不再等于零依赖）=="
 # 三条判据一起跑，任何一条红即 G1 红；判据自身另有三档对照，对照不过 ⇒ 报"G1 自身失效"而不是放过。

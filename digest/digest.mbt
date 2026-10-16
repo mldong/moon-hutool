@@ -650,3 +650,192 @@ pub fn hmac_sha1_verify_hex(
 ) -> Bool {
   equal_digest(hmac_sha1_of_bytes(key, data), hex_to_bytes(expected))
 }
+
+///|
+// ===== 第四批：流式/增量入口（三把摘要 × 四件 + 一个错误档；需求登记：本仓 Issues #3）。契约与读数见 spec §2.9 =====
+
+///|
+/// 增量上下文的误用档：`finish` 之后再 `update`。
+///
+/// - Note: 这一档存在的理由是 issue 点名的"不能默默出错值"——收尾之后再喂如果不报错，
+///   下一次 `finish` 会给一个"看着像"的摘要，而调用方无从发现。参照侧（JDK `MessageDigest.update`）
+///   是随意续算的，本包不跟随；分岔两侧读数记在 spec §2.9 与 §2.7 相位表
+pub suberror DigestError {
+  AlreadyFinished
+}
+
+///|
+/// 三把摘要共用的增量状态机（**只有一份**，与 §2.6 的 `hmac_of` 同理：不许出现第二套 padding）。
+///
+/// - Note: 长度位拆成 `total_lo`/`total_hi` 两个 32 位无符号量并带进位累加，不用 64 位移位——
+///   js 档 `Int` 只有 31 位语义、本版又没有 `0x..u64` 字面量后缀（包头"四条实现取向"第 3 条同形适用）
+priv struct CtxState {
+  mut chain : Array[UInt32]
+  mut buf : Array[Byte]
+  mut total_lo : UInt32
+  mut total_hi : UInt32
+  mut closed : Bool
+}
+
+///|
+/// MD5 增量上下文。对位 hutool `Digest`/`MD5Digest` 的"一次喂一块"用法，
+/// 也是 `java.security.MessageDigest` / `hashlib` 的 `update`/`digest` 形状。
+///
+/// - Note: 存在的理由（Issues #3）：一次性入口要求先把整份递给它，做对象存储客户端时两处躲不开——
+///   秒传查重要算整份 md5（文件大小没有上限），分块上传要逐块边读边喂。core 无 io，所以本包不做
+///   "读流"那一层，只做**可续算的状态**，取数由调用方负责。
+/// - Note: 构造只走 `Md5Ctx::new()`（`pub struct` 的字段是包内私有，外部拿不到也构造不出第二份状态）
+pub struct Md5Ctx {
+  priv st : CtxState
+}
+
+///|
+/// SHA-1 增量上下文（与 `Md5Ctx` 逐件同形，共用同一台状态机，只差压缩器与取字字节序）
+pub struct Sha1Ctx {
+  priv st : CtxState
+}
+
+///|
+/// SHA-256 增量上下文（同上）
+pub struct Sha256Ctx {
+  priv st : CtxState
+}
+
+///|
+/// 建 MD5 增量上下文（链字取 RFC 1321 的 IV，缓冲与长度位清空，`closed` 为假）。
+///
+/// - Returns: 空上下文，此时 `finish` 给的就是空串的 MD5
+/// - Note: `finish` 之后本上下文不可再喂（见 `DigestError`），要算下一条消息得新建
+pub fn Md5Ctx::new() -> Md5Ctx {
+  abort(
+    "PR-B：契约骨架，docs/spec/02-digest.md §2.9（增量上下文构造）",
+  )
+}
+
+///|
+/// 追加一段。分块边界由本件自己处理：不足一个算法分组（64 字节）的尾巴进缓冲，
+/// 跨块长度与整份喂必须逐字节等值（用例把 `1..N` 每种分段长度全档跑一遍）。
+///
+/// - Parameters: `data` 本段字节
+/// - Raises: `DigestError::AlreadyFinished` —— 已经 `finish` 过还继续喂
+pub fn Md5Ctx::update(self : Md5Ctx, data : Bytes) -> Unit raise DigestError {
+  let _ = (self, data)
+  abort(
+    "PR-B：契约骨架，docs/spec/02-digest.md §2.9（update 分段与错误档）",
+  )
+}
+
+///|
+/// 收尾并给出原始 16 字节摘要。**幂等**：不改动链字、缓冲与长度位，重复调用逐次同值
+/// （issue 点名"幂等性请明确写在文档注释里"）。副作用只有一处——把上下文标成已收尾，
+/// 于是之后的 `update` 走错误档而不是默默续算。
+///
+/// - Returns: 16 字节原始摘要（`md5_of_bytes` 同一张嘴）
+/// - Raises: 无——纯读，幂等，重复调用不是错误
+pub fn Md5Ctx::finish(self : Md5Ctx) -> Bytes {
+  let _ = self
+  abort("PR-B：契约骨架，docs/spec/02-digest.md §2.9（finish 幂等）")
+}
+
+///|
+/// 收尾并出十六进制小写 32 位（= `hex(finish())`，同一条腿的第二档出口）
+///
+/// - Returns: 32 位小写十六进制
+/// - Raises: 无——同 `finish`
+pub fn Md5Ctx::finish_hex(self : Md5Ctx) -> String {
+  let _ = self
+  abort(
+    "PR-B：契约骨架，docs/spec/02-digest.md §2.9（finish_hex 出口）",
+  )
+}
+
+///|
+/// 建 SHA-1 增量上下文（链字取 FIPS 180-4 §5.3.1 的五字初值）
+///
+/// - Returns: 空上下文
+pub fn Sha1Ctx::new() -> Sha1Ctx {
+  abort(
+    "PR-B：契约骨架，docs/spec/02-digest.md §2.9（增量上下文构造）",
+  )
+}
+
+///|
+/// 追加一段（形状与 `Md5Ctx::update` 逐字相同）
+///
+/// - Parameters: `data` 本段字节
+/// - Raises: `DigestError::AlreadyFinished`
+pub fn Sha1Ctx::update(self : Sha1Ctx, data : Bytes) -> Unit raise DigestError {
+  let _ = (self, data)
+  abort(
+    "PR-B：契约骨架，docs/spec/02-digest.md §2.9（update 分段与错误档）",
+  )
+}
+
+///|
+/// 收尾并给出原始 20 字节摘要（幂等，口径同 `Md5Ctx::finish`）
+///
+/// - Returns: 20 字节原始摘要
+/// - Raises: 无
+pub fn Sha1Ctx::finish(self : Sha1Ctx) -> Bytes {
+  let _ = self
+  abort("PR-B：契约骨架，docs/spec/02-digest.md §2.9（finish 幂等）")
+}
+
+///|
+/// 收尾并出十六进制小写 40 位
+///
+/// - Returns: 40 位小写十六进制
+/// - Raises: 无
+pub fn Sha1Ctx::finish_hex(self : Sha1Ctx) -> String {
+  let _ = self
+  abort(
+    "PR-B：契约骨架，docs/spec/02-digest.md §2.9（finish_hex 出口）",
+  )
+}
+
+///|
+/// 建 SHA-256 增量上下文（链字取 FIPS 180-4 §5.3.3 的八字初值）
+///
+/// - Returns: 空上下文
+pub fn Sha256Ctx::new() -> Sha256Ctx {
+  abort(
+    "PR-B：契约骨架，docs/spec/02-digest.md §2.9（增量上下文构造）",
+  )
+}
+
+///|
+/// 追加一段（形状与 `Md5Ctx::update` 逐字相同）
+///
+/// - Parameters: `data` 本段字节
+/// - Raises: `DigestError::AlreadyFinished`
+pub fn Sha256Ctx::update(
+  self : Sha256Ctx,
+  data : Bytes,
+) -> Unit raise DigestError {
+  let _ = (self, data)
+  abort(
+    "PR-B：契约骨架，docs/spec/02-digest.md §2.9（update 分段与错误档）",
+  )
+}
+
+///|
+/// 收尾并给出原始 32 字节摘要（幂等，口径同 `Md5Ctx::finish`）
+///
+/// - Returns: 32 字节原始摘要
+/// - Raises: 无
+pub fn Sha256Ctx::finish(self : Sha256Ctx) -> Bytes {
+  let _ = self
+  abort("PR-B：契约骨架，docs/spec/02-digest.md §2.9（finish 幂等）")
+}
+
+///|
+/// 收尾并出十六进制小写 64 位
+///
+/// - Returns: 64 位小写十六进制
+/// - Raises: 无
+pub fn Sha256Ctx::finish_hex(self : Sha256Ctx) -> String {
+  let _ = self
+  abort(
+    "PR-B：契约骨架，docs/spec/02-digest.md §2.9（finish_hex 出口）",
+  )
+}
