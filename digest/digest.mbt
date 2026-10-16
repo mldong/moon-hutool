@@ -8,8 +8,9 @@
 /// 验收只认**官方向量**（门禁 G6）。core 无任何摘要能力（本机实测 `md5|sha256|hmac` 全树命中 0）⇒ 整包自研。
 ///
 /// 四条实现取向（都被本机编译器裁决过，别再改回去）：
-/// · **零分配压缩**：不物化 padded 副本，按"虚拟消息的第 i 个字节"取值（`pad_byte`/`pad_word`）；
-///   长度域用 `UInt64` 编码，所以没有"只吃 512 MiB 以内"这种隐性上限。
+/// · **一组一组压，不物化整份副本**（10-16 第四批改造：原先是"虚拟 padded 消息"按第 i 个字节取值，
+///   现在整组直接压输入、只有不足一个分组的 ≤63 字节尾巴进缓冲，见 §2.9 的那台共用状态机）；
+///   长度域是 32 位两半带进位累加，所以没有"只吃 512 MiB 以内"这种隐性上限。
 /// · **32 位环路全走 `UInt`**：本版 core 里 `UInt32` 不是独立类型（`unsafe_write_uint32_be` 吃的就是 `UInt`），
 ///   而 js 档 `Int` 只有 31 位语义 ⇒ 用 `Int` 拼字会在 js 上悄悄错。跨目标一致性由四目标 CI 判。
 /// · 位运算用中缀 `& | ^ << >>`（`lsl/lsr/land/lor` 那批方法在本版已报废弃），取反没有 `~`，
@@ -72,22 +73,35 @@ fn sha256_iv() -> Array[UInt32] {
 }
 
 ///|
-/// 虚拟 padded 消息：原文 + 总长 + 比特长度的 32 位两半（都不物化副本）
-priv struct Msg {
-  data : Bytes
-  n : Int32
-  total : Int32
-  bits_lo : UInt32
-  bits_hi : UInt32
+/// 增量状态机（三把摘要共用**一份**）：链字 + 不足一个算法分组（64 字节）的尾巴 + 比特长度的
+/// 32 位两半 + 已收尾标记。§2.6 那条"两台 HMAC 合成一台"的取向在这里落到 padding 上：
+/// 一次性入口与增量入口不许各养一份 padding 与长度位。
+priv struct CtxState {
+  chain : Array[UInt32]
+  mut buf : Array[Byte]
+  mut total_lo : UInt32
+  mut total_hi : UInt32
+  mut closed : Bool
 }
 
 ///|
-/// 组装虚拟消息。`bits_lo/hi` = `n × 8` 的低/高 32 位，用 `UInt` 的溢出与移位取，
-/// 因此与宿主 `Int` 位宽无关（js 档 31 位也不炸）
-fn make_msg(data : Bytes) -> Msg {
-  let n = data.length()
-  let nu = n.reinterpret_as_uint()
-  Msg::{ data, n, total: padded_len(n), bits_lo: nu << 3, bits_hi: nu >> 29, }
+/// 新建状态：链字取各算法的 IV，缓冲清空、长度位归零、未收尾
+fn ctx_new_state(iv : Array[UInt32]) -> CtxState {
+  CtxState::{ chain: iv, buf: [], total_lo: 0, total_hi: 0, closed: false, }
+}
+
+///|
+/// 长度位用两个 32 位无符号量带进位累加，不走 64 位移位：本版 `0x..u64` 字面量后缀判词法错，
+/// 而 js 档 `Int` 只有 31 位语义（文件头那条"32 位环路全走 `UInt`"同形适用）。
+/// 低半溢出 ⇒ 高半进 1。**这条进位本套用例碰不到**：`total_lo` 数的是**字节**，要 4 GiB 输入才翻一次，
+/// 一百万字节档远够不着（`bits_lo` 那边才是 2^29 字节的界）。留着它不是"够用就行"，而是长度位算错
+/// 在任意长消息上都会出错；这一格的覆盖欠账如实记在 spec §2.9 的变异表末尾。
+fn ctx_add_len(st : CtxState, n : Int32) -> Unit {
+  let old = st.total_lo
+  st.total_lo = old + n.reinterpret_as_uint()
+  if st.total_lo < old {
+    st.total_hi = st.total_hi + 1
+  }
 }
 
 ///|
@@ -123,42 +137,103 @@ fn padded_len(n : Int32) -> Int32 {
 }
 
 ///|
-/// 取"虚拟 padded 消息"的第 `i` 个字节（不物化副本）；长度域按大端摊在末尾 8 字节，
-/// 各算法再按自己的字节序取字
-fn pad_byte(msg : Msg, i : Int32, le : Bool) -> UInt32 {
-  let n = msg.n
-  if i < n {
-    msg.data[i].to_uint()
-  } else if i == n {
-    0x80
-  } else if i < msg.total - 8 {
-    0
-  } else {
-    // 末尾 8 字节是"比特长度"，**摆法跟各算法取字的字节序一致**：
-    // MD5 取小端字 ⇒ 偏移越小越是低位；SHA-256 取网络字节序 ⇒ 偏移越小越是高位。
-    // 这条统一按大端写时，空串（长度 0）看不出错、SHA 全对、MD5 一有长度就错——
-    // 只有"长度非零 + 小端"这一格才暴露，正是官方向量必须含非空串的理由。
-    // 只用 UInt 的两半算，不碰 64 位移位（本版 core 的 0x..u64 字面量后缀判词法错，
-    // 而 Int 在 js 档只有 31 位）。
-    let k = if le { i - (msg.total - 8) } else { msg.total - 1 - i }
-    let half = if k < 4 { msg.bits_lo } else { msg.bits_hi }
-    let sh = if k < 4 { k } else { k - 4 }
-    (half >> (sh * 8)) & 0xff
-  }
-}
-
-///|
-/// 从虚拟消息取一个 32 位字，`le` 决定字节序（MD5 小端 / SHA-256 大端）
-fn pad_word(msg : Msg, off : Int32, le : Bool) -> UInt32 {
-  let b0 = pad_byte(msg, off, le)
-  let b1 = pad_byte(msg, off + 1, le)
-  let b2 = pad_byte(msg, off + 2, le)
-  let b3 = pad_byte(msg, off + 3, le)
+/// 从一个分组取一个 32 位字，`le` 决定字节序（MD5 小端 / SHA 系大端）。
+/// 字节一律 `Byte::to_uint` 成无符号，不做符号扩展（`Int` 那条路在 js 档只有 31 位语义）
+fn word_at(block : Bytes, off : Int32, le : Bool) -> UInt32 {
+  let b0 = block[off].to_uint()
+  let b1 = block[off + 1].to_uint()
+  let b2 = block[off + 2].to_uint()
+  let b3 = block[off + 3].to_uint()
   if le {
     b0 | (b1 << 8) | (b2 << 16) | (b3 << 24)
   } else {
     (b0 << 24) | (b1 << 16) | (b2 << 8) | b3
   }
+}
+
+///|
+/// 一个分组的 16 个字（三个压缩器共用的取字步骤）
+fn block_words(block : Bytes, off : Int32, le : Bool) -> Array[UInt32] {
+  let w : Array[UInt32] = []
+  for j in 0..<16 {
+    w.push(word_at(block, off + j * 4, le))
+  }
+  w
+}
+
+///|
+/// 追加一段：① 先把上一段留下的尾巴补满一组压掉；② 整组**直接压输入**（不复制）；
+/// ③ 不足一组的进缓冲。长度位由 `ctx_add_len` 累加。这三步就是"分段喂与整份喂同值"的全部内容。
+fn ctx_feed(
+  st : CtxState,
+  compress : (Array[UInt32], Bytes, Int32) -> Unit,
+  data : Bytes,
+) -> Unit {
+  let n = data.length()
+  let mut i = 0
+  if st.buf.length() > 0 {
+    while i < n && st.buf.length() < 64 {
+      st.buf.push(data[i])
+      i = i + 1
+    }
+    if st.buf.length() == 64 {
+      compress(st.chain, Bytes::from_array(st.buf), 0)
+      st.buf = []
+    }
+  }
+  while i + 64 <= n {
+    compress(st.chain, data, i)
+    i = i + 64
+  }
+  while i < n {
+    st.buf.push(data[i])
+    i = i + 1
+  }
+  ctx_add_len(st, n)
+}
+
+///|
+/// 收尾：补 padding 与 8 字节比特长度，压完最后（一或二）个分组，返回**新的**链字数组。
+/// 幂等的根据在这里——`chain` 先 `copy()`（本版 `clone` 已报废弃），`buf` 与长度位一字不动；
+/// 唯一副作用是 `closed`。
+///
+/// 长度域的**摆法跟各算法取字的字节序一致**：MD5 取小端字 ⇒ 偏移越小越是低位；SHA 系取网络字节序
+/// ⇒ 偏移越小越是高位。这条统一按大端写时，空串（长度 0）看不出错、SHA 全对、MD5 一有长度就错——
+/// 只有"长度非零 + 小端"这一格才暴露，正是官方向量必须含非空串的理由（文件头那条老坑，换了机器照样成立）。
+/// 只用 `UInt32` 的两半算，不碰 64 位移位。
+fn ctx_finish_chain(
+  st : CtxState,
+  compress : (Array[UInt32], Bytes, Int32) -> Unit,
+  le : Bool,
+) -> Array[UInt32] {
+  let chain = st.chain.copy()
+  let tail = padded_len(st.buf.length())
+  let bits_lo = st.total_lo << 3
+  let bits_hi = (st.total_hi << 3) | (st.total_lo >> 29)
+  let buf_len = st.buf.length()
+  let blk : Array[Byte] = []
+  for i in 0..<tail {
+    let b = if i < buf_len {
+      st.buf[i].to_uint()
+    } else if i == buf_len {
+      0x80
+    } else if i < tail - 8 {
+      0
+    } else {
+      let k = if le { i - (tail - 8) } else { tail - 1 - i }
+      let half = if k < 4 { bits_lo } else { bits_hi }
+      let sh = if k < 4 { k } else { k - 4 }
+      (half >> (sh * 8)) & 0xff
+    }
+    blk.push(b.reinterpret_as_int().to_byte())
+  }
+  let t = Bytes::from_array(blk)
+  compress(chain, t, 0)
+  if tail == 128 {
+    compress(chain, t, 64)
+  }
+  st.closed = true
+  chain
 }
 
 ///|
@@ -191,108 +266,112 @@ fn to_hex_lower(data : Bytes) -> String {
 }
 
 ///|
-/// MD5 主循环（RFC 1321 §3.4）
-fn md5_core(data : Bytes) -> Array[UInt32] {
-  let msg = make_msg(data)
-  let total = msg.total
-  let s = md5_shifts()
-  let k = md5_consts()
-  let mut a0 : UInt32 = 0x67452301
-  let mut b0 : UInt32 = 0xefcdab89
-  let mut c0 : UInt32 = 0x98badcfe
-  let mut d0 : UInt32 = 0x10325476
-  for chunk in 0..<(total / 64) {
-    let base = chunk * 64
-    let mut a = a0
-    let mut b = b0
-    let mut c = c0
-    let mut d = d0
-    for r in 0..<64 {
-      let mut f : UInt32 = 0
-      let mut g = 0
-      if r < 16 {
-        f = (b & c) | (not32(b) & d)
-        g = r
-      } else if r < 32 {
-        f = (d & b) | (not32(d) & c)
-        g = (5 * r + 1) % 16
-      } else if r < 48 {
-        f = b ^ c ^ d
-        g = (3 * r + 5) % 16
-      } else {
-        f = c ^ (b | not32(d))
-        g = 7 * r % 16
-      }
-      f = f + a + k[r] + pad_word(msg, base + g * 4, true)
-      a = d
-      d = c
-      c = b
-      b = b + rotl(f, s[r])
-    }
-    a0 = a0 + a
-    b0 = b0 + b
-    c0 = c0 + c
-    d0 = d0 + d
-  }
-  [a0, b0, c0, d0]
+/// MD5 初值 H(0)（RFC 1321 §3.3）
+fn md5_iv() -> Array[UInt32] {
+  [0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476]
 }
 
 ///|
-/// SHA-256 主循环（FIPS 180-4 §6.2.2）
-fn sha256_core(data : Bytes) -> Array[UInt32] {
-  let msg = make_msg(data)
-  let total = msg.total
-  let kk = sha256_consts()
-  let mut h = sha256_iv()
-  for chunk in 0..<(total / 64) {
-    let base = chunk * 64
-    let w : Array[UInt32] = []
-    for j in 0..<16 {
-      w.push(pad_word(msg, base + j * 4, false))
+/// MD5 单组压缩（RFC 1321 §3.4）：一次吃一个 64 字节分组，链字**原地**更新。
+/// 取字固定小端（`block_words(..., true)`）——长度域的摆法必须与它一致，见 `ctx_finish_chain`。
+fn md5_compress(chain : Array[UInt32], block : Bytes, off : Int32) -> Unit {
+  let s = md5_shifts()
+  let k = md5_consts()
+  let w = block_words(block, off, true)
+  let mut a = chain[0]
+  let mut b = chain[1]
+  let mut c = chain[2]
+  let mut d = chain[3]
+  for r in 0..<64 {
+    let mut f : UInt32 = 0
+    let mut g = 0
+    if r < 16 {
+      f = (b & c) | (not32(b) & d)
+      g = r
+    } else if r < 32 {
+      f = (d & b) | (not32(d) & c)
+      g = (5 * r + 1) % 16
+    } else if r < 48 {
+      f = b ^ c ^ d
+      g = (3 * r + 5) % 16
+    } else {
+      f = c ^ (b | not32(d))
+      g = 7 * r % 16
     }
-    for t in 16..<64 {
-      let w15 = w[t - 15]
-      let w2 = w[t - 2]
-      let s0 = rotr(w15, 7) ^ rotr(w15, 18) ^ (w15 >> 3)
-      let s1 = rotr(w2, 17) ^ rotr(w2, 19) ^ (w2 >> 10)
-      w.push(w[t - 16] + s0 + w[t - 7] + s1)
-    }
-    let mut a = h[0]
-    let mut b = h[1]
-    let mut c = h[2]
-    let mut d = h[3]
-    let mut e = h[4]
-    let mut f = h[5]
-    let mut g = h[6]
-    let mut hp = h[7]
-    for t in 0..<64 {
-      let s1 = rotr(e, 6) ^ rotr(e, 11) ^ rotr(e, 25)
-      let ch = (e & f) | (not32(e) & g)
-      let temp1 = hp + s1 + ch + kk[t] + w[t]
-      let s0 = rotr(a, 2) ^ rotr(a, 13) ^ rotr(a, 22)
-      let maj = (a & b) | (a & c) | (b & c)
-      let temp2 = s0 + maj
-      hp = g
-      g = f
-      f = e
-      e = d + temp1
-      d = c
-      c = b
-      b = a
-      a = temp1 + temp2
-    }
-    h = [
-      h[0] + a,
-      h[1] + b,
-      h[2] + c,
-      h[3] + d,
-      h[4] + e,
-      h[5] + f,
-      h[6] + g,
-      h[7] + hp,
-    ]
+    f = f + a + k[r] + w[g]
+    a = d
+    d = c
+    c = b
+    b = b + rotl(f, s[r])
   }
-  h
+  chain[0] = chain[0] + a
+  chain[1] = chain[1] + b
+  chain[2] = chain[2] + c
+  chain[3] = chain[3] + d
+}
+
+///|
+/// MD5 一次性入口 = **同一台增量机器的一个出口**（建状态 + 喂一次 + 收尾）。
+/// 走这条而不是另养一份 padding，"分段与整份同值"才不是测试碰巧对上（spec §2.9）
+fn md5_core(data : Bytes) -> Array[UInt32] {
+  let st = ctx_new_state(md5_iv())
+  ctx_feed(st, md5_compress, data)
+  ctx_finish_chain(st, md5_compress, true)
+}
+
+///|
+/// SHA-256 单组压缩（FIPS 180-4 §6.2.2）：一次吃一个 64 字节分组，链字**原地**更新。
+/// 取字固定大端（网络字节序），与长度域的摆法同侧（见 `ctx_finish_chain`）。
+fn sha256_compress(chain : Array[UInt32], block : Bytes, off : Int32) -> Unit {
+  let kk = sha256_consts()
+  let w = block_words(block, off, false)
+  for t in 16..<64 {
+    let w15 = w[t - 15]
+    let w2 = w[t - 2]
+    let s0 = rotr(w15, 7) ^ rotr(w15, 18) ^ (w15 >> 3)
+    let s1 = rotr(w2, 17) ^ rotr(w2, 19) ^ (w2 >> 10)
+    w.push(w[t - 16] + s0 + w[t - 7] + s1)
+  }
+  let mut a = chain[0]
+  let mut b = chain[1]
+  let mut c = chain[2]
+  let mut d = chain[3]
+  let mut e = chain[4]
+  let mut f = chain[5]
+  let mut g = chain[6]
+  let mut hp = chain[7]
+  for t in 0..<64 {
+    let s1 = rotr(e, 6) ^ rotr(e, 11) ^ rotr(e, 25)
+    let ch = (e & f) | (not32(e) & g)
+    let temp1 = hp + s1 + ch + kk[t] + w[t]
+    let s0 = rotr(a, 2) ^ rotr(a, 13) ^ rotr(a, 22)
+    let maj = (a & b) | (a & c) | (b & c)
+    let temp2 = s0 + maj
+    hp = g
+    g = f
+    f = e
+    e = d + temp1
+    d = c
+    c = b
+    b = a
+    a = temp1 + temp2
+  }
+  chain[0] = chain[0] + a
+  chain[1] = chain[1] + b
+  chain[2] = chain[2] + c
+  chain[3] = chain[3] + d
+  chain[4] = chain[4] + e
+  chain[5] = chain[5] + f
+  chain[6] = chain[6] + g
+  chain[7] = chain[7] + hp
+}
+
+///|
+/// SHA-256 一次性入口 = 同一台增量机器的一个出口（理由同 `md5_core`，spec §2.9）
+fn sha256_core(data : Bytes) -> Array[UInt32] {
+  let st = ctx_new_state(sha256_iv())
+  ctx_feed(st, sha256_compress, data)
+  ctx_finish_chain(st, sha256_compress, false)
 }
 
 ///|
@@ -529,56 +608,58 @@ fn sha1_consts() -> Array[UInt32] {
 /// 与 SHA-256 的三处结构差：① 消息表从 16 字**线性扩到 80 字**（`rotl(⊕(t-3,t-8,t-14,t-16), 1)`）；
 /// ② 每轮只动 5 个链字且 `b` 左转 30 位进 `c`；③ 轮函数与常数按 20 轮一段换（`t / 20` 取段）。
 fn sha1_core(data : Bytes) -> Array[UInt32] {
-  let msg = make_msg(data)
-  let total = msg.total
-  let kk = sha1_consts()
-  let mut h0 : UInt32 = 0x67452301
-  let mut h1 : UInt32 = 0xefcdab89
-  let mut h2 : UInt32 = 0x98badcfe
-  let mut h3 : UInt32 = 0x10325476
-  let mut h4 : UInt32 = 0xc3d2e1f0
-  for chunk in 0..<(total / 64) {
-    let base = chunk * 64
-    let w : Array[UInt32] = []
-    for j in 0..<16 {
-      w.push(pad_word(msg, base + j * 4, false))
-    }
-    for t in 16..<80 {
-      w.push(rotl(w[t - 3] ^ w[t - 8] ^ w[t - 14] ^ w[t - 16], 1))
-    }
-    let mut a = h0
-    let mut b = h1
-    let mut c = h2
-    let mut d = h3
-    let mut e = h4
-    for t in 0..<80 {
-      let f = if t < 20 {
-        (b & c) | (not32(b) & d)
-      } else if t < 40 {
-        b ^ c ^ d
-      } else if t < 60 {
-        (b & c) | (b & d) | (c & d)
-      } else {
-        b ^ c ^ d
-      }
-      let temp = rotl(a, 5) + f + e + kk[t / 20] + w[t]
-      e = d
-      d = c
-      c = rotl(b, 30)
-      b = a
-      a = temp
-    }
-    h0 = h0 + a
-    h1 = h1 + b
-    h2 = h2 + c
-    h3 = h3 + d
-    h4 = h4 + e
-  }
-  [h0, h1, h2, h3, h4]
+  let st = ctx_new_state(sha1_iv())
+  ctx_feed(st, sha1_compress, data)
+  ctx_finish_chain(st, sha1_compress, false)
 }
 
 ///|
-/// SHA-1 原始 20 字节。与 `sha256_bytes` 同族：大端取字，共用那台零分配的虚拟消息机器。
+/// SHA-1 单组压缩（FIPS 180-4 §6.1.2）：一次吃一个 64 字节分组，链字**原地**更新。
+/// 消息表从 16 字线性扩到 80 字，轮函数与常数按 20 轮一段换（`t / 20` 取段）
+fn sha1_compress(chain : Array[UInt32], block : Bytes, off : Int32) -> Unit {
+  let kk = sha1_consts()
+  let w = block_words(block, off, false)
+  for t in 16..<80 {
+    w.push(rotl(w[t - 3] ^ w[t - 8] ^ w[t - 14] ^ w[t - 16], 1))
+  }
+  let mut a = chain[0]
+  let mut b = chain[1]
+  let mut c = chain[2]
+  let mut d = chain[3]
+  let mut e = chain[4]
+  for t in 0..<80 {
+    let f = if t < 20 {
+      (b & c) | (not32(b) & d)
+    } else if t < 40 {
+      b ^ c ^ d
+    } else if t < 60 {
+      (b & c) | (b & d) | (c & d)
+    } else {
+      b ^ c ^ d
+    }
+    let temp = rotl(a, 5) + f + e + kk[t / 20] + w[t]
+    e = d
+    d = c
+    c = rotl(b, 30)
+    b = a
+    a = temp
+  }
+  chain[0] = chain[0] + a
+  chain[1] = chain[1] + b
+  chain[2] = chain[2] + c
+  chain[3] = chain[3] + d
+  chain[4] = chain[4] + e
+}
+
+///|
+/// SHA-1 初值 H(0) 五字（FIPS 180-4 §5.3.1）：前四个与 MD5 同源，第五个是 `0xc3d2e1f0`
+fn sha1_iv() -> Array[UInt32] {
+  [0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476, 0xc3d2e1f0]
+}
+
+///|
+/// SHA-1 原始 20 字节。与 `sha256_bytes` 同族：大端取字，共用那台增量状态机（§2.9）
+/// 与那一份 padding 实现。
 ///
 /// - Parameters: `data` 参与摘要的文本，按 **UTF-8** 成字节（全包口径）
 /// - Returns: 20 字节原始摘要
@@ -665,19 +746,6 @@ pub suberror DigestError {
 }
 
 ///|
-/// 三把摘要共用的增量状态机（**只有一份**，与 §2.6 的 `hmac_of` 同理：不许出现第二套 padding）。
-///
-/// - Note: 长度位拆成 `total_lo`/`total_hi` 两个 32 位无符号量并带进位累加，不用 64 位移位——
-///   js 档 `Int` 只有 31 位语义、本版又没有 `0x..u64` 字面量后缀（包头"四条实现取向"第 3 条同形适用）
-priv struct CtxState {
-  mut chain : Array[UInt32]
-  mut buf : Array[Byte]
-  mut total_lo : UInt32
-  mut total_hi : UInt32
-  mut closed : Bool
-}
-
-///|
 /// MD5 增量上下文。对位 hutool `Digest`/`MD5Digest` 的"一次喂一块"用法，
 /// 也是 `java.security.MessageDigest` / `hashlib` 的 `update`/`digest` 形状。
 ///
@@ -707,9 +775,7 @@ pub struct Sha256Ctx {
 /// - Returns: 空上下文，此时 `finish` 给的就是空串的 MD5
 /// - Note: `finish` 之后本上下文不可再喂（见 `DigestError`），要算下一条消息得新建
 pub fn Md5Ctx::new() -> Md5Ctx {
-  abort(
-    "PR-B：契约骨架，docs/spec/02-digest.md §2.9（增量上下文构造）",
-  )
+  Md5Ctx::{ st: ctx_new_state(md5_iv()), }
 }
 
 ///|
@@ -719,10 +785,10 @@ pub fn Md5Ctx::new() -> Md5Ctx {
 /// - Parameters: `data` 本段字节
 /// - Raises: `DigestError::AlreadyFinished` —— 已经 `finish` 过还继续喂
 pub fn Md5Ctx::update(self : Md5Ctx, data : Bytes) -> Unit raise DigestError {
-  let _ = (self, data)
-  abort(
-    "PR-B：契约骨架，docs/spec/02-digest.md §2.9（update 分段与错误档）",
-  )
+  if self.st.closed {
+    raise DigestError::AlreadyFinished
+  }
+  ctx_feed(self.st, md5_compress, data)
 }
 
 ///|
@@ -733,8 +799,7 @@ pub fn Md5Ctx::update(self : Md5Ctx, data : Bytes) -> Unit raise DigestError {
 /// - Returns: 16 字节原始摘要（`md5_of_bytes` 同一张嘴）
 /// - Raises: 无——纯读，幂等，重复调用不是错误
 pub fn Md5Ctx::finish(self : Md5Ctx) -> Bytes {
-  let _ = self
-  abort("PR-B：契约骨架，docs/spec/02-digest.md §2.9（finish 幂等）")
+  words_to_bytes(ctx_finish_chain(self.st, md5_compress, true), true)
 }
 
 ///|
@@ -743,10 +808,7 @@ pub fn Md5Ctx::finish(self : Md5Ctx) -> Bytes {
 /// - Returns: 32 位小写十六进制
 /// - Raises: 无——同 `finish`
 pub fn Md5Ctx::finish_hex(self : Md5Ctx) -> String {
-  let _ = self
-  abort(
-    "PR-B：契约骨架，docs/spec/02-digest.md §2.9（finish_hex 出口）",
-  )
+  to_hex_lower(self.finish())
 }
 
 ///|
@@ -754,9 +816,7 @@ pub fn Md5Ctx::finish_hex(self : Md5Ctx) -> String {
 ///
 /// - Returns: 空上下文
 pub fn Sha1Ctx::new() -> Sha1Ctx {
-  abort(
-    "PR-B：契约骨架，docs/spec/02-digest.md §2.9（增量上下文构造）",
-  )
+  Sha1Ctx::{ st: ctx_new_state(sha1_iv()), }
 }
 
 ///|
@@ -765,10 +825,10 @@ pub fn Sha1Ctx::new() -> Sha1Ctx {
 /// - Parameters: `data` 本段字节
 /// - Raises: `DigestError::AlreadyFinished`
 pub fn Sha1Ctx::update(self : Sha1Ctx, data : Bytes) -> Unit raise DigestError {
-  let _ = (self, data)
-  abort(
-    "PR-B：契约骨架，docs/spec/02-digest.md §2.9（update 分段与错误档）",
-  )
+  if self.st.closed {
+    raise DigestError::AlreadyFinished
+  }
+  ctx_feed(self.st, sha1_compress, data)
 }
 
 ///|
@@ -777,8 +837,7 @@ pub fn Sha1Ctx::update(self : Sha1Ctx, data : Bytes) -> Unit raise DigestError {
 /// - Returns: 20 字节原始摘要
 /// - Raises: 无
 pub fn Sha1Ctx::finish(self : Sha1Ctx) -> Bytes {
-  let _ = self
-  abort("PR-B：契约骨架，docs/spec/02-digest.md §2.9（finish 幂等）")
+  words_to_bytes(ctx_finish_chain(self.st, sha1_compress, false), false)
 }
 
 ///|
@@ -787,10 +846,7 @@ pub fn Sha1Ctx::finish(self : Sha1Ctx) -> Bytes {
 /// - Returns: 40 位小写十六进制
 /// - Raises: 无
 pub fn Sha1Ctx::finish_hex(self : Sha1Ctx) -> String {
-  let _ = self
-  abort(
-    "PR-B：契约骨架，docs/spec/02-digest.md §2.9（finish_hex 出口）",
-  )
+  to_hex_lower(self.finish())
 }
 
 ///|
@@ -798,9 +854,7 @@ pub fn Sha1Ctx::finish_hex(self : Sha1Ctx) -> String {
 ///
 /// - Returns: 空上下文
 pub fn Sha256Ctx::new() -> Sha256Ctx {
-  abort(
-    "PR-B：契约骨架，docs/spec/02-digest.md §2.9（增量上下文构造）",
-  )
+  Sha256Ctx::{ st: ctx_new_state(sha256_iv()), }
 }
 
 ///|
@@ -812,10 +866,10 @@ pub fn Sha256Ctx::update(
   self : Sha256Ctx,
   data : Bytes,
 ) -> Unit raise DigestError {
-  let _ = (self, data)
-  abort(
-    "PR-B：契约骨架，docs/spec/02-digest.md §2.9（update 分段与错误档）",
-  )
+  if self.st.closed {
+    raise DigestError::AlreadyFinished
+  }
+  ctx_feed(self.st, sha256_compress, data)
 }
 
 ///|
@@ -824,8 +878,7 @@ pub fn Sha256Ctx::update(
 /// - Returns: 32 字节原始摘要
 /// - Raises: 无
 pub fn Sha256Ctx::finish(self : Sha256Ctx) -> Bytes {
-  let _ = self
-  abort("PR-B：契约骨架，docs/spec/02-digest.md §2.9（finish 幂等）")
+  words_to_bytes(ctx_finish_chain(self.st, sha256_compress, false), false)
 }
 
 ///|
@@ -834,8 +887,5 @@ pub fn Sha256Ctx::finish(self : Sha256Ctx) -> Bytes {
 /// - Returns: 64 位小写十六进制
 /// - Raises: 无
 pub fn Sha256Ctx::finish_hex(self : Sha256Ctx) -> String {
-  let _ = self
-  abort(
-    "PR-B：契约骨架，docs/spec/02-digest.md §2.9（finish_hex 出口）",
-  )
+  to_hex_lower(self.finish())
 }
