@@ -178,6 +178,51 @@ test "prepare rejects transport-owned headers" {
 }
 
 ///|
+
+///|
+test "prepare rejects an explicit connection header" {
+  // 连接的关/复用由传输策略管（pool~ 关池即每请求新建），不收调用方单请求关线
+  assert_true(
+    prepare_rejected(
+      simple_request([{ name: "connection", value: "close", }], Empty),
+    ),
+  )
+}
+
+///|
+test "response_reusable follows the three exclusions" {
+  let framed = simple_response(200, [{ name: "content-length", value: "2", }])
+  let chunked = simple_response(200, [
+    { name: "transfer-encoding", value: "chunked", },
+  ])
+  let with_close = simple_response(200, [
+    { name: "content-length", value: "2", },
+    { name: "connection", value: "close", },
+  ])
+  let no_frame = simple_response(200, [])
+  // ① Connection: close 不回池
+  assert_false(response_reusable(Get, with_close))
+  // ② 无帧（关线定界）不回池
+  assert_false(response_reusable(Get, no_frame))
+  // ③ 有帧可复用
+  assert_true(response_reusable(Get, framed))
+  assert_true(response_reusable(Get, chunked))
+  // 无体应答（HEAD/204/304，帧已知完整）可复用
+  assert_true(response_reusable(Head, no_frame))
+  assert_true(response_reusable(Get, simple_response(204, [])))
+  assert_true(response_reusable(Get, simple_response(304, [])))
+}
+
+///|
+fn simple_response(code : Int32, headers : Array[Header]) -> @ahttp.Response {
+  let map : Map[@ahttp.CaseInsensitiveString, String] = Map([])
+  for header in headers {
+    map[@ahttp.CaseInsensitiveString(header.name)] = header.value
+  }
+  { code, reason: "OK", headers: map, cookies: [], }
+}
+
+///|
 test "method mapping covers all seven verbs" {
   assert_eq(to_request_method(Get), @ahttp.RequestMethod::Get)
   assert_eq(to_request_method(Head), @ahttp.RequestMethod::Head)

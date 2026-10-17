@@ -5,6 +5,7 @@ import {
   "moonbitlang/async",
   "moonbitlang/async/http" @ahttp,
   "moonbitlang/async/io",
+  "mldong/moon-hutool/date",
 }
 
 // 黑盒测试侧：端口契约用例走公开面；live 三档（真端点）由 MOONHUTOOL_HTTP_LIVE_BASE 门控，
@@ -13,7 +14,6 @@ import {
 import {
   "moonbitlang/async",
   "moonbitlang/async/io",
-  "mldong/moon-hutool/date",
   "moonbitlang/core/env",
 } for "test"
 

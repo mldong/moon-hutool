@@ -82,9 +82,19 @@
 7. **传输自有的头拒绝显式携带**：`host`（authority 来自 URL）、`content-length`/`transfer-encoding`
    （由 body 档推导——Empty 显式带 0 那条实测教训的另一面：两处真相必然漂移）。
    `user-agent` 走构造期持久头（官方口径 UA 只许 per-client 全局，本适配层一条请求一条连接）。
-8. **一条请求一条连接**：官方 `Client` 与单一 host 绑定且一次只走一条请求状态机，按请求新建是
-   保真的最短路径。连接复用不是本包的目标形状（存储线五条真腿无一依赖复用）；超时打断时
-   底层连接随 cancellation 丢弃，是否泄漏以工装读数为准（§5）。
+8. **连接复用按 origin（0.1.5 起，issue #5）**：本文件初版判"官方 Client 一次只走一条请求
+   状态机"——与官方文档冲突（`skip_response_body` 原话 "so that the next request can be
+   made"），0.1.5 更正并落地连接池。判据三条红线：只有读尽（EOF）的线回池（读一半就
+   close = 丢弃，保守档）；任何 Timeout/Network 后绝不回池；`Connection: close` 与无帧
+   （关线定界）应答不回池（无帧即 EOF 是对端关线，线已死）。池键 = (base, user-agent)——
+   持久头现读只可能带 UA，以后有别的头挪进持久头**键必须跟着变**，不然后一个请求会带着
+   前一个请求的头。`pool~ = false` 完全退回每 send 新建；`drain_connections()` 收掉空闲
+   连接（端口 trait 刻意不动：send-only，生命周期方法不逼每个实现方陪跑）。
+   从池里取出的线若在应答开始前死掉（对端闲置关线是常态），Empty/Bytes 自动换新线重试
+   一次（应答阶段失败绝不重试——状态不可知，重试可能双发；Stream 体不能倒带不重试）。
+   HTTP/1.0 不判别（官方公开面无版本号）：1.0 默认关线走"无帧不回池"，带 keep-alive 却
+   中途关线的由重试一次兜底。组合值 Connection 头（"keep-alive, close"）只做整值等值判，
+   如实记为已知限制。超时打断时连接随 cancellation 丢弃，是否泄漏以工装读数为准。
 
 ## §5 判据与读数（2026-10-17 本轮实测）
 
@@ -95,18 +105,25 @@ URL 切分逐字节（含拒绝三档）、头表决策（identity 注入/透传
 wasm 档 `moon test -p mldong/moon-hutool/http` = **18 绿**（live 四腿无 env 时响亮 SKIP——
 SKIP 不是 PASS，各腿自带这句打印）。
 
-**真端点四腿（`live_test.mbt`，工装 `scripts/http_live_harness.mjs`，127.0.0.1:18400）**：
+**真端点九档（`live_test.mbt`，工装 `scripts/http_live_harness.mjs`）**。档间以
+accepts 增量计数判连接数——**九档必须串行在一个测试体里跑**：wasm 跑批里多个 async test
+互相穿插（探针实测），分档计数窗口会被别的档污染。工装 accepts 口径：只数承载应用路由的
+连接、每连接只数一次（探测 /counter、/open 的连接不计）；/close3 以 `% 4 === 3` 循环关线
+（计数跨 run 累计，第一次用 `=== 3` 时第二遍起永远判不到关线应答）。
 
 | 腿 | 判据 | 读数 |
 |---|---|---|
 | 302 不跟随 | 302 原样返回 + `location` 头在位 + `/target` 计数仍 0 | 绿 |
 | gzip 原字节 | 强制 gzip 端点（无视 Accept-Encoding），收到字节与夹具逐字节相等 | 绿 |
-| 黑洞超时 | 1.5s 界 → `Timeout`，实测 **1509ms**（界 1500ms），< 20s 上限 | 绿 |
-| close 释放 | 读到 EOF + close 后轮询服务端连接数落回 0 | 绿 |
+| 黑洞超时 | 1.5s 界 → `Timeout`，实测 **1502–1506ms**（界 1500ms），< 20s 上限 | 绿 |
+| pool=false 回归 | 3 拍串行 = 3 条新连接（"关掉就退回旧形状"） | 绿 |
+| 串行复用 | 同 origin 8 拍：accepts 增量 **1**、请求数 8 | 绿 |
+| 并发 | 4 拍并发各建一线互不踩（增量 4）+ 随后 2 拍串行零新建 | 绿 |
+| Connection: close（负向一） | 第 3 应答关线 ⇒ 第 4 拍新建（增量 2，不是把死线递上去的 Timeout/Network） | 绿 |
+| 读一半 close（负向二） | 3 拍读一半各建一线全丢弃 + 第 4 拍新建（增量 4） | 绿 |
 
-工装无外部依赖（node:http + node:zlib），跑法写在文件头；`MOONHUTOOL_HTTP_LIVE_BASE`
-不设时四腿响亮 SKIP。native 档同套用例由 CI 出证（本机无 MSVC，编译可过、运行不行——与
-sched 同口径）。
+`MOONHUTOOL_HTTP_LIVE_BASE` 不设时响亮 SKIP（SKIP 不是 PASS）。native 档同套用例由 CI
+出证（本机无 MSVC，编译可过、运行不行——与 sched 同口径）。
 
 **变异五刀（全部在副本仓做，四刀为 issue 点名 + 一刀补约束③的守卫）**：
 

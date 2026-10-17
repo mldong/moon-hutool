@@ -127,6 +127,20 @@ async test "长度由 body 档推导，端口拒绝显式携带" {
 }
 ```
 
+## 连接什么时候复用、什么时候新建
+
+默认（`pool~ = true`）：同一 `AsyncHttpTransport` 上，**同 origin（scheme+host+port+user-agent）的请求复用空闲连接**——一次 TCP+TLS 握手服务多次请求；`pool~ = false` 完全退回每 send 新建。`drain_connections()` 收掉池里的空闲连接（测试收尾、进程退出用）。
+
+一条连接回池必须全部满足（红线，错了是协议串位，比慢严重得多）：
+
+- **应答体读到了 EOF**（read 返回 `None`）——读一半就 close 是丢弃，不是回池；
+- 应答没带 `Connection: close`；
+- 应答有帧（`content-length` 或 `chunked`；HEAD/204/304 视为帧已知完整）——无帧应答靠关线定界，EOF 即对端关线，这条线已死。
+
+绝不复用：任何一次 Timeout/Network 之后（半条连接状态不可知）；空闲超过 `idle_ttl_ms`（取出时静默丢弃）；同键空闲超过 `max_idle_per_origin`（最旧的先关）。从池里取出的线若在应答开始前就死掉（对端闲置关线是常态），Empty/Bytes 体自动换新线重试一次——Stream 体不能倒带，直接上报。
+
+并发口径：协作式单线程调度下 checkout/deposit 无 await 点，结构性原子（上游若引入抢占式调度，这里是第一个要复查的地方）。
+
 ## 错误四档
 
 状态码不是错误（2xx 与非 2xx 都算"拿到了应答"，各家错误码族上层自己解释）；端口只报"没拿到应答"与"发不出/解析不了"。`Timeout` 单列——"没在时限内得到应答"与"连接被拒"该走不同重试策略：

@@ -26,7 +26,8 @@ pub impl ResponseBody for AsyncHttpBody
 pub struct AsyncHttpTransport {
   // private fields
 }
-pub fn AsyncHttpTransport::new(timeout? : Int) -> Self
+pub fn AsyncHttpTransport::drain_connections(Self) -> Unit
+pub fn AsyncHttpTransport::new(timeout? : Int, pool? : Bool, max_idle_per_origin? : Int, idle_ttl_ms? : Int64) -> Self
 pub async fn AsyncHttpTransport::send(Self, Request) -> Response raise TransportError
 pub impl Transport for AsyncHttpTransport
 
