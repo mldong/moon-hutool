@@ -38,3 +38,4 @@
 | 23 | `typex` | [`roadmap-log/23-typex.md`](https://github.com/mldong/moon-hutool/blob/master/docs/roadmap-log/23-typex.md) |
 | 24 | `sched` | [`roadmap-log/24-sched.md`](https://github.com/mldong/moon-hutool/blob/master/docs/roadmap-log/24-sched.md) |
 | 25 | `cron_expr` | [`roadmap-log/25-cron-expr.md`](https://github.com/mldong/moon-hutool/blob/master/docs/roadmap-log/25-cron-expr.md) |
+| 26 | `http` | [`roadmap-log/26-http.md`](https://github.com/mldong/moon-hutool/blob/master/docs/roadmap-log/26-http.md) |

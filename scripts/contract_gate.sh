@@ -37,7 +37,7 @@ import io, json, os, re, subprocess, sys
 ROOT = subprocess.run(["git", "rev-parse", "--show-toplevel"],
                       capture_output=True, text=True).stdout.strip()
 ASYNC = "moonbitlang/async"
-OWNER = "sched"                      # 唯一被放行 import async 的包目录
+OWNERS = ("sched", "http")           # 被放行 import async 的包目录（sched=触发面、http=传输面，都只引官方 moonbitlang/async）
 THIRD = r'(moonbitstack|Betterlol|mizchi|bobzhang|justjavac|tonyfettes|Lfan-ke|oboard|caijiewei295|iceBear67|suiyunonghen|Asterless|Metalymph|Nanaloveyuki)/'
 
 
@@ -74,13 +74,13 @@ def scan(imports, mods):
         for n in names:
             if re.search(THIRD, n):
                 bad.append("第三方依赖 %s（包 %s）" % (n, pkg))
-            if n == ASYNC and pkg != OWNER:
-                bad.append("%s 包 import 了 %s —— 例外只登记在 %s" % (pkg, ASYNC, OWNER))
+            if n == ASYNC and pkg not in OWNERS:
+                bad.append("%s 包 import 了 %s —— 例外只登记在 %s" % (pkg, ASYNC, "/".join(OWNERS)))
     for n in mods:
         if re.search(THIRD, n):
             bad.append("moon.mod 有第三方 import：%s" % n)
-        if n == ASYNC and OWNER not in imports:
-            bad.append("moon.mod pin 了 %s 但包 %s 不存在 ⇒ 例外登记悬空" % (ASYNC, OWNER))
+        if n == ASYNC and not any(o in imports for o in OWNERS):
+            bad.append("moon.mod pin 了 %s 但 %s 都不存在 ⇒ 例外登记悬空" % (ASYNC, "/".join(OWNERS)))
     if ASYNC in mods and sorted(set(mods)) != [ASYNC]:
         bad.append("moon.mod 的 import 段必须只有 %s 这一条例外，现读：%s" % (ASYNC, mods))
     # ④ 反向死格：例外登记了却没人用（pin 漂成摆设），或用了却没登记（构建期才发现）
@@ -126,10 +126,11 @@ if not b2:
     print("  FAIL G1 自身失效：塞一个真第三方没被抓到，白名单判据不可信")
     rc = 1
 probe3 = dict(imports)
-probe3.pop(OWNER, None)
+for _owner in OWNERS:
+    probe3.pop(_owner, None)
 b3 = [x for x in scan(probe3, [ASYNC]) if "悬空" in x or "没有任何包" in x]
 if not b3:
-    print("  FAIL G1 自身失效：把唯一使用者摘掉后，悬空 pin 没被抓到（判据对'例外没人用'是瞎的）")
+    print("  FAIL G1 自身失效：把白名单里的使用者全摘掉后，悬空 pin 没被抓到（判据对'例外没人用'是瞎的）")
     rc = 1
 
 ALLOW = {"moonbitlang/core", "mldong/moon-hutool", ASYNC}
@@ -174,7 +175,7 @@ def tree_leg():
 
 
 real = scan(imports, mods)
-rc |= show("G1 三条判据（async 只归属 %s · 零真第三方 · moon.mod import 段只那一条例外 · 无悬空 pin）" % OWNER, real)
+rc |= show("G1 三条判据（async 只归属 %s · 零真第三方 · moon.mod import 段只那一条例外 · 无悬空 pin）" % "/".join(OWNERS), real)
 print("     （现读：moon.mod import 段 = %s；import %s 的包 = %s）"
       % (mods or "空", ASYNC, [p for p, ns in imports.items() if ASYNC in ns]))
 
@@ -516,8 +517,9 @@ else bad "G18 红（见上）"
 fi
 
 echo "== G19 同步性收口闸（10-09 拍：红线实质是「同步 + 零 OS 能力」，就得有闸看着「同步」这半）=="
-# 现读：剥掉注释后，全仓代码里的 async 只在 sched/sched.mbt（7 处）与 sched/sched_test.mbt（7 处）。
-# 这条闸不是"证明 sched 那两处对"，而是**第二个包一冒 async 就红**。AGENTS 第 2 条边界
+# 现读：剥掉注释后，全仓代码里的 async 在 sched 一族（10-09 的口径）与 http 一族（10-17 第二格，
+# 端口 trait 与官方 async/http 适配都是 async 面，见 docs/spec/26-http.md §1）。
+# 这条闸不是"证明这两族对"，而是**第三个包一冒 async 就红**。AGENTS 第 2 条边界
 # （纯计算半保持同步、零 OS 能力，"这条是外溢检查不是风格偏好"）此前只有文字：extern 有 G2、
 # 裸读时钟有 G18，「全同步」这一条一直没绑判据——缺口表第 3 行点名的就是它。
 # 扫两种面：*.mbt（剥整行与行尾注释）与 */README.mbt.md（**只数 ```mbt 围栏块里**）——
@@ -527,7 +529,7 @@ import io, os, re, shutil, subprocess, sys
 
 ROOT = subprocess.run(["git", "rev-parse", "--show-toplevel"],
                       capture_output=True, text=True).stdout.strip()
-OK_DIR = "sched"                 # 唯一登记过允许 async 的包目录
+OK_DIRS = ("sched", "http")      # 登记过允许 async 的包目录（第二格是 http 传输面，见 docs/spec/26-http.md §1）
 SKIP_DIRS = {"_build", ".mooncakes", ".git", "docs", "scripts", "node_modules"}
 TOK = re.compile(r"\basync\b")
 
@@ -572,16 +574,17 @@ def sites(base):
 
 def violations(found):
     return ["未登记 async 的包 %s（%d 处）" % (rel, n)
-            for rel, n in sorted(found.items()) if not rel.startswith(OK_DIR + "/")]
+            for rel, n in sorted(found.items())
+            if not any(rel.startswith(d + "/") for d in OK_DIRS)]
 
 
 found, seen = sites(ROOT)
 rc = 0
 
 # ① 尺子先要有刻度：真实扫描必须读到 sched 那两处。读到 0 个对象就给"没有违规"是自证空转
-if not found or OK_DIR + "/sched.mbt" not in found:
+if not found or OK_DIRS[0] + "/sched.mbt" not in found:
     print("  FAIL G19 自身失效：扫描面里没读到 %s/sched.mbt 的 async（现读命中 %s，扫过 %d 件）"
-          "⇒ 这条闸此刻什么都测不到" % (OK_DIR, found, seen))
+          "⇒ 这条闸此刻什么都测不到" % (OK_DIRS[0], found, seen))
     rc = 1
 # ② 坏样本必须被抓：临时造一个不在白名单目录里的 async 件（扫完立刻删）
 fx = os.path.join(ROOT, "_g19_fixture_probe")
@@ -601,7 +604,7 @@ if bad:
     print("  FAIL 非白名单包里出现 async：%s" % "；".join(bad))
     rc = 1
 # ④ 目录归属得真是那道口子：把 sched 挪出白名单目录名 ⇒ 必须报红
-moved = {("other/" + k if k.startswith(OK_DIR + "/") else k): v for k, v in found.items()}
+moved = {("other/" + k if k.startswith(OK_DIRS[0] + "/") else k): v for k, v in found.items()}
 if not violations(moved):
     print("  FAIL G19 自身失效：把 sched 挪出白名单后仍然不红（判据对目录归属是瞎的）")
     rc = 1

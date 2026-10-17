@@ -195,6 +195,6 @@
 ## 8. 整模块不做（写进 README 的「不承诺清单」）
 
 
-`bean`/`annotation`/`reflect`/`getter`/`compiler`/`aop`/`script`/`MapProxy`/序列化式 `clone`（**无运行时反射/动态代理**）；`io.FileUtil`/`IoUtil`/`CharsetUtil.convert`/`watch`/`net.NetUtil` 本机 IP/`ThreadUtil`/`system`（**需要 FFI 与 OS 线程**）；`http`/`db`/`socket`/`poi`/`captcha`（AWT 栅格化）/`extra`/`log`（跨栈定位不同：web 走 moonback、DB 走 moondb/moonmysql）。
+`bean`/`annotation`/`reflect`/`getter`/`compiler`/`aop`/`script`/`MapProxy`/序列化式 `clone`（**无运行时反射/动态代理**）；`io.FileUtil`/`IoUtil`/`CharsetUtil.convert`/`watch`/`net.NetUtil` 本机 IP/`ThreadUtil`/`system`（**需要 FFI 与 OS 线程**）；`db`/`socket`/`poi`/`captcha`（AWT 栅格化）/`extra`/`log`（跨栈定位不同：web 走 moonback、DB 走 moondb/moonmysql）。`http` 不在此列——10-17 起它是第 26 行的独立端口包（官方 `moonbitlang/async/http` 适配，见 `26-http.md`），不是 hutool-core 对位件。
 
 Bean 拷贝在 MoonBit 侧的正确姿势：`derive(ToJson)/derive(FromJson)`（**语言内置，非第三方宏**）或手写 `to_map/from_map`。

@@ -89,8 +89,10 @@ jobs:
       - name: moon update
         run: moon update
 
-      # 四档都必须编得过（本库立身之本）。唯一的例外是 `sched`：它 import moonbitlang/async，
-      # wasm-gc 档没有异步可执行入口，已由包级 supported_targets 摘掉那一档（读数见 docs/spec/24-sched.md §1）。
+      # 四档都必须编得过（本库立身之本）。两处登记过的例外都只引官方 moonbitlang/async：
+      # `sched`（wasm-gc 档无异步可执行入口，读数见 docs/spec/24-sched.md §1）与
+      # `http`（官方 async/http 对 js/wasm-gc 是占位件，读数见 docs/spec/26-http.md §1）——
+      # 都由包级 supported_targets 摘档，逐包生效，不碰其余包的四档承诺。
       - name: moon check --target ${{ matrix.target }}
         run: moon check --target ${{ matrix.target }}
 

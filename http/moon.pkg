@@ -1,0 +1,24 @@
+// moon-hutool/http —— 可注入的 HTTP 传输端口 + 官方 async/http 薄适配（需求登记：本仓 Issues #4）
+// 端口形状在对象存储线（moon-file-storage）五条真腿上实测磨出；底座只用官方 moonbitlang/async/http，
+// 不引第三方 HTTP 件——本包因此成为全仓第二个 import moonbitlang/async 的包（第一个是 sched）。
+import {
+  "moonbitlang/async",
+  "moonbitlang/async/http" @ahttp,
+  "moonbitlang/async/io",
+}
+
+// 黑盒测试侧：端口契约用例走公开面；live 三档（真端点）由 MOONHUTOOL_HTTP_LIVE_BASE 门控，
+// 缺席时响亮 SKIP——SKIP 不是 PASS（判据与工装见 docs/spec/26-http.md）。
+// 时钟读数走 @date 库内口（now_millis），不裸读 @env.now()（G18 口径）。
+import {
+  "moonbitlang/async",
+  "moonbitlang/async/io",
+  "mldong/moon-hutool/date",
+  "moonbitlang/core/env",
+} for "test"
+
+// 官方 async/http 只承诺 native+wasm 两档（其 src/http/unimplemented.mbt 的
+// #cfg(not(any(target="native", target="wasm"))) 就是 js/wasm-gc 的占位件），本包跟随摘档；
+// 做法照 sched 的先例（docs/spec/24-sched.md §1）：wasm-gc 下连编译入口都没有，js 档官方件自述不支持。
+
+supported_targets = "+native+wasm"

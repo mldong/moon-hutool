@@ -6,7 +6,7 @@
 
 | 状态 | 含义 | 出口条件 |
 |---|---|---|
-| `已实现` | 签名 + 实现 + 用例全绿，四目标都过（`sched` 是登记过的例外：它只承诺三档，见该行状态说明） | `moon check` 0 警告、`moon test` 该包全绿、`.mbti` 已提交 |
+| `已实现` | 签名 + 实现 + 用例全绿，四目标都过（登记过的例外：`sched` 只承诺三档、`http` 只承诺 native+wasm 两档，各自原因见该行状态说明） | `moon check` 0 警告、`moon test` 该包全绿、`.mbti` 已提交 |
 | `实现中` | 有人在写，**期望值不许改** | 每次提交只让红变绿，不新增公开 API |
 | `契约已冻结` | spec + 签名骨架 + 冻结期望值的用例就位，函数体是 `abort` | `moon check` 全绿，`moon test` 该包**预期红** |
 | `未开工` | 只有目录与范围声明，**无任何公开项** | 不许出现签名（签名即契约，契约未评审不出 API） |
@@ -41,6 +41,7 @@
 | `typex` | `Version` / `PageUtil` / `Ipv4Util` / `DataSize` / `DesensitizedUtil` / `IdcardUtil` / `CreditCodeUtil` / `PhoneUtil` / `CoordinateUtil` | **已实现** | `docs/spec/23-typex.md` | 详记 [`roadmap-log/23-typex.md`](https://github.com/mldong/moon-hutool/blob/master/docs/roadmap-log/23-typex.md) |
 | `sched` | hutool-cron 的调度族（`CronUtil`/`TaskTable`/`Scheduler`/`task/*`/`CronTimer`/`listener/*`/`timingwheel/*`；现读 `hutool-cron-5.8.35.jar` 共 43 个 `.class`，其中调度族 20 件，**件不在 hutool-core**） | **已实现** | `docs/spec/24-sched.md` | 详记 [`roadmap-log/24-sched.md`](https://github.com/mldong/moon-hutool/blob/master/docs/roadmap-log/24-sched.md) |
 | `cron_expr` | `cn.hutool.cron.pattern.*`（`CronPattern` + `parser/{PatternParser,PartParser}` + `matcher/*` + `Part`，与第 19 行同一族） | **未开工** | `docs/spec/25-cron_expr.md` | 详记 [`roadmap-log/25-cron-expr.md`](https://github.com/mldong/moon-hutool/blob/master/docs/roadmap-log/25-cron-expr.md) |
+| `http` | 不是 hutool 对位件——**可注入的 HTTP 传输端口 + 官方 `moonbitlang/async/http` 薄适配**（需求登记：本仓 Issues #4；对象存储线的 HTTP 层归口，签名协议要求 URL/头/正文原样上线） | **已实现**（10-17 两笔：端口形状在存储线五条真腿上实测磨出；官方件 0.22.4 无 per-request timeout ⇒ 适配层自 bounds；头表是 Map ⇒ 重复同名头响亮拒绝；缺省加 `Accept-Encoding` 并透明解压 ⇒ 恒显式带 `identity` 压掉。假传输 5 条 + 真端点 4 腿绿、变异 5 刀全红（含挂死形状）。只承诺 native+wasm：官方 http 包对 js/wasm-gc 是占位件（其 `unimplemented.mbt` 的 `#cfg` 即证），摘档照 sched 先例） | `docs/spec/26-http.md` | 详记 [`roadmap-log/26-http.md`](https://github.com/mldong/moon-hutool/blob/master/docs/roadmap-log/26-http.md) |
 
 ## 当前总读数
 
@@ -49,8 +50,8 @@
 <!-- READINGS:BEGIN 由 scripts/sync_status.py 生成，勿手改 -->
 | 读数（`moon test --target wasm`，当场跑） | 值 |
 |---|---|
-| 用例总数 | **1759** —— 绿 1759 / 红 0 |
-| 包状态 | 共 23 个：`已实现` 23 · `实现中` 0 · `契约已冻结` 0 · `未开工` 0 |
+| 用例总数 | **1777** —— 绿 1777 / 红 0 |
+| 包状态 | 共 24 个：`已实现` 24 · `实现中` 0 · `契约已冻结` 0 · `未开工` 0 |
 <!-- READINGS:END -->
 
 | 项 | 值 |
@@ -69,5 +70,5 @@ AES / SM4 / ChaCha20、PBKDF2、RSA（门票已在 core：`BigInt::pow(exp, modu
 
 `BeanUtil`/`ReflectUtil`/`ClassUtil`/`MapProxy`/`aop`/`script`/序列化式 `clone` —— MoonBit **无运行时反射与动态代理**；Bean 拷贝请走内置 `derive(ToJson)/derive(FromJson)` 或手写 `to_map/from_map`。
 `FileUtil`/`IoUtil`/`CharsetUtil.convert`/`WatchService`/`NetUtil.localIpv4s`/`ThreadUtil`/`SystemUtil` —— 需要 FFI 与 OS 线程（core 只给 `env.{now,rand,args,env_var,current_dir}`，官方生态也没有用户态线程 API，`moonbitlang/async` 那个线程池是内部件、不导出）。
-`http`/`db`/`socket`/`poi`/`captcha`/`extra`/`log` —— 跨栈定位不同；`captcha` 还依赖 AWT 字体栅格化。
+`db`/`socket`/`poi`/`captcha`/`extra`/`log` —— 跨栈定位不同；`captcha` 还依赖 AWT 字体栅格化。`http` 已随 10-17 翻案进逐包表第 26 行（本仓 Issues #4：传输是基础件，端口归口本库后存储线不再反向依赖实现），不再是「不做」项。
 命名时区的历史声明已随 `date` 第二批翻案（内置 IANA 段表，见逐包表那一行与 `03-date.md` §5），仍不做的是：`DateUtil` 智能无格式解析、`java.text` 全套 pattern、JDK lenient 语义、Unicode 大小写、完整 `BigDecimal`。cron 的调度族已于 10-09 改判、另立逐包表第 24 行 `sched`，不再是「不做」项。

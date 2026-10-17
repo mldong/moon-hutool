@@ -1,0 +1,77 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "mldong/moon-hutool/http"
+
+import {
+  "moonbitlang/async/io",
+}
+
+// Values
+
+// Errors
+pub(all) suberror TransportError {
+  Network(String)
+  Timeout
+  InvalidRequest(String)
+  InvalidResponse(String)
+}
+
+// Types and methods
+pub struct AsyncHttpBody {
+  // private fields
+}
+pub fn AsyncHttpBody::close(Self) -> Unit
+pub async fn AsyncHttpBody::read(Self, Int) -> Bytes? raise TransportError
+pub impl ResponseBody for AsyncHttpBody
+
+pub struct AsyncHttpTransport {
+  // private fields
+}
+pub fn AsyncHttpTransport::new(timeout? : Int) -> Self
+pub async fn AsyncHttpTransport::send(Self, Request) -> Response raise TransportError
+pub impl Transport for AsyncHttpTransport
+
+pub(all) struct Header {
+  name : String
+  value : String
+}
+
+pub(all) enum Method {
+  Get
+  Head
+  Put
+  Post
+  Delete
+  Patch
+  Options
+}
+
+pub(all) struct Request {
+  http_method : Method
+  url : String
+  headers : Array[Header]
+  body : RequestBody
+}
+
+pub(all) enum RequestBody {
+  Empty
+  Bytes(Bytes)
+  Stream(&@io.Reader, Int64?)
+}
+
+pub(all) struct Response {
+  status : Int
+  headers : Array[Header]
+  body : &ResponseBody
+}
+
+// Type aliases
+
+// Traits
+pub(open) trait ResponseBody {
+  async fn read(Self, Int) -> Bytes? raise TransportError
+  fn close(Self) -> Unit
+}
+
+pub(open) trait Transport {
+  async fn send(Self, Request) -> Response raise TransportError
+}

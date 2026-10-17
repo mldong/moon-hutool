@@ -23,17 +23,17 @@ keywords = [
   "moonbit",
   "hutool",
   "utility",
-  "core-only",
   "string",
   "date",
   "digest",
   "cron",
   "scheduler",
+  "http",
 ]
 
 preferred_target = "wasm"
 
-description = "Hutool-style utility library for MoonBit: all packages depend only on moonbitlang/core (no FFI, fully synchronous); the single exception is the `sched` package, which imports official `moonbitlang/async` for timer firing and therefore ships on three targets, not four"
+description = "Hutool-style utility library for MoonBit: all packages depend only on moonbitlang/core (no FFI, fully synchronous); the two exceptions both build on official `moonbitlang/async` — `sched` (cron timer firing, three targets) and `http` (injectable HTTP transport port, native+wasm only)"
 
 import {
   "moonbitlang/async@0.22.4",

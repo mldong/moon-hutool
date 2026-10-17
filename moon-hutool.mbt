@@ -1,5 +1,6 @@
 ///|
-/// moon-hutool —— MoonBit 版 hutool 工具库（**零第三方依赖**：只用随编译器发布的 `moonbitlang/core`）
+/// moon-hutool —— MoonBit 版 hutool 工具库（**零第三方依赖**：只用随编译器发布的 `moonbitlang/core`；
+/// 两处登记过的例外都只引官方 `moonbitlang/async`——`sched` 触发面、`http` 传输面）
 ///
 /// 本包是**导航根包**，刻意不放任何公开 API：
 /// 根包若 re-export 全部子包，就等于逼用户一次性链接整个库——本库的裁剪单位是**包**，
