@@ -13,19 +13,25 @@
 ```mbt check
 ///|
 async test "端口把准备好的东西原样交给传输层" {
-  let probe = DocRecordingTransport::{ received: [], body: DocProbeBody::{ closed: false } }
+  let probe = DocRecordingTransport::{
+    received: [],
+    body: DocProbeBody::{ closed: false, },
+  }
   let transport : &@http.Transport = probe
   let request = @http.Request::{
     http_method: @http.Method::Put,
     url: "https://s3.example.invalid/bucket/key?q=a%20b&x=1&x=2",
     headers: [
-      { name: "x-example", value: "first" },
-      { name: "x-example", value: "second" },
+      { name: "x-example", value: "first", },
+      { name: "x-example", value: "second", },
     ],
     body: @http.RequestBody::Empty,
   }
   let response = transport.send(request)
-  assert_eq(probe.received[0].url, "https://s3.example.invalid/bucket/key?q=a%20b&x=1&x=2")
+  assert_eq(
+    probe.received[0].url,
+    "https://s3.example.invalid/bucket/key?q=a%20b&x=1&x=2",
+  )
   // 同名头保序携带（端口语义；官方底座适配层对重复是响亮拒绝，见下节）
   assert_eq(probe.received[0].headers.length(), 2)
   assert_eq(probe.received[0].headers[1].value, "second")
@@ -66,7 +72,7 @@ priv struct DocRecordingTransport {
 ///|
 impl @http.Transport for DocRecordingTransport with fn send(self, request) {
   self.received.push(request)
-  { status: 200, headers: [], body: self.body }
+  { status: 200, headers: [], body: self.body, }
 }
 ```
 
@@ -82,8 +88,8 @@ async test "重复同名头响亮拒绝，不静默丢" {
     http_method: @http.Method::Put,
     url: "https://s3.example.invalid/bucket/key",
     headers: [
-      { name: "x-amz-meta-a", value: "1" },
-      { name: "x-amz-meta-a", value: "2" },
+      { name: "x-amz-meta-a", value: "1", },
+      { name: "x-amz-meta-a", value: "2", },
     ],
     body: @http.RequestBody::Empty,
   }
@@ -107,7 +113,7 @@ async test "长度由 body 档推导，端口拒绝显式携带" {
   let request : @http.Request = {
     http_method: @http.Method::Put,
     url: "https://s3.example.invalid/bucket/key",
-    headers: [{ name: "content-length", value: "3" }],
+    headers: [{ name: "content-length", value: "3", }],
     body: @http.RequestBody::Bytes(Bytes::from_array([1, 2, 3])),
   }
   let rejected = try {

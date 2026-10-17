@@ -312,7 +312,7 @@ echo "== G11 状态读数：生成块一致 + 逐包表覆盖 + 措辞不矛盾 
 if python scripts/sync_status.py --check >/tmp/mh_status.log 2>&1; then
   grep -E "^  (PASS|INFO)" /tmp/mh_status.log
 else
-  bad "状态句与当场读数不一致（见下）："; sed -n '1,12p' /tmp/mh_status.log | sed 's/^/    /'
+  bad "状态句与当场读数不一致（见下）："; sed -n '1,40p' /tmp/mh_status.log | sed 's/^/    /'
 fi
 
 
@@ -392,7 +392,7 @@ elif [ "$rc" = "0" ]; then
   if [ "$rc2" = "0" ]; then
     grep -E "^  (PASS|INFO)" /tmp/mh_ratchet.log
   else
-    bad "未覆盖行数超基线或基线缺失（见下）："; sed -n '1,14p' /tmp/mh_ratchet.log | sed 's/^/    /'
+    bad "未覆盖行数超基线或基线缺失（见下）："; sed -n '1,40p' /tmp/mh_ratchet.log | sed 's/^/    /'
   fi
 else
   bad "G15 自身失效：三档对照没全过——这条判据不可信（见下）"; sed -n '1,14p' /tmp/mh_ratchet_self.log | sed 's/^/    /'
