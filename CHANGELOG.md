@@ -7,6 +7,30 @@
 - **公开件签名只前进**：`.mbti` 里既有件的签名不改；要改必须另开主版本。
 - **期望值冻结**：断言右侧（参照读数）不因实现而改；确需更正，单独一条并在对应 spec 里写清外部读数来源。
 
+## 0.1.4（2026-10-17 · 新包 `http`：可注入 HTTP 传输端口 + 官方 async/http 薄适配）
+
+- **新增 `http` 包**（需求登记：本仓 Issues #4；对象存储线的 HTTP 层归口——传输是基础件，
+  归口本库后 SDK 侧不再反向依赖存储实现）。端口半是纯形状 + 两个 trait
+  （`Transport` / `ResponseBody`，零 OS 能力，桩实现不发网络即可全量验收端口语义）；
+  适配半是官方 `moonbitlang/async/http` 之上的 `AsyncHttpTransport`——本仓由此成为
+  "两个例外都用官方 `moonbitlang/async`"（`sched` 触发面 + `http` 传输面），
+  `moon.mod` 的 description 与 `keywords` 里过期的 `core-only` 已随本版更正。
+  包数与用例数现读 `docs/ROADMAP.md` 末的 READINGS 生成块。
+- **只承诺 native + wasm 两档**：官方 async/http 对 js/wasm-gc 是占位件
+  （其 `src/http/unimplemented.mbt` 的 `#cfg(not(any(target="native", target="wasm")))` 即证），
+  摘档做法照 `sched` 先例；契约真相在 `docs/spec/26-http.md`（逐包表第 26 行）。
+- **六条实现约束**（URL/正文一字不改、重复头不折字典、响应体显式 close、超时硬界、
+  非 2xx 不在端口里解释）逐条落点与判据见 spec §4/§5。其中两处与 issue 原文读数不同、
+  已按实测裁决：①官方件在调用方缺 `Accept-Encoding` 时会自己加头并透明解压
+  ⇒ 适配层恒显式带 `identity` 压掉自动路径，调用方自带则原样透传；②官方头表是 Map、
+  线上表达不了重复同名头 ⇒ 端口形状保序携带不变，适配层遇重复响亮 `InvalidRequest`，
+  **明文声明该适配层不承诺携带重复同名头**。
+- 判据：假传输/白盒 + 文档块 22 条（wasm 全绿，live 腿无 env 响亮 SKIP）；真端点四腿绿
+  （302 不跟随 / 强制 gzip 拿原字节 / 黑洞 Timeout 1509ms@界1500 / close 释放连接）；
+  变异五刀全红（四刀点名 + 一刀补 identity 守卫，去超时那刀是挂死形状）。工装
+  `scripts/http_live_harness.mjs` 入仓可复现，env 门控 `MOONHUTOOL_HTTP_LIVE_BASE`。
+- ROADMAP 逐包表第 72 行的「不做」清单里 `http` 已翻案移出（进第 26 行）。
+
 ## 0.1.3（2026-10-16 · `hash` 第二批 CRC32 + `digest` 流式/增量入口）
 
 - **`hash` 新增 CRC32 九件**（需求登记：本仓 Issues #2，七牛 Kodo 客户端的块级校验）：`Crc32` 累加器 +
