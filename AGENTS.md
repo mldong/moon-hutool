@@ -90,14 +90,17 @@ PR-A 的合入标准：`moon check` 必须全绿（签名与类型自洽、文�
 > 加它之前先量后改口径，不默认"红线里没写就是禁止"，也不静默扩红线。第 4 条的后半句从"只走 env.now/env.rand"
 > 改成上面这形；`read_file`、网络、宿主 API 仍然在禁令里。
 
-**10-09 唯一的例外登记**（不改写上面四条，只划死边界）：`sched`（逐包表第 24 行）允许 `import moonbitlang/async`。
+**例外登记**（不改写上面四条，只划死边界；第一格 10-09 `sched`，第二格 10-17 `http`）：`sched`（逐包表第 24 行）与 `http`（逐包表第 26 行）允许 `import moonbitlang/async`。
 边界由三条判据钉住，缺一条这例外就不成立：
 
-1. **只这一个包**：其余任何包 import 到 `moonbitlang/` 下的非 core 件即红。G1 的判据因此从
-   "前缀白名单 `moonbitlang/core`"改成"按包归属放行"，并补阳性对照（往别的包塞一条 async import 必须抓到）。
+1. **只这两个包**：其余任何包 import 到 `moonbitlang/` 下的非 core 件即红。G1 的判据因此从
+   "前缀白名单 `moonbitlang/core`"改成"按包归属放行"，并补阳性对照（往别的包塞一条 async import 必须抓到）；
+   白名单现读两格（`OWNERS = ("sched", "http")`）。
 2. **`async` 只准出现在触发壳**（"等 + 调 + 推状态"那一层）。时钟与时延源一律注入；
    纯计算半（任务表、"此刻该触发哪些"）保持同步、零 OS 能力、期望值可冻——**这条是外溢检查，不是风格偏好**。
-3. **代价如实写，不许缩回成"四目标一致"**：本包只承诺三档。`wasm-gc` 档 async 没有异步可执行入口
+3. **代价如实写，不许缩回成"四目标一致"**：`sched` 只承诺三档，`http` 只承诺 native+wasm 两档
+   （官方 async/http 对 js/wasm-gc 是占位件，读数见 `docs/spec/26-http.md` §1；
+   端口半 `transport.mbt` 保持零 OS 能力，async 面只在适配半，判据同下面第 2 条的外溢口径）。`sched` 的 `wasm-gc` 档 async 没有异步可执行入口
    （实测 `moon run`／`moon test --target wasm-gc` 报 `[4021] Value run_async_main not found in package moonbitlang/async`
    且 rc=1，而 `moon check` 照样通过 ⇒ 只看 check 会拿到假绿），已用包级 `supported_targets` 摘档；
    native 档本机编不了 async 自带的 C stub（现读 `#error "Currently only MSVC is supported on Windows"`），由 CI 出证；
@@ -113,7 +116,7 @@ PR-A 的合入标准：`moon check` 必须全绿（签名与类型自洽、文�
 |---|---|---|---|
 | 1 | 传递依赖的档能力（async 的 `wasm-gc` 无事件循环） | G1 只判"有没有第三方节点"，不判"它在哪些档能用" | 包级 `supported_targets` + spec §1 的代价表 |
 | 2 | 上游 0.x 的破坏性变更 | `moonbitlang/async` 本机缓存里已有 0.20.2→0.22.4 六个版本 | 发版 SOP 里把 pin 同步做成固定步骤（同 jeeflow-moon 那条接力 pin 教训） |
-| 3 | 四条没逐条绑定门禁（`extern` 有 G2，"全同步"没有） | **已落地（10-09，闸是 G19）**：此前现读 G1~G18 确实没有"同步性"判据（G18 管的是裸读 OS 时钟），这条就是缺口表自己点名的那一格 | G19：剥注释后扫 `*.mbt` 与 `*/README.mbt.md` 的 ```mbt 围栏块，`async` 只许出现在 `sched/` 目录下；四档自证——真实扫描必须读到 sched 那 14 处（读到 0 个对象就判"自身失效"，不给 PASS）、临时坏样本必被抓、白名单不误报、把 sched 挪出白名单必须报红。现读：扫过 132 件，命中只有 `sched/sched.mbt=7`、`sched/sched_test.mbt=7` |
+| 3 | 四条没逐条绑定门禁（`extern` 有 G2，"全同步"没有） | **已落地（10-09，闸是 G19）**：此前现读 G1~G18 确实没有"同步性"判据（G18 管的是裸读 OS 时钟），这条就是缺口表自己点名的那一格 | G19：剥注释后扫 `*.mbt` 与 `*/README.mbt.md` 的 ```mbt 围栏块，`async` 只许出现在登记过的包目录下（现读两格：`sched/`、`http/`，G19 的 `OK_DIRS`）；四档自证——真实扫描必须读到 sched 那几处（读到 0 个对象就判"自身失效"，不给 PASS）、临时坏样本必被抓、白名单不误报、把 sched 挪出白名单必须报红。首跑现读：扫过 163 件，命中 `http` 一族 16 处 + `sched` 一族 14 处；数字是当轮读数，以门禁 PASS 行现读为准 |
 | 4 | 体积与安装面 | registry publish 的包体校验会取依赖源码 | 首发前在 README 明写依赖代价 |
 | 5 | 依赖边界的"轴"：`moon.mod` 的 import 是**模块级**，包级豁免只是构建期约定 | 现读 `moon.mod` 一条 import 全模块可见；tree 那条腿**到 10-09 才被证实是死的**（旧代码走 `deps/children` 嵌套，而 `moon tree --json` 给的是扁平 `modules`+`edges` ⇒ 一个节点都没读到却报 PASS，见文末那条） | G1 按包归属只拦"代码里真 import"，`moon.mod` 那一行必须留着并加注释说明作用域 |
 | 6 | **裸 OS 时钟没有结构闸**，"可注入"是约定不是结构 | 现读：全库唯一读 OS 时钟的入口是 `date/date.mbt` 的 `now_millis()`（体即 `@env.now()`，注释自述"全库唯一"），`clock_system()` 是它的函数值形态、`clock_fixed()` 才是假钟；任何公开件都能直接走前两条，仓里没有一道闸禁止公开面裸读 `@env.now()`。G8 那条"与 core 同输入同输出"的对拍腿**永远绿**——它比的是"和 core 一样"，不是"可注入" | **已落地（10-09）：闸是 G18**——全仓代码里裸读 `@env.now()` 只许 `date/date.mbt` 的 `now_millis()` 一处，
