@@ -133,7 +133,8 @@ test "escape 实体族：XML 收撇号、HTML4 不收" {
   assert_eq(@text.escape_html4("a<b&c>d\"e'f"), "a&lt;b&amp;c&gt;d&quot;e'f")
   // 一次只解一层：`&amp;amp;` → `&amp;`，要回到 `&` 得再解一次
   assert_eq(@text.unescape_xml("&amp;amp;"), "&amp;")
-  // HTML4 认 `&copy;`；XML 的还原表只有那 5 条 + `&nbsp;`
+  // HTML4 认 `&copy;`；XML 的还原表只有那 5 条，`&nbsp;` 与 `&copy;` 都不认
+  assert_eq(@text.unescape_xml("&nbsp;"), "&nbsp;")
   assert_eq(@text.unescape_xml("&copy;"), "&copy;")
   assert_eq(@text.unescape_html4("&copy;"), "\u{00a9}")
 }

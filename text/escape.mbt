@@ -40,7 +40,8 @@ pub fn escape_xml(s : String) -> String {
 
 ///|
 /// XML 实体还原（`EscapeUtil.unescapeXml`）。只认 XML 那 5 条命名实体 + 数字引用：
-/// `&nbsp;` 解得出（参照的 XML 解表带它），`&copy;`/`&pound;` **原样留**（腿 E 行实测）。
+/// `&nbsp;` 与 `&copy;`/`&pound;` 一律**原样留**——参照的 `XmlUnescape` 只挂
+/// `invert(XmlEscape.BASIC_ESCAPE)` + `NumericEntityUnescaper`，没有 HTML 那张大表。
 pub fn unescape_xml(s : String) -> String raise TextError {
   unescape_entities(s, xml_unescape_pairs)
 }

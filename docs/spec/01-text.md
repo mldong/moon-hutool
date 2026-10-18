@@ -177,12 +177,18 @@ hutool 对位 `CharUtil.isBlankChar` ｜ 差异：入参是 `Char`（码位）�
 | `escape_xml("a<b&c>d\"e'f")` | `a&lt;b&amp;c&gt;d&quot;e&apos;f` | XML 收 `'` |
 | `escape_html4("a<b&c>d\"e'f")` | `a&lt;b&amp;c&gt;d&quot;e'f` | **HTML4 不收 `'`** —— 两族唯一的形式差在 `'`，别"顺手统一" |
 | `escape_html4("中文—–「")` | `中文&mdash;&ndash;「` | 只有进了表的码点才出实体名；`中`/`「` 原样 |
-| `unescape_xml("&nbsp;&lt;…&copy;&pound;")` | `&nbsp;` 解出、`&copy;`/`&pound;` **原样留** | XML 的还原表只有 5 条 + 参照额外认 `&nbsp;`（读数如此，不按 XML 规范常识改） |
+| `unescape_xml("&nbsp;&lt;…&copy;&pound;")` | 只有 `&lt;&gt;&quot;&apos;` 解出；`&nbsp;`/`&copy;`/`&pound;` 原样留 | XML 还原表就那 5 条，参照不认 `&nbsp;` |
 | `unescape_html4("&copy;&pound;")` | `©`/`£` | 还原表 252 条 |
 | `unescape_xml("&#65;&#x41;&#X41;&#999;")` | `AAA` + `γ` | 数字引用：十进制、小写 `x`、大写 `X` 都认 |
 | `unescape_xml("&amp;amp;")` | `&amp;` | **一次只解一层**（多次调用才逐层剥） |
 | `unescape_html4("&notanentity;&amp")` | 原样 | 未知名、缺分号：不猜、不报错 |
 | `unescape_html4("&#;&#xZZ;")` | 原样 | 坏数字引用同样原样 |
+
+**上表 `nbsp` 那行是 10-18 的更正**（原写作"`&nbsp;` 解出"，同句自称还在 `text/escape.mbt` 与
+`text/README.mbt.md` 两处，一并改掉）。判据两条：参照 5.8.37 的 `XmlUnescape` 构造器只挂
+`invert(XmlEscape.BASIC_ESCAPE)`（`' " & < >` 五条）+ `NumericEntityUnescaper`，没有 HTML 那张大表；
+而本仓腿 E 行的冻结读数（`escape_test.mbt` 的 `E|unescapeXml|&nbsp;…` 与 `A|`/`M|` 两档）**本来就是原样留**。
+表体与任何期望值一字未动——错的只是叙述，它与自己引用的读数矛盾。
 
 **闭环判据**：整 BMP 逐位扫"转义再还原"，`EntityTableLeg` 的 C 行**一条不剩**（0 条 NOTROUND）
 ——即表内每一位都能回到原字符。这条是本批最强的一条对撞，别拿"抽样通过"代替它。
