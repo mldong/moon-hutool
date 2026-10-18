@@ -72,6 +72,8 @@
    换来"服务器发什么字节、消费方读到什么字节"。
 4. **超时是硬界（约束⑤）**：建连 + 请求行/头 + 泵体 + 收应答头整段包一个 `with_timeout`；
    应答体每次读（`AsyncHttpBody::read`）单独包。默认 30s，`AsyncHttpTransport::new(timeout~)` 可改。
+   界是总时长不是空闲检测：慢链路上泵大请求体跟挂死拿同一个判决（`Timeout`），
+   "大请求体 × 跨境链路"这一档按体量调大 `timeout~`，不按体量自动放宽（moon-hutool#6 的判决）。
    对照实测：把界放大到事实无限（刀③），黑洞腿挂死、整轮测试被杀（exit 143/124 形状）——
    "没有界"的代价就是这条，不是推断。
 5. **响应体显式 close（约束④）**：`AsyncHttpBody::close` 即官方 `Client::close`（幂等、不 raise）。
