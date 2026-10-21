@@ -20,11 +20,11 @@ pub fn coord_wgs84_to_gcj02(Double, Double) -> (Double, Double)
 
 pub fn coord_wgs84_to_mercator(Double, Double) -> (Double, Double)
 
-pub fn count_by_ip_range(String, String) -> Int raise Ipv4Error
+pub fn count_by_ip_range(String, String) -> Int32 raise Ipv4Error
 
-pub fn count_by_mask_bit(Int, Bool) -> Int
+pub fn count_by_mask_bit(Int32, Bool) -> Int32
 
-pub fn data_size_compare(Int64, Int64) -> Int
+pub fn data_size_compare(Int64, Int64) -> Int32
 
 pub fn data_size_equal(Int64, Int64) -> Bool
 
@@ -66,7 +66,7 @@ pub fn data_unit_bytes_by_suffix(String) -> Int64?
 
 pub fn data_unit_suffixes() -> Array[String]
 
-pub fn desensitize_address(String, Int) -> String
+pub fn desensitize_address(String, Int32) -> String
 
 pub fn desensitize_bank_card(String) -> String
 
@@ -80,7 +80,7 @@ pub fn desensitize_first_mask(String) -> String
 
 pub fn desensitize_fixed_phone(String) -> String
 
-pub fn desensitize_id_card(String, Int, Int) -> String
+pub fn desensitize_id_card(String, Int32, Int32) -> String
 
 pub fn desensitize_ipv4(String) -> String
 
@@ -100,43 +100,43 @@ pub fn idcard_city_code(String) -> String?
 
 pub fn idcard_convert_15_to_18(String) -> String?
 
-pub fn idcard_convert_18_to_15(String, Int) -> String
+pub fn idcard_convert_18_to_15(String, Int32) -> String
 
-pub fn idcard_day(String) -> Int?
+pub fn idcard_day(String) -> Int32?
 
 pub fn idcard_district_code(String) -> String?
 
-pub fn idcard_gender(String) -> Int?
+pub fn idcard_gender(String) -> Int32?
 
-pub fn idcard_hide(String, Int, Int) -> String
+pub fn idcard_hide(String, Int32, Int32) -> String
 
 pub fn idcard_info_10(String) -> IdcardInfo10?
 
 pub fn idcard_is_valid_15(String) -> Bool
 
-pub fn idcard_is_valid_18(String, Int) -> Bool
+pub fn idcard_is_valid_18(String, Int32) -> Bool
 
-pub fn idcard_is_valid_18_case(String, Int, Bool) -> Bool
+pub fn idcard_is_valid_18_case(String, Int32, Bool) -> Bool
 
-pub fn idcard_is_valid_card(String, Int) -> Bool
+pub fn idcard_is_valid_card(String, Int32) -> Bool
 
 pub fn idcard_is_valid_hk_card(String) -> Bool
 
 pub fn idcard_is_valid_tw_card(String) -> Bool
 
-pub fn idcard_month(String) -> Int?
+pub fn idcard_month(String) -> Int32?
 
 pub fn idcard_province_code(String) -> String?
 
-pub fn idcard_year(String) -> Int?
+pub fn idcard_year(String) -> Int32?
 
-pub fn ipv4_begin_ip_long(String, Int) -> Int64 raise Ipv4Error
+pub fn ipv4_begin_ip_long(String, Int32) -> Int64 raise Ipv4Error
 
-pub fn ipv4_begin_ip_str(String, Int) -> String raise Ipv4Error
+pub fn ipv4_begin_ip_str(String, Int32) -> String raise Ipv4Error
 
-pub fn ipv4_end_ip_long(String, Int) -> Int64 raise Ipv4Error
+pub fn ipv4_end_ip_long(String, Int32) -> Int64 raise Ipv4Error
 
-pub fn ipv4_end_ip_str(String, Int) -> String raise Ipv4Error
+pub fn ipv4_end_ip_str(String, Int32) -> String raise Ipv4Error
 
 pub fn ipv4_format_block(String, String) -> String raise Ipv4Error
 
@@ -150,29 +150,29 @@ pub fn ipv4_to_long_or(String, Int64) -> Int64
 
 pub fn long_to_ipv4(Int64) -> String
 
-pub fn mask_bit_by_mask(String) -> Int raise Ipv4Error
+pub fn mask_bit_by_mask(String) -> Int32 raise Ipv4Error
 
-pub fn mask_bit_is_valid(Int) -> Bool
+pub fn mask_bit_is_valid(Int32) -> Bool
 
 pub fn mask_by_ip_range(String, String) -> String raise Ipv4Error
 
-pub fn mask_by_mask_bit(Int) -> String?
+pub fn mask_by_mask_bit(Int32) -> String?
 
 pub fn mask_is_valid(String) -> Bool
 
-pub fn page_get_end(Int, Int) -> Int
+pub fn page_get_end(Int32, Int32) -> Int32
 
-pub fn page_get_start(Int, Int) -> Int
+pub fn page_get_start(Int32, Int32) -> Int32
 
-pub fn page_rainbow(Int, Int) -> Array[Int]
+pub fn page_rainbow(Int32, Int32) -> Array[Int32]
 
-pub fn page_rainbow_count(Int, Int, Int) -> Array[Int]
+pub fn page_rainbow_count(Int32, Int32, Int32) -> Array[Int32]
 
-pub fn page_total_page(Int, Int) -> Int
+pub fn page_total_page(Int32, Int32) -> Int32
 
-pub fn page_total_page_long(Int64, Int) -> Int
+pub fn page_total_page_long(Int64, Int32) -> Int32
 
-pub fn page_trans_to_start_end(Int, Int) -> (Int, Int)
+pub fn page_trans_to_start_end(Int32, Int32) -> (Int32, Int32)
 
 pub fn phone_hide_after(String) -> String
 
@@ -208,11 +208,11 @@ pub fn typex_credit_code_is_simple(String) -> Bool
 
 pub fn typex_credit_code_is_valid(String) -> Bool
 
-pub fn typex_first_page_no() -> Int
+pub fn typex_first_page_no() -> Int32
 
-pub fn typex_set_first_page_no(Int) -> Unit
+pub fn typex_set_first_page_no(Int32) -> Unit
 
-pub fn version_compare(Version, Version) -> Int
+pub fn version_compare(Version, Version) -> Int32
 
 pub fn version_equals(Version, Version) -> Bool
 

@@ -30,7 +30,7 @@ pub fn grouped_map_put_all(GroupedMap, String?, Array[(String, String?)]) -> Uni
 
 pub fn grouped_map_remove(GroupedMap, String?, String) -> String?
 
-pub fn grouped_map_size(GroupedMap) -> Int
+pub fn grouped_map_size(GroupedMap) -> Int32
 
 pub fn grouped_map_values(GroupedMap, String?) -> Array[String?]
 
@@ -68,7 +68,7 @@ pub fn props_remove(Props, String) -> String?
 
 pub fn props_set(Props, String, String) -> String?
 
-pub fn props_size(Props) -> Int
+pub fn props_size(Props) -> Int32
 
 pub fn props_store(Props) -> String
 

@@ -2,24 +2,24 @@
 package "mldong/moon-hutool/bloom"
 
 // Values
-pub fn bloom_bits_for(Int) -> Int64
+pub fn bloom_bits_for(Int32) -> Int64
 
 pub fn new_bit_field(Int64, width? : WordWidth) -> BitField raise BloomError
 
-pub fn new_bloom(Int) -> Bloom raise BloomError
+pub fn new_bloom(Int32) -> Bloom raise BloomError
 
 pub fn new_bloom_with(Array[Filter]) -> Bloom
 
 pub fn new_filter(Int64, (String) -> Int64, width? : WordWidth) -> Filter raise BloomError
 
-pub fn word_width(Int) -> WordWidth raise BloomError
+pub fn word_width(Int32) -> WordWidth raise BloomError
 
 // Errors
 pub suberror BloomError {
-  BadWidth(Int)
+  BadWidth(Int32)
   ZeroSize
   BadBitCount(Int64)
-  IndexOutOfRange(Int64, Int)
+  IndexOutOfRange(Int64, Int32)
 }
 
 // Types and methods
@@ -31,7 +31,7 @@ pub struct BitField {
 pub fn BitField::add(Self, Int64) -> Unit raise BloomError
 pub fn BitField::contains(Self, Int64) -> Bool raise BloomError
 pub fn BitField::remove(Self, Int64) -> Unit raise BloomError
-pub fn BitField::word_count(Self) -> Int
+pub fn BitField::word_count(Self) -> Int32
 pub fn BitField::words(Self) -> Array[Int64]
 
 pub struct Bloom {

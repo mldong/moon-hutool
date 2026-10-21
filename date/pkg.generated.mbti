@@ -2,7 +2,7 @@
 package "mldong/moon-hutool/date"
 
 // Values
-pub fn age(Date, Date) -> Int raise DateError
+pub fn age(Date, Date) -> Int32 raise DateError
 
 pub fn between(DateTime, DateTime, TimeUnit) -> Int64
 
@@ -28,7 +28,7 @@ pub let datetime_millis_pattern : String
 
 pub let datetime_pattern : String
 
-pub fn days_in_month(Int, Int) -> Int raise DateError
+pub fn days_in_month(Int32, Int32) -> Int32 raise DateError
 
 pub fn default_zone() -> String
 
@@ -52,11 +52,11 @@ pub fn group_time_interval_nanos(() -> Int64) -> GroupTimeInterval
 
 pub fn is_custom_format(String) -> Bool
 
-pub fn is_leap_year(Int) -> Bool
+pub fn is_leap_year(Int32) -> Bool
 
 pub fn is_same_day(DateTime, DateTime) -> Bool
 
-pub fn now(Int) -> DateTime
+pub fn now(Int32) -> DateTime
 
 pub fn now_at(String, () -> Int64) -> DateTime?
 
@@ -92,7 +92,7 @@ pub fn time_interval_nanos(() -> Int64) -> GroupTimeInterval
 
 pub let time_pattern : String
 
-pub fn to_rfc3339(Int64, Int) -> String
+pub fn to_rfc3339(Int64, Int32) -> String
 
 pub fn to_rfc3339_in(Int64, String) -> String?
 
@@ -102,23 +102,23 @@ pub fn today_at(String, () -> Int64) -> Date?
 
 pub fn today_local() -> Date?
 
-pub fn zone_count() -> Int
+pub fn zone_count() -> Int32
 
 pub fn zone_exists(String) -> Bool
 
 pub fn zone_names() -> Array[String]
 
-pub fn zone_offset_minutes(String, Int64) -> Int?
+pub fn zone_offset_minutes(String, Int64) -> Int32?
 
-pub fn zone_offsets_at_wall(String, DateTime) -> Array[Int]
+pub fn zone_offsets_at_wall(String, DateTime) -> Array[Int32]
 
 // Errors
 pub suberror DateError {
-  MonthOutOfRange(Int)
-  DayOutOfRange(Int, Int, Int)
-  TimeFieldOutOfRange(Int, Int, Int, Int)
+  MonthOutOfRange(Int32)
+  DayOutOfRange(Int32, Int32, Int32)
+  TimeFieldOutOfRange(Int32, Int32, Int32, Int32)
   UnknownPatternToken(String)
-  ParseFailed(String, Int)
+  ParseFailed(String, Int32)
   FutureBirth
   ZoneGap(String)
   TimerAlreadyRunning
@@ -142,18 +142,18 @@ pub(all) enum ChronoUnit {
 pub fn ChronoUnit::shot_name(Self) -> String
 
 pub struct Date {
-  year : Int
-  month : Int
-  day : Int
+  year : Int32
+  month : Int32
+  day : Int32
 } derive(Compare, Eq)
 pub fn Date::begin_of_month(Self) -> Self
 pub fn Date::begin_of_quarter(Self) -> Self
 pub fn Date::begin_of_week(Self) -> Self
 pub fn Date::begin_of_year(Self) -> Self
-pub fn Date::between_day(Self, Self) -> Int
-pub fn Date::compare(Self, Self) -> Int
-pub fn Date::day_of_week(Self) -> Int
-pub fn Date::day_of_year(Self) -> Int
+pub fn Date::between_day(Self, Self) -> Int32
+pub fn Date::compare(Self, Self) -> Int32
+pub fn Date::day_of_week(Self) -> Int32
+pub fn Date::day_of_year(Self) -> Int32
 pub fn Date::end_of_month(Self) -> Self
 pub fn Date::end_of_quarter(Self) -> Self
 pub fn Date::end_of_year(Self) -> Self
@@ -163,51 +163,51 @@ pub fn Date::format(Self, String) -> String raise DateError
 pub fn Date::from_epoch_days(Int64) -> Self
 pub fn Date::is_weekend(Self) -> Bool
 pub fn Date::not_equal(Self, Self) -> Bool
-pub fn Date::of(Int, Int, Int) -> Self raise DateError
-pub fn Date::offset_day(Self, Int) -> Self
-pub fn Date::offset_month(Self, Int) -> Self
-pub fn Date::offset_year(Self, Int) -> Self
+pub fn Date::of(Int32, Int32, Int32) -> Self raise DateError
+pub fn Date::offset_day(Self, Int32) -> Self
+pub fn Date::offset_month(Self, Int32) -> Self
+pub fn Date::offset_year(Self, Int32) -> Self
 pub fn Date::op_ge(Self, Self) -> Bool
 pub fn Date::op_gt(Self, Self) -> Bool
 pub fn Date::op_le(Self, Self) -> Bool
 pub fn Date::op_lt(Self, Self) -> Bool
 pub fn Date::parse(String, String) -> Self raise DateError
-pub fn Date::quarter(Self) -> Int
+pub fn Date::quarter(Self) -> Int32
 pub fn Date::to_datetime(Self) -> DateTime
 pub fn Date::to_iso_string(Self) -> String
-pub fn Date::week_based_year(Self) -> Int
-pub fn Date::week_of_year(Self) -> Int
+pub fn Date::week_based_year(Self) -> Int32
+pub fn Date::week_of_year(Self) -> Int32
 
 pub struct DateTime {
   date : Date
-  hour : Int
-  minute : Int
-  second : Int
-  milli : Int
+  hour : Int32
+  minute : Int32
+  second : Int32
+  milli : Int32
 } derive(Compare, Eq)
 pub fn DateTime::begin_of_day(Self) -> Self
 pub fn DateTime::begin_of_month(Self) -> Self
 pub fn DateTime::begin_of_quarter(Self) -> Self
 pub fn DateTime::begin_of_week(Self) -> Self
 pub fn DateTime::begin_of_year(Self) -> Self
-pub fn DateTime::compare(Self, Self) -> Int
+pub fn DateTime::compare(Self, Self) -> Int32
 pub fn DateTime::end_of_day(Self) -> Self
 pub fn DateTime::end_of_month(Self) -> Self
 pub fn DateTime::end_of_quarter(Self) -> Self
 pub fn DateTime::end_of_year(Self) -> Self
 pub fn DateTime::equal(Self, Self) -> Bool
 pub fn DateTime::format(Self, String) -> String raise DateError
-pub fn DateTime::from_epoch_millis(Int64, Int) -> Self
+pub fn DateTime::from_epoch_millis(Int64, Int32) -> Self
 pub fn DateTime::not_equal(Self, Self) -> Bool
-pub fn DateTime::of(Date, Int, Int, Int, Int) -> Self raise DateError
+pub fn DateTime::of(Date, Int32, Int32, Int32, Int32) -> Self raise DateError
 pub fn DateTime::offset(Self, TimeUnit, Int64) -> Self
-pub fn DateTime::offset_month(Self, Int) -> Self
+pub fn DateTime::offset_month(Self, Int32) -> Self
 pub fn DateTime::op_ge(Self, Self) -> Bool
 pub fn DateTime::op_gt(Self, Self) -> Bool
 pub fn DateTime::op_le(Self, Self) -> Bool
 pub fn DateTime::op_lt(Self, Self) -> Bool
 pub fn DateTime::parse(String, String) -> Self raise DateError
-pub fn DateTime::to_epoch_millis(Self, Int) -> Int64
+pub fn DateTime::to_epoch_millis(Self, Int32) -> Int64
 pub fn DateTime::to_iso_string(Self) -> String
 
 pub struct GroupTimeInterval {
@@ -242,7 +242,7 @@ pub fn StopWatch::set_keep_task_list(Self, Bool) -> Unit
 pub fn StopWatch::short_summary(Self, unit? : ChronoUnit) -> String
 pub fn StopWatch::start(Self, name? : String?) -> Unit raise DateError
 pub fn StopWatch::stop(Self) -> Unit raise DateError
-pub fn StopWatch::task_count(Self) -> Int
+pub fn StopWatch::task_count(Self) -> Int32
 pub fn StopWatch::task_infos(Self) -> Array[TaskInfo] raise DateError
 pub fn StopWatch::to_string(Self) -> String
 pub fn StopWatch::total_in(Self, ChronoUnit) -> Int64

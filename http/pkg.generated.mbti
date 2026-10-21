@@ -20,14 +20,14 @@ pub struct AsyncHttpBody {
   // private fields
 }
 pub fn AsyncHttpBody::close(Self) -> Unit
-pub async fn AsyncHttpBody::read(Self, Int) -> Bytes? raise TransportError
+pub async fn AsyncHttpBody::read(Self, Int32) -> Bytes? raise TransportError
 pub impl ResponseBody for AsyncHttpBody
 
 pub struct AsyncHttpTransport {
   // private fields
 }
 pub fn AsyncHttpTransport::drain_connections(Self) -> Unit
-pub fn AsyncHttpTransport::new(timeout? : Int, pool? : Bool, max_idle_per_origin? : Int, idle_ttl_ms? : Int64) -> Self
+pub fn AsyncHttpTransport::new(timeout? : Int32, pool? : Bool, max_idle_per_origin? : Int32, idle_ttl_ms? : Int64) -> Self
 pub async fn AsyncHttpTransport::send(Self, Request) -> Response raise TransportError
 pub impl Transport for AsyncHttpTransport
 
@@ -60,7 +60,7 @@ pub(all) enum RequestBody {
 }
 
 pub(all) struct Response {
-  status : Int
+  status : Int32
   headers : Array[Header]
   body : &ResponseBody
 }
@@ -69,7 +69,7 @@ pub(all) struct Response {
 
 // Traits
 pub(open) trait ResponseBody {
-  async fn read(Self, Int) -> Bytes? raise TransportError
+  async fn read(Self, Int32) -> Bytes? raise TransportError
   fn close(Self) -> Unit
 }
 

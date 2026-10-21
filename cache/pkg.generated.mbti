@@ -8,35 +8,35 @@ package "mldong/moon-hutool/cache"
 // Types and methods
 pub struct Cache[K, V] {
   policy : CachePolicy
-  capacity : Int
+  capacity : Int32
   timeout : Int64
   mut order : Array[K]
   mut entries : Map[K, CacheObj[K, V]]
-  mut hit : Int
-  mut miss : Int
+  mut hit : Int32
+  mut miss : Int32
   mut listener : ((K, V) -> Unit)?
 }
 pub fn[K : Hash + Eq, V] Cache::cache_objs(Self[K, V]) -> Array[CacheObj[K, V]]
-pub fn[K, V] Cache::capacity(Self[K, V]) -> Int
+pub fn[K, V] Cache::capacity(Self[K, V]) -> Int32
 pub fn[K : Hash + Eq, V] Cache::clear(Self[K, V]) -> Unit
 pub fn[K : Hash + Eq, V] Cache::contains_key(Self[K, V], K, Int64) -> Bool
 pub fn[K : Hash + Eq, V] Cache::get(Self[K, V], K, Int64) -> V?
 pub fn[K : Hash + Eq, V] Cache::get_or_put(Self[K, V], K, Int64, () -> V) -> V
 pub fn[K : Hash + Eq, V] Cache::get_or_put_ttl(Self[K, V], K, Int64, Int64, () -> V) -> V
-pub fn[K, V] Cache::hit_count(Self[K, V]) -> Int
+pub fn[K, V] Cache::hit_count(Self[K, V]) -> Int32
 pub fn[K, V] Cache::is_empty(Self[K, V]) -> Bool
 pub fn[K, V] Cache::is_full(Self[K, V]) -> Bool
 pub fn[K, V] Cache::keys(Self[K, V]) -> Array[K]
-pub fn[K, V] Cache::miss_count(Self[K, V]) -> Int
-pub fn[K : Hash + Eq, V] Cache::new_cache(CachePolicy, Int, Int64) -> Self[K, V]
+pub fn[K, V] Cache::miss_count(Self[K, V]) -> Int32
+pub fn[K : Hash + Eq, V] Cache::new_cache(CachePolicy, Int32, Int64) -> Self[K, V]
 pub fn[K : Hash + Eq, V] Cache::peek(Self[K, V], K, Int64) -> V?
 pub fn[K, V] Cache::policy(Self[K, V]) -> CachePolicy
-pub fn[K : Hash + Eq, V] Cache::prune(Self[K, V], Int64) -> Int
+pub fn[K : Hash + Eq, V] Cache::prune(Self[K, V], Int64) -> Int32
 pub fn[K : Hash + Eq, V] Cache::put(Self[K, V], K, V, Int64) -> Unit
 pub fn[K : Hash + Eq, V] Cache::put_ttl(Self[K, V], K, V, Int64, Int64) -> Unit
 pub fn[K : Hash + Eq, V] Cache::remove(Self[K, V], K) -> Unit
 pub fn[K, V] Cache::set_listener(Self[K, V], (K, V) -> Unit) -> Unit
-pub fn[K, V] Cache::size(Self[K, V]) -> Int
+pub fn[K, V] Cache::size(Self[K, V]) -> Int32
 pub fn[K, V] Cache::timeout(Self[K, V]) -> Int64
 pub fn[K : Hash + Eq, V] Cache::values(Self[K, V]) -> Array[V]
 
@@ -45,7 +45,7 @@ pub(all) struct CacheObj[K, V] {
   value : V
   ttl : Int64
   mut last_access : Int64
-  mut access_count : Int
+  mut access_count : Int32
 }
 
 pub(all) enum CachePolicy {

@@ -16,7 +16,7 @@ pub fn csv_write_with_opts(Array[Array[String?]], CsvWriteOpts) -> String
 
 // Errors
 pub suberror CsvError {
-  UnevenFields(Int, Int, Int)
+  UnevenFields(Int32, Int32, Int32)
 }
 
 // Types and methods
@@ -24,17 +24,17 @@ pub(all) struct CsvData {
   header : Array[String]
   rows : Array[CsvRow]
 }
-pub fn CsvData::get_row(Self, Int) -> CsvRow?
+pub fn CsvData::get_row(Self, Int32) -> CsvRow?
 pub fn CsvData::header_names(Self) -> Array[String]
-pub fn CsvData::row_count(Self) -> Int
+pub fn CsvData::row_count(Self) -> Int32
 
 pub(all) struct CsvReadOpts {
   delimiter : Char
   quote : Char
   comment : Char?
-  header_line_no : Int
-  begin_line_no : Int
-  end_line_no : Int
+  header_line_no : Int32
+  begin_line_no : Int32
+  end_line_no : Int32
   skip_empty_rows : Bool
   trim_field : Bool
   error_on_different_field_count : Bool
@@ -42,12 +42,12 @@ pub(all) struct CsvReadOpts {
 }
 
 pub(all) struct CsvRow {
-  line_no : Int
+  line_no : Int32
   fields : Array[String]
   // private fields
 }
-pub fn CsvRow::field_count(Self) -> Int
-pub fn CsvRow::get(Self, Int) -> String?
+pub fn CsvRow::field_count(Self) -> Int32
+pub fn CsvRow::get(Self, Int32) -> String?
 pub fn CsvRow::get_by_name(Self, String) -> String?
 
 pub(all) struct CsvWriteOpts {

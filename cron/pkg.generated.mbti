@@ -12,13 +12,13 @@ pub fn cron_builder_new() -> CronBuilder
 
 pub fn cron_builder_set(CronBuilder, CronPart, String) -> CronBuilder
 
-pub fn cron_builder_set_range(CronBuilder, CronPart, Int, Int) -> CronBuilder raise CronError
+pub fn cron_builder_set_range(CronBuilder, CronPart, Int32, Int32) -> CronBuilder raise CronError
 
-pub fn cron_builder_set_values(CronBuilder, CronPart, Array[Int]) -> CronBuilder raise CronError
+pub fn cron_builder_set_values(CronBuilder, CronPart, Array[Int32]) -> CronBuilder raise CronError
 
 pub fn cron_match(Cron, @date.DateTime, match_second? : Bool) -> Bool
 
-pub fn cron_matched_dates(Cron, String, Int64, Int64, Int, Bool) -> Array[Int64]? raise CronError
+pub fn cron_matched_dates(Cron, String, Int64, Int64, Int32, Bool) -> Array[Int64]? raise CronError
 
 pub fn cron_next_match(Cron, @date.DateTime) -> @date.DateTime
 
@@ -30,11 +30,11 @@ pub fn cron_next_match_in(Cron, String, Int64) -> Int64?
 
 pub fn cron_of(String) -> Cron raise CronError
 
-pub fn cron_part_check_value(CronPart, Int) -> Int raise CronError
+pub fn cron_part_check_value(CronPart, Int32) -> Int32 raise CronError
 
-pub fn cron_part_max(CronPart) -> Int
+pub fn cron_part_max(CronPart) -> Int32
 
-pub fn cron_part_min(CronPart) -> Int
+pub fn cron_part_min(CronPart) -> Int32
 
 pub fn cron_part_name(CronPart) -> String
 
@@ -45,7 +45,7 @@ pub suberror CronError {
   BadParts(String)
   BadValue(String)
   BadAlias(String)
-  OutOfRange(String, Int)
+  OutOfRange(String, Int32)
   NonPositiveStep(String)
   BadSyntax(String)
   BadRange(Int64, Int64)

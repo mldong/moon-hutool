@@ -20,7 +20,7 @@ pub fn parse_double_loose(String) -> Double?
 
 pub fn parse_int64_loose(String) -> Int64?
 
-pub fn parse_int_loose(String) -> Int?
+pub fn parse_int_loose(String) -> Int32?
 
 pub fn[A] to_array(Json, (Json) -> A?) -> Array[A]
 
@@ -32,7 +32,7 @@ pub fn to_char(Json) -> Char?
 
 pub fn to_double(Json) -> Double?
 
-pub fn to_int(Json) -> Int?
+pub fn to_int(Json) -> Int32?
 
 pub fn to_int64(Json) -> Int64?
 

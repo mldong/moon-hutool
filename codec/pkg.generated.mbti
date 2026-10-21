@@ -6,9 +6,9 @@ pub fn b32_decode(String, hex? : Bool) -> Bytes raise CodecError
 
 pub fn b32_encode(Bytes, hex? : Bool, padding? : Bool) -> String
 
-pub fn b58_check_decode(String, version? : Int) -> Bytes raise CodecError
+pub fn b58_check_decode(String, version? : Int32) -> Bytes raise CodecError
 
-pub fn b58_check_encode(Bytes, version? : Int) -> String raise CodecError
+pub fn b58_check_encode(Bytes, version? : Int32) -> String raise CodecError
 
 pub fn b58_decode(String) -> Bytes raise CodecError
 
@@ -26,9 +26,9 @@ pub fn b64_encode_mime(Bytes) -> String
 
 pub fn b64_encode_url(Bytes, padding? : Bool) -> String
 
-pub fn caesar_decode(String, Int) -> String
+pub fn caesar_decode(String, Int32) -> String
 
-pub fn caesar_encode(String, Int) -> String raise CodecError
+pub fn caesar_encode(String, Int32) -> String raise CodecError
 
 pub let caesar_table : String
 
@@ -46,29 +46,29 @@ pub fn form_parse(String) -> Array[(String, String)] raise CodecError
 
 pub let radix_alphabet : String
 
-pub fn radix_decode(String, Int) -> Int64 raise CodecError
+pub fn radix_decode(String, Int32) -> Int64 raise CodecError
 
-pub fn radix_encode(Int64, Int) -> String raise CodecError
+pub fn radix_encode(Int64, Int32) -> String raise CodecError
 
 pub fn rot13_decode(String, number_support? : Bool) -> String
 
 pub fn rot13_encode(String, number_support? : Bool) -> String
 
-pub fn rot_decode(String, Int, Bool) -> String
+pub fn rot_decode(String, Int32, Bool) -> String
 
-pub fn rot_encode(String, Int, Bool) -> String
+pub fn rot_encode(String, Int32, Bool) -> String
 
 pub fn url_of_http(String) -> Url raise CodecError
 
 // Errors
 pub suberror CodecError {
-  IllegalChar(String, Int)
-  BadPadding(String, Int)
-  RadixOutOfRange(Int, Int)
+  IllegalChar(String, Int32)
+  BadPadding(String, Int32)
+  RadixOutOfRange(Int32, Int32)
   ValueOverflow(String)
   ChecksumMismatch
   BadUtf8(String)
-  ShiftUnderflow(Int)
+  ShiftUnderflow(Int32)
 }
 
 // Types and methods
@@ -76,7 +76,7 @@ pub(all) struct Url {
   scheme : String
   userinfo : String
   host : String
-  port : Int
+  port : Int32
   path : String
   query : String?
   fragment : String?

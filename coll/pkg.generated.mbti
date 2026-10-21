@@ -6,7 +6,7 @@ pub fn[A : Hash + Eq] distinct(Array[A]) -> Array[A]
 
 pub fn[A, K : Hash + Eq] distinct_by(Array[A], (A) -> K) -> Array[A]
 
-pub fn[A : Hash + Eq] freq(Array[A]) -> Map[A, Int]
+pub fn[A : Hash + Eq] freq(Array[A]) -> Map[A, Int32]
 
 pub fn[A, K : Hash + Eq] group_by(Array[A], (A) -> K) -> Map[K, Array[A]]
 
@@ -20,9 +20,9 @@ pub fn[A : Compare] minimum(Array[A]) -> A?
 
 pub fn[A, K : Compare] minimum_by_key(Array[A], (A) -> K) -> A?
 
-pub fn[A] page(Array[A], Int, Int) -> Array[A] raise CollError
+pub fn[A] page(Array[A], Int32, Int32) -> Array[A] raise CollError
 
-pub fn page_count(Int, Int) -> Int raise CollError
+pub fn page_count(Int32, Int32) -> Int32 raise CollError
 
 pub fn[A] partition(Array[A], (A) -> Bool) -> (Array[A], Array[A])
 
@@ -32,9 +32,9 @@ pub fn[A : Hash + Eq] union(Array[A], Array[A]) -> Array[A]
 
 // Errors
 pub suberror CollError {
-  NonPositivePageNumber(Int)
-  NonPositivePageSize(Int)
-  NegativeTotal(Int)
+  NonPositivePageNumber(Int32)
+  NonPositivePageSize(Int32)
+  NegativeTotal(Int32)
 }
 
 // Types and methods

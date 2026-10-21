@@ -6,7 +6,7 @@ pub fn clean_invalid(String) -> String
 
 pub fn combine(String, String) -> String raise PathError
 
-pub fn compare_patterns(String, String, String) -> Int
+pub fn compare_patterns(String, String, String) -> Int32
 
 pub fn contains_invalid(String) -> Bool
 

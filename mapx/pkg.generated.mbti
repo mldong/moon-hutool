@@ -28,7 +28,7 @@ pub fn[K : Hash + Eq, V] BiMap::get(Self[K, V], K) -> V?
 pub fn[K, V : Hash + Eq] BiMap::get_key(Self[K, V], V) -> K?
 pub fn[K : Hash + Eq, V : Hash + Eq] BiMap::inverse(Self[K, V]) -> Self[V, K]
 pub fn[K, V] BiMap::keys(Self[K, V]) -> Array[K]
-pub fn[K, V] BiMap::length(Self[K, V]) -> Int
+pub fn[K, V] BiMap::length(Self[K, V]) -> Int32
 pub fn[K : Hash + Eq, V : Hash + Eq] BiMap::new() -> Self[K, V]
 pub fn[K : Hash + Eq, V : Hash + Eq] BiMap::of(Array[(K, V)]) -> Self[K, V] raise MapError
 pub fn[K : Hash + Eq, V : Hash + Eq] BiMap::put(Self[K, V], K, V) -> V? raise MapError
@@ -43,7 +43,7 @@ pub fn[V] CiMap::contains(Self[V], String) -> Bool
 pub fn[V] CiMap::get(Self[V], String) -> V?
 pub fn[V] CiMap::get_key_of(Self[V], String) -> String?
 pub fn[V] CiMap::keys(Self[V]) -> Array[String]
-pub fn[V] CiMap::length(Self[V]) -> Int
+pub fn[V] CiMap::length(Self[V]) -> Int32
 pub fn[V] CiMap::new() -> Self[V]
 pub fn[V] CiMap::put(Self[V], String, V) -> V?
 pub fn[V] CiMap::remove(Self[V], String) -> V?
@@ -67,7 +67,7 @@ pub fn[R : Hash + Eq, C : Hash + Eq, V] Table::put(Self[R, C, V], R, C, V) -> V?
 pub fn[R : Hash + Eq, C : Hash + Eq, V] Table::remove(Self[R, C, V], R, C) -> V?
 pub fn[R : Hash + Eq, C : Hash + Eq, V] Table::row(Self[R, C, V], R) -> Map[C, V]
 pub fn[R, C, V] Table::rows(Self[R, C, V]) -> Array[R]
-pub fn[R, C, V] Table::size(Self[R, C, V]) -> Int
+pub fn[R, C, V] Table::size(Self[R, C, V]) -> Int32
 pub fn[R, C, V] Table::to_cells(Self[R, C, V]) -> Array[(R, C, V)]
 
 // Type aliases

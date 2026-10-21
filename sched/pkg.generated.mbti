@@ -10,13 +10,13 @@ pub fn config_default() -> CronConfig
 
 pub fn default_clock() -> () -> Int64
 
-pub async fn default_sleeper(Int) -> Unit
+pub async fn default_sleeper(Int32) -> Unit
 
-pub fn due_indices(TaskTable, CronConfig, @date.DateTime) -> Array[Int]
+pub fn due_indices(TaskTable, CronConfig, @date.DateTime) -> Array[Int32]
 
 pub fn scheduler_is_started(Scheduler) -> Bool
 
-pub fn scheduler_new(TaskTable, CronConfig, () -> Int64, async (Int) -> Unit) -> Scheduler
+pub fn scheduler_new(TaskTable, CronConfig, () -> Int64, async (Int32) -> Unit) -> Scheduler
 
 pub fn scheduler_on_failed(Scheduler, (String, Error) -> Unit) -> Unit
 
@@ -24,7 +24,7 @@ pub async fn scheduler_start(Scheduler) -> Unit
 
 pub fn scheduler_stop(Scheduler) -> Unit
 
-pub async fn scheduler_tick(Scheduler) -> Int
+pub async fn scheduler_tick(Scheduler) -> Int32
 
 pub fn table_add(TaskTable, String, String, &Task) -> Unit raise SchedError
 
@@ -38,9 +38,9 @@ pub fn table_pattern_text(TaskTable, String) -> String raise SchedError
 
 pub fn table_remove(TaskTable, String) -> Bool
 
-pub fn table_size(TaskTable) -> Int
+pub fn table_size(TaskTable) -> Int32
 
-pub fn table_task_at(TaskTable, Int) -> &Task raise SchedError
+pub fn table_task_at(TaskTable, Int32) -> &Task raise SchedError
 
 pub fn table_update_pattern(TaskTable, String, String) -> Bool raise SchedError
 
@@ -68,7 +68,7 @@ pub struct TaskTable {
 // Type aliases
 pub type Clock = () -> Int64
 
-pub type Sleeper = async (Int) -> Unit
+pub type Sleeper = async (Int32) -> Unit
 
 // Traits
 pub(open) trait Task {

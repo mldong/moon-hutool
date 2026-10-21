@@ -14,7 +14,7 @@ pub fn remove_sign(String) -> String
 
 pub fn similar(String, String) -> Double
 
-pub fn similar_percent(String, String, Int) -> String raise @num.NumError
+pub fn similar_percent(String, String, Int32) -> String raise @num.NumError
 
 // Errors
 

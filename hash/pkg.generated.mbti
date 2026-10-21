@@ -2,69 +2,69 @@
 package "mldong/moon-hutool/hash"
 
 // Values
-pub fn additive_hash(String, Int) -> Int raise HashError
+pub fn additive_hash(String, Int32) -> Int32 raise HashError
 
-pub fn ap_hash(String) -> Int
+pub fn ap_hash(String) -> Int32
 
-pub fn bernstein(String) -> Int
+pub fn bernstein(String) -> Int32
 
-pub fn bkdr_hash(String) -> Int
+pub fn bkdr_hash(String) -> Int32
 
 pub fn crc32_hex(Bytes) -> String
 
 pub fn crc32_of_bytes(Bytes) -> Int64
 
-pub fn dek_hash(String) -> Int
+pub fn dek_hash(String) -> Int32
 
-pub fn djb_hash(String) -> Int
+pub fn djb_hash(String) -> Int32
 
-pub fn elf_hash(String) -> Int
+pub fn elf_hash(String) -> Int32
 
-pub fn fnv_hash(String) -> Int
+pub fn fnv_hash(String) -> Int32
 
-pub fn fnv_hash_bytes(Bytes) -> Int
+pub fn fnv_hash_bytes(Bytes) -> Int32
 
 pub fn hf_hash(String) -> Int64
 
 pub fn hf_ip_hash(String) -> Int64
 
-pub fn int_hash(Int) -> Int
+pub fn int_hash(Int32) -> Int32
 
-pub fn java_default_hash(String) -> Int
+pub fn java_default_hash(String) -> Int32
 
-pub fn js_hash(String) -> Int
+pub fn js_hash(String) -> Int32
 
 pub fn mix_hash(String) -> Int64
 
-pub fn murmur32(String) -> Int
+pub fn murmur32(String) -> Int32
 
-pub fn murmur32_bytes(Bytes) -> Int
+pub fn murmur32_bytes(Bytes) -> Int32
 
-pub fn murmur32_len_seed(Bytes, Int, Int) -> Int
+pub fn murmur32_len_seed(Bytes, Int32, Int32) -> Int32
 
-pub fn murmur32_range(Bytes, Int, Int, Int) -> Int
+pub fn murmur32_range(Bytes, Int32, Int32, Int32) -> Int32
 
 pub fn murmur64(String) -> Int64
 
 pub fn murmur64_bytes(Bytes) -> Int64
 
-pub fn murmur64_len_seed(Bytes, Int, Int) -> Int64
+pub fn murmur64_len_seed(Bytes, Int32, Int32) -> Int64
 
 pub fn new_crc16(Crc16Variant) -> Crc16
 
 pub fn new_crc32() -> Crc32
 
-pub fn new_crc8(Int, Int) -> Crc8
+pub fn new_crc8(Int32, Int32) -> Crc8
 
-pub fn one_by_one_hash(String) -> Int
+pub fn one_by_one_hash(String) -> Int32
 
-pub fn pjw_hash(String) -> Int
+pub fn pjw_hash(String) -> Int32
 
-pub fn rotating_hash(String, Int) -> Int raise HashError
+pub fn rotating_hash(String, Int32) -> Int32 raise HashError
 
-pub fn rs_hash(String) -> Int
+pub fn rs_hash(String) -> Int32
 
-pub fn sdbm_hash(String) -> Int
+pub fn sdbm_hash(String) -> Int32
 
 pub fn tianl_hash(String) -> Int64
 
@@ -76,14 +76,14 @@ pub suberror HashError {
 // Types and methods
 pub struct Crc16 {
   variant : Crc16Variant
-  mut value : Int
+  mut value : Int32
 }
 pub fn Crc16::crc16_hex_value(Self, Bool) -> String
 pub fn Crc16::crc16_reset(Self) -> Unit
 pub fn Crc16::crc16_update(Self, Bytes) -> Unit
-pub fn Crc16::crc16_update_byte(Self, Int) -> Unit
-pub fn Crc16::crc16_update_range(Self, Bytes, Int, Int) -> Unit
-pub fn Crc16::crc16_value(Self) -> Int
+pub fn Crc16::crc16_update_byte(Self, Int32) -> Unit
+pub fn Crc16::crc16_update_range(Self, Bytes, Int32, Int32) -> Unit
+pub fn Crc16::crc16_value(Self) -> Int32
 
 pub(all) enum Crc16Variant {
   Ansi
@@ -99,26 +99,26 @@ pub(all) enum Crc16Variant {
 }
 
 pub struct Crc32 {
-  table : Array[UInt]
-  mut value : UInt
+  table : Array[UInt32]
+  mut value : UInt32
 }
 pub fn Crc32::crc32_reset(Self) -> Unit
 pub fn Crc32::crc32_update(Self, Bytes) -> Unit
-pub fn Crc32::crc32_update_byte(Self, Int) -> Unit
-pub fn Crc32::crc32_update_range(Self, Bytes, Int, Int) -> Unit
+pub fn Crc32::crc32_update_byte(Self, Int32) -> Unit
+pub fn Crc32::crc32_update_range(Self, Bytes, Int32, Int32) -> Unit
 pub fn Crc32::crc32_value(Self) -> Int64
 
 pub struct Crc8 {
-  polynomial : Int
-  init : Int
-  mut value : Int
-  table : Array[Int]
+  polynomial : Int32
+  init : Int32
+  mut value : Int32
+  table : Array[Int32]
 }
 pub fn Crc8::crc8_reset(Self) -> Unit
 pub fn Crc8::crc8_update(Self, Bytes) -> Unit
-pub fn Crc8::crc8_update_byte(Self, Int) -> Unit
-pub fn Crc8::crc8_update_range(Self, Bytes, Int, Int) -> Unit
-pub fn Crc8::crc8_value(Self) -> Int
+pub fn Crc8::crc8_update_byte(Self, Int32) -> Unit
+pub fn Crc8::crc8_update_range(Self, Bytes, Int32, Int32) -> Unit
+pub fn Crc8::crc8_value(Self) -> Int32
 
 // Type aliases
 

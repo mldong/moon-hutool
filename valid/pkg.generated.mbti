@@ -8,9 +8,9 @@ pub fn is_car_vin(String) -> Bool
 
 pub fn is_general(String) -> Bool
 
-pub fn is_general_at_least(String, Int) -> Bool
+pub fn is_general_at_least(String, Int32) -> Bool
 
-pub fn is_general_between(String, Int, Int) -> Bool
+pub fn is_general_between(String, Int32, Int32) -> Bool
 
 pub fn is_hex(String) -> Bool
 

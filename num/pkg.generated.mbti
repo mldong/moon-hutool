@@ -6,7 +6,7 @@ import {
 }
 
 // Values
-pub fn arrangement_count(Int, Int) -> @bigint.BigInt raise NumError
+pub fn arrangement_count(Int32, Int32) -> @bigint.BigInt raise NumError
 
 pub fn chinese_abbrev(Int64) -> String
 
@@ -20,67 +20,67 @@ pub fn chinese_money_simple_of(String) -> String raise NumError
 
 pub fn chinese_of(String) -> String raise NumError
 
-pub fn chinese_of_thousand(Int) -> String raise NumError
+pub fn chinese_of_thousand(Int32) -> String raise NumError
 
 pub fn chinese_upper_colloquial_of(String) -> String raise NumError
 
 pub fn chinese_upper_of(String) -> String raise NumError
 
-pub fn chinese_upper_of_thousand(Int) -> String raise NumError
+pub fn chinese_upper_of_thousand(Int32) -> String raise NumError
 
-pub fn combination_count(Int, Int) -> @bigint.BigInt raise NumError
+pub fn combination_count(Int32, Int32) -> @bigint.BigInt raise NumError
 
 pub fn english_abbrev(Int64) -> String
 
 pub fn english_word_of(String) -> String raise NumError
 
-pub fn ext_gcd(Int, Int) -> (Int, Int, Int)
+pub fn ext_gcd(Int32, Int32) -> (Int32, Int32, Int32)
 
-pub fn factorial(Int) -> @bigint.BigInt raise NumError
+pub fn factorial(Int32) -> @bigint.BigInt raise NumError
 
-pub fn format_percent(Double, Int, mode? : RoundingMode, suffix? : String) -> String raise NumError
+pub fn format_percent(Double, Int32, mode? : RoundingMode, suffix? : String) -> String raise NumError
 
-pub fn format_thousands(Double, Int, mode? : RoundingMode, sep? : Char, decimal_sep? : Char) -> String raise NumError
+pub fn format_thousands(Double, Int32, mode? : RoundingMode, sep? : Char, decimal_sep? : Char) -> String raise NumError
 
-pub fn gcd(Int, Int) -> Int
+pub fn gcd(Int32, Int32) -> Int32
 
 pub fn int_of_chinese(String) -> Int64 raise NumError
 
-pub fn is_prime(Int) -> Bool
+pub fn is_prime(Int32) -> Bool
 
-pub fn isqrt(Int) -> Int raise NumError
+pub fn isqrt(Int32) -> Int32 raise NumError
 
 pub fn lcm(@bigint.BigInt, @bigint.BigInt) -> @bigint.BigInt
 
-pub fn mod_inverse(Int, Int) -> Int raise NumError
+pub fn mod_inverse(Int32, Int32) -> Int32 raise NumError
 
 pub fn money_of_chinese(String) -> Money raise NumError
 
 pub fn num_calculate(String) -> Double raise NumError
 
-pub fn round_to(Double, Int, mode? : RoundingMode) -> Double raise NumError
+pub fn round_to(Double, Int32, mode? : RoundingMode) -> Double raise NumError
 
-pub fn round_to_str(Double, Int, mode? : RoundingMode) -> String raise NumError
+pub fn round_to_str(Double, Int32, mode? : RoundingMode) -> String raise NumError
 
 pub fn trim_trailing_zeros(String) -> String raise NumError
 
 // Errors
 pub suberror NumError {
-  ScaleOutOfRange(Int)
+  ScaleOutOfRange(Int32)
   NotFinite
-  NegativeRadicand(Int)
-  InvalidModulus(Int)
-  NonCoprime(Int, Int)
-  NegativeFactorial(Int)
-  NegativeCount(Int, Int)
+  NegativeRadicand(Int32)
+  InvalidModulus(Int32)
+  NonCoprime(Int32, Int32)
+  NegativeFactorial(Int32)
+  NegativeCount(Int32, Int32)
   NotDecimal(String)
-  NonPositiveTargets(Int)
-  NegativeRatio(Int)
+  NonPositiveTargets(Int32)
+  NegativeRatio(Int32)
   RatioSumNotPositive(Int64)
   MoneyOverflow
   OutOfRange(String)
-  UnknownChineseUnit(Char, Int)
-  BadChineseNumber(String, Int)
+  UnknownChineseUnit(Char, Int32)
+  BadChineseNumber(String, Int32)
   BadExpression(String)
   DivZero
 }
@@ -90,8 +90,8 @@ pub(all) struct Money {
   cent : Int64
 }
 pub fn Money::add(Self, Self) -> Self raise NumError
-pub fn Money::allocate_by_ratio(Self, Array[Int]) -> Array[Self] raise NumError
-pub fn Money::allocate_even(Self, Int) -> Array[Self] raise NumError
+pub fn Money::allocate_by_ratio(Self, Array[Int32]) -> Array[Self] raise NumError
+pub fn Money::allocate_even(Self, Int32) -> Array[Self] raise NumError
 pub fn Money::cent(Self) -> Int64
 pub fn Money::from_yuan(Double, mode? : RoundingMode) -> Self raise NumError
 pub fn Money::from_yuan_str(String, mode? : RoundingMode) -> Self raise NumError

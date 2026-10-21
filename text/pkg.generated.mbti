@@ -2,7 +2,7 @@
 package "mldong/moon-hutool/text"
 
 // Values
-pub fn compare_version(String, String) -> Int
+pub fn compare_version(String, String) -> Int32
 
 pub fn encode_blank(String) -> String
 
@@ -20,7 +20,7 @@ pub fn first_non_blank(Array[String?]) -> String?
 
 pub fn format(String, Array[String]) -> String
 
-pub fn hide(String, Int, Int, Char) -> String
+pub fn hide(String, Int32, Int32, Char) -> String
 
 pub fn is_blank(String) -> Bool
 
@@ -68,7 +68,7 @@ pub fn unescape_html4(String) -> String raise TextError
 
 pub fn unescape_xml(String) -> String raise TextError
 
-pub fn unicode_of(Int) -> String
+pub fn unicode_of(Int32) -> String
 
 pub fn unicode_to_string(String) -> String raise TextError
 
@@ -78,7 +78,7 @@ pub fn upper_first(String) -> String
 pub suberror TextError {
   BadHex(String)
   ShortInput
-  LoneSurrogate(Int)
+  LoneSurrogate(Int32)
   EmptyKey
 }
 
