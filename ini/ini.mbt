@@ -877,7 +877,7 @@ fn ff_char() -> Char {
 
 ///|
 // 参照 `loadConvert`：`\t\n\f\r` 各还原、`uXXXX` 解码（畸形 ⇒ raise）、其余转义直接取下一字符
-fn load_convert(seg : String) -> Result[String, PropsError] {
+fn load_convert(seg : String) -> String raise PropsError {
   let cs = seg.to_array()
   let n = cs.length()
   let out : Array[Char] = []
@@ -909,7 +909,7 @@ fn load_convert(seg : String) -> Result[String, PropsError] {
         i += 2
       } else if d == 0x75 {
         if i + 6 > n {
-          return Err(BadUnicodeEscape)
+          raise BadUnicodeEscape
         }
         let mut v = 0
         let mut q = i + 2
@@ -924,7 +924,7 @@ fn load_convert(seg : String) -> Result[String, PropsError] {
           }
         }
         if bad {
-          return Err(BadUnicodeEscape)
+          raise BadUnicodeEscape
         }
         out.push(v.unsafe_to_char())
         i += 6
@@ -934,7 +934,7 @@ fn load_convert(seg : String) -> Result[String, PropsError] {
       }
     }
   }
-  Ok(String::from_array(out))
+  String::from_array(out)
 }
 
 ///|
@@ -1023,14 +1023,8 @@ pub fn props_parse(text : String) -> Props raise PropsError {
   let p = props_new()
   for line in logical_lines(text) {
     let kv = split_kv(line)
-    let key = match load_convert(kv.0) {
-      Ok(v) => v
-      Err(e) => raise e
-    }
-    let value = match load_convert(kv.1) {
-      Ok(v) => v
-      Err(e) => raise e
-    }
+    let key = load_convert(kv.0)
+    let value = load_convert(kv.1)
     let _ = put_pair(p, key, value)
   }
   p
