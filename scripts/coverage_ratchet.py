@@ -24,22 +24,29 @@ import tempfile
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BASE = os.path.join(REPO, "scripts", "coverage_baseline.txt")
-LINE_RE = re.compile(r"^(\d+) uncovered line\(s\) in (.+):$")
+# moon 0.1.20261020 起默认 reporter（simplified）要逐文件重新解析源码，部分文件会报
+# "cannot parse source file" 而整体 FAILED（moonc 本身对同一文件零诊断——是 reporter 内嵌
+# parser 与 moonc 不同步）。`-f summary` 不解析源码、直接从覆盖率数据出每文件 covered/total，
+# 未覆盖 = total - covered，口径与旧"uncovered line(s)"同是行级。
+SUM_RE = re.compile(r"^(.+?): (\d+)/(\d+)$")
 
 
 def measure():
-    """跑 `moon coverage analyze`，返回 (每包未覆盖行数, 解析出的文件数, 原始输出)。"""
-    r = subprocess.run("moon coverage analyze", shell=True,
+    """跑 `moon coverage analyze -- -f summary`，返回 (每包未覆盖行数, 解析出的文件数, 原始输出)。"""
+    r = subprocess.run("moon coverage analyze -- -f summary", shell=True,
                        stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     out = r.stdout.decode("utf-8", "replace").replace("\r", "")
     per = {}
     for line in out.splitlines():
-        m = LINE_RE.match(line.strip())
+        line = line.strip()
+        if line.startswith("Total:") or line.startswith("SKIP"):
+            continue
+        m = SUM_RE.match(line)
         if not m:
             continue
-        n = int(m.group(1))
-        pkg = m.group(2).replace("\\", "/").split("/")[0]
-        per[pkg] = per.get(pkg, 0) + n
+        covered, total = int(m.group(2)), int(m.group(3))
+        pkg = m.group(1).replace("\\", "/").split("/")[0]
+        per[pkg] = per.get(pkg, 0) + (total - covered)
     return per, len(per), out
 
 
@@ -115,7 +122,7 @@ def main():
             return 2
         with io.open(BASE, "w", encoding="utf-8", newline="\n") as f:
             f.write("# 未覆盖行棘轮基线 —— 由 `python scripts/coverage_ratchet.py --write` 生成，勿手改\n")
-            f.write("# 现读命令：moon coverage analyze（要先 moon test --target wasm --enable-coverage）\n")
+            f.write("# 现读命令：moon coverage analyze -- -f summary（要先 moon test --target wasm --enable-coverage）\n")
             f.write("# 收紧（数字变小）随时可以；放宽或新增包的条目必须单独一笔并写明是哪条通道补/加了\n")
             for k in sorted(per):
                 f.write("%s = %d\n" % (k, per[k]))
