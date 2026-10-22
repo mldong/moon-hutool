@@ -36,5 +36,5 @@ preferred_target = "wasm"
 description = "Hutool-style utility library for MoonBit: all packages depend only on moonbitlang/core (no FFI, fully synchronous); the two exceptions both build on official `moonbitlang/async` — `sched` (cron timer firing, three targets) and `http` (injectable HTTP transport port, native+wasm only)"
 
 import {
-  "moonbitlang/async@0.22.4",
+  "moonbitlang/async@0.22.5",
 }
