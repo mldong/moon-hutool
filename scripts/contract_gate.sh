@@ -202,10 +202,30 @@ n2=$(grep -rl 'native-stub' --include='moon.pkg' . 2>/dev/null | grep -v '\.moon
 [ "$n2" = "0" ] && ok "无 native-stub" || bad "有 $n2 个包带 native-stub"
 
 echo "== G3 逐档编译 + 用例收集数 =="
+# 依赖树里的实验包告警不是本仓的账（同 G4 对 .mooncakes/ 格式告警的口径）：
+# 官方 moonbitlang/async 自 0.22.6 起转发到 core 的实验包 core/async，该告警由 async 自己的
+# 包发出，本仓 moon.pkg 的 allow-experimental-packages 压不掉（2026-11-03 实测）。
+# 只剔除“依赖方是 moonbitlang/async*”那一种形状；本仓包若将来直接踩实验包，仍照常计数。
+own_warnings() {
+  grep "Warning" "$1" 2>/dev/null \
+    | grep -vE '^Warning: Package `moonbitlang/async(/[^`]*)?` depends on experimental package' \
+    | wc -l | tr -d ' '
+}
+# 阳性对照：三行依赖告警 + 一行本仓告警 ⇒ 必须只剩 1（否则这条过滤会吞掉本仓的账）。
+printf '%s\n' \
+  'Warning: Package `moonbitlang/async` depends on experimental package `moonbitlang/core/async`.' \
+  'Warning: Package `moonbitlang/async/internal/event_loop` depends on experimental package `moonbitlang/core/async`.' \
+  'Warning: Package `moonbitlang/async/external_loop_integration` depends on experimental package `moonbitlang/core/async/external_loop_integration`.' \
+  'Warning: [0027] own warning' >/tmp/mh_g3_selftest.log
+if [ "$(own_warnings /tmp/mh_g3_selftest.log)" = "1" ]; then
+  ok "G3 告警计数阳性对照正常（依赖树告警被剔除，本仓告警仍计）"
+else
+  bad "G3 告警计数过滤器失效：阳性对照没数到 1 条本仓告警"
+fi
 for t in $GATE_TARGETS; do
   if moon check --target "$t" >/tmp/mh_check_$t.log 2>&1; then
-    w=$(grep -c "Warning" /tmp/mh_check_$t.log || true)
-    [ "$w" = "0" ] && ok "check $t 全绿（0 警告）" || bad "check $t 有 $w 条警告（零警告是门禁）"
+    w=$(own_warnings /tmp/mh_check_$t.log)
+    [ "$w" = "0" ] && ok "check $t 全绿（0 条本仓警告）" || bad "check $t 有 $w 条本仓警告（零警告是门禁）"
   else bad "check $t 失败：$(tail -2 /tmp/mh_check_$t.log | tr '\n' ' ')"; fi
   if moon test --target "$t" >/tmp/mh_test_$t.log 2>&1 || true; then
     got=$(grep -oE "Total tests: [0-9]+" /tmp/mh_test_$t.log | head -1 | grep -oE "[0-9]+")
