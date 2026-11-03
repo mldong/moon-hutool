@@ -3,16 +3,17 @@ package "mldong/moon-hutool/conv"
 
 import {
   "moonbitlang/core/bigint",
+  "moonbitlang/core/json",
 }
 
 // Values
-pub fn[A] chain((Json) -> A?, (Json) -> A?) -> (Json) -> A?
+pub fn[A] chain((@json.Json) -> A?, (@json.Json) -> A?) -> (@json.Json) -> A?
 
-pub fn field(Json, String) -> Json?
+pub fn field(@json.Json, String) -> @json.Json?
 
-pub fn get_by_path(Json, String) -> Json? raise ConvError
+pub fn get_by_path(@json.Json, String) -> @json.Json? raise ConvError
 
-pub fn get_ids(Json) -> Array[Int64]
+pub fn get_ids(@json.Json) -> Array[Int64]
 
 pub fn parse_bool(String) -> Bool?
 
@@ -22,23 +23,23 @@ pub fn parse_int64_loose(String) -> Int64?
 
 pub fn parse_int_loose(String) -> Int32?
 
-pub fn[A] to_array(Json, (Json) -> A?) -> Array[A]
+pub fn[A] to_array(@json.Json, (@json.Json) -> A?) -> Array[A]
 
-pub fn to_big_int(Json) -> @bigint.BigInt?
+pub fn to_big_int(@json.Json) -> @bigint.BigInt?
 
-pub fn to_bool(Json) -> Bool?
+pub fn to_bool(@json.Json) -> Bool?
 
-pub fn to_char(Json) -> Char?
+pub fn to_char(@json.Json) -> Char?
 
-pub fn to_double(Json) -> Double?
+pub fn to_double(@json.Json) -> Double?
 
-pub fn to_int(Json) -> Int32?
+pub fn to_int(@json.Json) -> Int32?
 
-pub fn to_int64(Json) -> Int64?
+pub fn to_int64(@json.Json) -> Int64?
 
-pub fn[A] to_map(Json, (Json) -> A?) -> Map[String, A]
+pub fn[A] to_map(@json.Json, (@json.Json) -> A?) -> Map[String, A]
 
-pub fn to_str(Json) -> String?
+pub fn to_str(@json.Json) -> String?
 
 // Errors
 pub suberror ConvError {
@@ -48,6 +49,6 @@ pub suberror ConvError {
 // Types and methods
 
 // Type aliases
-pub type JsonConv[A] = (Json) -> A?
+pub type JsonConv[A] = (@json.Json) -> A?
 
 // Traits

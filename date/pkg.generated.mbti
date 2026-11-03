@@ -141,11 +141,12 @@ pub(all) enum ChronoUnit {
 }
 pub fn ChronoUnit::shot_name(Self) -> String
 
+#derive(Compare, Eq)
 pub struct Date {
   year : Int32
   month : Int32
   day : Int32
-} derive(Compare, Eq)
+}
 pub fn Date::begin_of_month(Self) -> Self
 pub fn Date::begin_of_quarter(Self) -> Self
 pub fn Date::begin_of_week(Self) -> Self
@@ -178,13 +179,14 @@ pub fn Date::to_iso_string(Self) -> String
 pub fn Date::week_based_year(Self) -> Int32
 pub fn Date::week_of_year(Self) -> Int32
 
+#derive(Compare, Eq)
 pub struct DateTime {
   date : Date
   hour : Int32
   minute : Int32
   second : Int32
   milli : Int32
-} derive(Compare, Eq)
+}
 pub fn DateTime::begin_of_day(Self) -> Self
 pub fn DateTime::begin_of_month(Self) -> Self
 pub fn DateTime::begin_of_quarter(Self) -> Self

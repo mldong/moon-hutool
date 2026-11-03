@@ -64,10 +64,11 @@ pub suberror IdError {
 }
 
 // Types and methods
+#derive(Compare, Eq)
 pub struct IdRange {
   start : Int64
   finish : Int64
-} derive(Compare, Eq)
+}
 pub fn IdRange::compare(Self, Self) -> Int32
 pub fn IdRange::equal(Self, Self) -> Bool
 pub fn IdRange::not_equal(Self, Self) -> Bool
@@ -94,12 +95,13 @@ pub fn Snowflake::new(Int32, Int32, tolerance_millis? : Int64) -> Self raise IdE
 pub fn Snowflake::next(Self, Int64) -> Int64 raise IdError
 pub fn Snowflake::next_string(Self, Int64) -> String raise IdError
 
+#derive(Compare, Eq)
 pub struct SnowflakeParts {
   timestamp_millis : Int64
   datacenter_id : Int32
   worker_id : Int32
   sequence : Int64
-} derive(Compare, Eq)
+}
 pub fn SnowflakeParts::compare(Self, Self) -> Int32
 pub fn SnowflakeParts::equal(Self, Self) -> Bool
 pub fn SnowflakeParts::not_equal(Self, Self) -> Bool
