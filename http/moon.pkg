@@ -1,6 +1,14 @@
 // moon-hutool/http —— 可注入的 HTTP 传输端口 + 官方 async/http 薄适配（需求登记：本仓 Issues #4）
 // 端口形状在对象存储线（moon-file-storage）五条真腿上实测磨出；底座只用官方 moonbitlang/async/http，
 // 不引第三方 HTTP 件——本包因此成为全仓第二个 import moonbitlang/async 的包（第一个是 sched）。
+// 官方 async（0.22.x）现转发到 core 的实验包 core/async：本包显式认账，否则 check 带告警。
+options(
+  "allow-experimental-packages": [
+    "moonbitlang/core/async",
+    "moonbitlang/core/async/external_loop_integration",
+  ],
+)
+
 import {
   "moonbitlang/async",
   "moonbitlang/async/http" @ahttp,

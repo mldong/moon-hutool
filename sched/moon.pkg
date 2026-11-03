@@ -1,6 +1,14 @@
 // 全仓唯一 import moonbitlang/async 的包（口径翻案的落点与代价见 docs/spec/24-sched.md §1）：
 //   cron  —— 表达式与"下一条匹配时刻"全在它，本包不重算字段进位（spec §2 第 3 条）
 //   date  —— 时刻类型与时钟注入口同形（#24.4）
+// 官方 async（0.22.x）现转发到 core 的实验包 core/async：本包显式认账，否则 check 带告警。
+options(
+  "allow-experimental-packages": [
+    "moonbitlang/core/async",
+    "moonbitlang/core/async/external_loop_integration",
+  ],
+)
+
 import {
   "moonbitlang/async",
   "mldong/moon-hutool/cron",

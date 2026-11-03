@@ -22,23 +22,25 @@
 ///
 /// 只有 `of`/`from_epoch_days`/`parse` 三个入口，**非法日期无法构造**（2 月 30 日直接 `raise`）。
 /// 字段可读、不可改；跨包构造请用这三个入口。
+#derive(Eq, Compare)
 pub struct Date {
   year : Int32
   month : Int32
   day : Int32
-} derive(Eq, Compare)
+}
 
 ///|
 /// 墙上时刻（date + 时分秒毫），**不带偏移**
 ///
 /// 它是"某偏移下的读表结果"，不是瞬间；要拿到瞬间用 `to_epoch_millis(offset_minutes)`。
+#derive(Eq, Compare)
 pub struct DateTime {
   date : Date
   hour : Int32
   minute : Int32
   second : Int32
   milli : Int32
-} derive(Eq, Compare)
+}
 
 ///|
 /// 固定长度的时间单位（hutool `DateUnit` 对位）

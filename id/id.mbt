@@ -51,19 +51,21 @@ pub let snowflake_max_sequence : Int64 = 4095L
 
 ///|
 /// 雪花 ID 的四段解析结果（41 位时间戳 ‖ 5 位数据中心 ‖ 5 位 worker ‖ 12 位序列）
+#derive(Eq, Compare)
 pub struct SnowflakeParts {
   timestamp_millis : Int64
   datacenter_id : Int32
   worker_id : Int32
   sequence : Int64
-} derive(Eq, Compare)
+}
 
 ///|
 /// 一段时间区间的 ID 边界（用于"按时间查 ID"这类范围扫描）
+#derive(Eq, Compare)
 pub struct IdRange {
   start : Int64
   finish : Int64
-} derive(Eq, Compare)
+}
 
 ///|
 /// 发号器：节点编号与容忍回拨量在 `new` 时定下，时钟每次显式传
