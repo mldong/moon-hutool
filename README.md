@@ -7,6 +7,8 @@ MoonBit 版 [hutool](https://github.com/chinabugotech/hutool) 风格工具库。
 import { "moonbitlang/async@0.22.4" }
 ```
 
+> 注：`moonbitlang/async` 现已是转发到编译器自带 `core/async` 实验包的薄 shim——仍需 `moon add` 并 import 它（直接引 `core/async` 会与 `http` 端口类型不兼容）。
+
 ## 文档索引
 
 | 要看什么 | 去哪 |
